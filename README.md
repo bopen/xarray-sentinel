@@ -1,2 +1,3 @@
 # xarray-sentinel
-Xarray backend to the products of Copernicus Sentinel satellites
+
+Xarray backend to Copernicus Sentinel-1 and Sentinel-2 satellite data products
