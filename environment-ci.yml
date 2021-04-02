@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - flake8
+  - make
   - mypy
   - pytest
   - pytest-cov

@@ -35,7 +35,7 @@ jobs:
         python -m pip install --no-deps -e .
     - name: Run tests
       run: |
-        python -m pytest --cov=. --cov-report=xml .
+        make unit-test COV_REPORT=xml
     - name: Upload code coverage to Codecov
       uses: codecov/codecov-action@v1
 
