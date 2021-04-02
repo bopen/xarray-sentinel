@@ -30,6 +30,7 @@ jobs:
         mamba env update -f environment-ci.yml
     - name: Install xarray-sentinel
       run: |
+        python -m pip install --no-deps https://github.com/pydata/xarray/archive/master.zip  # to enable plugins
         python -m pip install --no-deps -e .
     - name: Run tests
       run: |
