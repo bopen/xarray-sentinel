@@ -1,0 +1,5 @@
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - xarray >= 0.17.0
