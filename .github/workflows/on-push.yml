@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
     - uses: actions/checkout@v2
     - name: Cache conda
