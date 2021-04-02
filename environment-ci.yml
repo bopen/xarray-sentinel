@@ -2,4 +2,6 @@ channels:
   - defaults
   - conda-forge
 dependencies:
+  - pytest
+  - pytest-cov
   - xarray >= 0.17.0
