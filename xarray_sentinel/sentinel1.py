@@ -10,32 +10,30 @@ from xarray_sentinel import esa_safe
 SPEED_OF_LIGHT = 299_792_458  # m / s
 
 
-def open_gcp_dataset(filename):
+def open_gcp_dataset(filename: str) -> xr.Dataset:
     annotation = ElementTree.parse(filename)
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation)
     time = []
     slant_range = []
-    line = set()
-    pixel = set()
+    line_set = set()
+    pixel_set = set()
     for ggp in geolocation_grid_points.values():
-        if ggp["line"] not in line:
+        if ggp["line"] not in line_set:
             time.append(np.datetime64(ggp["azimuthTime"]))
-            line.add(ggp["line"])
-        if ggp["pixel"] not in pixel:
+            line_set.add(ggp["line"])
+        if ggp["pixel"] not in pixel_set:
             slant_range.append(ggp["slantRangeTime"] * SPEED_OF_LIGHT / 2)
-            pixel.add(ggp["pixel"])
+            pixel_set.add(ggp["pixel"])
     shape = (len(time), len(slant_range))
     data_vars = {
         "latitude": (("time", "slant_range"), np.zeros(shape)),
         "longitude": (("time", "slant_range"), np.zeros(shape)),
         "height": (("time", "slant_range"), np.zeros(shape)),
-        "height": (("time", "slant_range"), np.zeros(shape)),
-        "height": (("time", "slant_range"), np.zeros(shape)),
         "incidenceAngle": (("time", "slant_range"), np.zeros(shape)),
         "elevationAngle": (("time", "slant_range"), np.zeros(shape)),
     }
-    line = sorted(line)
-    pixel = sorted(pixel)
+    line = sorted(line_set)
+    pixel = sorted(pixel_set)
     for ggp in geolocation_grid_points.values():
         for var in data_vars:
             j = line.index(ggp["line"])
@@ -43,7 +41,7 @@ def open_gcp_dataset(filename):
             data_vars[var][1][j, i] = ggp[var]
 
     ds = xr.Dataset(
-        data_vars=data_vars,
+        data_vars=data_vars,  # type: ignore
         coords={
             "time": ("time", [np.datetime64(dt) for dt in sorted(time)]),
             "slant_range": ("slant_range", sorted(slant_range), {"unit": "m"}),
@@ -52,7 +50,7 @@ def open_gcp_dataset(filename):
     return ds
 
 
-def open_root_dataset(filename):
+def open_root_dataset(filename: str) -> xr.Dataset:
     manifest = esa_safe.open_manifest(filename)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     product_attrs["groups"] = ["orbit"] + product_attrs["xs:instrument_mode_swaths"]

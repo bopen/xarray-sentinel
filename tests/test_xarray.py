@@ -39,9 +39,7 @@ def test_open_dataset_gcp() -> None:
         / "annotation"
         / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
     )
-    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="gcp")
+    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="gcp")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
-    # assert set(res.dims) == {"time", "slant_range"}
-
-    print(res)
+    assert set(res.dims) == {"time", "slant_range"}
