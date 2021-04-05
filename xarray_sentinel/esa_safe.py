@@ -14,6 +14,21 @@ SENTINEL2_NAMESPACES = {
 }
 
 
+GGP_CONVERT = {
+    "azimuthTime": lambda x: x,
+    "line": int,
+    "pixel": int,
+}
+
+
+def parse_geolocation_grid_points(annotation: ElementTree.ElementTree):
+    geolocation_grid_points = {}
+    for ggp_tag in annotation.findall(".//geolocationGridPoint"):
+        ggp = {tag.tag: GGP_CONVERT.get(tag.tag, float)(tag.text) for tag in ggp_tag}
+        geolocation_grid_points[ggp["line"], ggp["pixel"]] = ggp
+    return geolocation_grid_points
+
+
 def open_manifest(
     product_folder: T.Union[str, "os.PathLike[str]"]
 ) -> ElementTree.ElementTree:
