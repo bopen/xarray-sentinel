@@ -7,4 +7,5 @@ dependencies:
   - mypy
   - pytest
   - pytest-cov
+  - rioxarray
   - xarray >= 0.17.0
