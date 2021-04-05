@@ -13,10 +13,10 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         manifest = esa_safe.open_manifest(filename_or_obj)
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
         product_attrs["groups"] = ["orbit"] + product_attrs["xs:instrument_mode_swaths"]
-        ds = xr.Dataset(attrs=product_attrs)
+        ds = xr.Dataset(attrs=product_attrs)  # type: ignore
         return ds
 
-    def guess_can_open(self, filename_or_obj):
+    def guess_can_open(self, filename_or_obj: T.Any) -> bool:
         try:
             _, ext = os.path.splitext(filename_or_obj)
         except TypeError:

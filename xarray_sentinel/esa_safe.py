@@ -106,9 +106,11 @@ def parse_manifest_sentinel1(
     files = {}
 
     for file_tag in manifest.findall(".//dataObjectSection/dataObject"):
-        file_href = file_tag.find(".//fileLocation").attrib["href"]
-        file_type = file_tag.attrib["repID"]
-        files[file_href] = file_type
+        location_tag = file_tag.find(".//fileLocation")
+        if location_tag is not None:
+            file_href = location_tag.attrib["href"]
+            file_type = file_tag.attrib["repID"]
+            files[file_href] = file_type
 
     return attributes, files
 
@@ -128,29 +130,38 @@ def parse_manifest_sentinel2(
     if number is None:
         raise ValueError(f"{number=} not supported")
 
-    groundTrackDirection = manifest.find(
+    orbitNumber_tag = manifest.find(
         ".//safe:orbitReference/safe:orbitNumber", namespaces=SENTINEL2_NAMESPACES
-    ).attrib["groundTrackDirection"]
+    )
+    if orbitNumber_tag is None:
+        raise ValueError(f"orbitNumber not found")
+    groundTrackDirection = orbitNumber_tag.attrib["groundTrackDirection"]
     if groundTrackDirection not in {"ascending", "descending"}:
         raise ValueError(f"{groundTrackDirection=} not supported")
 
     orbitNumber = manifest.findtext(
-        ".//safe:orbitReference/safe:orbitNumber", namespaces=SENTINEL2_NAMESPACES
+        ".//safe:orbitReference/safe:orbitNumber",
+        default="-1",
+        namespaces=SENTINEL2_NAMESPACES,
     )
 
     relativeOrbitNumber = manifest.findtext(
         ".//safe:orbitReference/safe:relativeOrbitNumber",
+        default="-1",
         namespaces=SENTINEL2_NAMESPACES,
     )
 
-    mtd_product_type = manifest.find(
+    mtd_product_tag = manifest.find(
         ".//dataObject[@ID='S2_Level-1C_Product_Metadata']/byteStream/fileLocation",
         namespaces=SENTINEL2_NAMESPACES,
-    ).attrib["href"]
-    if "MTD_MSIL1C.xml" in mtd_product_type:
+    )
+    if (
+        mtd_product_tag is not None
+        and "MTD_MSIL1C.xml" in mtd_product_tag.attrib["href"]
+    ):
         product_type = "S2MSIl1C"
     else:
-        raise ValueError(f"{mtd_product_type=} not suppoorted")
+        raise ValueError(f"{mtd_product_tag=} not suppoorted")
 
     attributes = {
         "constellation": "sentinel-2",
@@ -165,8 +176,10 @@ def parse_manifest_sentinel2(
     files = {}
 
     for file_tag in manifest.findall(".//dataObjectSection/dataObject"):
-        file_href = file_tag.find(".//fileLocation").attrib["href"]
-        file_type = file_tag.attrib["ID"]
-        files[file_href] = file_type
+        location_tag = file_tag.find(".//fileLocation")
+        if location_tag is not None:
+            file_href = location_tag.attrib["href"]
+            file_type = file_tag.attrib["ID"]
+            files[file_href] = file_type
 
     return attributes, files
