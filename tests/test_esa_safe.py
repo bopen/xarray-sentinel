@@ -108,7 +108,7 @@ SENTINEL2_ATTRIBUTES = {
 }
 
 
-def test_parse_geolocation_grid_points():
+def test_parse_geolocation_grid_points() -> None:
     annotation_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"

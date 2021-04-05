@@ -14,17 +14,22 @@ SENTINEL2_NAMESPACES = {
 }
 
 
-GGP_CONVERT = {
+GGP_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
     "azimuthTime": lambda x: x,
     "line": int,
     "pixel": int,
 }
 
 
-def parse_geolocation_grid_points(annotation: ElementTree.ElementTree):
+def parse_geolocation_grid_points(
+    annotation: ElementTree.ElementTree,
+) -> T.Dict[T.Tuple[int, int], T.Any]:
     geolocation_grid_points = {}
     for ggp_tag in annotation.findall(".//geolocationGridPoint"):
-        ggp = {tag.tag: GGP_CONVERT.get(tag.tag, float)(tag.text) for tag in ggp_tag}
+        ggp = {}
+        for tag in ggp_tag:
+            converter = GGP_CONVERT.get(tag.tag, float)
+            ggp[tag.tag] = converter(str(tag.text))
         geolocation_grid_points[ggp["line"], ggp["pixel"]] = ggp
     return geolocation_grid_points
 
@@ -151,7 +156,7 @@ def parse_manifest_sentinel2(
         ".//safe:orbitReference/safe:orbitNumber", namespaces=SENTINEL2_NAMESPACES
     )
     if orbitNumber_tag is None:
-        raise ValueError(f"orbitNumber not found")
+        raise ValueError("orbitNumber not found")
     groundTrackDirection = orbitNumber_tag.attrib["groundTrackDirection"]
     if groundTrackDirection not in {"ascending", "descending"}:
         raise ValueError(f"{groundTrackDirection=} not supported")
