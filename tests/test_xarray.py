@@ -13,3 +13,6 @@ def test_open_dataset() -> None:
     res = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
+    assert res.attrs["constellation"] == "sentinel-1"
+    assert res.attrs["sar:product_type"] == "SLC"
+    assert res.attrs["sar:instrument_mode"] == "IW"
