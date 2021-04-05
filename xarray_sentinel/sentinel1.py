@@ -21,4 +21,4 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
             _, ext = os.path.splitext(filename_or_obj)
         except TypeError:
             return False
-        return ext in {".SAFE"}
+        return ext.lower() in {".safe"}

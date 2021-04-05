@@ -33,7 +33,9 @@ def open_manifest(
     product_folder: T.Union[str, "os.PathLike[str]"]
 ) -> ElementTree.ElementTree:
     product_folder = pathlib.Path(product_folder)
-    return ElementTree.parse(product_folder / "manifest.safe")
+    if product_folder.is_dir():
+        product_folder = product_folder / "manifest.safe"
+    return ElementTree.parse(product_folder)
 
 
 def parse_manifest_sentinel1(
