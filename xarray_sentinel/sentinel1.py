@@ -26,11 +26,11 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
             pixel_set.add(ggp["pixel"])
     shape = (len(time), len(slant_range))
     data_vars = {
-        "latitude": (("time", "range"), np.zeros(shape)),
-        "longitude": (("time", "range"), np.zeros(shape)),
-        "height": (("time", "range"), np.zeros(shape)),
-        "incidenceAngle": (("time", "range"), np.zeros(shape)),
-        "elevationAngle": (("time", "range"), np.zeros(shape)),
+        "latitude": (("time", "range"), np.zeros(shape), {"units": "degrees_north"}),
+        "longitude": (("time", "range"), np.zeros(shape), {"units": "degrees_east"}),
+        "height": (("time", "range"), np.zeros(shape), {"units": "m"}),
+        "incidenceAngle": (("time", "range"), np.zeros(shape), {"units": "degrees"}),
+        "elevationAngle": (("time", "range"), np.zeros(shape), {"units": "degrees"}),
     }
     line = sorted(line_set)
     pixel = sorted(pixel_set)
@@ -54,6 +54,7 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
                 {"units": "m", "long_name": "slant range / line-of-sight distance"},
             ),
         },
+        attrs={"Conventions": "CF-1.7"},
     )
     return ds
 
