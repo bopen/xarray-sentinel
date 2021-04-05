@@ -51,7 +51,7 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
             "range": (
                 "range",
                 sorted(slant_range),
-                {"unit": "m", "long_name": "slant range / line-of-sight distance"},
+                {"units": "m", "long_name": "slant range / line-of-sight distance"},
             ),
         },
     )
