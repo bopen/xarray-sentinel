@@ -26,11 +26,11 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
             pixel_set.add(ggp["pixel"])
     shape = (len(time), len(slant_range))
     data_vars = {
-        "latitude": (("time", "slant_range"), np.zeros(shape)),
-        "longitude": (("time", "slant_range"), np.zeros(shape)),
-        "height": (("time", "slant_range"), np.zeros(shape)),
-        "incidenceAngle": (("time", "slant_range"), np.zeros(shape)),
-        "elevationAngle": (("time", "slant_range"), np.zeros(shape)),
+        "latitude": (("time", "range"), np.zeros(shape)),
+        "longitude": (("time", "range"), np.zeros(shape)),
+        "height": (("time", "range"), np.zeros(shape)),
+        "incidenceAngle": (("time", "range"), np.zeros(shape)),
+        "elevationAngle": (("time", "range"), np.zeros(shape)),
     }
     line = sorted(line_set)
     pixel = sorted(pixel_set)
@@ -43,8 +43,16 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         coords={
-            "time": ("time", [np.datetime64(dt) for dt in sorted(time)]),
-            "slant_range": ("slant_range", sorted(slant_range), {"unit": "m"}),
+            "time": (
+                "time",
+                [np.datetime64(dt) for dt in sorted(time)],
+                {"standard_name": "time", "long_name": "azimuth time"},
+            ),
+            "range": (
+                "range",
+                sorted(slant_range),
+                {"unit": "m", "long_name": "slant range / line-of-sight distance"},
+            ),
         },
     )
     return ds
