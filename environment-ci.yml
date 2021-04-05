@@ -5,6 +5,7 @@ dependencies:
   - flake8
   - make
   - mypy
+  - numpy >= 1.20.0
   - pytest
   - pytest-cov
   - rioxarray
