@@ -11,8 +11,8 @@ Data groups:
 - ground control points (azimuth / slant_range dimensions on one more reduced grid)
 - de-ramping parameters
 - kinematic description:
-  - state vectors
-  - quaternions
+  - orbit / state vectors
+  - attitude / quaternions
 - antenna pattern
 - Doppler centroid / Doppler rate
 - incidence angle & Co. 
@@ -43,11 +43,19 @@ User experience
 >>> ds
 ... instruction on what to do ...
 
->>> ds_gpc = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE", group="gpc")
+>>> ds_iw1_gpc = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE", group="IW1/gpc")
+>>> ds_iw1_gpc = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE/annotations/s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml", group="gcp")
 ```
 
+Structure:
 
+* root / SAFE
+  * orbit-attitude "orbit" / (almost) duplicated in all annotation XML
+  * swaths "IW1" "IW2" "S3" etc / duplicated in VH-VV annotation XML
+    * bursts "W0120N433_VV" etc (include polarization?)
+    * gcp "gcp"
+    * calibration "calibration"
+    * antenna pattern "antenna"
+    * zero-Doppler "doppler"
 
-```python
->>> ds = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE/annotations/s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml")
-```
+examples: `group="orbit"`, `group="IW2/W0120N433_VV`, `group="S3/gcp"` etc
