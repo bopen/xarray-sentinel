@@ -7,30 +7,48 @@ import xarray as xr
 
 from xarray_sentinel import esa_safe
 
-SPEED_OF_LIGHT = 299_792_458  # m / s
-
 
 def open_gcp_dataset(filename: str) -> xr.Dataset:
     annotation = ElementTree.parse(filename)
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation)
-    time = []
-    slant_range = []
+    azimuth_time = []
+    slant_range_time = []
     line_set = set()
     pixel_set = set()
     for ggp in geolocation_grid_points.values():
         if ggp["line"] not in line_set:
-            time.append(np.datetime64(ggp["azimuthTime"]))
+            azimuth_time.append(np.datetime64(ggp["azimuthTime"]))
             line_set.add(ggp["line"])
         if ggp["pixel"] not in pixel_set:
-            slant_range.append(ggp["slantRangeTime"] * SPEED_OF_LIGHT / 2)
+            slant_range_time.append(ggp["slantRangeTime"])
             pixel_set.add(ggp["pixel"])
-    shape = (len(time), len(slant_range))
+    shape = (len(azimuth_time), len(slant_range_time))
     data_vars = {
-        "latitude": (("time", "range"), np.zeros(shape), {"units": "degrees_north"}),
-        "longitude": (("time", "range"), np.zeros(shape), {"units": "degrees_east"}),
-        "height": (("time", "range"), np.zeros(shape), {"units": "m"}),
-        "incidenceAngle": (("time", "range"), np.zeros(shape), {"units": "degrees"}),
-        "elevationAngle": (("time", "range"), np.zeros(shape), {"units": "degrees"}),
+        "latitude": (
+            ("azimuth_time", "slant_range_time"),
+            np.full(shape, np.nan),
+            {"units": "degrees_north"},
+        ),
+        "longitude": (
+            ("azimuth_time", "slant_range_time"),
+            np.full(shape, np.nan),
+            {"units": "degrees_east"},
+        ),
+        "height": (
+            ("azimuth_time", "slant_range_time"),
+            np.full(shape, np.nan),
+            {"units": "m"},
+        ),
+        "incidenceAngle": (
+            ("azimuth_time", "slant_range_time"),
+            np.full(shape, np.nan),
+            {"units": "degrees"},
+        ),
+        "elevationAngle": (
+            ("azimuth_time", "slant_range_time"),
+            np.full(shape, np.nan),
+            {"units": "degrees"},
+        ),
     }
     line = sorted(line_set)
     pixel = sorted(pixel_set)
@@ -43,15 +61,15 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         coords={
-            "time": (
-                "time",
-                [np.datetime64(dt) for dt in sorted(time)],
+            "azimuth_time": (
+                "azimuth_time",
+                [np.datetime64(dt) for dt in sorted(azimuth_time)],
                 {"standard_name": "time", "long_name": "azimuth time"},
             ),
-            "range": (
-                "range",
-                sorted(slant_range),
-                {"units": "m", "long_name": "slant range / line-of-sight distance"},
+            "slant_range_time": (
+                "slant_range_time",
+                sorted(slant_range_time),
+                {"units": "s", "long_name": "slant range time / two-way delay"},
             ),
         },
         attrs={"Conventions": "CF-1.7"},
