@@ -59,3 +59,14 @@ Structure:
     * zero-Doppler "doppler"
 
 examples: `group="orbit"`, `group="IW2/N433_W0120_VV`, `group="S3/gcp"` etc
+
+Dimensions, coordinates and variables
+
+We may either keep names and unit of measures as close as possible to the original
+or going for easier-to-use chaices.
+
+In all cases we add the XML tag name in the long_name so it is clear the provenance of the
+information: e.g. for `slant_range_time` -> `"long_name": "two way delay (slantRangeTime)""`
+
+* `azimuth_time` as CF time in UTC (warn: may fail on leap seconds)
+* `slant_range_time` as CF time interval in "s"
