@@ -52,7 +52,7 @@ Structure:
 * root / SAFE
   * orbit-attitude "orbit" / (almost) duplicated in all annotation XML
   * swaths "IW1" "IW2" "S3" etc / duplicated in VH-VV annotation XML
-    * bursts "W0120N433_VV" etc (include polarization?)
+    * bursts / polarization "N433_W0120_VV" etc (include polarization?)
     * gcp "gcp"
     * calibration "calibration"
     * antenna pattern "antenna"
