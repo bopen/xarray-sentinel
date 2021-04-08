@@ -59,6 +59,35 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
     return ds
 
 
+def open_attitude_dataset(filename: str) -> xr.Dataset:
+    annotation = ElementTree.parse(filename)
+    attitude = esa_safe.parse_attitude(annotation)
+    shape = len(attitude)
+
+    data_vars = {
+        "q0": (("time"), [], {"units": "1"}),
+        "q1": (("time"), [], {"units": "1"}),
+        "q2": (("time"), [], {"units": "1"}),
+        "wx": (("time"), []),
+        "wy": (("time"), []),
+        "wz": (("time"), []),
+        "pitch": (("time"), [], {"units": "degrees"}),
+        "roll": (("time"), [], {"units": "degrees"}),
+        "yaw": (("time"), [], {"units": "degrees"}),
+        "time": (("time"), []),
+    }
+
+    for k in range(shape):
+        for var in data_vars:
+            data_vars[var][1].append(attitude[k][var])
+
+    ds = xr.Dataset(
+        data_vars=data_vars,  # type: ignore
+        attrs={"Conventions": "CF-1.7"},
+    )
+    return ds
+
+
 def open_root_dataset(filename: str) -> xr.Dataset:
     manifest = esa_safe.open_manifest(filename)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
