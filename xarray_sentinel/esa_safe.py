@@ -39,29 +39,31 @@ def parse_attitude(
 ) -> T.List[T.Any]:
     attitude = []
     for attitude_tag in annotation.findall(".//attitude"):
-        attitude.append({})
+        att = {}
         for tag in attitude_tag:
             converter = ATTITUDE_CONVERT.get(tag.tag, float)
-            attitude[-1][tag.tag] = converter(str(tag.text))
+            att[tag.tag] = converter(str(tag.text))
+        attitude.append(att)
     return attitude
 
 
 def parse_orbit(
     annotation: ElementTree.ElementTree,
 ) -> T.List[T.Any]:
-    attitude = []
+    orbit = []
     for orbit_tag in annotation.findall(".//orbit"):
-        attitude.append({})
+        orb = {}
         for tag in orbit_tag:
             if str(tag.text).strip():
                 converter = ORBIT_CONVERT.get(tag.tag, float)
-                attitude[-1][tag.tag] = converter(str(tag.text))
+                orb[tag.tag] = converter(str(tag.text))
             else:
-                attitude[-1][tag.tag] = {}
+                orb[tag.tag] = {}
                 for sub_tag in tag:
                     converter = ORBIT_CONVERT.get(sub_tag.tag, float)
-                    attitude[-1][tag.tag][sub_tag.tag] = converter(str(sub_tag.text))
-    return attitude
+                    orb[tag.tag][sub_tag.tag] = converter(str(sub_tag.text))
+        orbit.append(orb)
+    return orbit
 
 
 def parse_geolocation_grid_points(
