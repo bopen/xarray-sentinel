@@ -58,4 +58,4 @@ Structure:
     * antenna pattern "antenna"
     * zero-Doppler "doppler"
 
-examples: `group="orbit"`, `group="IW2/W0120N433_VV`, `group="S3/gcp"` etc
+examples: `group="orbit"`, `group="IW2/N433_W0120_VV`, `group="S3/gcp"` etc
