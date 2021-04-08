@@ -1,4 +1,5 @@
 import os.path
+import warnings
 import typing as T
 from xml.etree import ElementTree
 
@@ -76,6 +77,37 @@ def open_attitude_dataset(filename: str) -> xr.Dataset:
         attrs={"Conventions": "CF-1.7"},
     )
 
+    ds = conventions.update_attributes(ds)
+    return ds
+
+
+def open_orbit_dataset(filename: str) -> xr.Dataset:
+    annotation = ElementTree.parse(filename)
+    orbit = esa_safe.parse_orbit(annotation)
+    shape = len(orbit)
+
+    reference_system = orbit[0]["frame"]
+    data_vars = {"time": [], "x": [], "y": [], "z": [], "vx": [], "vy": [], "vz": []}
+    for k in range(shape):
+        data_vars["time"].append(orbit[k]["time"])
+        data_vars["x"].append(orbit[k]["position"]["x"])
+        data_vars["y"].append(orbit[k]["position"]["y"])
+        data_vars["z"].append(orbit[k]["position"]["z"])
+        data_vars["x"].append(orbit[k]["velocity"]["x"])
+        data_vars["y"].append(orbit[k]["velocity"]["y"])
+        data_vars["z"].append(orbit[k]["velocity"]["z"])
+        if orbit[k]["frame"] != reference_system:
+            warnings.warn(f"reference_system is not consistent in all the state vectors. "
+                          f"xpath: .//orbit//frame \n File: ${filename}")
+            reference_system = None
+
+    attrs = {"Conventions": "CF-1.7"}
+    if reference_system is not None:
+        attrs.update({"reference_system": reference_system})
+    ds = xr.Dataset(
+        data_vars=data_vars,  # type: ignore
+        attrs=attrs,
+    )
     ds = conventions.update_attributes(ds)
     return ds
 

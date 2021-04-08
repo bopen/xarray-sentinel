@@ -8,6 +8,12 @@ variables_attributes = {
     "roll": {"units": "degrees"},
     "yaw": {"units": "degrees"},
     "time": {},
+    "x": {"units": "m"},
+    "y": {"units": "m"},
+    "z": {"units": "m"},
+    "vx": {"units": "m s-1"},
+    "vy": {"units": "m s-1"},
+    "vz": {"units": "m s-1"},
 }
 
 
