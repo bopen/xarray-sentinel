@@ -5,6 +5,7 @@ from xml.etree import ElementTree
 import numpy as np
 import xarray as xr
 
+from xarray_sentinel import conventions
 from xarray_sentinel import esa_safe
 
 SPEED_OF_LIGHT = 299_792_458  # m / s
@@ -63,28 +64,19 @@ def open_attitude_dataset(filename: str) -> xr.Dataset:
     annotation = ElementTree.parse(filename)
     attitude = esa_safe.parse_attitude(annotation)
     shape = len(attitude)
-
-    data_vars = {
-        "q0": (("time"), [], {"units": "1"}),
-        "q1": (("time"), [], {"units": "1"}),
-        "q2": (("time"), [], {"units": "1"}),
-        "wx": (("time"), []),
-        "wy": (("time"), []),
-        "wz": (("time"), []),
-        "pitch": (("time"), [], {"units": "degrees"}),
-        "roll": (("time"), [], {"units": "degrees"}),
-        "yaw": (("time"), [], {"units": "degrees"}),
-        "time": (("time"), []),
-    }
+    variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
+    data_vars = {var: [] for var in variables}
 
     for k in range(shape):
-        for var in data_vars:
-            data_vars[var][1].append(attitude[k][var])
+        for var in variables:
+            data_vars[var].append((attitude[k][var]))
 
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs={"Conventions": "CF-1.7"},
     )
+
+    ds = conventions.update_attributes(ds)
     return ds
 
 
