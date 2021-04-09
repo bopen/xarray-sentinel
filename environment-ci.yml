@@ -2,11 +2,13 @@ channels:
   - defaults
   - conda-forge
 dependencies:
+  - black = 19.10b0
   - flake8
+  - isort
   - make
   - mypy
   - numpy >= 1.20.0
   - pytest
   - pytest-cov
+  - python >= 3.8
   - rioxarray
-  - xarray >= 0.17.0
