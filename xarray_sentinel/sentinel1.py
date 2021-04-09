@@ -83,7 +83,7 @@ def open_attitude_dataset(filename: str) -> xr.Dataset:
     attitude = esa_safe.parse_attitude(annotation)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
-    data_vars = {var: [] for var in variables}
+    data_vars: T.Dict[str, T.List[T.Any]] = {var: [] for var in variables}
 
     for k in range(shape):
         for var in variables:
@@ -104,7 +104,15 @@ def open_orbit_dataset(filename: str) -> xr.Dataset:
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
-    data_vars = {"time": [], "x": [], "y": [], "z": [], "vx": [], "vy": [], "vz": []}
+    data_vars: T.Dict[str, T.List[T.Any]] = {
+        "time": [],
+        "x": [],
+        "y": [],
+        "z": [],
+        "vx": [],
+        "vy": [],
+        "vz": [],
+    }
     for k in range(shape):
         data_vars["time"].append(orbit[k]["time"])
         data_vars["x"].append(orbit[k]["position"]["x"])
@@ -125,7 +133,7 @@ def open_orbit_dataset(filename: str) -> xr.Dataset:
         attrs.update({"reference_system": reference_system})
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
-        attrs=attrs,
+        attrs=attrs,  # type: ignore
     )
     ds = conventions.update_attributes(ds)
     return ds
