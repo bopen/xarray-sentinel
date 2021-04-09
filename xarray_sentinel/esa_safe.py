@@ -1,3 +1,4 @@
+import datetime as dt
 import os
 import pathlib
 import typing as T
@@ -24,6 +25,46 @@ GGP_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
     "incidenceAngle": float,
     "elevationAngle": float,
 }
+
+
+ATTITUDE_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
+    "time": lambda t: dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%f"),
+    "frame": str,
+}
+
+
+ORBIT_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
+    "time": lambda t: dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%f"),
+    "frame": str,
+}
+
+
+def parse_attitude(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
+    attitude = []
+    for attitude_tag in annotation.findall(".//attitude"):
+        att = {}
+        for tag in attitude_tag:
+            converter = ATTITUDE_CONVERT.get(tag.tag, float)
+            att[tag.tag] = converter(str(tag.text))
+        attitude.append(att)
+    return attitude
+
+
+def parse_orbit(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
+    orbit = []
+    for orbit_tag in annotation.findall(".//orbit"):
+        orb = {}
+        for tag in orbit_tag:
+            if str(tag.text).strip():
+                converter = ORBIT_CONVERT.get(tag.tag, float)
+                orb[tag.tag] = converter(str(tag.text))
+            else:
+                orb[tag.tag] = {}
+                for sub_tag in tag:
+                    converter = ORBIT_CONVERT.get(sub_tag.tag, float)
+                    orb[tag.tag][sub_tag.tag] = converter(str(sub_tag.text))
+        orbit.append(orb)
+    return orbit
 
 
 def parse_geolocation_grid_points(

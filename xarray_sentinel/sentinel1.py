@@ -1,11 +1,12 @@
 import os.path
 import typing as T
+import warnings
 from xml.etree import ElementTree
 
 import numpy as np
 import xarray as xr
 
-from xarray_sentinel import esa_safe
+from xarray_sentinel import conventions, esa_safe
 
 
 def open_gcp_dataset(filename: str) -> xr.Dataset:
@@ -74,6 +75,67 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
         },
         attrs={"Conventions": "CF-1.7"},
     )
+    return ds
+
+
+def open_attitude_dataset(filename: str) -> xr.Dataset:
+    annotation = ElementTree.parse(filename)
+    attitude = esa_safe.parse_attitude(annotation)
+    shape = len(attitude)
+    variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
+    data_vars: T.Dict[str, T.List[T.Any]] = {var: [] for var in variables}
+
+    for k in range(shape):
+        for var in variables:
+            data_vars[var].append((attitude[k][var]))
+
+    ds = xr.Dataset(
+        data_vars=data_vars,  # type: ignore
+        attrs={"Conventions": "CF-1.7"},
+    )
+
+    ds = conventions.update_attributes(ds)
+    return ds
+
+
+def open_orbit_dataset(filename: str) -> xr.Dataset:
+    annotation = ElementTree.parse(filename)
+    orbit = esa_safe.parse_orbit(annotation)
+    shape = len(orbit)
+
+    reference_system = orbit[0]["frame"]
+    data_vars: T.Dict[str, T.List[T.Any]] = {
+        "time": [],
+        "x": [],
+        "y": [],
+        "z": [],
+        "vx": [],
+        "vy": [],
+        "vz": [],
+    }
+    for k in range(shape):
+        data_vars["time"].append(orbit[k]["time"])
+        data_vars["x"].append(orbit[k]["position"]["x"])
+        data_vars["y"].append(orbit[k]["position"]["y"])
+        data_vars["z"].append(orbit[k]["position"]["z"])
+        data_vars["x"].append(orbit[k]["velocity"]["x"])
+        data_vars["y"].append(orbit[k]["velocity"]["y"])
+        data_vars["z"].append(orbit[k]["velocity"]["z"])
+        if orbit[k]["frame"] != reference_system:
+            warnings.warn(
+                f"reference_system is not consistent in all the state vectors. "
+                f"xpath: .//orbit//frame \n File: ${filename}"
+            )
+            reference_system = None
+
+    attrs = {"Conventions": "CF-1.7"}
+    if reference_system is not None:
+        attrs.update({"reference_system": reference_system})
+    ds = xr.Dataset(
+        data_vars=data_vars,  # type: ignore
+        attrs=attrs,  # type: ignore
+    )
+    ds = conventions.update_attributes(ds)
     return ds
 
 
