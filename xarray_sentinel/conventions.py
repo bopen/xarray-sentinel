@@ -1,6 +1,8 @@
+import typing as T
+
 import xarray as xr
 
-variables_attributes = {
+VARIABLE_ATTRIBUTES: T.Dict[str, T.Callable[[str], T.Any]] = {
     "q0": {"units": "1"},
     "q1": {"units": "1"},
     "q2": {"units": "1"},
@@ -19,7 +21,6 @@ variables_attributes = {
 
 def update_attributes(ds: xr.Dataset) -> xr.Dataset:
     for var in ds.variables:
-        if var in variables_attributes:
-            attrs = variables_attributes.get(str(var), {})
-            ds.variables[var].attrs.update(attrs)
+        attrs = VARIABLE_ATTRIBUTES.get(str(var), {})
+        ds.variables[var].attrs.update(attrs)
     return ds
