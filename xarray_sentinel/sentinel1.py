@@ -1,13 +1,12 @@
 import os.path
-import warnings
 import typing as T
+import warnings
 from xml.etree import ElementTree
 
 import numpy as np
 import xarray as xr
 
-from xarray_sentinel import conventions
-from xarray_sentinel import esa_safe
+from xarray_sentinel import conventions, esa_safe
 
 
 def open_gcp_dataset(filename: str) -> xr.Dataset:
@@ -115,8 +114,10 @@ def open_orbit_dataset(filename: str) -> xr.Dataset:
         data_vars["y"].append(orbit[k]["velocity"]["y"])
         data_vars["z"].append(orbit[k]["velocity"]["z"])
         if orbit[k]["frame"] != reference_system:
-            warnings.warn(f"reference_system is not consistent in all the state vectors. "
-                          f"xpath: .//orbit//frame \n File: ${filename}")
+            warnings.warn(
+                f"reference_system is not consistent in all the state vectors. "
+                f"xpath: .//orbit//frame \n File: ${filename}"
+            )
             reference_system = None
 
     attrs = {"Conventions": "CF-1.7"}

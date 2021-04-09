@@ -1,8 +1,8 @@
+import datetime as dt
 import os
 import pathlib
 import typing as T
 from xml.etree import ElementTree
-import datetime as dt
 
 SENTINEL1_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel-1.0",
@@ -100,13 +100,13 @@ def parse_manifest_sentinel1(
         ".//safe:platform/safe:familyName", namespaces=SENTINEL1_NAMESPACES
     )
     if familyName != "SENTINEL-1":
-        raise ValueError(f"{familyName} not supported")
+        raise ValueError(f"{familyName=} not supported")
 
     number = manifest.findtext(
         ".//safe:platform/safe:number", namespaces=SENTINEL1_NAMESPACES
     )
     if number is None:
-        raise ValueError(f"{number} not supported")
+        raise ValueError(f"{number=} not supported")
 
     instrumentMode = manifest.findtext(
         ".//s1sarl1:instrumentMode/s1sarl1:mode", namespaces=SENTINEL1_NAMESPACES
@@ -129,13 +129,13 @@ def parse_manifest_sentinel1(
         ".//s1:orbitProperties/s1:pass", namespaces=SENTINEL1_NAMESPACES
     )
     if orbitProperties_pass not in {"ASCENDING", "DESCENDING"}:
-        raise ValueError(f"{orbitProperties_pass}= not supported")
+        raise ValueError(f"{orbitProperties_pass=} not supported")
 
     ascendingNodeTime = manifest.findtext(
         ".//s1:orbitProperties/s1:ascendingNodeTime", namespaces=SENTINEL1_NAMESPACES
     )
     if ascendingNodeTime is None:
-        raise ValueError(f"{ascendingNodeTime} not supported")
+        raise ValueError(f"{ascendingNodeTime=} not supported")
 
     orbitNumber = manifest.findall(
         ".//safe:orbitReference/safe:orbitNumber", namespaces=SENTINEL1_NAMESPACES
@@ -194,13 +194,13 @@ def parse_manifest_sentinel2(
         ".//safe:platform/safe:familyName", namespaces=SENTINEL2_NAMESPACES
     )
     if familyName != "SENTINEL":
-        raise ValueError(f"{familyName} not supported")
+        raise ValueError(f"{familyName=} not supported")
 
     number = manifest.findtext(
         ".//safe:platform/safe:number", namespaces=SENTINEL2_NAMESPACES
     )
     if number is None:
-        raise ValueError(f"{number} not supported")
+        raise ValueError(f"{number=} not supported")
 
     orbitNumber_tag = manifest.find(
         ".//safe:orbitReference/safe:orbitNumber", namespaces=SENTINEL2_NAMESPACES
@@ -209,7 +209,7 @@ def parse_manifest_sentinel2(
         raise ValueError("orbitNumber not found")
     groundTrackDirection = orbitNumber_tag.attrib["groundTrackDirection"]
     if groundTrackDirection not in {"ascending", "descending"}:
-        raise ValueError(f"{groundTrackDirection} not supported")
+        raise ValueError(f"{groundTrackDirection=} not supported")
 
     orbitNumber = manifest.findtext(
         ".//safe:orbitReference/safe:orbitNumber",
@@ -233,7 +233,7 @@ def parse_manifest_sentinel2(
     ):
         product_type = "S2MSIl1C"
     else:
-        raise ValueError(f"{mtd_product_tag} not suppoorted")
+        raise ValueError(f"{mtd_product_tag=} not suppoorted")
 
     attributes = {
         "constellation": "sentinel-2",
@@ -255,4 +255,3 @@ def parse_manifest_sentinel2(
             files[file_href] = file_type
 
     return attributes, files
-
