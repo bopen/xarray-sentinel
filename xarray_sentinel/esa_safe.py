@@ -16,9 +16,14 @@ SENTINEL2_NAMESPACES = {
 
 
 GGP_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
-    "azimuthTime": lambda x: x,
+    "slantRangeTime": float,
     "line": int,
     "pixel": int,
+    "latitude": float,
+    "longitude": float,
+    "height": float,
+    "incidenceAngle": float,
+    "elevationAngle": float,
 }
 
 
@@ -73,7 +78,7 @@ def parse_geolocation_grid_points(
     for ggp_tag in annotation.findall(".//geolocationGridPoint"):
         ggp = {}
         for tag in ggp_tag:
-            converter = GGP_CONVERT.get(tag.tag, float)
+            converter = GGP_CONVERT.get(tag.tag, lambda x: x)
             ggp[tag.tag] = converter(str(tag.text))
         geolocation_grid_points[ggp["line"], ggp["pixel"]] = ggp
     return geolocation_grid_points
