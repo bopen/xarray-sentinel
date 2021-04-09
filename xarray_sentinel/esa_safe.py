@@ -39,9 +39,7 @@ ORBIT_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
 }
 
 
-def parse_attitude(
-    annotation: ElementTree.ElementTree,
-) -> T.List[T.Any]:
+def parse_attitude(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
     attitude = []
     for attitude_tag in annotation.findall(".//attitude"):
         att = {}
@@ -52,9 +50,7 @@ def parse_attitude(
     return attitude
 
 
-def parse_orbit(
-    annotation: ElementTree.ElementTree,
-) -> T.List[T.Any]:
+def parse_orbit(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
     orbit = []
     for orbit_tag in annotation.findall(".//orbit"):
         orb = {}
