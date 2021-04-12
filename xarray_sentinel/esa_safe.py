@@ -22,12 +22,6 @@ SENTINEL2_NAMESPACES = {
 }
 
 
-ORBIT_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
-    "time": lambda t: dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%f"),
-    "frame": str,
-}
-
-
 @functools.lru_cache()
 def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
