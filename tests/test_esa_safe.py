@@ -3,6 +3,7 @@ import typing as T
 from xml.etree import ElementTree
 
 import pytest
+import xmlschema
 
 from xarray_sentinel import esa_safe
 
@@ -108,14 +109,19 @@ SENTINEL2_ATTRIBUTES = {
 }
 
 
-def test_parse_geolocation_grid_points() -> None:
+def test_sentinel1_schemas() -> None:
+    res = esa_safe.sentinel1_schemas("product")
+
+    assert isinstance(res, xmlschema.XMLSchema)
+
+
+def test_parse_tag_list() -> None:
     annotation_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
         / "annotation"
         / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
     )
-    annotation = ElementTree.parse(annotation_path)
     expected = {
         "azimuthTime",
         "slantRangeTime",
@@ -128,10 +134,10 @@ def test_parse_geolocation_grid_points() -> None:
         "elevationAngle",
     }
 
-    res = esa_safe.parse_geolocation_grid_points(annotation)
+    res = esa_safe.parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
-    assert (0, 0) in res
-    assert set(res[0, 0]) == expected
+    assert isinstance(res, list)
+    assert set(res[0]) == expected
 
 
 @pytest.mark.parametrize("product_id,expected", SENTINEL1_ATTRIBUTES.items())

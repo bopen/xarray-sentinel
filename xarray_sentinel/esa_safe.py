@@ -1,8 +1,15 @@
 import datetime as dt
+import functools
 import os
 import pathlib
 import typing as T
 from xml.etree import ElementTree
+
+import pkg_resources
+import xmlschema  # type: ignore
+
+PathType = T.Union[bytes, str, "os.PathLike[str]", "os.PathLike[bytes]"]
+
 
 SENTINEL1_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel-1.0",
@@ -12,18 +19,6 @@ SENTINEL1_NAMESPACES = {
 
 SENTINEL2_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel/1.1",
-}
-
-
-GGP_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
-    "slantRangeTime": float,
-    "line": int,
-    "pixel": int,
-    "latitude": float,
-    "longitude": float,
-    "height": float,
-    "incidenceAngle": float,
-    "elevationAngle": float,
 }
 
 
@@ -37,6 +32,22 @@ ORBIT_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
     "time": lambda t: dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%f"),
     "frame": str,
 }
+
+
+@functools.lru_cache()
+def sentinel1_schemas(schema_type) -> T.Dict[str, xmlschema.XMLSchema]:
+    support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
+    schema_paths = {"product": os.path.join(support_dir, "s1-level-1-product.xsd")}
+    return xmlschema.XMLSchema(schema_paths[schema_type])
+
+
+def parse_tag_list(
+    annotation_path: PathType, schema_type: str, query: str,
+) -> T.List[T.Dict[str, T.Any]]:
+    annotation_path = os.fspath(annotation_path)
+    schema = sentinel1_schemas(schema_type)
+    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(annotation_path, query)
+    return tag_list
 
 
 def parse_attitude(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
@@ -65,19 +76,6 @@ def parse_orbit(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
                     orb[tag.tag][sub_tag.tag] = converter(str(sub_tag.text))
         orbit.append(orb)
     return orbit
-
-
-def parse_geolocation_grid_points(
-    annotation: ElementTree.ElementTree,
-) -> T.Dict[T.Tuple[int, int], T.Any]:
-    geolocation_grid_points = {}
-    for ggp_tag in annotation.findall(".//geolocationGridPoint"):
-        ggp = {}
-        for tag in ggp_tag:
-            converter = GGP_CONVERT.get(tag.tag, lambda x: x)
-            ggp[tag.tag] = converter(str(tag.text))
-        geolocation_grid_points[ggp["line"], ggp["pixel"]] = ggp
-    return geolocation_grid_points
 
 
 def open_manifest(
