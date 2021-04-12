@@ -48,24 +48,13 @@ def parse_attitude(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation_path, "product", ".//attitude")
 
 
-def parse_orbit(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
-    orbit = []
-    for orbit_tag in annotation.findall(".//orbit"):
-        orb = {}
-        for tag in orbit_tag:
-            if str(tag.text).strip():
-                converter = ORBIT_CONVERT.get(tag.tag, float)
-                orb[tag.tag] = converter(str(tag.text))
-            else:
-                orb[tag.tag] = {}
-                for sub_tag in tag:
-                    converter = ORBIT_CONVERT.get(sub_tag.tag, float)
-                    orb[tag.tag][sub_tag.tag] = converter(str(sub_tag.text))
-        orbit.append(orb)
-    return orbit
+def parse_orbit(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//orbit")
 
 
-def parse_geolocation_grid_points(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+def parse_geolocation_grid_points(
+    annotation_path: PathType,
+) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 
