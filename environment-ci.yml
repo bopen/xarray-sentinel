@@ -12,3 +12,4 @@ dependencies:
   - pytest-cov
   - rioxarray
   - xarray >= 0.17.0
+  - xmlschema
