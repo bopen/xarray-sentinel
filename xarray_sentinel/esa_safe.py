@@ -62,8 +62,8 @@ def open_manifest(
 ) -> ElementTree.ElementTree:
     product_path = pathlib.Path(product_path)
     if product_path.is_dir():
-        product_folder = product_path / "manifest.safe"
-    return ElementTree.parse(product_folder)
+        product_path = product_path / "manifest.safe"
+    return ElementTree.parse(product_path)
 
 
 def parse_manifest_sentinel1(

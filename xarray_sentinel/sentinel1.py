@@ -82,11 +82,12 @@ def open_attitude_dataset(product_path: str,) -> xr.Dataset:
     attitude = esa_safe.read_product_element(product_path, ".//attitude")
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
-    data_vars: T.Dict[str, T.List[T.Any]] = {var: [] for var in variables}
+    data_vars: T.Dict[str, T.List[T.Any]] = \
+        {var: ("time", []) for var in variables}
 
     for k in range(shape):
         for var in variables:
-            data_vars[var].append((attitude[k][var]))
+            data_vars[var][1].append(attitude[k][var])
 
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
@@ -103,22 +104,22 @@ def open_orbit_dataset(product_path: str,) -> xr.Dataset:
     shape = len(orbit)
     reference_system = orbit[0]["frame"]
     data_vars: T.Dict[str, T.List[T.Any]] = {
-        "time": [],
-        "x": [],
-        "y": [],
-        "z": [],
-        "vx": [],
-        "vy": [],
-        "vz": [],
+        "time": ("time", []),
+        "x": ("time", []),
+        "y": ("time", []),
+        "z": ("time", []),
+        "vx": ("time", []),
+        "vy": ("time", []),
+        "vz": ("time", []),
     }
     for k in range(shape):
-        data_vars["time"].append(orbit[k]["time"])
-        data_vars["x"].append(orbit[k]["position"]["x"])
-        data_vars["y"].append(orbit[k]["position"]["y"])
-        data_vars["z"].append(orbit[k]["position"]["z"])
-        data_vars["x"].append(orbit[k]["velocity"]["x"])
-        data_vars["y"].append(orbit[k]["velocity"]["y"])
-        data_vars["z"].append(orbit[k]["velocity"]["z"])
+        data_vars["time"][1].append(orbit[k]["time"])
+        data_vars["x"][1].append(orbit[k]["position"]["x"])
+        data_vars["y"][1].append(orbit[k]["position"]["y"])
+        data_vars["z"][1].append(orbit[k]["position"]["z"])
+        data_vars["vx"][1].append(orbit[k]["velocity"]["x"])
+        data_vars["vy"][1].append(orbit[k]["velocity"]["y"])
+        data_vars["vz"][1].append(orbit[k]["velocity"]["z"])
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
@@ -156,6 +157,10 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
             ds = open_root_dataset(filename_or_obj)
         elif group == "gcp":
             ds = open_gcp_dataset(filename_or_obj)
+        elif group == "orbit":
+            ds = open_orbit_dataset(filename_or_obj)
+        elif group == "attitude":
+            ds = open_attitude_dataset(filename_or_obj)
         return ds
 
     def guess_can_open(self, filename_or_obj: T.Any) -> bool:
