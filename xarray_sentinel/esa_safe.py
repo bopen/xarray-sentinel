@@ -2,6 +2,7 @@ import os
 import pathlib
 import typing as T
 from xml.etree import ElementTree
+
 import xmlschema
 
 SENTINEL1_NAMESPACES = {
@@ -28,22 +29,24 @@ GGP_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
 
 
 def read_product_element(
-        product_path: str,
+        product_path: T.Union[str, "os.PathLike[str]"],
         element: str
-):
+) -> T.Dict[str, T.Any]:
+
     product_path = pathlib.Path(product_path)
     if product_path.is_dir():
         schema_path = product_path / "support" / "s1-level-1-product.xsd"
     else:
-        schema_path = product_path.parents[1] /  "support" / "s1-level-1-product.xsd"
+        schema_path = product_path.parents[1] / "support" / "s1-level-1-product.xsd"
 
     product_reader = xmlschema.XMLSchema(str(schema_path))
     element = product_reader.to_dict(str(product_path), element)
     return element
 
+
 def parse_geolocation_grid_points(
     annotation: ElementTree.ElementTree,
-) -> T.Dict[T.Tuple[int, int], T.Any]:
+) -> T.List[T.Any]:
     geolocation_grid_points = {}
     for ggp_tag in annotation.findall(".//geolocationGridPoint"):
         ggp = {}
@@ -55,11 +58,11 @@ def parse_geolocation_grid_points(
 
 
 def open_manifest(
-    product_folder: T.Union[str, "os.PathLike[str]"]
+    product_path: T.Union[str, "os.PathLike[str]"]
 ) -> ElementTree.ElementTree:
-    product_folder = pathlib.Path(product_folder)
-    if product_folder.is_dir():
-        product_folder = product_folder / "manifest.safe"
+    product_path = pathlib.Path(product_path)
+    if product_path.is_dir():
+        product_folder = product_path / "manifest.safe"
     return ElementTree.parse(product_folder)
 
 

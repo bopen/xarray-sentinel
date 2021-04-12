@@ -1,7 +1,6 @@
 import os.path
 import typing as T
 import warnings
-import xmlschema
 
 import numpy as np
 import xarray as xr
@@ -9,12 +8,9 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_gcp_dataset(
-        product_path: str,
-) -> xr.Dataset:
+def open_gcp_dataset(product_path: str,) -> xr.Dataset:
     geolocation_grid_points = esa_safe.read_product_element(
-        product_path,
-        ".//geolocationGridPoint"
+        product_path, ".//geolocationGridPoint"
     )
     azimuth_time = []
     slant_range_time = []
@@ -82,9 +78,7 @@ def open_gcp_dataset(
     return ds
 
 
-def open_attitude_dataset(
-        product_path: str,
-) -> xr.Dataset:
+def open_attitude_dataset(product_path: str,) -> xr.Dataset:
     attitude = esa_safe.read_product_element(product_path, ".//attitude")
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
@@ -104,9 +98,7 @@ def open_attitude_dataset(
     return ds
 
 
-def open_orbit_dataset(
-        product_path: str,
-) -> xr.Dataset:
+def open_orbit_dataset(product_path: str,) -> xr.Dataset:
     orbit = esa_safe.read_product_element(product_path, ".//orbit")
     shape = len(orbit)
     reference_system = orbit[0]["frame"]
