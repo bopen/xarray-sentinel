@@ -120,7 +120,7 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
-                f"xpath: .//orbit//frame \n File: ${annotation_path}"
+                f"xpath: .//orbit//frame \n File: ${product_path}"
             )
             reference_system = None
 
