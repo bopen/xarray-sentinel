@@ -6,7 +6,7 @@ import typing as T
 from xml.etree import ElementTree
 
 import pkg_resources
-import xmlschema  # type: ignore
+import xmlschema
 
 PathType = T.Union[bytes, str, "os.PathLike[str]", "os.PathLike[bytes]"]
 
@@ -22,12 +22,6 @@ SENTINEL2_NAMESPACES = {
 }
 
 
-ATTITUDE_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
-    "time": lambda t: dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%f"),
-    "frame": str,
-}
-
-
 ORBIT_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
     "time": lambda t: dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%f"),
     "frame": str,
@@ -35,30 +29,23 @@ ORBIT_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
 
 
 @functools.lru_cache()
-def sentinel1_schemas(schema_type) -> T.Dict[str, xmlschema.XMLSchema]:
+def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
     schema_paths = {"product": os.path.join(support_dir, "s1-level-1-product.xsd")}
     return xmlschema.XMLSchema(schema_paths[schema_type])
 
 
 def parse_tag_list(
-    annotation_path: PathType, schema_type: str, query: str,
+    xml_path: PathType, schema_type: str, query: str,
 ) -> T.List[T.Dict[str, T.Any]]:
-    annotation_path = os.fspath(annotation_path)
+    xml_path = os.fspath(xml_path)
     schema = sentinel1_schemas(schema_type)
-    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(annotation_path, query)
+    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)
     return tag_list
 
 
-def parse_attitude(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
-    attitude = []
-    for attitude_tag in annotation.findall(".//attitude"):
-        att = {}
-        for tag in attitude_tag:
-            converter = ATTITUDE_CONVERT.get(tag.tag, float)
-            att[tag.tag] = converter(str(tag.text))
-        attitude.append(att)
-    return attitude
+def parse_attitude(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//attitude")
 
 
 def parse_orbit(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
@@ -76,6 +63,10 @@ def parse_orbit(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
                     orb[tag.tag][sub_tag.tag] = converter(str(sub_tag.text))
         orbit.append(orb)
     return orbit
+
+
+def parse_geolocation_grid_points(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 
 def open_manifest(

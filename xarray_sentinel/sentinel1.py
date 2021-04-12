@@ -9,9 +9,8 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_gcp_dataset(filename: str) -> xr.Dataset:
-    annotation = ElementTree.parse(filename)
-    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation)
+def open_gcp_dataset(annotation_path: str) -> xr.Dataset:
+    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_path)
     azimuth_time = []
     slant_range_time = []
     line_set = set()

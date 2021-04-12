@@ -1,6 +1,5 @@
 import pathlib
 import typing as T
-from xml.etree import ElementTree
 
 import pytest
 import xmlschema
@@ -115,7 +114,7 @@ def test_sentinel1_schemas() -> None:
     assert isinstance(res, xmlschema.XMLSchema)
 
 
-def test_parse_tag_list() -> None:
+def test_parse_geolocation_grid_points() -> None:
     annotation_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
@@ -134,7 +133,35 @@ def test_parse_tag_list() -> None:
         "elevationAngle",
     }
 
-    res = esa_safe.parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
+    res = esa_safe.parse_geolocation_grid_points(annotation_path)
+
+    assert isinstance(res, list)
+    assert set(res[0]) == expected
+
+
+def test_parse_attitude() -> None:
+    annotation_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+        / "annotation"
+        / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+    )
+    expected = {
+        "time",
+        "frame",
+        "q0",
+        "q1",
+        "q2",
+        "q3",
+        "wx",
+        "wy",
+        "wz",
+        "roll",
+        "pitch",
+        "yaw",
+    }
+
+    res = esa_safe.parse_attitude(annotation_path)
 
     assert isinstance(res, list)
     assert set(res[0]) == expected
