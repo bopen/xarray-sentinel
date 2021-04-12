@@ -1,6 +1,5 @@
 import pathlib
 
-import pytest
 import xarray as xr
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
@@ -33,7 +32,6 @@ def test_open_dataset_root() -> None:
     assert isinstance(res, xr.Dataset)
 
 
-@pytest.mark.xfail
 def test_open_dataset_gcp() -> None:
     annotation_path = (
         DATA_FOLDER
