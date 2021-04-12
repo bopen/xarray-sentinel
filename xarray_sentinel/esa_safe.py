@@ -1,8 +1,8 @@
-import datetime as dt
 import os
 import pathlib
 import typing as T
 from xml.etree import ElementTree
+import xmlschema
 
 SENTINEL1_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel-1.0",
@@ -27,45 +27,19 @@ GGP_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
 }
 
 
-ATTITUDE_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
-    "time": lambda t: dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%f"),
-    "frame": str,
-}
+def read_product_element(
+        product_path: str,
+        element: str
+):
+    product_path = pathlib.Path(product_path)
+    if product_path.is_dir():
+        schema_path = product_path / "support" / "s1-level-1-product.xsd"
+    else:
+        schema_path = product_path.parents[1] /  "support" / "s1-level-1-product.xsd"
 
-
-ORBIT_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
-    "time": lambda t: dt.datetime.strptime(t, "%Y-%m-%dT%H:%M:%S.%f"),
-    "frame": str,
-}
-
-
-def parse_attitude(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
-    attitude = []
-    for attitude_tag in annotation.findall(".//attitude"):
-        att = {}
-        for tag in attitude_tag:
-            converter = ATTITUDE_CONVERT.get(tag.tag, float)
-            att[tag.tag] = converter(str(tag.text))
-        attitude.append(att)
-    return attitude
-
-
-def parse_orbit(annotation: ElementTree.ElementTree,) -> T.List[T.Any]:
-    orbit = []
-    for orbit_tag in annotation.findall(".//orbit"):
-        orb = {}
-        for tag in orbit_tag:
-            if str(tag.text).strip():
-                converter = ORBIT_CONVERT.get(tag.tag, float)
-                orb[tag.tag] = converter(str(tag.text))
-            else:
-                orb[tag.tag] = {}
-                for sub_tag in tag:
-                    converter = ORBIT_CONVERT.get(sub_tag.tag, float)
-                    orb[tag.tag][sub_tag.tag] = converter(str(sub_tag.text))
-        orbit.append(orb)
-    return orbit
-
+    product_reader = xmlschema.XMLSchema(str(schema_path))
+    element = product_reader.to_dict(str(product_path), element)
+    return element
 
 def parse_geolocation_grid_points(
     annotation: ElementTree.ElementTree,

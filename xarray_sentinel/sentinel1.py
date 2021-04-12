@@ -1,7 +1,7 @@
 import os.path
 import typing as T
 import warnings
-from xml.etree import ElementTree
+import xmlschema
 
 import numpy as np
 import xarray as xr
@@ -9,14 +9,18 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_gcp_dataset(filename: str) -> xr.Dataset:
-    annotation = ElementTree.parse(filename)
-    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation)
+def open_gcp_dataset(
+        product_path: str,
+) -> xr.Dataset:
+    geolocation_grid_points = esa_safe.read_product_element(
+        product_path,
+        ".//geolocationGridPoint"
+    )
     azimuth_time = []
     slant_range_time = []
     line_set = set()
     pixel_set = set()
-    for ggp in geolocation_grid_points.values():
+    for ggp in geolocation_grid_points:
         if ggp["line"] not in line_set:
             azimuth_time.append(np.datetime64(ggp["azimuthTime"]))
             line_set.add(ggp["line"])
@@ -53,7 +57,7 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
     }
     line = sorted(line_set)
     pixel = sorted(pixel_set)
-    for ggp in geolocation_grid_points.values():
+    for ggp in geolocation_grid_points:
         for var in data_vars:
             j = line.index(ggp["line"])
             i = pixel.index(ggp["pixel"])
@@ -78,9 +82,10 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
     return ds
 
 
-def open_attitude_dataset(filename: str) -> xr.Dataset:
-    annotation = ElementTree.parse(filename)
-    attitude = esa_safe.parse_attitude(annotation)
+def open_attitude_dataset(
+        product_path: str,
+) -> xr.Dataset:
+    attitude = esa_safe.read_product_element(product_path, ".//attitude")
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
     data_vars: T.Dict[str, T.List[T.Any]] = {var: [] for var in variables}
@@ -95,14 +100,15 @@ def open_attitude_dataset(filename: str) -> xr.Dataset:
     )
 
     ds = conventions.update_attributes(ds)
+    ds = ds.update({"time": ds.time.astype(np.datetime64)})
     return ds
 
 
-def open_orbit_dataset(filename: str) -> xr.Dataset:
-    annotation = ElementTree.parse(filename)
-    orbit = esa_safe.parse_orbit(annotation)
+def open_orbit_dataset(
+        product_path: str,
+) -> xr.Dataset:
+    orbit = esa_safe.read_product_element(product_path, ".//orbit")
     shape = len(orbit)
-
     reference_system = orbit[0]["frame"]
     data_vars: T.Dict[str, T.List[T.Any]] = {
         "time": [],
@@ -124,7 +130,7 @@ def open_orbit_dataset(filename: str) -> xr.Dataset:
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
-                f"xpath: .//orbit//frame \n File: ${filename}"
+                f"xpath: .//orbit//frame \n File: ${product_path}"
             )
             reference_system = None
 
@@ -136,11 +142,12 @@ def open_orbit_dataset(filename: str) -> xr.Dataset:
         attrs=attrs,  # type: ignore
     )
     ds = conventions.update_attributes(ds)
+    ds = ds.update({"time": ds.time.astype(np.datetime64)})
     return ds
 
 
-def open_root_dataset(filename: str) -> xr.Dataset:
-    manifest = esa_safe.open_manifest(filename)
+def open_root_dataset(product_path: str) -> xr.Dataset:
+    manifest = esa_safe.open_manifest(product_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     product_attrs["groups"] = ["orbit"] + product_attrs["xs:instrument_mode_swaths"]
     return xr.Dataset(attrs=product_attrs)  # type: ignore
