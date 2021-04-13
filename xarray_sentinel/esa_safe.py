@@ -22,26 +22,6 @@ SENTINEL2_NAMESPACES = {
 }
 
 
-def get_annotation_path(
-        product_path: T.Union[str, "os.PathLike[str]"],
-        subswath: str,
-) -> PathType:
-    manifest = open_manifest(product_path)
-    product_attrs, product_files = parse_manifest_sentinel1(manifest)
-    product_path = pathlib.Path(product_path)
-    folder = product_path.parent
-    annotation_path = None
-    for file in product_files:
-        name = os.path.basename(file)
-        if re.match("s1.-" + subswath.lower() + "-slc-vh-.*\.xml$", name):
-            annotation_path = folder / file
-    if annotation_path is None:
-        raise ValueError(
-            f"subswat {subswath} annotation file path not defined in ${product_path}"
-        )
-    return annotation_path
-
-
 @functools.lru_cache()
 def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
