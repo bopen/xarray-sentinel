@@ -97,8 +97,6 @@ def open_attitude_dataset(product_path: str) -> xr.Dataset:
     return ds
 
 
-def open_orbit_dataset(product_path: str,) -> xr.Dataset:
-    orbit = esa_safe.read_product_element(product_path, ".//orbit")
 def open_orbit_dataset(product_path: str) -> xr.Dataset:
     orbit = esa_safe.parse_orbit(product_path)
     shape = len(orbit)
