@@ -1,7 +1,7 @@
 import functools
 import os
-import re
 import pathlib
+import re
 import typing as T
 from xml.etree import ElementTree
 
@@ -21,8 +21,9 @@ SENTINEL2_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel/1.1",
 }
 
+
 def get_annotation_path(
-        product_path: PathType,
+        product_path: T.Union[str, "os.PathLike[str]"],
         subswath: str,
 ) -> PathType:
     manifest = open_manifest(product_path)
