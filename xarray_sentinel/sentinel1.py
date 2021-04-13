@@ -1,7 +1,6 @@
 import os.path
 import typing as T
 import warnings
-from xml.etree import ElementTree
 
 import numpy as np
 import xarray as xr
@@ -9,14 +8,13 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_gcp_dataset(filename: str) -> xr.Dataset:
-    annotation = ElementTree.parse(filename)
-    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation)
+def open_gcp_dataset(product_path: str) -> xr.Dataset:
+    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(product_path)
     azimuth_time = []
     slant_range_time = []
     line_set = set()
     pixel_set = set()
-    for ggp in geolocation_grid_points.values():
+    for ggp in geolocation_grid_points:
         if ggp["line"] not in line_set:
             azimuth_time.append(np.datetime64(ggp["azimuthTime"]))
             line_set.add(ggp["line"])
@@ -53,7 +51,7 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
     }
     line = sorted(line_set)
     pixel = sorted(pixel_set)
-    for ggp in geolocation_grid_points.values():
+    for ggp in geolocation_grid_points:
         for var in data_vars:
             j = line.index(ggp["line"])
             i = pixel.index(ggp["pixel"])
@@ -78,9 +76,8 @@ def open_gcp_dataset(filename: str) -> xr.Dataset:
     return ds
 
 
-def open_attitude_dataset(filename: str) -> xr.Dataset:
-    annotation = ElementTree.parse(filename)
-    attitude = esa_safe.parse_attitude(annotation)
+def open_attitude_dataset(product_path: str) -> xr.Dataset:
+    attitude = esa_safe.parse_attitude(product_path)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
     data_vars: T.Dict[str, T.List[T.Any]] = {var: [] for var in variables}
@@ -98,9 +95,8 @@ def open_attitude_dataset(filename: str) -> xr.Dataset:
     return ds
 
 
-def open_orbit_dataset(filename: str) -> xr.Dataset:
-    annotation = ElementTree.parse(filename)
-    orbit = esa_safe.parse_orbit(annotation)
+def open_orbit_dataset(product_path: str) -> xr.Dataset:
+    orbit = esa_safe.parse_orbit(product_path)
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
@@ -124,7 +120,7 @@ def open_orbit_dataset(filename: str) -> xr.Dataset:
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
-                f"xpath: .//orbit//frame \n File: ${filename}"
+                f"xpath: .//orbit//frame \n File: ${product_path}"
             )
             reference_system = None
 
