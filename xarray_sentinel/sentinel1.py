@@ -8,10 +8,8 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_gcp_dataset(product_path: str,) -> xr.Dataset:
-    geolocation_grid_points = esa_safe.read_product_element(
-        product_path, ".//geolocationGridPoint"
-    )
+def open_gcp_dataset(product_path: str) -> xr.Dataset:
+    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(product_path)
     azimuth_time = []
     slant_range_time = []
     line_set = set()
@@ -78,8 +76,8 @@ def open_gcp_dataset(product_path: str,) -> xr.Dataset:
     return ds
 
 
-def open_attitude_dataset(product_path: str,) -> xr.Dataset:
-    attitude = esa_safe.read_product_element(product_path, ".//attitude")
+def open_attitude_dataset(product_path: str) -> xr.Dataset:
+    attitude = esa_safe.parse_attitude(product_path)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
     data_vars: T.Dict[str, T.List[T.Any]] = \
@@ -101,7 +99,10 @@ def open_attitude_dataset(product_path: str,) -> xr.Dataset:
 
 def open_orbit_dataset(product_path: str,) -> xr.Dataset:
     orbit = esa_safe.read_product_element(product_path, ".//orbit")
+def open_orbit_dataset(product_path: str) -> xr.Dataset:
+    orbit = esa_safe.parse_orbit(product_path)
     shape = len(orbit)
+
     reference_system = orbit[0]["frame"]
     data_vars: T.Dict[str, T.List[T.Any]] = {
         "time": ("time", []),
@@ -142,7 +143,7 @@ def open_orbit_dataset(product_path: str,) -> xr.Dataset:
 def open_root_dataset(product_path: str) -> xr.Dataset:
     manifest = esa_safe.open_manifest(product_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-    product_attrs["groups"] = ["orbit"] + product_attrs["xs:instrument_mode_swaths"]
+    product_attrs["groups"] = ["orbit", "attitude"] + product_attrs["xs:instrument_mode_swaths"]
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
 

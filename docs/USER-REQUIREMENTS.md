@@ -31,6 +31,7 @@ Conformance:
 
 High level requirements:
 
+- keep all naming as close to the original al possible (with XML camel case to Python snake case?)
 - support opening a swath when other swaths are missing (especially the tifs)
 
 
@@ -50,23 +51,23 @@ User experience
 Structure:
 
 * root / SAFE
-  * orbit-attitude "orbit" / (almost) duplicated in all annotation XML
   * swaths "IW1" "IW2" "S3" etc / duplicated in VH-VV annotation XML
     * bursts / polarization "N433_W0120_VV" etc (include polarization?)
     * gcp "gcp"
     * calibration "calibration"
+    * orbit-attitude "orbit" / (almost) duplicated in all annotation XML
     * antenna pattern "antenna"
     * zero-Doppler "doppler"
 
-examples: `group="orbit"`, `group="IW2/N433_W0120_VV`, `group="S3/gcp"` etc
+examples: `group="IW2/orbit"`, `group="IW2/N433_W0120_VV`, `group="S3/gcp"` etc
 
 Dimensions, coordinates and variables
 
 We may either keep names and unit of measures as close as possible to the original
-or going for easier-to-use chaices.
+or going for easier-to-use choices.
 
 In all cases we add the XML tag name in the long_name so it is clear the provenance of the
-information: e.g. for `slant_range_time` -> `"long_name": "two way delay (slantRangeTime)""`
+information: e.g. for `slant_range_time` -> `"long_name": "two way delay (slantRangeTime)"`
 
 * `azimuth_time` as CF time in UTC (warn: may fail on leap seconds)
-* `slant_range_time` as CF time interval in "s"
+* `slant_range_time` as CF time interval in `"s"`

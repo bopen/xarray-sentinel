@@ -1,9 +1,14 @@
+import functools
 import os
 import pathlib
 import typing as T
 from xml.etree import ElementTree
 
+import pkg_resources
 import xmlschema
+
+PathType = T.Union[bytes, str, "os.PathLike[str]", "os.PathLike[bytes]"]
+
 
 SENTINEL1_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel-1.0",
@@ -16,45 +21,34 @@ SENTINEL2_NAMESPACES = {
 }
 
 
-GGP_CONVERT: T.Dict[str, T.Callable[[str], T.Any]] = {
-    "slantRangeTime": float,
-    "line": int,
-    "pixel": int,
-    "latitude": float,
-    "longitude": float,
-    "height": float,
-    "incidenceAngle": float,
-    "elevationAngle": float,
-}
+@functools.lru_cache()
+def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
+    support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
+    schema_paths = {"product": os.path.join(support_dir, "s1-level-1-product.xsd")}
+    return xmlschema.XMLSchema(schema_paths[schema_type])
 
 
-def read_product_element(
-        product_path: T.Union[str, "os.PathLike[str]"],
-        element: str
-) -> T.Dict[str, T.Any]:
+def parse_tag_list(
+    xml_path: PathType, schema_type: str, query: str,
+) -> T.List[T.Dict[str, T.Any]]:
+    xml_path = os.fspath(xml_path)
+    schema = sentinel1_schemas(schema_type)
+    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)
+    return tag_list
 
-    product_path = pathlib.Path(product_path)
-    if product_path.is_dir():
-        schema_path = product_path / "support" / "s1-level-1-product.xsd"
-    else:
-        schema_path = product_path.parents[1] / "support" / "s1-level-1-product.xsd"
 
-    product_reader = xmlschema.XMLSchema(str(schema_path))
-    element = product_reader.to_dict(str(product_path), element)
-    return element
+def parse_attitude(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//attitude")
+
+
+def parse_orbit(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//orbit")
 
 
 def parse_geolocation_grid_points(
-    annotation: ElementTree.ElementTree,
-) -> T.List[T.Any]:
-    geolocation_grid_points = {}
-    for ggp_tag in annotation.findall(".//geolocationGridPoint"):
-        ggp = {}
-        for tag in ggp_tag:
-            converter = GGP_CONVERT.get(tag.tag, lambda x: x)
-            ggp[tag.tag] = converter(str(tag.text))
-        geolocation_grid_points[ggp["line"], ggp["pixel"]] = ggp
-    return geolocation_grid_points
+    annotation_path: PathType,
+) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 
 def open_manifest(
