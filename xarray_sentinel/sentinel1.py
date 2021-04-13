@@ -101,7 +101,7 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
-    variables = [ "time", "x", "y", "z", "vx", "vy", "vz"]
+    variables = ["time", "x", "y", "z", "vx", "vy", "vz"]
     data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
 
     for k in range(shape):
