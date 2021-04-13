@@ -206,7 +206,7 @@ def test_parse_manifest_sentinel2(
     assert res_attrs == expected
 
 
-def test_parse_sentinel1_manifest():
+def test_parse_sentinel1_manifest() -> None:
     manifest_path = str(
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
