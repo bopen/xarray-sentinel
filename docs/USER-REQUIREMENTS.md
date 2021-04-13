@@ -51,7 +51,7 @@ User experience
 Structure:
 
 * root / SAFE
-  * swaths "IW1" "IW2" "S3" etc / duplicated in VH-VV annotation XML
+  * relative orbit / swaths "22/IW1" "22/IW2" "124/S3" etc / duplicated in VH-VV annotation XML
     * bursts / polarization "N433_W0120_VV" etc (include polarization?)
     * gcp "gcp"
     * calibration "calibration"
@@ -59,7 +59,9 @@ Structure:
     * antenna pattern "antenna"
     * zero-Doppler "doppler"
 
-examples: `group="IW2/orbit"`, `group="IW2/N433_W0120_VV`, `group="S3/gcp"` etc
+examples: `group="22/IW2/orbit"`, `group="22/IW2/N433_W0120_VV`, `group="124/S3/gcp"` etc
+
+Burst groups with the same name e.g. `group="22/IW2/N433_W0120_VV`, are interferometric.
 
 Dimensions, coordinates and variables
 
