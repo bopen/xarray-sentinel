@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Liquid Technologies Online Tools 1.0 (https://www.liquid-technologies.com) -->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="urn:ccsds:schema:xfdu:1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="my-no-namespace.xsd" />
+  <xs:element name="XFDU">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="informationPackageMap" />
+        <xs:element ref="metadataSection" />
+        <xs:element ref="dataObjectSection" />
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="contentUnit">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="contentUnit">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element ref="dataObjectPointer" />
+            </xs:sequence>
+            <xs:attribute name="unitType" type="xs:string" use="required" />
+            <xs:attribute name="repID" type="xs:string" use="required" />
+            <xs:attribute name="dmdID" type="xs:string" use="optional" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="unitType" type="xs:string" use="required" />
+      <xs:attribute name="textInfo" type="xs:string" use="required" />
+      <xs:attribute name="dmdID" type="xs:string" use="required" />
+      <xs:attribute name="pdiID" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

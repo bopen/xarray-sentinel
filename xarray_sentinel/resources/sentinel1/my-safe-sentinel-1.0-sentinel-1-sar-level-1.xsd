@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="instrumentMode">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="mode" type="xs:string" />
+        <xs:element maxOccurs="unbounded" name="swath" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="standAloneProductInformation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="instrumentConfigurationID" type="xs:unsignedByte" />
+        <xs:element name="missionDataTakeID" type="xs:unsignedInt" />
+        <xs:element maxOccurs="unbounded" name="transmitterReceiverPolarisation" type="xs:string" />
+        <xs:element name="productClass" type="xs:string" />
+        <xs:element name="productClassDescription" type="xs:string" />
+        <xs:element name="productComposition" type="xs:string" />
+        <xs:element name="productType" type="xs:string" />
+        <xs:element name="productTimelinessCategory" type="xs:string" />
+        <xs:element name="sliceProductFlag" type="xs:boolean" />
+        <xs:element name="segmentStartTime" type="xs:dateTime" />
+        <xs:element name="sliceNumber" type="xs:unsignedByte" />
+        <xs:element name="totalSlices" type="xs:unsignedByte" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
