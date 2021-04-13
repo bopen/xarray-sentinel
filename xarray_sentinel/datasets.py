@@ -1,3 +1,4 @@
+import os
 import typing as T
 import warnings
 
@@ -7,7 +8,7 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_gcp_dataset(product_path: str) -> xr.Dataset:
+def open_gcp_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(product_path)
     azimuth_time = []
     slant_range_time = []
@@ -75,12 +76,11 @@ def open_gcp_dataset(product_path: str) -> xr.Dataset:
     return ds
 
 
-def open_attitude_dataset(product_path: str) -> xr.Dataset:
+def open_attitude_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Dataset:
     attitude = esa_safe.parse_attitude(product_path)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
-    data_vars: T.Dict[str, T.List[T.Any]] = \
-        {var: ("time", []) for var in variables}
+    data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
 
     for k in range(shape):
         for var in variables:
@@ -96,20 +96,14 @@ def open_attitude_dataset(product_path: str) -> xr.Dataset:
     return ds
 
 
-def open_orbit_dataset(product_path: str) -> xr.Dataset:
+def open_orbit_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Dataset:
     orbit = esa_safe.parse_orbit(product_path)
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
-    data_vars: T.Dict[str, T.List[T.Any]] = {
-        "time": ("time", []),
-        "x": ("time", []),
-        "y": ("time", []),
-        "z": ("time", []),
-        "vx": ("time", []),
-        "vy": ("time", []),
-        "vz": ("time", []),
-    }
+    variables = ["time", "x", "y", "z", "vx", "vy", "vz"]
+    data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
+
     for k in range(shape):
         data_vars["time"][1].append(orbit[k]["time"])
         data_vars["x"][1].append(orbit[k]["position"]["x"])
