@@ -1,7 +1,7 @@
 import functools
 import os
-import re
 import pathlib
+import re
 import typing as T
 from xml.etree import ElementTree
 
@@ -20,25 +20,6 @@ SENTINEL1_NAMESPACES = {
 SENTINEL2_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel/1.1",
 }
-
-def get_annotation_path(
-        product_path: PathType,
-        subswath: str,
-) -> PathType:
-    manifest = open_manifest(product_path)
-    product_attrs, product_files = parse_manifest_sentinel1(manifest)
-    product_path = pathlib.Path(product_path)
-    folder = product_path.parent
-    annotation_path = None
-    for file in product_files:
-        name = os.path.basename(file)
-        if re.match("s1.-" + subswath.lower() + "-slc-vh-.*\.xml$", name):
-            annotation_path = folder / file
-    if annotation_path is None:
-        raise ValueError(
-            f"subswat {subswath} annotation file path not defined in ${product_path}"
-        )
-    return annotation_path
 
 
 @functools.lru_cache()
