@@ -51,6 +51,10 @@ def parse_geolocation_grid_points(
     return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 
+def parse_swath_timing(annotation_path: PathType,) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//swathTiming")
+
+
 def open_manifest(
     product_folder: T.Union[str, "os.PathLike[str]"]
 ) -> ElementTree.ElementTree:
