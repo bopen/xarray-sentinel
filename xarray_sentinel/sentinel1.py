@@ -7,7 +7,7 @@ from xarray_sentinel import esa_safe
 from xarray_sentinel.datasets import OPENERS
 
 
-def open_root_dataset(product_path: str,) -> xr.Dataset:
+def open_root_dataset(product_path: str) -> xr.Dataset:
     manifest = esa_safe.open_manifest(product_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     sub_swaths = product_attrs["xs:instrument_mode_swaths"]

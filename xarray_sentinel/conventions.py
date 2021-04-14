@@ -10,12 +10,12 @@ VARIABLE_ATTRIBUTES: T.Dict[str, T.Dict[str, str]] = {
     "roll": {"units": "degrees"},
     "yaw": {"units": "degrees"},
     "time": {},
-    "x": {"units": "m"},
-    "y": {"units": "m"},
-    "z": {"units": "m"},
-    "vx": {"units": "m s-1"},
-    "vy": {"units": "m s-1"},
-    "vz": {"units": "m s-1"},
+    "x": {"units": "m", "long_name": "position_x"},
+    "y": {"units": "m", "long_name": "position_y"},
+    "z": {"units": "m", "long_name": "position_z"},
+    "vx": {"units": "m s-1", "long_name": "velocity_x"},
+    "vy": {"units": "m s-1", "long_name": "velocity_y"},
+    "vz": {"units": "m s-1", "long_name": "velocity_z"},
 }
 
 

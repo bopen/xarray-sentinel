@@ -55,11 +55,13 @@ def test_open_dataset_attitude() -> None:
 
 
 def test_open_dataset_gcp() -> None:
-    manifest_path = (
+    annotation_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+        / "annotation"
+        / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
     )
-    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW1/gcp")  # type: ignore
+    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="gcp")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
