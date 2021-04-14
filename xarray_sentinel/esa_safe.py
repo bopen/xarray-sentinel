@@ -29,8 +29,13 @@ def get_annotation_path(
 ) -> "os.PathLike[str]":
     manifest = open_manifest(product_path)
     product_attrs, product_files = parse_manifest_sentinel1(manifest)
+
     product_path = pathlib.Path(product_path)
-    folder = product_path.parent
+    if product_path.is_dir():
+        folder = product_path
+    else:
+        folder = product_path.parent
+
     annotation_path = None
     for file in product_files:
         name = os.path.basename(file)
@@ -38,11 +43,10 @@ def get_annotation_path(
             "s1.-" + subswath.lower() + "-slc-" + polarization.lower() + "-.*xml$",
             name,
         ):
-            if (folder / file).is_file():
-                annotation_path = folder / file
+            annotation_path = folder / file
     if not annotation_path.is_file():
         raise ValueError(
-            f"Not found {subswath} annotation file path not found found:\n"
+            f"Not found {subswath} annotation file:\n"
             f"{annotation_path}"
         )
     return annotation_path

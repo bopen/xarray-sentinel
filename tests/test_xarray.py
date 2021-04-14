@@ -36,7 +36,6 @@ def test_open_dataset_orbit() -> None:
     manifest_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "manifest.safe"
     )
     res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW2/orbit")  # type: ignore
 
@@ -48,7 +47,6 @@ def test_open_dataset_attitude() -> None:
     manifest_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "manifest.safe"
     )
     res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW2/attitude")  # type: ignore
 
@@ -60,7 +58,6 @@ def test_open_dataset_gcp() -> None:
     manifest_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "manifest.safe"
     )
     res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW2/gcp")  # type: ignore
 
