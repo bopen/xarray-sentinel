@@ -44,10 +44,13 @@ def get_annotation_path(
             name,
         ):
             annotation_path = folder / file
+    if annotation_path is None:
+        raise ValueError(
+            f"{subswath} annotation file path not found in manifest {product_path}"
+        )
     if not annotation_path.is_file():
         raise ValueError(
-            f"Not found {subswath} annotation file:\n"
-            f"{annotation_path}"
+            f"Not found {subswath} annotation file:\n" f"{annotation_path}"
         )
     return annotation_path
 
