@@ -79,16 +79,21 @@ def open_gcp_dataset(product_path: str) -> xr.Dataset:
 def open_attitude_dataset(product_path: str) -> xr.Dataset:
     attitude = esa_safe.parse_attitude(product_path)
     shape = len(attitude)
-    variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
+    variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw"]
+    time: T.List[T.Any] = []
     data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
-
     for k in range(shape):
+        time.append(attitude[k]["time"])
         for var in variables:
             data_vars[var][1].append(attitude[k][var])
 
+    coords = {
+        "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
+    }
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs={"Conventions": "CF-1.7"},
+        coords=coords,  # type: ignore
     )
 
     ds = conventions.update_attributes(ds)
@@ -101,11 +106,11 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
-    variables = ["time", "x", "y", "z", "vx", "vy", "vz"]
+    variables = ["x", "y", "z", "vx", "vy", "vz"]
     data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
-
+    time: T.List[T.Any] = []
     for k in range(shape):
-        data_vars["time"][1].append(orbit[k]["time"])
+        time.append(orbit[k]["time"])
         data_vars["x"][1].append(orbit[k]["position"]["x"])
         data_vars["y"][1].append(orbit[k]["position"]["y"])
         data_vars["z"][1].append(orbit[k]["position"]["z"])
@@ -119,12 +124,16 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
             )
             reference_system = None
 
+    coords = {
+        "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
+    }
     attrs = {"Conventions": "CF-1.7"}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs=attrs,  # type: ignore
+        coords=coords,  # type: ignore
     )
     ds = conventions.update_attributes(ds)
     ds = ds.update({"time": ds.time.astype(np.datetime64)})

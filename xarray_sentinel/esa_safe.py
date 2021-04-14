@@ -1,7 +1,6 @@
 import functools
 import os
 import pathlib
-import re
 import typing as T
 from xml.etree import ElementTree
 
