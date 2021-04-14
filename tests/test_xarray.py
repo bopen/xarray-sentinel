@@ -37,7 +37,7 @@ def test_open_dataset_orbit() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW2/orbit")  # type: ignore
+    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW1/orbit")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"time"}
@@ -48,7 +48,7 @@ def test_open_dataset_attitude() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW2/attitude")  # type: ignore
+    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW1/attitude")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"time"}
@@ -59,7 +59,7 @@ def test_open_dataset_gcp() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW2/gcp")  # type: ignore
+    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW1/gcp")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
