@@ -140,6 +140,18 @@ def open_orbit_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Dat
     return ds
 
 
+def find_avalable_groups(product_path: str) -> T.Tuple[T.List[str], T.List[str]]:
+    manifest = esa_safe.open_manifest(product_path)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    sub_swaths = product_attrs["xs:instrument_mode_swaths"]
+    groups_lev0 = sub_swaths
+    groups_lev1 = []
+    for sub_swath in sub_swaths:
+        for data in OPENERS:
+            groups_lev1.append(sub_swath + "/" + data)
+    return groups_lev0, groups_lev1
+
+
 def open_root_dataset(product_path: str) -> xr.Dataset:
     manifest = esa_safe.open_manifest(product_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
@@ -151,7 +163,7 @@ def open_root_dataset(product_path: str) -> xr.Dataset:
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
 
-def open_annotation(product_path: str) -> xr.Dataset:
+def open_swath_dataset(product_path: str, group: str) -> xr.Dataset:
     product_attrs = {"groups": ["orbit", "attitude", "gcp"]}
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
@@ -164,13 +176,22 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         group: T.Optional[str] = None,
     ) -> xr.Dataset:
 
+        groups_lev0, groups_lev1 = find_avalable_groups(filename_or_obj)
+
         if group is None:
             ds = open_root_dataset(filename_or_obj)
-            return ds
-        else:
+        elif group in groups_lev0:
+            open_swath_dataset(filename_or_obj, group)
+        elif group in groups_lev1:
             subswath, subgroup = group.split("/")
             annotation_path = esa_safe.get_annotation_path(filename_or_obj, subswath)
             ds = OPENERS[subgroup](annotation_path)
+        else:
+            raise ValueError(
+                f"Invalid group {group}, please select one of the following groups:"
+                f"\n{groups_lev0+groups_lev1}"
+            )
+
         return ds
 
     def guess_can_open(self, filename_or_obj: T.Any) -> bool:
