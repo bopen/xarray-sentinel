@@ -25,7 +25,7 @@ SENTINEL2_NAMESPACES = {
 def get_annotation_path(
     product_path: T.Union[str, "os.PathLike[str]"],
     subswath: str,
-    polarization: str = "vh",
+    polarization: str = "vv",
 ) -> "os.PathLike[str]":
     manifest = open_manifest(product_path)
     product_attrs, product_files = parse_manifest_sentinel1(manifest)
@@ -40,12 +40,11 @@ def get_annotation_path(
         ):
             if (folder / file).is_file():
                 annotation_path = folder / file
-    if annotation_path is None:
-        raise ValueError(
-            f"subswat {subswath} annotation file path not found in manifest {product_path}"
-        )
     if not annotation_path.is_file():
-        raise ValueError(f"subswat {subswath} annotation file path not found found")
+        raise ValueError(
+            f"Not found {subswath} annotation file path not found found:\n"
+            f"{annotation_path}"
+        )
     return annotation_path
 
 
