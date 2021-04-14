@@ -181,7 +181,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         if group is None:
             ds = open_root_dataset(filename_or_obj)
         elif group in groups_lev0:
-            open_swath_dataset(filename_or_obj, group)
+            ds = open_swath_dataset(filename_or_obj, group)
         elif group in groups_lev1:
             subswath, subgroup = group.split("/")
             annotation_path = esa_safe.get_annotation_path(filename_or_obj, subswath)
