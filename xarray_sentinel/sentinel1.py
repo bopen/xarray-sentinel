@@ -143,7 +143,7 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
 def open_root_dataset(product_path: str) -> xr.Dataset:
     manifest = esa_safe.open_manifest(product_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-    product_attrs["groups"] = ["orbit", "attitude"] + product_attrs[
+    product_attrs["groups"] = ["orbit", "attitude", "gcp"] + product_attrs[
         "xs:instrument_mode_swaths"
     ]
     return xr.Dataset(attrs=product_attrs)  # type: ignore
