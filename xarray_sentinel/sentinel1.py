@@ -79,19 +79,25 @@ def open_gcp_dataset(product_path: str) -> xr.Dataset:
 def open_attitude_dataset(product_path: str) -> xr.Dataset:
     attitude = esa_safe.parse_attitude(product_path)
     shape = len(attitude)
-    variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw", "time"]
-    data_vars: T.Dict[str, T.List[T.Any]] = {var: [] for var in variables}
-
+    variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw"]
+    time: T.List[T.Any] = []
+    data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
     for k in range(shape):
+        time.append(attitude[k]["time"])
         for var in variables:
-            data_vars[var].append((attitude[k][var]))
+            data_vars[var][1].append(attitude[k][var])
 
+    coords = {
+        "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
+    }
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs={"Conventions": "CF-1.7"},
+        coords=coords,  # type: ignore
     )
 
     ds = conventions.update_attributes(ds)
+    ds = ds.update({"time": ds.time.astype(np.datetime64)})
     return ds
 
 
@@ -100,23 +106,17 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
-    data_vars: T.Dict[str, T.List[T.Any]] = {
-        "time": [],
-        "x": [],
-        "y": [],
-        "z": [],
-        "vx": [],
-        "vy": [],
-        "vz": [],
-    }
+    variables = ["x", "y", "z", "vx", "vy", "vz"]
+    data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
+    time: T.List[T.Any] = []
     for k in range(shape):
-        data_vars["time"].append(orbit[k]["time"])
-        data_vars["x"].append(orbit[k]["position"]["x"])
-        data_vars["y"].append(orbit[k]["position"]["y"])
-        data_vars["z"].append(orbit[k]["position"]["z"])
-        data_vars["x"].append(orbit[k]["velocity"]["x"])
-        data_vars["y"].append(orbit[k]["velocity"]["y"])
-        data_vars["z"].append(orbit[k]["velocity"]["z"])
+        time.append(orbit[k]["time"])
+        data_vars["x"][1].append(orbit[k]["position"]["x"])
+        data_vars["y"][1].append(orbit[k]["position"]["y"])
+        data_vars["z"][1].append(orbit[k]["position"]["z"])
+        data_vars["vx"][1].append(orbit[k]["velocity"]["x"])
+        data_vars["vy"][1].append(orbit[k]["velocity"]["y"])
+        data_vars["vz"][1].append(orbit[k]["velocity"]["z"])
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
@@ -124,21 +124,28 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
             )
             reference_system = None
 
+    coords = {
+        "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
+    }
     attrs = {"Conventions": "CF-1.7"}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs=attrs,  # type: ignore
+        coords=coords,  # type: ignore
     )
     ds = conventions.update_attributes(ds)
+    ds = ds.update({"time": ds.time.astype(np.datetime64)})
     return ds
 
 
-def open_root_dataset(filename: str) -> xr.Dataset:
-    manifest = esa_safe.open_manifest(filename)
+def open_root_dataset(product_path: str) -> xr.Dataset:
+    manifest = esa_safe.open_manifest(product_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-    product_attrs["groups"] = ["orbit"] + product_attrs["xs:instrument_mode_swaths"]
+    product_attrs["groups"] = ["orbit", "attitude", "gcp"] + product_attrs[
+        "xs:instrument_mode_swaths"
+    ]
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
 
@@ -153,6 +160,10 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
             ds = open_root_dataset(filename_or_obj)
         elif group == "gcp":
             ds = open_gcp_dataset(filename_or_obj)
+        elif group == "orbit":
+            ds = open_orbit_dataset(filename_or_obj)
+        elif group == "attitude":
+            ds = open_attitude_dataset(filename_or_obj)
         return ds
 
     def guess_can_open(self, filename_or_obj: T.Any) -> bool:

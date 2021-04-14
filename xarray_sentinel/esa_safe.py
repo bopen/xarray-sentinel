@@ -54,13 +54,17 @@ def parse_geolocation_grid_points(
     return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 
+def parse_swath_timing(annotation_path: PathType,) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//swathTiming")
+
+
 def open_manifest(
-    product_folder: T.Union[str, "os.PathLike[str]"]
+    product_path: T.Union[str, "os.PathLike[str]"]
 ) -> ElementTree.ElementTree:
-    product_folder = pathlib.Path(product_folder)
-    if product_folder.is_dir():
-        product_folder = product_folder / "manifest.safe"
-    return ElementTree.parse(product_folder)
+    product_path = pathlib.Path(product_path)
+    if product_path.is_dir():
+        product_path = product_path / "manifest.safe"
+    return ElementTree.parse(product_path)
 
 
 def parse_manifest_sentinel1(
