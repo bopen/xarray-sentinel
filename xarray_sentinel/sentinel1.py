@@ -149,6 +149,57 @@ def open_root_dataset(product_path: str) -> xr.Dataset:
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
 
+def get_burst_id(
+    product_attrs: T.Dict[str, T.Any], centre: T.Tuple[float, float]
+) -> str:
+    rounded_centre = np.int_(np.round(centre, 1) * 10)
+    n_or_s = "N" if rounded_centre[0] >= 0 else "S"
+    e_or_w = "E" if rounded_centre[1] >= 0 else "W"
+    return (
+        f"R{product_attrs['sat:relative_orbit']:03}"
+        f"-{n_or_s}{rounded_centre[0]:03}"
+        f"-{e_or_w}{rounded_centre[1]:04}"
+    )
+
+
+def get_burst_info(
+    product_path: str, subswath_id: str
+) -> T.Dict[str, T.Dict[str, T.Any]]:
+    manifest = esa_safe.open_manifest(product_path)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+
+    for filename, filetype in product_files.items():
+        if (
+            filetype == "s1Level1ProductSchema"
+            and f"-{subswath_id.lower()}-" in os.path.basename(filename)
+        ):
+            annot_path = filename
+            break
+    annot = os.path.join(os.path.dirname(product_path), annot_path)
+    geoloc = esa_safe.parse_geolocation_grid_points(annot)
+    swath_timing = esa_safe.parse_swath_timing(annot)
+    linesPerBurst = swath_timing["linesPerBurst"]
+
+    burst_geoloc = {}
+    for geoloc_item in geoloc:
+        burst_id = geoloc_item["line"] // linesPerBurst
+        burst_geoloc.setdefault(burst_id, []).append(geoloc_item)
+
+    burst_info = {}
+    for burst_pos, burst_geoloc_items in burst_geoloc.items():
+        first_and_last = burst_geoloc_items[
+            :: len(burst_geoloc_items) - 1
+        ]  # TODO: take full lines
+        coords = [
+            (geoloc_item["longitude"], geoloc_item["latitude"])
+            for geoloc_item in first_and_last
+        ]
+        centre = np.mean(coords, axis=0)
+        burst_id = get_burst_id(product_attrs, centre)
+        burst_info[burst_id] = dict(centre=centre, burst_pos=burst_pos,)
+    return burst_info
+
+
 class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
     def open_dataset(  # type: ignore
         self,
