@@ -231,14 +231,14 @@ def test_parse_manifest_sentinel2(
     assert res_attrs == expected
 
 
-def test_parse_sentinel1_manifest() -> None:
+def test_parse_original_manifest_sentinel1() -> None:
     manifest_path = str(
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
         / "manifest.safe"
     )
 
-    res, _ = esa_safe.parse_sentinel1_manifest(manifest_path)
+    res, _ = esa_safe.parse_original_manifest_sentinel1(manifest_path)
 
     assert isinstance(res, dict)
     assert "safe:platform" in res
@@ -249,7 +249,7 @@ def test_parse_sentinel1_manifest() -> None:
         "safe:instrument",
     }
 
-    _, res = esa_safe.parse_sentinel1_manifest(manifest_path)
+    _, res = esa_safe.parse_original_manifest_sentinel1(manifest_path)
 
     assert isinstance(res, list)
     assert isinstance(res[0], dict)

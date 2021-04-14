@@ -162,7 +162,7 @@ def parse_manifest_sentinel1(
 
 
 # unused until we add an interface to access original metadata
-def parse_sentinel1_manifest(
+def parse_original_manifest_sentinel1(
     manifest_path: PathType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
     schema = sentinel1_schemas("manifest")
