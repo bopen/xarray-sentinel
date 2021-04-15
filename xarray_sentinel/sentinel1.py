@@ -3,6 +3,7 @@ import typing as T
 import warnings
 
 import numpy as np
+import rioxarray  # type: ignore
 import xarray as xr
 
 from xarray_sentinel import conventions, esa_safe
@@ -141,38 +142,67 @@ def open_orbit_dataset(annotation_path: PathType) -> xr.Dataset:
     return ds
 
 
-def find_avalable_groups(product_path: str) -> T.Tuple[T.List[str], T.List[str]]:
-    _, manifest = esa_safe.open_manifest(product_path)
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-    sub_swaths = product_attrs["xs:instrument_mode_swaths"]
-    groups_lev0 = sub_swaths
-    groups_lev1 = []
-    for sub_swath in sub_swaths:
-        for data in METADATA_OPENERS:
-            groups_lev1.append(f"{sub_swath}/{data}")
-    return groups_lev0, groups_lev1
+def find_avalable_groups(
+    manifest_path: PathType,
+    product_attrs: T.Dict[str, T.Any],
+    product_files: T.Dict[str, str],
+) -> T.Dict[str, T.Dict[str, T.Any]]:
+    ancillary_data_paths = esa_safe.get_ancillary_data_paths(
+        manifest_path, product_files
+    )
+    groups: T.Dict[str, T.Dict[str, T.Any]] = {}
+    for subswath_id, subswath_data in ancillary_data_paths.items():
+        subswath_id = subswath_id.upper()
+        burst_info = get_burst_info(product_attrs, subswath_id, subswath_data)
+        subgroups = list(METADATA_OPENERS.keys()) + list(burst_info.keys())
+        groups[subswath_id] = dict(subswath_data, subgroups=subgroups)
+        for subgroup in METADATA_OPENERS.keys():
+            groups[f"{subswath_id}/{subgroup}"] = subswath_data
+        for burst_id, burst_data in burst_info.items():
+            full_data = dict(subswath_data, **burst_data)
+            groups[f"{subswath_id}/{burst_id}"] = full_data
+    return groups
 
 
-def open_root_dataset(product_path: str) -> xr.Dataset:
-    _, manifest = esa_safe.open_manifest(product_path)
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-    sub_swaths = product_attrs["xs:instrument_mode_swaths"]
-    product_attrs["groups"] = []
-    for sub_swath in sub_swaths:
-        for data in METADATA_OPENERS:
-            product_attrs["groups"].append(f"{sub_swath}/{data}")
+def open_root_dataset(
+    product_attrs: T.Dict[str, str], groups: T.Dict[str, T.Dict[str, T.Collection[str]]]
+) -> xr.Dataset:
+    product_attrs = dict(product_attrs, groups=list(groups.keys()))
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
 
-def open_swath_dataset(product_path: str, group: str) -> xr.Dataset:
-    product_attrs = {"groups": ["orbit", "attitude", "gcp"]}
+def open_swath_dataset(
+    product_attrs: T.Dict[str, str],
+    swath_id: str,
+    swath_data: T.Dict[str, T.Collection[str]],
+) -> xr.Dataset:
+    product_attrs = dict(product_attrs, groups=swath_data["subgroups"])
     return xr.Dataset(attrs=product_attrs)  # type: ignore
+
+
+def open_burst_dataset(
+    product_attrs: T.Dict[str, str], burst_id: str, burst_data: T.Dict[str, T.Any]
+) -> xr.Dataset:
+    ds = xr.merge(
+        [
+            {
+                pol.upper(): rioxarray.open_rasterio(datafile)
+                for pol, datafile in burst_data["measurement"].items()
+            }
+        ]
+    )
+    ds.attrs.update(product_attrs)
+    ds = ds.squeeze("band").drop(["band", "spatial_ref"])
+    return ds.isel(
+        x=slice(burst_data["burst_first_pixel"], burst_data["burst_last_pixel"] + 1),
+        y=slice(burst_data["burst_first_line"], burst_data["burst_last_line"] + 1),
+    )
 
 
 def get_burst_id(
-    product_attrs: T.Dict[str, T.Any], centre: T.Tuple[float, float]
+    product_attrs: T.Dict[str, T.Any], burst_centre: np.typing.ArrayLike,
 ) -> str:
-    rounded_centre = np.int_(np.round(centre, 1) * 10)
+    rounded_centre = np.int_(np.round(burst_centre, 1) * 10)
     n_or_s = "N" if rounded_centre[0] >= 0 else "S"
     e_or_w = "E" if rounded_centre[1] >= 0 else "W"
     return (
@@ -183,24 +213,17 @@ def get_burst_id(
 
 
 def get_burst_info(
-    product_path: str, subswath_id: str
+    product_attrs: T.Dict[str, T.Any],
+    subswath_id: str,
+    subswath_data: T.Dict[str, T.Dict[str, str]],
 ) -> T.Dict[str, T.Dict[str, T.Any]]:
-    manifest = esa_safe.open_manifest(product_path)
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-
-    for filename, filetype in product_files.items():
-        if (
-            filetype == "s1Level1ProductSchema"
-            and f"-{subswath_id.lower()}-" in os.path.basename(filename)
-        ):
-            annot_path = filename
-            break
-    annot = os.path.join(os.path.dirname(product_path), annot_path)
+    annot = list(subswath_data["annotation"].values())[0]
     geoloc = esa_safe.parse_geolocation_grid_points(annot)
     swath_timing = esa_safe.parse_swath_timing(annot)
-    linesPerBurst = swath_timing["linesPerBurst"]
+    linesPerBurst = int(swath_timing["linesPerBurst"])  # type: ignore
+    samplesPerBurst = int(swath_timing["samplesPerBurst"])  # type: ignore
 
-    burst_geoloc = {}
+    burst_geoloc: T.Dict[int, T.List[T.Dict[str, T.Any]]] = {}
     for geoloc_item in geoloc:
         burst_id = geoloc_item["line"] // linesPerBurst
         burst_geoloc.setdefault(burst_id, []).append(geoloc_item)
@@ -216,7 +239,15 @@ def get_burst_info(
         ]
         centre = np.mean(coords, axis=0)
         burst_id = get_burst_id(product_attrs, centre)
-        burst_info[burst_id] = dict(centre=centre, burst_pos=burst_pos,)
+        burst_pos * linesPerBurst
+        burst_info[burst_id] = dict(
+            burst_centre=centre,
+            burst_pos=burst_pos,
+            burst_first_line=burst_pos * linesPerBurst,
+            burst_last_line=(burst_pos + 1) * linesPerBurst - 1,
+            burst_first_pixel=0,
+            burst_last_pixel=samplesPerBurst - 1,
+        )
     return burst_info
 
 
@@ -228,21 +259,26 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         group: T.Optional[str] = None,
     ) -> xr.Dataset:
 
-        groups_lev0, groups_lev1 = find_avalable_groups(filename_or_obj)
+        manifest_path, manifest = esa_safe.open_manifest(filename_or_obj)
+        product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+        groups = find_avalable_groups(manifest_path, product_attrs, product_files)
 
         if group is None:
-            ds = open_root_dataset(filename_or_obj)
-        elif group in groups_lev0:
-            ds = open_swath_dataset(filename_or_obj, group)
-        elif group in groups_lev1:
-            subswath, subgroup = group.split("/")
-            annotation_path = esa_safe.get_annotation_path(filename_or_obj, subswath)
-            ds = METADATA_OPENERS[subgroup](annotation_path)
-        else:
+            ds = open_root_dataset(product_attrs, groups)
+        elif group not in groups:
             raise ValueError(
                 f"Invalid group {group}, please select one of the following groups:"
-                f"\n{groups_lev0+groups_lev1}"
+                f"\n{list(groups.keys())}"
             )
+        elif "/" not in group:
+            ds = open_swath_dataset(product_attrs, group, groups[group])
+        else:
+            subswath, subgroup = group.split("/", 1)
+            if subgroup in METADATA_OPENERS:
+                annot = list(groups[group]["annotation"].values())[0]
+                ds = METADATA_OPENERS[subgroup](annot)
+            else:
+                ds = open_burst_dataset(product_attrs, group, groups[group])
 
         return ds
 
