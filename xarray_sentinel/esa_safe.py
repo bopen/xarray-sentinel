@@ -1,7 +1,6 @@
 import functools
 import os
 import pathlib
-import re
 import typing as T
 from xml.etree import ElementTree
 
@@ -22,27 +21,27 @@ SENTINEL2_NAMESPACES = {
 }
 
 
-def get_annotation_path(
-    product_path: PathType, subswath: str, polarization: str = "VV",
-) -> pathlib.Path:
-    manifest_path, manifest = open_manifest(product_path)
-    product_attrs, product_files = parse_manifest_sentinel1(manifest)
-    folder = manifest_path.parent
+def get_ancillary_data_paths(
+    manifest_path: PathType, product_files: T.Dict[str, str],
+) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
+    folder = pathlib.Path(manifest_path).parent
 
-    annotation_path = None
-    for file in product_files:
-        name = os.path.basename(file)
-        if re.match(f"s1.-{subswath.lower()}-slc-{polarization.lower()}-.*xml$", name,):
-            annotation_path = folder / file
-    if annotation_path is None:
-        raise ValueError(
-            f"{subswath} annotation file path not found in manifest {product_path}"
-        )
-    if not annotation_path.is_file():
-        raise ValueError(
-            f"Not found {subswath} annotation file:\n" f"{annotation_path}"
-        )
-    return annotation_path
+    type_mapping = {
+        "s1Level1CalibrationSchema": "calibration",
+        "s1Level1MeasurementSchema": "measurement",
+        "s1Level1NoiseSchema": "noise",
+        "s1Level1ProductSchema": "annotation",
+    }
+    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
+    for filename, filetype in product_files.items():
+        if filetype not in type_mapping:
+            continue
+        name = os.path.basename(filename)
+        subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
+        swath_dict = ancillary_data_paths.setdefault(subswath, {})
+        type_dict = swath_dict.setdefault(type_mapping[filetype], {})
+        type_dict[pol] = str(folder / filename)
+    return ancillary_data_paths
 
 
 @functools.lru_cache()
