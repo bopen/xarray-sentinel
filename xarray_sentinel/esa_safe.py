@@ -24,15 +24,10 @@ SENTINEL2_NAMESPACES = {
 
 def get_annotation_path(
     product_path: PathType, subswath: str, polarization: str = "VV",
-) -> PathType:
-    manifest = open_manifest(product_path)
+) -> pathlib.Path:
+    manifest_path, manifest = open_manifest(product_path)
     product_attrs, product_files = parse_manifest_sentinel1(manifest)
-
-    product_path = pathlib.Path(product_path)
-    if product_path.is_dir():
-        folder = product_path
-    else:
-        folder = product_path.parent
+    folder = manifest_path.parent
 
     annotation_path = None
     for file in product_files:
@@ -84,11 +79,13 @@ def parse_swath_timing(annotation_path: PathType,) -> T.List[T.Dict[str, T.Any]]
     return parse_tag_list(annotation_path, "product", ".//swathTiming")
 
 
-def open_manifest(product_path: PathType) -> ElementTree.ElementTree:
+def open_manifest(
+    product_path: PathType,
+) -> T.Tuple[pathlib.Path, ElementTree.ElementTree]:
     product_path = pathlib.Path(product_path)
     if product_path.is_dir():
         product_path = product_path / "manifest.safe"
-    return ElementTree.parse(product_path)
+    return product_path, ElementTree.parse(product_path)
 
 
 def parse_manifest_sentinel1(

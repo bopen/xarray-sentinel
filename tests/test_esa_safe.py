@@ -212,7 +212,7 @@ def test_parse_manifest_sentinel1(
     product_id: str, expected: T.Dict[str, T.Any]
 ) -> None:
     product_folder = DATA_FOLDER / (product_id + ".SAFE")
-    manifest = esa_safe.open_manifest(product_folder)
+    _, manifest = esa_safe.open_manifest(product_folder)
 
     res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest)
 
@@ -224,7 +224,7 @@ def test_parse_manifest_sentinel2(
     product_id: str, expected: T.Dict[str, T.Any]
 ) -> None:
     product_folder = DATA_FOLDER / (product_id + ".SAFE")
-    manifest = esa_safe.open_manifest(product_folder)
+    _, manifest = esa_safe.open_manifest(product_folder)
 
     res_attrs, res_files = esa_safe.parse_manifest_sentinel2(manifest)
 
