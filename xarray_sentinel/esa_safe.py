@@ -39,10 +39,7 @@ def get_annotation_path(
     annotation_path = None
     for file in product_files:
         name = os.path.basename(file)
-        if re.match(
-            "s1.-" + subswath.lower() + "-slc-" + polarization.lower() + "-.*xml$",
-            name,
-        ):
+        if re.match(f"s1.-{subswath.lower()}-slc-{polarization.lower()}-.*xml$", name,):
             annotation_path = folder / file
     if annotation_path is None:
         raise ValueError(

@@ -148,7 +148,7 @@ def find_avalable_groups(product_path: str) -> T.Tuple[T.List[str], T.List[str]]
     groups_lev1 = []
     for sub_swath in sub_swaths:
         for data in METADATA_OPENERS:
-            groups_lev1.append(sub_swath + "/" + data)
+            groups_lev1.append(f"{sub_swath}/{data}")
     return groups_lev0, groups_lev1
 
 
@@ -159,7 +159,7 @@ def open_root_dataset(product_path: str) -> xr.Dataset:
     product_attrs["groups"] = []
     for sub_swath in sub_swaths:
         for data in METADATA_OPENERS:
-            product_attrs["groups"].append(sub_swath + "/" + data)
+            product_attrs["groups"].append(f"{sub_swath}/{data}")
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
 
