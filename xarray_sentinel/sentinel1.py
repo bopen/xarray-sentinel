@@ -147,7 +147,7 @@ def find_avalable_groups(product_path: str) -> T.Tuple[T.List[str], T.List[str]]
     groups_lev0 = sub_swaths
     groups_lev1 = []
     for sub_swath in sub_swaths:
-        for data in OPENERS:
+        for data in METADATA_OPENERS:
             groups_lev1.append(sub_swath + "/" + data)
     return groups_lev0, groups_lev1
 
@@ -158,7 +158,7 @@ def open_root_dataset(product_path: str) -> xr.Dataset:
     sub_swaths = product_attrs["xs:instrument_mode_swaths"]
     product_attrs["groups"] = []
     for sub_swath in sub_swaths:
-        for data in OPENERS:
+        for data in METADATA_OPENERS:
             product_attrs["groups"].append(sub_swath + "/" + data)
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
@@ -185,7 +185,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         elif group in groups_lev1:
             subswath, subgroup = group.split("/")
             annotation_path = esa_safe.get_annotation_path(filename_or_obj, subswath)
-            ds = OPENERS[subgroup](annotation_path)
+            ds = METADATA_OPENERS[subgroup](annotation_path)
         else:
             raise ValueError(
                 f"Invalid group {group}, please select one of the following groups:"
@@ -202,7 +202,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         return ext.lower() in {".safe"}
 
 
-OPENERS = {
+METADATA_OPENERS = {
     "gcp": open_gcp_dataset,
     "attitude": open_attitude_dataset,
     "orbit": open_orbit_dataset,
