@@ -25,7 +25,7 @@ SENTINEL2_NAMESPACES = {
 def get_annotation_path(
     product_path: T.Union[str, "os.PathLike[str]"],
     subswath: str,
-    polarization: str = "vv",
+    polarization: str = "VV",
 ) -> "os.PathLike[str]":
     manifest = open_manifest(product_path)
     product_attrs, product_files = parse_manifest_sentinel1(manifest)
