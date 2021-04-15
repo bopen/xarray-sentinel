@@ -201,8 +201,8 @@ def test_parse_swath_timing() -> None:
 
     assert isinstance(res, dict)
     assert "burstList" in res
-    assert "burst" in res["burstList"]
-    burst_list = res["burstList"]["burst"]
+    assert "burst" in res["burstList"]  # type: ignore
+    burst_list = res["burstList"]["burst"]  # type: ignore
     assert isinstance(burst_list, list)
     assert set(burst_list[0]) == expected
 
