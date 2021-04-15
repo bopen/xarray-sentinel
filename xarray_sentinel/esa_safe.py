@@ -24,7 +24,10 @@ SENTINEL2_NAMESPACES = {
 @functools.lru_cache()
 def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
-    schema_paths = {"product": os.path.join(support_dir, "s1-level-1-product.xsd")}
+    schema_paths = {
+        "manifest": os.path.join(support_dir, "my-xfdu.xsd"),
+        "product": os.path.join(support_dir, "s1-level-1-product.xsd"),
+    }
     return xmlschema.XMLSchema(schema_paths[schema_type])
 
 
@@ -156,6 +159,22 @@ def parse_manifest_sentinel1(
             files[file_href] = file_type
 
     return attributes, files
+
+
+# unused until we add an interface to access original metadata
+def parse_original_manifest_sentinel1(
+    manifest_path: PathType,
+) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
+    schema = sentinel1_schemas("manifest")
+
+    xml_metadata = {}
+    for xml_tags in schema.to_dict(manifest_path, ".//xmlData"):
+        for key, value in xml_tags.items():
+            xml_metadata[key] = value
+
+    fileLocation = schema.to_dict(manifest_path, ".//fileLocation")
+
+    return xml_metadata, fileLocation
 
 
 def parse_manifest_sentinel2(

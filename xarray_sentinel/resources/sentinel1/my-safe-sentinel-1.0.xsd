@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Liquid Technologies Online Tools 1.0 (https://www.liquid-technologies.com) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.esa.int/safe/sentinel-1.0">
+  <xs:import schemaLocation="my-safe-sentinel-1.0-sentinel-1-sar-level-1.xsd" namespace="http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1"/>
+  <xs:import schemaLocation="my-safe-sentinel-1.0-sentinel-1.xsd" namespace="http://www.esa.int/safe/sentinel-1.0/sentinel-1"/>
+  <xs:import schemaLocation="my-gml.xsd" namespace="http://www.opengis.net/gml"/>
+  <xs:element name="processing">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="facility">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="software">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="version" type="xs:decimal" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="country" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="organisation" type="xs:string" use="required"/>
+            <xs:attribute name="site" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="resource">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="processing">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="facility">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="software">
+                            <xs:complexType>
+                              <xs:attribute name="name" type="xs:string" use="required"/>
+                              <xs:attribute name="version" type="xs:decimal" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="country" type="xs:string" use="required"/>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="organisation" type="xs:string" use="required"/>
+                        <xs:attribute name="site" type="xs:string" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element maxOccurs="unbounded" name="resource">
+                      <xs:complexType>
+                        <xs:sequence minOccurs="0">
+                          <xs:element name="processing">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="facility">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="software">
+                                        <xs:complexType>
+                                          <xs:attribute name="name" type="xs:string" use="required"/>
+                                          <xs:attribute name="version" type="xs:string" use="required"/>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="name" type="xs:string" use="required"/>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element maxOccurs="unbounded" name="resource">
+                                  <xs:complexType>
+                                    <xs:sequence minOccurs="0">
+                                      <xs:element name="processing">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element maxOccurs="unbounded" name="resource">
+                                              <xs:complexType>
+                                                <xs:sequence minOccurs="0">
+                                                  <xs:element name="processing">
+                                                    <xs:complexType>
+                                                      <xs:simpleContent>
+                                                        <xs:extension base="xs:string">
+                                                          <xs:attribute name="name" type="xs:string" use="required"/>
+                                                          <xs:attribute name="start" type="xs:dateTime" use="required"/>
+                                                          <xs:attribute name="stop" type="xs:dateTime" use="required"/>
+                                                        </xs:extension>
+                                                      </xs:simpleContent>
+                                                    </xs:complexType>
+                                                  </xs:element>
+                                                </xs:sequence>
+                                                <xs:attribute name="name" type="xs:string" use="required"/>
+                                                <xs:attribute name="role" type="xs:string" use="required"/>
+                                                <xs:attribute name="version" type="xs:decimal" use="optional"/>
+                                              </xs:complexType>
+                                            </xs:element>
+                                          </xs:sequence>
+                                          <xs:attribute name="name" type="xs:string" use="required"/>
+                                          <xs:attribute name="start" type="xs:dateTime" use="required"/>
+                                          <xs:attribute name="stop" type="xs:dateTime" use="required"/>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="name" type="xs:string" use="required"/>
+                                    <xs:attribute name="role" type="xs:string" use="required"/>
+                                    <xs:attribute name="version" type="xs:decimal" use="optional"/>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                              <xs:attribute name="name" type="xs:string" use="required"/>
+                              <xs:attribute name="start" type="xs:dateTime" use="required"/>
+                              <xs:attribute name="stop" type="xs:dateTime" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="name" type="xs:string" use="required"/>
+                        <xs:attribute name="role" type="xs:string" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="start" type="xs:dateTime" use="required"/>
+                  <xs:attribute name="stop" type="xs:dateTime" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="role" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:attribute name="start" type="xs:dateTime" use="required"/>
+      <xs:attribute name="stop" type="xs:dateTime" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="platform">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nssdcIdentifier" type="xs:string"/>
+        <xs:element name="familyName" type="xs:string"/>
+        <xs:element name="number" type="xs:string"/>
+        <xs:element name="instrument">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="familyName">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="abbreviation" type="xs:string" use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="extension">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element xmlns:q1="http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1" ref="q1:instrumentMode"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="orbitReference">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="orbitNumber">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:unsignedShort">
+                <xs:attribute name="type" type="xs:string" use="required"/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element maxOccurs="unbounded" name="relativeOrbitNumber">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:unsignedByte">
+                <xs:attribute name="type" type="xs:string" use="required"/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="cycleNumber" type="xs:unsignedByte"/>
+        <xs:element name="phaseIdentifier" type="xs:unsignedByte"/>
+        <xs:element name="extension">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element xmlns:q2="http://www.esa.int/safe/sentinel-1.0/sentinel-1" ref="q2:orbitProperties"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="acquisitionPeriod">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="startTime" type="xs:dateTime"/>
+        <xs:element name="stopTime" type="xs:dateTime"/>
+        <xs:element name="extension">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element xmlns:q3="http://www.esa.int/safe/sentinel-1.0/sentinel-1" ref="q3:timeANX"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="frameSet">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="frame">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="footPrint">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element xmlns:q4="http://www.opengis.net/gml" ref="q4:coordinates"/>
+                  </xs:sequence>
+                  <xs:attribute name="srsName" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

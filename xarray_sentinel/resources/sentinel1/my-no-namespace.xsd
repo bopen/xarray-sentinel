@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Liquid Technologies Online Tools 1.0 (https://www.liquid-technologies.com) -->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="my-xfdu.xsd" namespace="urn:ccsds:schema:xfdu:1" />
+  <xs:import schemaLocation="my-safe-sentinel-1.0.xsd" namespace="http://www.esa.int/safe/sentinel-1.0" />
+  <xs:import schemaLocation="my-safe-sentinel-1.0-sentinel-1-sar-level-1.xsd" namespace="http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1" />
+  <xs:element name="informationPackageMap">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q1="urn:ccsds:schema:xfdu:1" ref="q1:contentUnit" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="dataObjectPointer">
+    <xs:complexType>
+      <xs:attribute name="dataObjectID" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="metadataSection">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="metadataObject">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="metadataReference">
+                <xs:complexType>
+                  <xs:attribute name="mimeType" type="xs:string" use="required" />
+                  <xs:attribute name="vocabularyName" type="xs:string" use="required" />
+                  <xs:attribute name="locatorType" type="xs:string" use="required" />
+                  <xs:attribute name="href" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="metadataWrap">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="xmlData">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" xmlns:q2="http://www.esa.int/safe/sentinel-1.0" ref="q2:frameSet" />
+                          <xs:element minOccurs="0" xmlns:q3="http://www.esa.int/safe/sentinel-1.0" ref="q3:acquisitionPeriod" />
+                          <xs:element minOccurs="0" xmlns:q4="http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1" ref="q4:standAloneProductInformation" />
+                          <xs:element minOccurs="0" xmlns:q5="http://www.esa.int/safe/sentinel-1.0" ref="q5:orbitReference" />
+                          <xs:element minOccurs="0" xmlns:q6="http://www.esa.int/safe/sentinel-1.0" ref="q6:platform" />
+                          <xs:element minOccurs="0" xmlns:q7="http://www.esa.int/safe/sentinel-1.0" ref="q7:processing" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="mimeType" type="xs:string" use="required" />
+                  <xs:attribute name="vocabularyName" type="xs:string" use="required" />
+                  <xs:attribute name="textInfo" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="dataObjectPointer">
+                <xs:complexType>
+                  <xs:attribute name="dataObjectID" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="ID" type="xs:string" use="required" />
+            <xs:attribute name="classification" type="xs:string" use="required" />
+            <xs:attribute name="category" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="dataObjectSection">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="dataObject">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="byteStream">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="fileLocation">
+                      <xs:complexType>
+                        <xs:attribute name="locatorType" type="xs:string" use="required" />
+                        <xs:attribute name="href" type="xs:string" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="checksum">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="checksumName" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="mimeType" type="xs:string" use="required" />
+                  <xs:attribute name="size" type="xs:unsignedInt" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="ID" type="xs:string" use="required" />
+            <xs:attribute name="repID" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
