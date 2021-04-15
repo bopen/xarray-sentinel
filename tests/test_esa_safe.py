@@ -212,7 +212,7 @@ def test_parse_manifest_sentinel1(
     product_id: str, expected: T.Dict[str, T.Any]
 ) -> None:
     product_folder = DATA_FOLDER / (product_id + ".SAFE")
-    manifest = esa_safe.open_manifest(product_folder)
+    _, manifest = esa_safe.open_manifest(product_folder)
 
     res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest)
 
@@ -224,8 +224,33 @@ def test_parse_manifest_sentinel2(
     product_id: str, expected: T.Dict[str, T.Any]
 ) -> None:
     product_folder = DATA_FOLDER / (product_id + ".SAFE")
-    manifest = esa_safe.open_manifest(product_folder)
+    _, manifest = esa_safe.open_manifest(product_folder)
 
     res_attrs, res_files = esa_safe.parse_manifest_sentinel2(manifest)
 
     assert res_attrs == expected
+
+
+def test_parse_original_manifest_sentinel1() -> None:
+    manifest_path = str(
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+        / "manifest.safe"
+    )
+
+    res, _ = esa_safe.parse_original_manifest_sentinel1(manifest_path)
+
+    assert isinstance(res, dict)
+    assert "safe:platform" in res
+    assert set(res["safe:platform"]) == {
+        "safe:nssdcIdentifier",
+        "safe:familyName",
+        "safe:number",
+        "safe:instrument",
+    }
+
+    _, res = esa_safe.parse_original_manifest_sentinel1(manifest_path)
+
+    assert isinstance(res, list)
+    assert isinstance(res[0], dict)
+    assert "@href" in res[0]

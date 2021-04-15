@@ -52,14 +52,16 @@ Structure:
 
 * root / SAFE
   * swaths "IW1" "IW2" "S3" etc / duplicated in VH-VV annotation XML
-    * bursts / polarization "N433_W0120_VV" etc (include polarization?)
+    * bursts "R022_N433_E0120" etc
+      * polarizations are data variables
     * gcp "gcp"
     * calibration "calibration"
-    * orbit-attitude "orbit" / (almost) duplicated in all annotation XML
+    * orbit "orbit" / duplicated in annotation XML for different polarizations
+    * attitude "attitude" / same as above
     * antenna pattern "antenna"
     * zero-Doppler "doppler"
 
-examples: `group="IW2/orbit"`, `group="IW2/N433_W0120_VV`, `group="S3/gcp"` etc
+examples: `group="IW2/orbit"`, `group="IW2/N433_E0120`, `group="S3/gcp"` etc
 
 Dimensions, coordinates and variables
 
