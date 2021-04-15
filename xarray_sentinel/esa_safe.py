@@ -1,13 +1,14 @@
 import functools
 import os
 import pathlib
+import re
 import typing as T
 from xml.etree import ElementTree
 
 import pkg_resources
 import xmlschema
 
-PathType = T.Union[bytes, str, "os.PathLike[str]", "os.PathLike[bytes]"]
+PathType = T.Union[str, os.PathLike]
 
 
 SENTINEL1_NAMESPACES = {
@@ -19,6 +20,29 @@ SENTINEL1_NAMESPACES = {
 SENTINEL2_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel/1.1",
 }
+
+
+def get_annotation_path(
+    product_path: PathType, subswath: str, polarization: str = "VV",
+) -> pathlib.Path:
+    manifest_path, manifest = open_manifest(product_path)
+    product_attrs, product_files = parse_manifest_sentinel1(manifest)
+    folder = manifest_path.parent
+
+    annotation_path = None
+    for file in product_files:
+        name = os.path.basename(file)
+        if re.match(f"s1.-{subswath.lower()}-slc-{polarization.lower()}-.*xml$", name,):
+            annotation_path = folder / file
+    if annotation_path is None:
+        raise ValueError(
+            f"{subswath} annotation file path not found in manifest {product_path}"
+        )
+    if not annotation_path.is_file():
+        raise ValueError(
+            f"Not found {subswath} annotation file:\n" f"{annotation_path}"
+        )
+    return annotation_path
 
 
 @functools.lru_cache()
@@ -59,12 +83,12 @@ def parse_swath_timing(annotation_path: PathType,) -> T.List[T.Dict[str, T.Any]]
 
 
 def open_manifest(
-    product_path: T.Union[str, "os.PathLike[str]"]
-) -> ElementTree.ElementTree:
+    product_path: PathType,
+) -> T.Tuple[pathlib.Path, ElementTree.ElementTree]:
     product_path = pathlib.Path(product_path)
     if product_path.is_dir():
         product_path = product_path / "manifest.safe"
-    return ElementTree.parse(product_path)
+    return product_path, ElementTree.parse(product_path)
 
 
 def parse_manifest_sentinel1(

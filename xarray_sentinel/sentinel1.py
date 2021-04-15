@@ -1,4 +1,4 @@
-import os.path
+import os
 import typing as T
 import warnings
 
@@ -6,9 +6,10 @@ import numpy as np
 import xarray as xr
 
 from xarray_sentinel import conventions, esa_safe
+from xarray_sentinel.esa_safe import PathType
 
 
-def open_gcp_dataset(product_path: str) -> xr.Dataset:
+def open_gcp_dataset(product_path: PathType) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(product_path)
     azimuth_time = []
     slant_range_time = []
@@ -76,7 +77,7 @@ def open_gcp_dataset(product_path: str) -> xr.Dataset:
     return ds
 
 
-def open_attitude_dataset(product_path: str) -> xr.Dataset:
+def open_attitude_dataset(product_path: PathType) -> xr.Dataset:
     attitude = esa_safe.parse_attitude(product_path)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw"]
@@ -96,12 +97,12 @@ def open_attitude_dataset(product_path: str) -> xr.Dataset:
         coords=coords,  # type: ignore
     )
 
-    ds = conventions.update_attributes(ds)
     ds = ds.update({"time": ds.time.astype(np.datetime64)})
+    ds = conventions.update_attributes(ds)
     return ds
 
 
-def open_orbit_dataset(product_path: str) -> xr.Dataset:
+def open_orbit_dataset(product_path: PathType) -> xr.Dataset:
     orbit = esa_safe.parse_orbit(product_path)
     shape = len(orbit)
 
@@ -120,7 +121,7 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
-                f"xpath: .//orbit//frame \n File: ${product_path}"
+                f"xpath: .//orbit//frame \n File: {str(product_path)}"
             )
             reference_system = None
 
@@ -135,17 +136,36 @@ def open_orbit_dataset(product_path: str) -> xr.Dataset:
         attrs=attrs,  # type: ignore
         coords=coords,  # type: ignore
     )
-    ds = conventions.update_attributes(ds)
     ds = ds.update({"time": ds.time.astype(np.datetime64)})
+    ds = conventions.update_attributes(ds)
     return ds
 
 
-def open_root_dataset(product_path: str) -> xr.Dataset:
-    manifest = esa_safe.open_manifest(product_path)
+def find_avalable_groups(product_path: str) -> T.Tuple[T.List[str], T.List[str]]:
+    _, manifest = esa_safe.open_manifest(product_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-    product_attrs["groups"] = ["orbit", "attitude", "gcp"] + product_attrs[
-        "xs:instrument_mode_swaths"
-    ]
+    sub_swaths = product_attrs["xs:instrument_mode_swaths"]
+    groups_lev0 = sub_swaths
+    groups_lev1 = []
+    for sub_swath in sub_swaths:
+        for data in METADATA_OPENERS:
+            groups_lev1.append(f"{sub_swath}/{data}")
+    return groups_lev0, groups_lev1
+
+
+def open_root_dataset(product_path: str) -> xr.Dataset:
+    _, manifest = esa_safe.open_manifest(product_path)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    sub_swaths = product_attrs["xs:instrument_mode_swaths"]
+    product_attrs["groups"] = []
+    for sub_swath in sub_swaths:
+        for data in METADATA_OPENERS:
+            product_attrs["groups"].append(f"{sub_swath}/{data}")
+    return xr.Dataset(attrs=product_attrs)  # type: ignore
+
+
+def open_swath_dataset(product_path: str, group: str) -> xr.Dataset:
+    product_attrs = {"groups": ["orbit", "attitude", "gcp"]}
     return xr.Dataset(attrs=product_attrs)  # type: ignore
 
 
@@ -156,14 +176,23 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         drop_variables: T.Optional[T.Tuple[str]] = None,
         group: T.Optional[str] = None,
     ) -> xr.Dataset:
+
+        groups_lev0, groups_lev1 = find_avalable_groups(filename_or_obj)
+
         if group is None:
             ds = open_root_dataset(filename_or_obj)
-        elif group == "gcp":
-            ds = open_gcp_dataset(filename_or_obj)
-        elif group == "orbit":
-            ds = open_orbit_dataset(filename_or_obj)
-        elif group == "attitude":
-            ds = open_attitude_dataset(filename_or_obj)
+        elif group in groups_lev0:
+            ds = open_swath_dataset(filename_or_obj, group)
+        elif group in groups_lev1:
+            subswath, subgroup = group.split("/")
+            annotation_path = esa_safe.get_annotation_path(filename_or_obj, subswath)
+            ds = METADATA_OPENERS[subgroup](annotation_path)
+        else:
+            raise ValueError(
+                f"Invalid group {group}, please select one of the following groups:"
+                f"\n{groups_lev0+groups_lev1}"
+            )
+
         return ds
 
     def guess_can_open(self, filename_or_obj: T.Any) -> bool:
@@ -172,3 +201,10 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         except TypeError:
             return False
         return ext.lower() in {".safe"}
+
+
+METADATA_OPENERS = {
+    "gcp": open_gcp_dataset,
+    "attitude": open_attitude_dataset,
+    "orbit": open_orbit_dataset,
+}
