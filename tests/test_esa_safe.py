@@ -107,6 +107,13 @@ SENTINEL2_ATTRIBUTES = {
     },
 }
 
+ANNOTATION_PATH = (
+    DATA_FOLDER
+    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    / "annotation"
+    / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+)
+
 
 def test_sentinel1_schemas() -> None:
     res = esa_safe.sentinel1_schemas("product")
@@ -115,12 +122,6 @@ def test_sentinel1_schemas() -> None:
 
 
 def test_parse_geolocation_grid_points() -> None:
-    annotation_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "annotation"
-        / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
-    )
     expected = {
         "azimuthTime",
         "slantRangeTime",
@@ -133,19 +134,13 @@ def test_parse_geolocation_grid_points() -> None:
         "elevationAngle",
     }
 
-    res = esa_safe.parse_geolocation_grid_points(annotation_path)
+    res = esa_safe.parse_geolocation_grid_points(ANNOTATION_PATH)
 
     assert isinstance(res, list)
     assert set(res[0]) == expected
 
 
 def test_parse_attitude() -> None:
-    annotation_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "annotation"
-        / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
-    )
     expected = {
         "time",
         "frame",
@@ -161,34 +156,22 @@ def test_parse_attitude() -> None:
         "yaw",
     }
 
-    res = esa_safe.parse_attitude(annotation_path)
+    res = esa_safe.parse_attitude(ANNOTATION_PATH)
 
     assert isinstance(res, list)
     assert set(res[0]) == expected
 
 
 def test_parse_orbit() -> None:
-    annotation_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "annotation"
-        / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
-    )
     expected = {"time", "frame", "position", "velocity"}
 
-    res = esa_safe.parse_orbit(annotation_path)
+    res = esa_safe.parse_orbit(ANNOTATION_PATH)
 
     assert isinstance(res, list)
     assert set(res[0]) == expected
 
 
 def test_parse_swath_timing() -> None:
-    annotation_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "annotation"
-        / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
-    )
     expected = {
         "azimuthTime",
         "azimuthAnxTime",
@@ -197,7 +180,7 @@ def test_parse_swath_timing() -> None:
         "firstValidSample",
         "lastValidSample",
     }
-    res = esa_safe.parse_swath_timing(annotation_path)
+    res = esa_safe.parse_swath_timing(ANNOTATION_PATH)
 
     assert isinstance(res, dict)
     assert "burstList" in res
@@ -205,6 +188,15 @@ def test_parse_swath_timing() -> None:
     burst_list = res["burstList"]["burst"]
     assert isinstance(burst_list, list)
     assert set(burst_list[0]) == expected
+
+
+def test_parse_azimuth_fm_rate() -> None:
+    res = esa_safe.parse_azimuth_fm_rate(ANNOTATION_PATH)
+    expected = {"azimuthTime", "t0", "azimuthFmRatePolynomial"}
+
+    assert isinstance(res, list)
+    assert set(res[0]) == expected
+    assert isinstance(res[0]["azimuthFmRatePolynomial"], list)
 
 
 @pytest.mark.parametrize("product_id,expected", SENTINEL1_ATTRIBUTES.items())

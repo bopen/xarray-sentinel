@@ -8,7 +8,7 @@ from xml.etree import ElementTree
 import pkg_resources
 import xmlschema
 
-PathType = T.Union[str, os.PathLike]
+PathType = T.Union[str, "os.PathLike[str]"]
 
 
 SENTINEL1_NAMESPACES = {
@@ -55,6 +55,15 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     return xmlschema.XMLSchema(schema_paths[schema_type])
 
 
+def parse_tag_dict(
+    xml_path: PathType, schema_type: str, query: str,
+) -> T.Dict[str, T.Any]:
+    xml_path = os.fspath(xml_path)
+    schema = sentinel1_schemas(schema_type)
+    tag_list: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)
+    return tag_list
+
+
 def parse_tag_list(
     xml_path: PathType, schema_type: str, query: str,
 ) -> T.List[T.Dict[str, T.Any]]:
@@ -78,8 +87,31 @@ def parse_geolocation_grid_points(
     return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 
-def parse_swath_timing(annotation_path: PathType,) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//swathTiming")
+def parse_swath_timing(annotation_path: PathType) -> T.Dict[str, T.Any]:
+    return parse_tag_dict(annotation_path, "product", ".//swathTiming")
+
+
+def parse_product_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
+    return parse_tag_dict(annotation_path, "product", ".//productInformation")
+
+
+def parse_azimuth_fm_rate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    azimuth_fm_rate = []
+    for afmr in parse_tag_list(annotation_path, "product", ".//azimuthFmRate"):
+        poly = [float(c) for c in afmr["azimuthFmRatePolynomial"]["$"].split()]
+        afmr["azimuthFmRatePolynomial"] = poly
+        azimuth_fm_rate.append(afmr)
+    return azimuth_fm_rate
+
+
+def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    dc_estimate = []
+    for de in parse_tag_list(annotation_path, "product", ".//dcEstimate"):
+        poly = [float(c) for c in de["dataDcPolynomial"]]
+        de["dataDcPolynomial"] = poly
+        de.pop("fineDceList")  # drop large unused data
+        dc_estimate.append(de)
+    return dc_estimate
 
 
 def open_manifest(
