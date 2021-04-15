@@ -8,7 +8,7 @@ from xml.etree import ElementTree
 import pkg_resources
 import xmlschema
 
-PathType = T.Union[bytes, str, "os.PathLike[str]", "os.PathLike[bytes]"]
+PathType = T.Union[str, os.PathLike]
 
 
 SENTINEL1_NAMESPACES = {
@@ -23,10 +23,8 @@ SENTINEL2_NAMESPACES = {
 
 
 def get_annotation_path(
-    product_path: T.Union[str, "os.PathLike[str]"],
-    subswath: str,
-    polarization: str = "VV",
-) -> "os.PathLike[str]":
+    product_path: PathType, subswath: str, polarization: str = "VV",
+) -> PathType:
     manifest = open_manifest(product_path)
     product_attrs, product_files = parse_manifest_sentinel1(manifest)
 
@@ -86,9 +84,7 @@ def parse_swath_timing(annotation_path: PathType,) -> T.List[T.Dict[str, T.Any]]
     return parse_tag_list(annotation_path, "product", ".//swathTiming")
 
 
-def open_manifest(
-    product_path: T.Union[str, "os.PathLike[str]"]
-) -> ElementTree.ElementTree:
+def open_manifest(product_path: PathType) -> ElementTree.ElementTree:
     product_path = pathlib.Path(product_path)
     if product_path.is_dir():
         product_path = product_path / "manifest.safe"

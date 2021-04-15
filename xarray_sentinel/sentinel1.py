@@ -6,9 +6,10 @@ import numpy as np
 import xarray as xr
 
 from xarray_sentinel import conventions, esa_safe
+from xarray_sentinel.esa_safe import PathType
 
 
-def open_gcp_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Dataset:
+def open_gcp_dataset(product_path: PathType) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(product_path)
     azimuth_time = []
     slant_range_time = []
@@ -76,7 +77,7 @@ def open_gcp_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Datas
     return ds
 
 
-def open_attitude_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Dataset:
+def open_attitude_dataset(product_path: PathType) -> xr.Dataset:
     attitude = esa_safe.parse_attitude(product_path)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw"]
@@ -101,7 +102,7 @@ def open_attitude_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.
     return ds
 
 
-def open_orbit_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Dataset:
+def open_orbit_dataset(product_path: PathType) -> xr.Dataset:
     orbit = esa_safe.parse_orbit(product_path)
     shape = len(orbit)
 
@@ -120,7 +121,7 @@ def open_orbit_dataset(product_path: T.Union[str, "os.PathLike[str]"]) -> xr.Dat
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
-                f"xpath: .//orbit//frame \n File: ${product_path}"
+                f"xpath: .//orbit//frame \n File: {str(product_path)}"
             )
             reference_system = None
 
