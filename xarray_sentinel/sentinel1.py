@@ -219,14 +219,14 @@ def get_burst_info(
     product_attrs: T.Dict[str, T.Any],
     subswath_id: str,
     subswath_data: T.Dict[str, T.Dict[str, str]],
-) -> T.Dict[str, T.Dict[str, T.Any]]:
+) -> T.Optional[T.Dict[str, T.Dict[str, T.Any]]]:
     if "annotation" not in subswath_data:
         return None
     annot = list(subswath_data["annotation"].values())[0]
     geoloc = esa_safe.parse_geolocation_grid_points(annot)
     swath_timing = esa_safe.parse_swath_timing(annot)
-    linesPerBurst = int(swath_timing["linesPerBurst"])  # type: ignore
-    samplesPerBurst = int(swath_timing["samplesPerBurst"])  # type: ignore
+    linesPerBurst = int(swath_timing["linesPerBurst"])
+    samplesPerBurst = int(swath_timing["samplesPerBurst"])
 
     burst_geoloc: T.Dict[int, T.List[T.Dict[str, T.Any]]] = {}
     for geoloc_item in geoloc:
