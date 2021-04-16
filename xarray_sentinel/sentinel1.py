@@ -154,7 +154,7 @@ def find_avalable_groups(
     groups: T.Dict[str, T.Dict[str, T.Any]] = {}
     for subswath_id, subswath_data_path in ancillary_data_paths.items():
         subswath_id = subswath_id.upper()
-        burst_info = get_burst_info(product_attrs, subswath_id, subswath_data_path)
+        burst_info = get_burst_info(product_attrs, subswath_data_path)
         if burst_info is None:
             continue
         subgroups = list(METADATA_OPENERS.keys()) + list(burst_info.keys())
@@ -249,7 +249,6 @@ def get_bursts_gcp(
 
 def get_burst_info(
     product_attrs: T.Dict[str, T.Any],
-    subswath_id: str,
     subswath_data: T.Dict[str, T.Dict[str, str]],
 ) -> T.Optional[T.Dict[str, T.Dict[str, T.Any]]]:
     if len(subswath_data["annotation_path"]) == 0:
