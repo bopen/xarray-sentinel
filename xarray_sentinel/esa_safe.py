@@ -38,8 +38,6 @@ def get_ancillary_data_paths(
         if filetype not in type_mapping:
             continue
         file_path = folder / filename
-        if not os.path.exists(file_path):
-            continue
         name = os.path.basename(filename)
         subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
         swath_dict = ancillary_data_paths.setdefault(subswath, {})

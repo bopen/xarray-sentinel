@@ -150,20 +150,31 @@ def find_avalable_groups(
     ancillary_data_paths = esa_safe.get_ancillary_data_paths(
         manifest_path, product_files
     )
+    filter_missin_path(ancillary_data_paths)
     groups: T.Dict[str, T.Dict[str, T.Any]] = {}
-    for subswath_id, subswath_data in ancillary_data_paths.items():
+    for subswath_id, subswath_data_path in ancillary_data_paths.items():
         subswath_id = subswath_id.upper()
-        burst_info = get_burst_info(product_attrs, subswath_id, subswath_data)
+        burst_info = get_burst_info(product_attrs, subswath_id, subswath_data_path)
         if burst_info is None:
             continue
         subgroups = list(METADATA_OPENERS.keys()) + list(burst_info.keys())
-        groups[subswath_id] = dict(subswath_data, subgroups=subgroups)
+        groups[subswath_id] = dict(subswath_data_path, subgroups=subgroups)
         for subgroup in METADATA_OPENERS.keys():
-            groups[f"{subswath_id}/{subgroup}"] = subswath_data
+            groups[f"{subswath_id}/{subgroup}"] = subswath_data_path
         for burst_id, burst_data in burst_info.items():
-            full_data = dict(subswath_data, **burst_data)
+            full_data = dict(subswath_data_path, **burst_data)
             groups[f"{subswath_id}/{burst_id}"] = full_data
     return groups
+
+
+def filter_missin_path(path_dict):
+    path_dict_copy = path_dict.copy
+    for k in path_dict_copy():
+        if isinstance(path_dict[k], dict):
+            filter_missin_path(path_dict[k])
+        else:
+            if not os.path.exists(path_dict[k]):
+                path_dict.pop(k)
 
 
 def open_root_dataset(
@@ -217,7 +228,7 @@ def get_burst_info(
     subswath_id: str,
     subswath_data: T.Dict[str, T.Dict[str, str]],
 ) -> T.Optional[T.Dict[str, T.Dict[str, T.Any]]]:
-    if "annotation_path" not in subswath_data:
+    if len(subswath_data["annotation_path"]) == 0:
         return None
     annotation_path = list(subswath_data["annotation_path"].values())[0]
     geoloc = esa_safe.parse_geolocation_grid_points(annotation_path)
