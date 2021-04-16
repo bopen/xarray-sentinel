@@ -154,6 +154,8 @@ def find_avalable_groups(
     for subswath_id, subswath_data in ancillary_data_paths.items():
         subswath_id = subswath_id.upper()
         burst_info = get_burst_info(product_attrs, subswath_id, subswath_data)
+        if burst_info is None:
+            continue
         subgroups = list(METADATA_OPENERS.keys()) + list(burst_info.keys())
         groups[subswath_id] = dict(subswath_data, subgroups=subgroups)
         for subgroup in METADATA_OPENERS.keys():
@@ -218,6 +220,8 @@ def get_burst_info(
     subswath_id: str,
     subswath_data: T.Dict[str, T.Dict[str, str]],
 ) -> T.Dict[str, T.Dict[str, T.Any]]:
+    if "annotation" not in subswath_data:
+        return None
     annot = list(subswath_data["annotation"].values())[0]
     geoloc = esa_safe.parse_geolocation_grid_points(annot)
     swath_timing = esa_safe.parse_swath_timing(annot)

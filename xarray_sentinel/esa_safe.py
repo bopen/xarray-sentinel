@@ -36,11 +36,14 @@ def get_ancillary_data_paths(
     for filename, filetype in product_files.items():
         if filetype not in type_mapping:
             continue
+        relpath = folder / filename
+        if not os.path.exists(relpath):
+            continue
         name = os.path.basename(filename)
         subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
         swath_dict = ancillary_data_paths.setdefault(subswath, {})
         type_dict = swath_dict.setdefault(type_mapping[filetype], {})
-        type_dict[pol] = str(folder / filename)
+        type_dict[pol] = str(relpath)
     return ancillary_data_paths
 
 
