@@ -57,9 +57,18 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     return xmlschema.XMLSchema(schema_paths[schema_type])
 
 
+def parse_tag_dict(
+    xml_path: PathType, schema_type: str, query: str,
+) -> T.Dict[str, T.Any]:
+    xml_path = os.fspath(xml_path)
+    schema = sentinel1_schemas(schema_type)
+    tag_list: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)
+    return tag_list
+
+
 def parse_tag_list(
     xml_path: PathType, schema_type: str, query: str,
-) -> T.Union[T.List[T.Dict[str, T.Any]], T.Dict[str, T.Any]]:
+) -> T.List[T.Dict[str, T.Any]]:
     xml_path = os.fspath(xml_path)
     schema = sentinel1_schemas(schema_type)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)
@@ -67,23 +76,21 @@ def parse_tag_list(
 
 
 def parse_attitude(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//attitude")  # type: ignore
+    return parse_tag_list(annotation_path, "product", ".//attitude")
 
 
 def parse_orbit(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//orbit")  # type: ignore
+    return parse_tag_list(annotation_path, "product", ".//orbit")
 
 
 def parse_geolocation_grid_points(
     annotation_path: PathType,
 ) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")  # type: ignore
+    return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 
-def parse_swath_timing(
-    annotation_path: PathType,
-) -> T.Dict[str, T.Union[int, T.Dict[str, T.Any]]]:
-    return parse_tag_list(annotation_path, "product", ".//swathTiming")  # type: ignore
+def parse_swath_timing(annotation_path: PathType,) -> T.Dict[str, T.Any]:
+    return parse_tag_dict(annotation_path, "product", ".//swathTiming")
 
 
 def open_manifest(
