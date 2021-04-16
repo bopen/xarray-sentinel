@@ -167,9 +167,7 @@ def find_avalable_groups(
     return groups
 
 
-def filter_missin_path(
-    path_dict: T.Dict[str, T.Any]
-) -> None:
+def filter_missin_path(path_dict: T.Dict[str, T.Any]) -> None:
 
     path_dict_copy = path_dict.copy
     for k in path_dict_copy():
@@ -226,13 +224,13 @@ def get_burst_id(
     )
 
 
-def compute_burst_center(burst_gcp: T.List[T.Dict[str, float]]) -> float:
+def compute_burst_center(burst_gcp: T.List[T.Dict[str, float]]) -> np.ndarray:
     first_and_last = burst_gcp[:: len(burst_gcp) - 1]  # TODO: take full lines
     coords = [
         (geoloc_item["longitude"], geoloc_item["latitude"])
         for geoloc_item in first_and_last
     ]
-    centre = np.mean(coords)
+    centre = np.mean(coords, axis=0)
     return centre  # type: ignore
 
 
@@ -248,8 +246,7 @@ def get_bursts_gcp(
 
 
 def get_burst_info(
-    product_attrs: T.Dict[str, T.Any],
-    subswath_data: T.Dict[str, T.Dict[str, str]],
+    product_attrs: T.Dict[str, T.Any], subswath_data: T.Dict[str, T.Dict[str, str]],
 ) -> T.Optional[T.Dict[str, T.Dict[str, T.Any]]]:
     if len(subswath_data["annotation_path"]) == 0:
         return None
