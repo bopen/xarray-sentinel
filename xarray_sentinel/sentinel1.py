@@ -167,7 +167,10 @@ def find_avalable_groups(
     return groups
 
 
-def filter_missin_path(path_dict):
+def filter_missin_path(
+    path_dict: T.Dict[str, T.Any]
+) -> None:
+
     path_dict_copy = path_dict.copy
     for k in path_dict_copy():
         if isinstance(path_dict[k], dict):
@@ -223,6 +226,27 @@ def get_burst_id(
     )
 
 
+def compute_burst_center(burst_gcp: T.List[T.Dict[str, float]]) -> float:
+    first_and_last = burst_gcp[:: len(burst_gcp) - 1]  # TODO: take full lines
+    coords = [
+        (geoloc_item["longitude"], geoloc_item["latitude"])
+        for geoloc_item in first_and_last
+    ]
+    centre = np.mean(coords)
+    return centre  # type: ignore
+
+
+def get_bursts_gcp(
+    subswath_gcp: T.List[T.Dict[str, T.Any]], linesPerBurst: int
+) -> T.Dict[int, T.List[T.Dict[str, T.Any]]]:
+
+    burst_gcp: T.Dict[int, T.List[T.Dict[str, T.Any]]] = {}
+    for gcp in subswath_gcp:
+        burst_id = gcp["line"] // linesPerBurst
+        burst_gcp.setdefault(burst_id, []).append(gcp)
+    return burst_gcp
+
+
 def get_burst_info(
     product_attrs: T.Dict[str, T.Any],
     subswath_id: str,
@@ -231,28 +255,18 @@ def get_burst_info(
     if len(subswath_data["annotation_path"]) == 0:
         return None
     annotation_path = list(subswath_data["annotation_path"].values())[0]
-    geoloc = esa_safe.parse_geolocation_grid_points(annotation_path)
+    subswath_gcp = esa_safe.parse_geolocation_grid_points(annotation_path)
+
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = int(swath_timing["linesPerBurst"])
     samplesPerBurst = int(swath_timing["samplesPerBurst"])
 
-    burst_geoloc: T.Dict[int, T.List[T.Dict[str, T.Any]]] = {}
-    for geoloc_item in geoloc:
-        burst_id = geoloc_item["line"] // linesPerBurst
-        burst_geoloc.setdefault(burst_id, []).append(geoloc_item)
+    bursts_gcp = get_bursts_gcp(subswath_gcp, linesPerBurst)
 
     burst_info = {}
-    for burst_pos, burst_geoloc_items in burst_geoloc.items():
-        first_and_last = burst_geoloc_items[
-            :: len(burst_geoloc_items) - 1
-        ]  # TODO: take full lines
-        coords = [
-            (geoloc_item["longitude"], geoloc_item["latitude"])
-            for geoloc_item in first_and_last
-        ]
-        centre = np.mean(coords, axis=0)
+    for burst_pos, burst_gcp in bursts_gcp.items():
+        centre = compute_burst_center(burst_gcp)
         burst_id = get_burst_id(product_attrs, centre)
-        burst_pos * linesPerBurst
         burst_info[burst_id] = dict(
             burst_centre=centre,
             burst_pos=burst_pos,
