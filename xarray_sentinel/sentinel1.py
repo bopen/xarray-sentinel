@@ -193,10 +193,11 @@ def open_burst_dataset(
     )
     ds.attrs.update(product_attrs)  # type: ignore
     ds = ds.squeeze("band").drop(["band", "spatial_ref"])
-    return ds.isel(
+    ds = ds.isel(
         x=slice(burst_data["burst_first_pixel"], burst_data["burst_last_pixel"] + 1),
         y=slice(burst_data["burst_first_line"], burst_data["burst_last_line"] + 1),
     )
+    return ds
 
 
 def get_burst_id(
