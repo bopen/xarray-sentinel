@@ -167,8 +167,8 @@ def find_avalable_groups(
 def open_root_dataset(
     product_attrs: T.Dict[str, str], groups: T.Dict[str, T.Dict[str, T.Collection[str]]]
 ) -> xr.Dataset:
-    product_attrs = dict(product_attrs, groups=list(groups.keys()))
-    return xr.Dataset(attrs=product_attrs)  # type: ignore
+    attrs = dict(product_attrs, groups=list(groups.keys()))
+    return xr.Dataset(attrs=attrs)  # type: ignore
 
 
 def open_swath_dataset(
@@ -176,8 +176,8 @@ def open_swath_dataset(
     swath_id: str,
     swath_data: T.Dict[str, T.Collection[str]],
 ) -> xr.Dataset:
-    product_attrs = dict(product_attrs, groups=swath_data["subgroups"])
-    return xr.Dataset(attrs=product_attrs)  # type: ignore
+    attrs = dict(product_attrs, groups=swath_data["subgroups"])
+    return xr.Dataset(attrs=attrs)  # type: ignore
 
 
 def open_burst_dataset(
@@ -191,7 +191,7 @@ def open_burst_dataset(
             }
         ]
     )
-    ds.attrs.update(product_attrs)
+    ds.attrs.update(product_attrs)  # type: ignore
     ds = ds.squeeze("band").drop(["band", "spatial_ref"])
     return ds.isel(
         x=slice(burst_data["burst_first_pixel"], burst_data["burst_last_pixel"] + 1),
