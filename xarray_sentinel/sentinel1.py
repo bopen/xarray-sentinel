@@ -143,13 +143,10 @@ def open_orbit_dataset(annotation_path: PathType) -> xr.Dataset:
 
 
 def find_avalable_groups(
-    manifest_path: PathType,
+    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]],
     product_attrs: T.Dict[str, T.Any],
-    product_files: T.Dict[str, str],
 ) -> T.Dict[str, T.Dict[str, T.Any]]:
-    ancillary_data_paths = esa_safe.get_ancillary_data_paths(
-        manifest_path, product_files
-    )
+
     filter_missin_path(ancillary_data_paths)
     groups: T.Dict[str, T.Dict[str, T.Any]] = {}
     for subswath_id, subswath_data_path in ancillary_data_paths.items():
@@ -284,7 +281,11 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
 
         manifest_path, manifest = esa_safe.open_manifest(filename_or_obj)
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-        groups = find_avalable_groups(manifest_path, product_attrs, product_files)
+        ancillary_data_paths = esa_safe.get_ancillary_data_paths(
+            manifest_path, product_files
+        )
+
+        groups = find_avalable_groups(ancillary_data_paths, product_attrs)
 
         if group is None:
             ds = open_root_dataset(product_attrs, groups)
