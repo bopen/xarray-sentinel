@@ -1,3 +1,4 @@
+import warnings
 import functools
 import os
 import pathlib
@@ -27,23 +28,23 @@ def get_ancillary_data_paths(
     folder = pathlib.Path(manifest_path).parent
 
     type_mapping = {
-        "s1Level1CalibrationSchema": "calibration",
-        "s1Level1MeasurementSchema": "measurement",
-        "s1Level1NoiseSchema": "noise",
-        "s1Level1ProductSchema": "annotation",
+        "s1Level1CalibrationSchema": "calibration_path",
+        "s1Level1MeasurementSchema": "measurement_path",
+        "s1Level1NoiseSchema": "noise_path",
+        "s1Level1ProductSchema": "annotation_path",
     }
     ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
     for filename, filetype in product_files.items():
         if filetype not in type_mapping:
             continue
-        relpath = folder / filename
-        if not os.path.exists(relpath):
+        file_path = folder / filename
+        if not os.path.exists(file_path):
             continue
         name = os.path.basename(filename)
         subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
         swath_dict = ancillary_data_paths.setdefault(subswath, {})
         type_dict = swath_dict.setdefault(type_mapping[filetype], {})
-        type_dict[pol] = str(relpath)
+        type_dict[pol] = str(file_path)
     return ancillary_data_paths
 
 

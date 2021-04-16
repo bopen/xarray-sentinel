@@ -185,14 +185,11 @@ def open_swath_dataset(
 def open_burst_dataset(
     product_attrs: T.Dict[str, str], burst_id: str, burst_data: T.Dict[str, T.Any]
 ) -> xr.Dataset:
-    ds = xr.merge(
-        [
-            {
-                pol.upper(): rioxarray.open_rasterio(datafile)
-                for pol, datafile in burst_data["measurement"].items()
-            }
-        ]
-    )
+    ds_pol = {
+        pol.upper(): rioxarray.open_rasterio(datafile)
+        for pol, datafile in burst_data["measurement"].items()
+    }
+    ds = xr.merge([ds_pol])
     ds.attrs.update(product_attrs)  # type: ignore
     ds = ds.squeeze("band").drop(["band", "spatial_ref"])
     ds = ds.isel(
@@ -220,11 +217,11 @@ def get_burst_info(
     subswath_id: str,
     subswath_data: T.Dict[str, T.Dict[str, str]],
 ) -> T.Optional[T.Dict[str, T.Dict[str, T.Any]]]:
-    if "annotation" not in subswath_data:
+    if "annotation_path" not in subswath_data:
         return None
-    annot = list(subswath_data["annotation"].values())[0]
-    geoloc = esa_safe.parse_geolocation_grid_points(annot)
-    swath_timing = esa_safe.parse_swath_timing(annot)
+    annotation_path = list(subswath_data["annotation_path"].values())[0]
+    geoloc = esa_safe.parse_geolocation_grid_points(annotation_path)
+    swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = int(swath_timing["linesPerBurst"])
     samplesPerBurst = int(swath_timing["samplesPerBurst"])
 
@@ -280,8 +277,8 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         else:
             subswath, subgroup = group.split("/", 1)
             if subgroup in METADATA_OPENERS:
-                annot = list(groups[group]["annotation"].values())[0]
-                ds = METADATA_OPENERS[subgroup](annot)
+                annotation_path = list(groups[group]["annotation_path"].values())[0]
+                ds = METADATA_OPENERS[subgroup](annotation_path)
             else:
                 ds = open_burst_dataset(product_attrs, group, groups[group])
 
