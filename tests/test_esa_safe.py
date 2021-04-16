@@ -257,17 +257,28 @@ def test_parse_original_manifest_sentinel1() -> None:
 
 
 def test_get_ancillary_data() -> None:
-    manifest_path = DATA_FOLDER\
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"\
+    manifest_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
         / "manifest.safe"
+    )
 
-    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    product_files = {
+        "./annotation/s1b-iw1-slc-vh-xx-xx-xx-xx-xx.xml": "s1Level1ProductSchema",
+        "./annotation/calibration/noise-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1NoiseSchema",
+        "./annotation/calibration/calibration-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
+        "./annotation/s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1ProductSchema",
+        "./annotation/calibration/noise-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1NoiseSchema",
+        "./annotation/calibration/calibration-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
+        "./measurement/s1b-iw1-slc-vh-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
+        "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
+    }
+
     ancillary_data_paths = esa_safe.get_ancillary_data_paths(
         manifest_path, product_files
     )
 
-    expected = {"iw1", "iw2", "iw3"}
+    expected = {"iw1"}
     assert set(ancillary_data_paths) == expected
 
     expected = {"annotation_path", "noise_path", "calibration_path", "measurement_path"}
