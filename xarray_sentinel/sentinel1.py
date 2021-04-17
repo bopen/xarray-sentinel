@@ -209,7 +209,7 @@ def open_burst_dataset(
     return ds
 
 
-def get_burst_id(
+def build_burst_id(
     product_attrs: T.Dict[str, T.Any], burst_centre: np.typing.ArrayLike,
 ) -> str:
     rounded_centre = np.int_(np.round(burst_centre, 1) * 10)
@@ -260,7 +260,7 @@ def get_burst_info(
     burst_info = {}
     for burst_pos, burst_gcp in bursts_gcp.items():
         centre = compute_burst_center(burst_gcp)
-        burst_id = get_burst_id(product_attrs, centre)
+        burst_id = build_burst_id(product_attrs, centre)
         burst_info[burst_id] = dict(
             burst_centre=centre,
             burst_pos=burst_pos,
