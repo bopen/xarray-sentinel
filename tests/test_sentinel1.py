@@ -22,4 +22,3 @@ def test_filter_missing_path() -> None:
     expected = {"paths1": {"path1": existing_path}, "paths2": {}}
 
     assert res == expected
-
