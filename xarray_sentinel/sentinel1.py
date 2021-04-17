@@ -169,7 +169,7 @@ def filter_missing_path(path_dict: T.Dict[str, T.Any]) -> T.Dict[str, T.Any]:
     path_dict_copy = path_dict.copy()
     for k in path_dict:
         if isinstance(path_dict[k], dict):
-            path_dict[k] = filter_missing_path(path_dict[k])
+            path_dict_copy[k] = filter_missing_path(path_dict[k])
         else:
             if not os.path.exists(path_dict[k]):
                 del path_dict_copy[k]
