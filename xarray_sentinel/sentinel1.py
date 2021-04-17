@@ -215,11 +215,12 @@ def build_burst_id(
     rounded_centre = np.int_(np.round(burst_centre, 1) * 10)
     n_or_s = "N" if rounded_centre[0] >= 0 else "S"
     e_or_w = "E" if rounded_centre[1] >= 0 else "W"
-    return (
+    burst_id = (
         f"R{product_attrs['sat:relative_orbit']:03}"
         f"-{n_or_s}{rounded_centre[0]:03}"
         f"-{e_or_w}{rounded_centre[1]:04}"
     )
+    return burst_id
 
 
 def compute_burst_center(burst_gcp: T.List[T.Dict[str, float]]) -> np.ndarray:
