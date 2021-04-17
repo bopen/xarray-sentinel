@@ -147,7 +147,7 @@ def find_avalable_groups(
     product_attrs: T.Dict[str, T.Any],
 ) -> T.Dict[str, T.Dict[str, T.Any]]:
 
-    filter_missin_path(ancillary_data_paths)
+    ancillary_data_paths = filter_missing_path(ancillary_data_paths)
     groups: T.Dict[str, T.Dict[str, T.Any]] = {}
     for subswath_id, subswath_data_path in ancillary_data_paths.items():
         subswath_id = subswath_id.upper()
@@ -164,15 +164,16 @@ def find_avalable_groups(
     return groups
 
 
-def filter_missin_path(path_dict: T.Dict[str, T.Any]) -> None:
+def filter_missing_path(path_dict: T.Dict[str, T.Any]) -> T.Dict[str, T.Any]:
 
-    path_dict_copy = path_dict.copy
-    for k in path_dict_copy():
+    path_dict_copy = path_dict.copy()
+    for k in path_dict:
         if isinstance(path_dict[k], dict):
-            filter_missin_path(path_dict[k])
+            path_dict[k] = filter_missing_path(path_dict[k])
         else:
             if not os.path.exists(path_dict[k]):
-                path_dict.pop(k)
+                del path_dict_copy[k]
+    return path_dict_copy
 
 
 def open_root_dataset(
