@@ -2,7 +2,6 @@ import functools
 import os
 import pathlib
 import typing as T
-import warnings
 from xml.etree import ElementTree
 
 import pkg_resources
