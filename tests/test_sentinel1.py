@@ -22,3 +22,10 @@ def test_filter_missing_path() -> None:
     expected = {"paths1": {"path1": existing_path}, "paths2": {}}
 
     assert res == expected
+
+
+def test_build_burst_id() -> None:
+    product_attrs = {"sat:relative_orbit": 168}
+    burst_centre = [11.8475875, 47.16626783]
+    burst_id = sentinel1.build_burst_id(product_attrs, burst_centre)
+    assert burst_id == "R168-N118-E0472"
