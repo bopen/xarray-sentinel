@@ -201,7 +201,7 @@ def open_burst_dataset(
     }
     ds = xr.merge([ds_pol])
     ds.attrs.update(product_attrs)  # type: ignore
-    ds = ds.squeeze("band").drop(["band", "spatial_ref"])
+    ds = ds.squeeze("band").drop_vars(["band", "spatial_ref"])
     ds = ds.isel(
         x=slice(burst_data["burst_first_pixel"], burst_data["burst_last_pixel"] + 1),
         y=slice(burst_data["burst_first_line"], burst_data["burst_last_line"] + 1),
