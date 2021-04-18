@@ -197,7 +197,7 @@ def open_burst_dataset(
 ) -> xr.Dataset:
     ds_pol = {
         pol.upper(): rioxarray.open_rasterio(datafile)
-        for pol, datafile in burst_data["measurement"].items()
+        for pol, datafile in burst_data["measurement_path"].items()
     }
     ds = xr.merge([ds_pol])
     ds.attrs.update(product_attrs)  # type: ignore
