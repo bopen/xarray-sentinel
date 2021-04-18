@@ -63,3 +63,14 @@ def test_open_dataset_gcp() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+
+
+def test_open_subswath() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1")  # type: ignore
+
+    assert isinstance(res, xr.Dataset)
+    assert not res.variables
