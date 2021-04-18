@@ -69,3 +69,37 @@ def test_get_burst_info() -> None:
         del burst_info[burst_id]["burst_centre"]
         del partial_expected_burst_info[burst_id]["burst_centre"]
         assert burst_info[burst_id] == partial_expected_burst_info[burst_id]
+
+
+def test_find_avalable_groups() -> None:
+    base_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    ancillary_data_paths = {
+        "iw1": {
+            "annotation_path": {
+                "vv": f"{base_path}/annotation/"
+                + "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
+            },
+        },
+    }
+    product_attrs = {"sat:relative_orbit": 168}
+    expected_groups = {
+        "IW1",
+        "IW1/attitude",
+        "IW1/gcp",
+        "IW1/orbit",
+        "IW1/R168-N115-E0457",
+        "IW1/R168-N116-E0460",
+        "IW1/R168-N116-E0462",
+        "IW1/R168-N116-E0463",
+        "IW1/R168-N117-E0465",
+        "IW1/R168-N117-E0467",
+        "IW1/R168-N118-E0468",
+        "IW1/R168-N118-E0470",
+        "IW1/R168-N118-E0472",
+    }
+
+    groups = sentinel1.find_avalable_groups(ancillary_data_paths, product_attrs)
+    assert set(groups) == expected_groups
