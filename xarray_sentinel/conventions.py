@@ -1,21 +1,27 @@
-import typing as T
-
 import xarray as xr
 
-VARIABLE_ATTRIBUTES: T.Dict[str, T.Dict[str, str]] = {
+VARIABLE_ATTRIBUTES = {
+    "azimuth_time": {"long_name": "azimuth time", "standard_name": "time"},
+    "slant_range_time": {"units": "s", "long_name": "slant range time / two-way delay"},
+    "latitude": {"units": "degrees_north"},
+    "longitude": {"units": "degrees_east"},
+    "height": {"units": "m"},
+    "incidenceAngle": {"units": "degrees"},
+    "elevationAngle": {"units": "degrees"},
     "q0": {"units": "1"},
     "q1": {"units": "1"},
     "q2": {"units": "1"},
-    "pitch": {"units": "degrees"},
+    "q3": {"units": "1"},
     "roll": {"units": "degrees"},
+    "pitch": {"units": "degrees"},
     "yaw": {"units": "degrees"},
-    "time": {},
-    "x": {"units": "m", "long_name": "position_x"},
-    "y": {"units": "m", "long_name": "position_y"},
-    "z": {"units": "m", "long_name": "position_z"},
-    "vx": {"units": "m s-1", "long_name": "velocity_x"},
-    "vy": {"units": "m s-1", "long_name": "velocity_y"},
-    "vz": {"units": "m s-1", "long_name": "velocity_z"},
+    "time": {"standard_name": "time"},
+    "x": {"units": "m", "long_name": "position x"},
+    "y": {"units": "m", "long_name": "position y"},
+    "z": {"units": "m", "long_name": "position z"},
+    "vx": {"units": "m s-1", "long_name": "velocity x"},
+    "vy": {"units": "m s-1", "long_name": "velocity y"},
+    "vz": {"units": "m s-1", "long_name": "velocity z"},
 }
 
 
