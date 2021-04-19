@@ -254,17 +254,6 @@ def compute_burst_centre(gcp: xr.Dataset) -> xr.Dataset:
     return centre  # type: ignore
 
 
-def get_bursts_gcp(
-    subswath_gcp: T.List[T.Dict[str, T.Any]], linesPerBurst: int
-) -> T.Dict[int, T.List[T.Dict[str, T.Any]]]:
-
-    burst_gcp: T.Dict[int, T.List[T.Dict[str, T.Any]]] = {}
-    for gcp in subswath_gcp:
-        burst_id = gcp["line"] // linesPerBurst
-        burst_gcp.setdefault(burst_id, []).append(gcp)
-    return burst_gcp
-
-
 def get_burst_info(
     product_attrs: T.Dict[str, T.Any], subswath_data: T.Dict[str, T.Dict[str, str]],
 ) -> T.Optional[T.Dict[str, T.Dict[str, T.Any]]]:
