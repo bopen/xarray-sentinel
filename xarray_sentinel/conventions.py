@@ -2,6 +2,8 @@ import xarray as xr
 
 VARIABLE_ATTRIBUTES = {
     "azimuth_time": {"long_name": "azimuth time", "standard_name": "time"},
+    # NOTE: `slant_range_time` is not expressed as `np.timedelta64[ns]` in order to keep enough
+    #   accuracy for interferometric processing, i.e. c * 1ns ~= 30cm.
     "slant_range_time": {"units": "s", "long_name": "slant range time / two-way delay"},
     "latitude": {"units": "degrees_north"},
     "longitude": {"units": "degrees_east"},
