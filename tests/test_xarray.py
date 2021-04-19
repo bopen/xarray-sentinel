@@ -1,5 +1,4 @@
 import pathlib
-import typing as T
 
 import pytest
 import xarray as xr
@@ -7,19 +6,20 @@ import xarray as xr
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
 
-def assert_common_attributes(attrs: T.Dict[T.Hashable, T.Any]) -> None:
-    assert attrs["constellation"] == "sentinel-1"
-    assert attrs["platform"] == "sentinel-1b"
-    assert attrs["instrument"] == ["c-sar"]
-    assert attrs["sat:orbit_state"] == "descending"
-    assert attrs["sat:absolute_orbit"] == 26269
-    assert attrs["sat:relative_orbit"] == 168
-    assert attrs["sat:anx_datetime"] == "2021-04-01T04:49:55.637823Z"
-    assert attrs["sar:frequency_band"] == "C"
-    assert attrs["sar:instrument_mode"] == "IW"
-    assert attrs["sar:polarizations"] == ["VV", "VH"]
-    assert attrs["sar:product_type"] == "SLC"
-    assert attrs["xs:instrument_mode_swaths"] == ["IW1", "IW2", "IW3"]
+COMMON_ATTRIBUTES = {
+    "constellation": "sentinel-1",
+    "platform": "sentinel-1b",
+    "instrument": ["c-sar"],
+    "sat:orbit_state": "descending",
+    "sat:absolute_orbit": 26269,
+    "sat:relative_orbit": 168,
+    "sat:anx_datetime": "2021-04-01T04:49:55.637823Z",
+    "sar:frequency_band": "C",
+    "sar:instrument_mode": "IW",
+    "sar:polarizations": ["VV", "VH"],
+    "sar:product_type": "SLC",
+    "xs:instrument_mode_swaths": ["IW1", "IW2", "IW3"],
+}
 
 
 def test_open_dataset_root() -> None:
@@ -30,7 +30,9 @@ def test_open_dataset_root() -> None:
     res = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
-    assert_common_attributes(res.attrs)
+    for attr_name in COMMON_ATTRIBUTES:
+        assert attr_name in res.attrs
+        assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
 
     res = xr.open_dataset(product_path)  # type: ignore
 
@@ -88,7 +90,9 @@ def test_open_subswath() -> None:
     res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
-    assert_common_attributes(res.attrs)
+    for attr_name in COMMON_ATTRIBUTES:
+        assert attr_name in res.attrs
+        assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
     assert not res.variables
 
 
@@ -101,6 +105,8 @@ def test_open_burst() -> None:
     res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/R168-N118-E0472")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
-    assert_common_attributes(res.attrs)
+    for attr_name in COMMON_ATTRIBUTES:
+        assert attr_name in res.attrs
+        assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
     assert res.dims == {"x": 21632, "y": 1501}
     assert set(res.variables) == {"VH", "VV", "x", "y"}
