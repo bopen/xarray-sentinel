@@ -38,50 +38,6 @@ def test_build_burst_id() -> None:
     assert burst_id == "R168-N118-E0472"
 
 
-def test_get_burst_info() -> None:
-    base_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-    )
-    subswath_data = {
-        "annotation_path": {
-            "vh": str(
-                base_path
-                / "annotation/s1b-iw1-slc-vh-20210401t052624-20210401t052649-026269-032297-001.xml"
-            ),
-        },
-    }
-    product_attrs = {"sat:relative_orbit": 168}
-
-    partial_expected_burst_info = {
-        "R168-N471-E0118": {
-            "burst_centre_latitude": 47.086949354032605,
-            "burst_centre_longitude": 11.806954918616803,
-            "burst_pos": 0,
-            "burst_first_line": 0,
-            "burst_last_line": 1500,
-            "burst_first_pixel": 0,
-            "burst_last_pixel": 21631,
-        },
-    }
-
-    burst_info = sentinel1.get_burst_info(product_attrs, subswath_data)
-
-    assert burst_info is not None
-    assert "R168-N471-E0118" in burst_info
-
-    res = burst_info["R168-N471-E0118"]
-    expected = partial_expected_burst_info["R168-N471-E0118"]
-
-    assert np.isclose(res["burst_centre_longitude"], expected["burst_centre_longitude"])
-    assert np.isclose(res["burst_centre_latitude"], expected["burst_centre_latitude"])
-    assert res["burst_pos"] == expected["burst_pos"]
-    assert res["burst_first_line"] == expected["burst_first_line"]
-    assert res["burst_last_line"] == expected["burst_last_line"]
-    assert res["burst_first_pixel"] == expected["burst_first_pixel"]
-    assert res["burst_last_pixel"] == expected["burst_last_pixel"]
-
-
 def test_find_avalable_groups() -> None:
     base_path = (
         DATA_FOLDER
@@ -116,7 +72,7 @@ def test_find_avalable_groups() -> None:
     assert set(groups) == expected_groups
 
 
-def test_compute_burst_centre() -> None:
+def test_compute_burst_centres() -> None:
     gcp = xr.Dataset(
         {
             "latitude": xr.DataArray(
@@ -129,6 +85,6 @@ def test_compute_burst_centre() -> None:
         },
         attrs={"burst_count": 4},
     )
-    res = sentinel1.compute_burst_centre(gcp)
+    res = sentinel1.compute_burst_centres(gcp)
     assert np.allclose(res.latitude, [0.5, 1.5, 2.5, 3.5])
     assert np.allclose(res.longitude, [5, 15, 25, 35])

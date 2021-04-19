@@ -10,19 +10,6 @@ from xarray_sentinel import conventions, esa_safe
 from xarray_sentinel.esa_safe import PathType
 
 
-def read_swath_attributes(annotation_path: PathType) -> T.Dict[str, T.Any]:
-    swath_timing = esa_safe.parse_swath_timing(annotation_path)
-    linesPerBurst = int(swath_timing["linesPerBurst"])
-    samplesPerBurst = int(swath_timing["samplesPerBurst"])
-    burst_count = swath_timing["burstList"]["@count"]
-    attrs = {
-        "linesPerBurst": linesPerBurst,
-        "samplesPerBurst": samplesPerBurst,
-        "burst_count": burst_count,
-    }
-    return attrs
-
-
 def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_path)
     azimuth_time = []
@@ -72,7 +59,6 @@ def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
             i = pixel.index(ggp["pixel"])
             data_vars[var][1][j, i] = ggp[var]
 
-    attrs = read_swath_attributes(annotation_path)
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         coords={
@@ -87,7 +73,7 @@ def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
                 {"units": "s", "long_name": "slant range time / two-way delay"},
             ),
         },
-        attrs={"Conventions": "CF-1.7", **attrs},  # type: ignore
+        attrs={"Conventions": "CF-1.7"},
     )
     return ds
 
@@ -106,10 +92,9 @@ def open_attitude_dataset(annotation_path: PathType) -> xr.Dataset:
     coords = {
         "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
     }
-    attrs = read_swath_attributes(annotation_path)
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
-        attrs={"Conventions": "CF-1.7", **attrs},  # type: ignore
+        attrs={"Conventions": "CF-1.7"},
         coords=coords,  # type: ignore
     )
 
@@ -145,8 +130,7 @@ def open_orbit_dataset(annotation_path: PathType) -> xr.Dataset:
         "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
     }
 
-    attrs = read_swath_attributes(annotation_path)
-    attrs = {"Conventions": "CF-1.7", **attrs}
+    attrs = {"Conventions": "CF-1.7"}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
 
@@ -169,16 +153,23 @@ def find_avalable_groups(
     groups: T.Dict[str, T.Dict[str, T.Any]] = {}
     for subswath_id, subswath_data_path in ancillary_data_paths.items():
         subswath_id = subswath_id.upper()
-        burst_info = get_burst_info(product_attrs, subswath_data_path)
-        if burst_info is None:
+        if len(subswath_data_path["annotation_path"]) == 0:
             continue
-        subgroups = list(METADATA_OPENERS.keys()) + list(burst_info.keys())
-        groups[subswath_id] = dict(subswath_data_path, subgroups=subgroups)
+        annotation_path = list(subswath_data_path["annotation_path"].values())[0]
+        gcp = open_gcp_dataset(annotation_path)
+        burst_centres = compute_burst_centres(gcp)
+        burst_ids = []
+        for k in range(len(burst_centres.latitude)):
+            burst_centre = burst_centres.isel(azimuth_time=k)
+            burst_ids.append(build_burst_id(product_attrs, burst_centre))
+
+        subgroups = list(METADATA_OPENERS.keys()) + burst_ids
+
+        groups[subswath_id] = {"subgroups": subgroups, **subswath_data_path}
         for subgroup in METADATA_OPENERS.keys():
             groups[f"{subswath_id}/{subgroup}"] = subswath_data_path
-        for burst_id, burst_data in burst_info.items():
-            full_data = dict(subswath_data_path, **burst_data)
-            groups[f"{subswath_id}/{burst_id}"] = full_data
+        for k, burst_id in enumerate(burst_ids):
+            groups[f"{subswath_id}/{burst_id}"] = {"position": k, **subswath_data_path}
     return groups
 
 
@@ -211,18 +202,30 @@ def open_swath_dataset(
 
 
 def open_burst_dataset(
-    product_attrs: T.Dict[str, str], burst_id: str, burst_data: T.Dict[str, T.Any]
+    product_attrs: T.Dict[str, str], burst_id: str, burst_data: T.Dict[str, T.Any],
 ) -> xr.Dataset:
     ds_pol = {
         pol.upper(): rioxarray.open_rasterio(datafile)
         for pol, datafile in burst_data["measurement_path"].items()
     }
+    annotation_path = list(burst_data["annotation_path"].values())[0]
+    burst_pos = burst_data["position"]
+
+    swath_timing = esa_safe.parse_swath_timing(annotation_path)
+    linesPerBurst = int(swath_timing["linesPerBurst"])
+    samplesPerBurst = int(swath_timing["samplesPerBurst"])
+
+    burst_first_line = burst_pos * linesPerBurst
+    burst_last_line = (burst_pos + 1) * linesPerBurst - 1
+    burst_first_pixel = 0
+    burst_last_pixel = samplesPerBurst - 1
+
     ds = xr.merge([ds_pol])
     ds.attrs.update(product_attrs)  # type: ignore
     ds = ds.squeeze("band").drop_vars(["band", "spatial_ref"])
     ds = ds.isel(
-        x=slice(burst_data["burst_first_pixel"], burst_data["burst_last_pixel"] + 1),
-        y=slice(burst_data["burst_first_line"], burst_data["burst_last_line"] + 1),
+        x=slice(burst_first_pixel, burst_last_pixel + 1),
+        y=slice(burst_first_line, burst_last_line + 1),
     )
     return ds
 
@@ -242,41 +245,12 @@ def build_burst_id(product_attrs: T.Dict[str, T.Any], burst_centre: xr.Dataset,)
     return burst_id
 
 
-def compute_burst_centre(gcp: xr.Dataset) -> xr.Dataset:
-    burst_count = gcp.burst_count
-    gcp_azimuth_count = len(gcp.azimuth_time)
-
-    gcp_per_burst = (gcp_azimuth_count - 1) // burst_count + 1
-    gcp_rolling = gcp.rolling(azimuth_time=gcp_per_burst, min_periods=gcp_per_burst - 1)
+def compute_burst_centres(gcp: xr.Dataset) -> xr.Dataset:
+    gcp_rolling = gcp.rolling(azimuth_time=2, min_periods=1)
     gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
     centre = gc_az_win.mean(["az_win", "slant_range_time"])
-    centre = centre.isel(azimuth_time=slice(gcp_per_burst - 1, None, gcp_per_burst - 1))
+    centre = centre.isel(azimuth_time=slice(1, None))
     return centre  # type: ignore
-
-
-def get_burst_info(
-    product_attrs: T.Dict[str, T.Any], subswath_data: T.Dict[str, T.Dict[str, str]],
-) -> T.Optional[T.Dict[str, T.Dict[str, T.Any]]]:
-    if len(subswath_data["annotation_path"]) == 0:
-        return None
-    annotation_path = list(subswath_data["annotation_path"].values())[0]
-    gcp = open_gcp_dataset(annotation_path)
-    burst_centre = compute_burst_centre(gcp)
-
-    burst_info = {}
-    for burst_pos in range(gcp.burst_count):
-        centre = burst_centre.isel(azimuth_time=burst_pos)
-        burst_id = build_burst_id(product_attrs, centre)
-        burst_info[burst_id] = dict(
-            burst_centre_longitude=float(centre.longitude.values),
-            burst_centre_latitude=float(centre.latitude.values),
-            burst_pos=burst_pos,
-            burst_first_line=burst_pos * gcp.linesPerBurst,
-            burst_last_line=(burst_pos + 1) * gcp.linesPerBurst - 1,
-            burst_first_pixel=0,
-            burst_last_pixel=gcp.samplesPerBurst - 1,
-        )
-    return burst_info
 
 
 class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
