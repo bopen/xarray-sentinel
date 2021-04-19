@@ -28,13 +28,12 @@ def test_filter_missing_path() -> None:
 
 
 def test_build_burst_id() -> None:
-    product_attrs = {"sat:relative_orbit": 168}
-    burst_centre = xr.Dataset(
-        dict(
-            latitude=xr.DataArray([11.8475875]), longitude=xr.DataArray([47.16626783]),
-        )
-    )
-    burst_id = sentinel1.build_burst_id(product_attrs, burst_centre)
+    lat = 11.8475875
+    lon = 47.16626783
+    relative_orbit = 168
+
+    burst_id = sentinel1.build_burst_id(lat=lat, lon=lon, relative_orbit=relative_orbit)
+
     assert burst_id == "R168-N118-E0472"
 
 
@@ -85,6 +84,6 @@ def test_compute_burst_centres() -> None:
         },
         attrs={"burst_count": 4},
     )
-    res = sentinel1.compute_burst_centres(gcp)
-    assert np.allclose(res.latitude, [0.5, 1.5, 2.5, 3.5])
-    assert np.allclose(res.longitude, [5, 15, 25, 35])
+    lat, lon = sentinel1.compute_burst_centres(gcp)
+    assert np.allclose(lat, [0.5, 1.5, 2.5, 3.5])
+    assert np.allclose(lon, [5, 15, 25, 35])

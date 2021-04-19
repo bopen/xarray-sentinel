@@ -157,11 +157,14 @@ def find_avalable_groups(
             continue
         annotation_path = list(subswath_data_path["annotation_path"].values())[0]
         gcp = open_gcp_dataset(annotation_path)
-        burst_centres = compute_burst_centres(gcp)
-        burst_ids = []
-        for k in range(len(burst_centres.latitude)):
-            burst_centre = burst_centres.isel(azimuth_time=k)
-            burst_ids.append(build_burst_id(product_attrs, burst_centre))
+        centres_lat, centres_lon = compute_burst_centres(gcp)
+        burst_ids: T.List[str] = []
+        for k in range(len(centres_lat)):
+            burst_ids.append(
+                build_burst_id(
+                    centres_lat[k], centres_lon[k], product_attrs["sat:relative_orbit"]
+                )
+            )
 
         subgroups = list(METADATA_OPENERS.keys()) + burst_ids
 
@@ -230,27 +233,22 @@ def open_burst_dataset(
     return ds
 
 
-def build_burst_id(product_attrs: T.Dict[str, T.Any], burst_centre: xr.Dataset,) -> str:
-    burst_centre = burst_centre.squeeze()
-    rounded_centre = (burst_centre.round(1) * 10).astype(int)
-    lat = rounded_centre.latitude.values
-    lon = rounded_centre.longitude.values
+def build_burst_id(lat: float, lon: float, relative_orbit: int,) -> str:
+    lat = int(round(lat * 10))
+    lon = int(round(lon * 10))
+
     n_or_s = "N" if lat >= 0 else "S"
     e_or_w = "E" if lon >= 0 else "W"
-    burst_id = (
-        f"R{product_attrs['sat:relative_orbit']:03}"
-        f"-{n_or_s}{lat:03}"
-        f"-{e_or_w}{lon:04}"
-    )
+    burst_id = f"R{relative_orbit:03}" f"-{n_or_s}{lat:03}" f"-{e_or_w}{lon:04}"
     return burst_id
 
 
-def compute_burst_centres(gcp: xr.Dataset) -> xr.Dataset:
+def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[np.ndarray, np.ndarray]:
     gcp_rolling = gcp.rolling(azimuth_time=2, min_periods=1)
     gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
     centre = gc_az_win.mean(["az_win", "slant_range_time"])
     centre = centre.isel(azimuth_time=slice(1, None))
-    return centre  # type: ignore
+    return centre.latitude.values, centre.longitude.values
 
 
 class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
@@ -301,3 +299,11 @@ METADATA_OPENERS = {
     "attitude": open_attitude_dataset,
     "orbit": open_orbit_dataset,
 }
+
+# def compute_burst_coordinate(annotation_path):
+#     azimuth_start = annot['azimuthTime'], epoch_utc_calendar)
+#     azimuth_sampling = float(annot['azimuthTimeInterval'])
+#     azimuth_count = int(annot['linesPerBurst'])
+#     slant_range_start = float(annot['imageInformation/slantRangeTime'])
+#     slant_range_sampling = 1 / float(annot['rangeSamplingRate'])
+#     slant_range_count = int(annot['samplesPerBurst'])
