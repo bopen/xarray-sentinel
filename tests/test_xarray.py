@@ -102,7 +102,7 @@ def test_open_burst() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/R168-N118-E0472")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/R168-N471-E0118")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     for attr_name in COMMON_ATTRIBUTES:
