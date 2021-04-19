@@ -215,8 +215,8 @@ def open_burst_dataset(
     burst_pos = burst_data["position"]
 
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
-    linesPerBurst = int(swath_timing["linesPerBurst"])
-    samplesPerBurst = int(swath_timing["samplesPerBurst"])
+    linesPerBurst = swath_timing["linesPerBurst"]
+    samplesPerBurst = swath_timing["samplesPerBurst"]
 
     burst_first_line = burst_pos * linesPerBurst
     burst_last_line = (burst_pos + 1) * linesPerBurst - 1
