@@ -44,7 +44,6 @@ def open_gcp_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
             "azimuth_time": [np.datetime64(dt) for dt in sorted(azimuth_time)],
             "slant_range_time": sorted(slant_range_time),
         },
-        attrs={"Conventions": "CF-1.7"},
     )
     conventions.update_attributes(ds)
     return ds
@@ -61,16 +60,10 @@ def open_attitude_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
         for var in variables:
             data_vars[var][1].append(attitude[k][var])
 
-    coords = {
-        "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
-    }
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
-        attrs={"Conventions": "CF-1.7"},
-        coords=coords,  # type: ignore
+        coords={"time": [np.datetime64(dt) for dt in time]},
     )
-
-    ds = ds.update({"time": ds.time.astype(np.datetime64)})
     ds = conventions.update_attributes(ds)
     return ds
 
@@ -98,18 +91,14 @@ def open_orbit_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
             )
             reference_system = None
 
-    coords = {
-        "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
-    }
-    attrs = {"Conventions": "CF-1.7"}
+    attrs = {}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs=attrs,  # type: ignore
-        coords=coords,  # type: ignore
+        coords={"time": [np.datetime64(dt) for dt in time]},
     )
-    ds = ds.update({"time": ds.time.astype(np.datetime64)})
     ds = conventions.update_attributes(ds)
     return ds
 

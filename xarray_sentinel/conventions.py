@@ -26,6 +26,7 @@ VARIABLE_ATTRIBUTES = {
 
 
 def update_attributes(ds: xr.Dataset) -> xr.Dataset:
+    ds.attrs["Conventions"] = "CF-1.7"
     for var in ds.variables:
         attrs = VARIABLE_ATTRIBUTES.get(str(var), {})
         ds.variables[var].attrs.update(attrs)  # type: ignore
