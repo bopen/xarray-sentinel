@@ -3,6 +3,7 @@ import typing as T
 import warnings
 
 import numpy as np
+import pandas as pd
 import rioxarray  # type: ignore
 import xarray as xr
 
@@ -215,6 +216,8 @@ def open_burst_dataset(
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    image_information = esa_safe.parse_image_information(annotation_path)
+    processing_information = esa_safe.parse_processing_information(annotation_path)
     ds_pol = {
         pol.upper(): rioxarray.open_rasterio(datafile)
         for pol, datafile in measurement_paths.items()
@@ -223,6 +226,13 @@ def open_burst_dataset(
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = swath_timing["linesPerBurst"]
     samplesPerBurst = swath_timing["samplesPerBurst"]
+    first_azimuth_time = pd.to_datetime(swath_timings[burst_position]["azimuthTime"])
+    azimuth_time_interval = pd.to_timedelta(image_information["azimuthTimeInterval"], "s")
+    azimuth_time = pd.date_range(
+        start=first_azimuth_time,
+        periods=linesPerBurst
+        freq=azimuth_time_interval,
+    )
 
     burst_first_line = burst_position * linesPerBurst
     burst_last_line = (burst_position + 1) * linesPerBurst - 1
@@ -230,6 +240,7 @@ def open_burst_dataset(
     burst_last_pixel = samplesPerBurst - 1
 
     ds = xr.merge([ds_pol])  # type: ignore
+    ds = xr.merge([ds_pol, dict(azimuth_time=azimuth_time)])
     ds.attrs.update(product_attrs)  # type: ignore
     ds = ds.squeeze("band").drop_vars(["band", "spatial_ref"])
     ds = ds.isel(
