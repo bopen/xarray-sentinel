@@ -2,6 +2,7 @@ import pathlib
 import tempfile
 
 import numpy as np
+import xarray as xr
 
 from xarray_sentinel import sentinel1
 
@@ -28,7 +29,11 @@ def test_filter_missing_path() -> None:
 
 def test_build_burst_id() -> None:
     product_attrs = {"sat:relative_orbit": 168}
-    burst_centre = [11.8475875, 47.16626783]
+    burst_centre = xr.Dataset(
+        dict(
+            latitude=xr.DataArray([11.8475875]), longitude=xr.DataArray([47.16626783]),
+        )
+    )
     burst_id = sentinel1.build_burst_id(product_attrs, burst_centre)
     assert burst_id == "R168-N118-E0472"
 
@@ -47,9 +52,11 @@ def test_get_burst_info() -> None:
         },
     }
     product_attrs = {"sat:relative_orbit": 168}
+
     partial_expected_burst_info = {
-        "R168-N118-E0472": {
-            "burst_centre": np.array([11.8475875, 47.16626783]),
+        "R168-N471-E0118": {
+            "burst_centre_latitude": 47.086949354032605,
+            "burst_centre_longitude": 11.806954918616803,
             "burst_pos": 0,
             "burst_first_line": 0,
             "burst_last_line": 1500,
@@ -59,16 +66,20 @@ def test_get_burst_info() -> None:
     }
 
     burst_info = sentinel1.get_burst_info(product_attrs, subswath_data)
-    assert burst_info is not None
 
-    for burst_id in partial_expected_burst_info:
-        assert np.allclose(
-            np.asanyarray(burst_info[burst_id]["burst_centre"]),
-            np.asanyarray(partial_expected_burst_info[burst_id]["burst_centre"]),
-        )
-        del burst_info[burst_id]["burst_centre"]
-        del partial_expected_burst_info[burst_id]["burst_centre"]
-        assert burst_info[burst_id] == partial_expected_burst_info[burst_id]
+    assert burst_info is not None
+    assert "R168-N471-E0118" in burst_info
+
+    res = burst_info["R168-N471-E0118"]
+    expected = partial_expected_burst_info["R168-N471-E0118"]
+
+    assert np.isclose(res["burst_centre_longitude"], expected["burst_centre_longitude"])
+    assert np.isclose(res["burst_centre_latitude"], expected["burst_centre_latitude"])
+    assert res["burst_pos"] == expected["burst_pos"]
+    assert res["burst_first_line"] == expected["burst_first_line"]
+    assert res["burst_last_line"] == expected["burst_last_line"]
+    assert res["burst_first_pixel"] == expected["burst_first_pixel"]
+    assert res["burst_last_pixel"] == expected["burst_last_pixel"]
 
 
 def test_find_avalable_groups() -> None:
@@ -90,16 +101,34 @@ def test_find_avalable_groups() -> None:
         "IW1/attitude",
         "IW1/gcp",
         "IW1/orbit",
-        "IW1/R168-N115-E0457",
-        "IW1/R168-N116-E0460",
-        "IW1/R168-N116-E0462",
-        "IW1/R168-N116-E0463",
-        "IW1/R168-N117-E0465",
-        "IW1/R168-N117-E0467",
-        "IW1/R168-N118-E0468",
-        "IW1/R168-N118-E0470",
-        "IW1/R168-N118-E0472",
+        "IW1/R168-N471-E0118",
+        "IW1/R168-N469-E0118",
+        "IW1/R168-N468-E0117",
+        "IW1/R168-N466-E0117",
+        "IW1/R168-N464-E0116",
+        "IW1/R168-N463-E0116",
+        "IW1/R168-N461-E0116",
+        "IW1/R168-N459-E0115",
+        "IW1/R168-N458-E0115",
     }
 
     groups = sentinel1.find_avalable_groups(ancillary_data_paths, product_attrs)
     assert set(groups) == expected_groups
+
+
+def test_compute_burst_centre() -> None:
+    gcp = xr.Dataset(
+        {
+            "latitude": xr.DataArray(
+                np.arange(5).reshape(5, 1), dims=("azimuth_time", "slant_range_time")
+            ),
+            "longitude": xr.DataArray(
+                np.arange(5).reshape(5, 1) * 10,
+                dims=("azimuth_time", "slant_range_time"),
+            ),
+        },
+        attrs={"burst_count": 4},
+    )
+    res = sentinel1.compute_burst_centre(gcp)
+    assert np.allclose(res.latitude, [0.5, 1.5, 2.5, 3.5])
+    assert np.allclose(res.longitude, [5, 15, 25, 35])

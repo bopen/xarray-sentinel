@@ -10,8 +10,22 @@ from xarray_sentinel import conventions, esa_safe
 from xarray_sentinel.esa_safe import PathType
 
 
+def read_swath_attributes(annotation_path: PathType) -> T.Dict[str, T.Any]:
+    swath_timing = esa_safe.parse_swath_timing(annotation_path)
+    linesPerBurst = int(swath_timing["linesPerBurst"])
+    samplesPerBurst = int(swath_timing["samplesPerBurst"])
+    burst_count = swath_timing["burstList"]["@count"]
+    attrs = {
+        "linesPerBurst": linesPerBurst,
+        "samplesPerBurst": samplesPerBurst,
+        "burst_count": burst_count,
+    }
+    return attrs
+
+
 def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_path)
+    attrs = read_swath_attributes(annotation_path)
     azimuth_time = []
     slant_range_time = []
     line_set = set()
@@ -73,7 +87,7 @@ def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
                 {"units": "s", "long_name": "slant range time / two-way delay"},
             ),
         },
-        attrs={"Conventions": "CF-1.7"},
+        attrs={"Conventions": "CF-1.7", **attrs},  # type: ignore
     )
     return ds
 
@@ -209,27 +223,30 @@ def open_burst_dataset(
     return ds
 
 
-def build_burst_id(
-    product_attrs: T.Dict[str, T.Any], burst_centre: np.typing.ArrayLike,
-) -> str:
-    rounded_centre = np.int_(np.round(burst_centre, 1) * 10)
-    n_or_s = "N" if rounded_centre[0] >= 0 else "S"
-    e_or_w = "E" if rounded_centre[1] >= 0 else "W"
+def build_burst_id(product_attrs: T.Dict[str, T.Any], burst_centre: xr.Dataset,) -> str:
+    burst_centre = burst_centre.squeeze()
+    rounded_centre = (burst_centre.round(1) * 10).astype(int)
+    lat = rounded_centre.latitude.values
+    lon = rounded_centre.longitude.values
+    n_or_s = "N" if lat >= 0 else "S"
+    e_or_w = "E" if lon >= 0 else "W"
     burst_id = (
         f"R{product_attrs['sat:relative_orbit']:03}"
-        f"-{n_or_s}{rounded_centre[0]:03}"
-        f"-{e_or_w}{rounded_centre[1]:04}"
+        f"-{n_or_s}{lat:03}"
+        f"-{e_or_w}{lon:04}"
     )
     return burst_id
 
 
-def compute_burst_center(burst_gcp: T.List[T.Dict[str, float]]) -> np.ndarray:
-    first_and_last = burst_gcp[:: len(burst_gcp) - 1]  # TODO: take full lines
-    coords = [
-        (geoloc_item["longitude"], geoloc_item["latitude"])
-        for geoloc_item in first_and_last
-    ]
-    centre = np.mean(coords, axis=0)
+def compute_burst_centre(gcp: xr.Dataset) -> xr.Dataset:
+    burst_count = gcp.burst_count
+    gcp_azimuth_count = len(gcp.azimuth_time)
+
+    gcp_per_burst = (gcp_azimuth_count - 1) // burst_count + 1
+    gcp_rolling = gcp.rolling(azimuth_time=gcp_per_burst, min_periods=gcp_per_burst - 1)
+    gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
+    centre = gc_az_win.mean(["az_win", "slant_range_time"])
+    centre = centre.isel(azimuth_time=slice(gcp_per_burst - 1, None, gcp_per_burst - 1))
     return centre  # type: ignore
 
 
@@ -250,25 +267,21 @@ def get_burst_info(
     if len(subswath_data["annotation_path"]) == 0:
         return None
     annotation_path = list(subswath_data["annotation_path"].values())[0]
-    subswath_gcp = esa_safe.parse_geolocation_grid_points(annotation_path)
-
-    swath_timing = esa_safe.parse_swath_timing(annotation_path)
-    linesPerBurst = int(swath_timing["linesPerBurst"])
-    samplesPerBurst = int(swath_timing["samplesPerBurst"])
-
-    bursts_gcp = get_bursts_gcp(subswath_gcp, linesPerBurst)
+    gcp = open_gcp_dataset(annotation_path)
+    burst_centre = compute_burst_centre(gcp)
 
     burst_info = {}
-    for burst_pos, burst_gcp in bursts_gcp.items():
-        centre = compute_burst_center(burst_gcp)
+    for burst_pos in range(gcp.burst_count):
+        centre = burst_centre.isel(azimuth_time=burst_pos)
         burst_id = build_burst_id(product_attrs, centre)
         burst_info[burst_id] = dict(
-            burst_centre=centre,
+            burst_centre_longitude=float(centre.longitude.values),
+            burst_centre_latitude=float(centre.latitude.values),
             burst_pos=burst_pos,
-            burst_first_line=burst_pos * linesPerBurst,
-            burst_last_line=(burst_pos + 1) * linesPerBurst - 1,
+            burst_first_line=burst_pos * gcp.linesPerBurst,
+            burst_last_line=(burst_pos + 1) * gcp.linesPerBurst - 1,
             burst_first_pixel=0,
-            burst_last_pixel=samplesPerBurst - 1,
+            burst_last_pixel=gcp.samplesPerBurst - 1,
         )
     return burst_info
 
