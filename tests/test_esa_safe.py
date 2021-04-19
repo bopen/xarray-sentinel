@@ -199,6 +199,24 @@ def test_parse_azimuth_fm_rate() -> None:
     assert isinstance(res[0]["azimuthFmRatePolynomial"], list)
 
 
+def test_parse_dc_estimate() -> None:
+    res = esa_safe.parse_dc_estimate(ANNOTATION_PATH)
+    expected = {
+        "azimuthTime",
+        "t0",
+        "geometryDcPolynomial",
+        "dataDcPolynomial",
+        "dataDcRmsError",
+        "dataDcRmsErrorAboveThreshold",
+        "fineDceAzimuthStartTime",
+        "fineDceAzimuthStopTime",
+    }
+
+    assert isinstance(res, list)
+    assert set(res[0]) == expected
+    assert isinstance(res[0]["dataDcPolynomial"], list)
+
+
 @pytest.mark.parametrize("product_id,expected", SENTINEL1_ATTRIBUTES.items())
 def test_parse_manifest_sentinel1(
     product_id: str, expected: T.Dict[str, T.Any]

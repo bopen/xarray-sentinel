@@ -95,6 +95,10 @@ def parse_product_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation_path, "product", ".//productInformation")
 
 
+def parse_image_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
+    return parse_tag_dict(annotation_path, "product", ".//imageInformation")
+
+
 def parse_azimuth_fm_rate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
     azimuth_fm_rate = []
     for afmr in parse_tag_list(annotation_path, "product", ".//azimuthFmRate"):
@@ -107,7 +111,7 @@ def parse_azimuth_fm_rate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any
 def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
     dc_estimate = []
     for de in parse_tag_list(annotation_path, "product", ".//dcEstimate"):
-        poly = [float(c) for c in de["dataDcPolynomial"]]
+        poly = [float(c) for c in de["dataDcPolynomial"]["$"].split()]
         de["dataDcPolynomial"] = poly
         de.pop("fineDceList")  # drop large unused data
         dc_estimate.append(de)
