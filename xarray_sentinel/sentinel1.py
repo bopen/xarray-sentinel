@@ -25,7 +25,6 @@ def read_swath_attributes(annotation_path: PathType) -> T.Dict[str, T.Any]:
 
 def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_path)
-    attrs = read_swath_attributes(annotation_path)
     azimuth_time = []
     slant_range_time = []
     line_set = set()
@@ -73,6 +72,7 @@ def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
             i = pixel.index(ggp["pixel"])
             data_vars[var][1][j, i] = ggp[var]
 
+    attrs = read_swath_attributes(annotation_path)
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         coords={
@@ -106,9 +106,10 @@ def open_attitude_dataset(annotation_path: PathType) -> xr.Dataset:
     coords = {
         "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
     }
+    attrs = read_swath_attributes(annotation_path)
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
-        attrs={"Conventions": "CF-1.7"},
+        attrs={"Conventions": "CF-1.7", **attrs},  # type: ignore
         coords=coords,  # type: ignore
     )
 
@@ -143,9 +144,12 @@ def open_orbit_dataset(annotation_path: PathType) -> xr.Dataset:
     coords = {
         "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
     }
-    attrs = {"Conventions": "CF-1.7"}
+
+    attrs = read_swath_attributes(annotation_path)
+    attrs = {"Conventions": "CF-1.7", **attrs}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
+
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs=attrs,  # type: ignore
