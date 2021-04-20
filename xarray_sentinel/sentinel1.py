@@ -153,7 +153,8 @@ def filter_missing_path(path_dict: T.Dict[str, T.Any]) -> T.Dict[str, T.Any]:
 
 
 def open_root_dataset(
-    manifest_path: PathType, groups: T.Dict[str, T.Dict[str, T.Collection[str]]]
+    manifest_path: esa_safe.PathType,
+    groups: T.Dict[str, T.Dict[str, T.Collection[str]]],
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
@@ -161,7 +162,9 @@ def open_root_dataset(
     return xr.Dataset(attrs=attrs)  # type: ignore
 
 
-def open_swath_dataset(manifest_path: PathType, subgrups: T.List[int],) -> xr.Dataset:
+def open_swath_dataset(
+    manifest_path: esa_safe.PathType, subgrups: T.List[int],
+) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=subgrups)
@@ -169,10 +172,10 @@ def open_swath_dataset(manifest_path: PathType, subgrups: T.List[int],) -> xr.Da
 
 
 def open_burst_dataset(
-    manifest_path: PathType,
+    manifest_path: esa_safe.PathType,
     burst_position: int,
-    measurement_paths: T.Dict[str, PathType],
-    annotation_path: PathType,
+    measurement_paths: T.Dict[str, esa_safe.PathType],
+    annotation_path: esa_safe.PathType,
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
