@@ -3,7 +3,7 @@ import typing as T
 import warnings
 
 import numpy as np
-import pandas as pd
+import pandas as pd  # type: ignore
 import rioxarray  # type: ignore
 import xarray as xr
 
@@ -242,7 +242,7 @@ def open_burst_dataset(
     burst_last_pixel = samplesPerBurst - 1
 
     ds = xr.merge([ds_pol])  # type: ignore
-    ds = xr.merge([ds_pol, dict(azimuth_time=azimuth_time)])
+    ds = xr.merge([ds_pol, dict(azimuth_time=azimuth_time)])  # type: ignore
     ds.attrs.update(product_attrs)  # type: ignore
     ds = ds.squeeze("band").drop_vars(["band", "spatial_ref"])
     ds = ds.isel(
