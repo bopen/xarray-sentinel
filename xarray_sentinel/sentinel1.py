@@ -226,7 +226,9 @@ def open_burst_dataset(
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = swath_timing["linesPerBurst"]
     samplesPerBurst = swath_timing["samplesPerBurst"]
-    first_azimuth_time = pd.to_datetime(swath_timings[burst_position]["azimuthTime"])
+    first_azimuth_time = pd.to_datetime(
+        swath_timing["burstList"][burst_position]["azimuthTime"]
+    )
     azimuth_time_interval = pd.to_timedelta(
         image_information["azimuthTimeInterval"], "s"
     )
