@@ -159,7 +159,9 @@ def open_root_dataset(
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=list(groups.keys()))
-    return xr.Dataset(attrs=attrs)  # type: ignore
+    ds = xr.Dataset(attrs=attrs)  # type: ignore
+    conventions.update_attributes(ds)
+    return ds
 
 
 def open_swath_dataset(
@@ -168,7 +170,9 @@ def open_swath_dataset(
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=subgrups)
-    return xr.Dataset(attrs=attrs)  # type: ignore
+    ds = xr.Dataset(attrs=attrs)  # type: ignore
+    conventions.update_attributes(ds)
+    return ds
 
 
 def open_burst_dataset(
@@ -200,6 +204,7 @@ def open_burst_dataset(
         x=slice(burst_first_pixel, burst_last_pixel + 1),
         y=slice(burst_first_line, burst_last_line + 1),
     )
+    conventions.update_attributes(ds)
     return ds
 
 

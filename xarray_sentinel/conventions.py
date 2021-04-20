@@ -28,6 +28,7 @@ VARIABLE_ATTRIBUTES = {
 
 
 def update_attributes(ds: xr.Dataset) -> xr.Dataset:
+    # NOTE: keep the version in sync with the capabilities of CF compliance checkers
     ds.attrs["Conventions"] = "CF-1.7"
     for var in ds.variables:
         attrs = VARIABLE_ATTRIBUTES.get(str(var), {})
