@@ -35,8 +35,7 @@ High level requirements:
 - support opening a swath when other swaths are missing (especially the tifs)
 
 
-User experience
----------------
+# User experience
 
 ```python
 >>> ds = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE/manifest.safe")
@@ -73,3 +72,15 @@ information: e.g. for `slant_range_time` -> `"long_name": "two way delay (slantR
 
 * `azimuth_time` as CF time in UTC (warn: may fail on leap seconds)
 * `slant_range_time` as CF time interval in `"s"`
+
+
+# Accuracy considerations
+
+- `azimuth_time` can be expressed as `np.datetime64[ns]` because
+  spatial resolution at LEO speed is 10km/s * 1ns ~= 0.001cm
+- `slant_range_time` cannot be expressed as `np.timedelta64[ns]` because
+  spatial resolution at the speed of light is 300_000km/s * 1ns / 2 ~= 15cm,
+  that it is not enough for interferometric applications.
+  `slant_range_time` needs a spatial resolution of 0.001cm at a 1_000km distance
+  so around 1e-9 that is well within 1e-15 resolution of IEEE-754 float64.
+
