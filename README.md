@@ -13,25 +13,29 @@ Xarray backend to explore and load Copernicus Sentinel-1 satellite data products
 
 ## Sentinel-1 SLC IWS
 
-### Data  
+### Data
+
 Currently, xarray-sentinel provides access as Xarray datsets to the following data:
 - burst data
 - gcp
 - orbit
 - attitude
 
-using `aximuth_time` and `slant_range_time` refence system.
+using `azimuth_time` and `slant_range_time` dimensions.
 
 
 ## Examples:
 
 ### Open root dataset
 ```python
+>>> import xarray as xr
+>>> product_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
 >>> xr.open_dataset(product_path, engine="sentinel-1")
+<xarray.Dataset>
 Dimensions:  ()
 Data variables:
     *empty*
-Attributes: (12/13)
+Attributes: (12/14)
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
@@ -39,13 +43,15 @@ Attributes: (12/13)
     sat:absolute_orbit:         26269
     sat:relative_orbit:         168
     ...                         ...
-    sar:frequency_band:         C
     sar:instrument_mode:        IW
     sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     groups:                     ['IW1', 'IW1/gcp', 'IW1/attitude', 'IW1/orbit...
+    Conventions:                CF-1.7
+
 ```
+
 the attributes `groups` shows the avaible groups to be loaded. The key `group`
 shall be used to select the dataset to be loaded.
 
@@ -66,8 +72,11 @@ Data variables:
     elevationAngle    (azimuth_time, slant_range_time) float64 ...
 Attributes:
     Conventions:  CF-1.7
+
 ```
+
 ### Open attitude dataset
+
 ```python
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")
 <xarray.Dataset>
@@ -86,11 +95,13 @@ Data variables:
     yaw      (time) float64 ...
 Attributes:
     Conventions:  CF-1.7
+
 ```
 
 ### Open orbit dataset
+
 ```python
->>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")
+>>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/orbit")
 <xarray.Dataset>
 Dimensions:  (time: 17)
 Coordinates:
@@ -103,6 +114,36 @@ Data variables:
     vy       (time) float64 ...
     vz       (time) float64 ...
 Attributes:
-    Conventions:       CF-1.7
     reference_system:  Earth Fixed
+    Conventions:       CF-1.7
+
+```
+
+### Open a single burst
+
+```python
+>>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/R168-N459-E0115")
+<xarray.Dataset>
+    Dimensions:  (x: 21632, y: 1501)
+    Coordinates:
+      * y        (y) float64 1.051e+04 1.051e+04 1.051e+04 ... 1.201e+04 1.201e+04
+      * x        (x) float64 0.5 1.5 2.5 3.5 ... 2.163e+04 2.163e+04 2.163e+04
+    Data variables:
+        VH       (y, x) complex128 ...
+        VV       (y, x) complex128 ...
+    Attributes: (12/13)
+        constellation:              sentinel-1
+        platform:                   sentinel-1b
+        instrument:                 ['c-sar']
+        sat:orbit_state:            descending
+        sat:absolute_orbit:         26269
+        sat:relative_orbit:         168
+        ...                         ...
+        sar:frequency_band:         C
+        sar:instrument_mode:        IW
+        sar:polarizations:          ['VV', 'VH']
+        sar:product_type:           SLC
+        xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+        Conventions:                CF-1.7
+
 ```
