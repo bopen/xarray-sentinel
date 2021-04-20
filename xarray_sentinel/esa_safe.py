@@ -7,7 +7,7 @@ from xml.etree import ElementTree
 import pkg_resources
 import xmlschema
 
-PathType = T.Union[str, os.PathLike]
+PathType = T.Union[str, "os.PathLike[str]"]
 
 
 SENTINEL1_NAMESPACES = {
@@ -87,11 +87,38 @@ def parse_geolocation_grid_points(
     return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 
-def parse_swath_timing(annotation_path: PathType,) -> T.Dict[str, T.Any]:
+def parse_swath_timing(annotation_path: PathType) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation_path, "product", ".//swathTiming")
 
 
 @functools.lru_cache()
+def parse_product_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
+    return parse_tag_dict(annotation_path, "product", ".//productInformation")
+
+
+def parse_image_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
+    return parse_tag_dict(annotation_path, "product", ".//imageInformation")
+
+
+def parse_azimuth_fm_rate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    azimuth_fm_rate = []
+    for afmr in parse_tag_list(annotation_path, "product", ".//azimuthFmRate"):
+        poly = [float(c) for c in afmr["azimuthFmRatePolynomial"]["$"].split()]
+        afmr["azimuthFmRatePolynomial"] = poly
+        azimuth_fm_rate.append(afmr)
+    return azimuth_fm_rate
+
+
+def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+    dc_estimate = []
+    for de in parse_tag_list(annotation_path, "product", ".//dcEstimate"):
+        poly = [float(c) for c in de["dataDcPolynomial"]["$"].split()]
+        de["dataDcPolynomial"] = poly
+        de.pop("fineDceList")  # drop large unused data
+        dc_estimate.append(de)
+    return dc_estimate
+
+
 def open_manifest(
     product_path: PathType,
 ) -> T.Tuple[pathlib.Path, ElementTree.ElementTree]:
