@@ -5,3 +5,5 @@ try:
 except ImportError:
     # Local copy or not installed with setuptools
     __version__ = "999"
+
+__all__ = ["__version__"]
