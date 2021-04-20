@@ -3,13 +3,14 @@ import typing as T
 import warnings
 
 import numpy as np
+import rioxarray  # type: ignore
 import xarray as xr
 
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_gcp_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
-    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(product_path)
+def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
+    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_path)
     azimuth_time = []
     slant_range_time = []
     line_set = set()
@@ -49,8 +50,8 @@ def open_gcp_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
     return ds
 
 
-def open_attitude_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
-    attitude = esa_safe.parse_attitude(product_path)
+def open_attitude_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
+    attitude = esa_safe.parse_attitude(annotation_path)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     time: T.List[T.Any] = []
@@ -68,8 +69,8 @@ def open_attitude_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
     return ds
 
 
-def open_orbit_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
-    orbit = esa_safe.parse_orbit(product_path)
+def open_orbit_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
+    orbit = esa_safe.parse_orbit(annotation_path)
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
@@ -87,13 +88,14 @@ def open_orbit_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
-                f"xpath: .//orbit//frame \nFile: {str(product_path)}"
+                f"xpath: .//orbit//frame \nFile: {str(annotation_path)}"
             )
             reference_system = None
 
     attrs = {}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
+
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs=attrs,  # type: ignore
@@ -103,32 +105,117 @@ def open_orbit_dataset(product_path: esa_safe.PathType) -> xr.Dataset:
     return ds
 
 
-def find_avalable_groups(product_path: str) -> T.Tuple[T.List[str], T.List[str]]:
-    _, manifest = esa_safe.open_manifest(product_path)
+def find_avalable_groups(
+    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]],
+    product_attrs: T.Dict[str, T.Any],
+) -> T.Dict[str, T.Dict[str, T.Any]]:
+
+    ancillary_data_paths = filter_missing_path(ancillary_data_paths)
+    groups: T.Dict[str, T.Dict[str, T.Any]] = {}
+    for subswath_id, subswath_data_path in ancillary_data_paths.items():
+        subswath_id = subswath_id.upper()
+        if len(subswath_data_path["annotation_path"]) == 0:
+            continue
+        annotation_path = list(subswath_data_path["annotation_path"].values())[0]
+        gcp = open_gcp_dataset(annotation_path)
+        centres_lat, centres_lon = compute_burst_centres(gcp)
+        burst_ids: T.List[str] = []
+        for k in range(len(centres_lat)):
+            burst_ids.append(
+                build_burst_id(
+                    centres_lat[k], centres_lon[k], product_attrs["sat:relative_orbit"]
+                )
+            )
+
+        subgroups = list(METADATA_OPENERS.keys()) + burst_ids
+
+        groups[subswath_id] = {"subgroups": subgroups, **subswath_data_path}
+        for subgroup in METADATA_OPENERS.keys():
+            groups[f"{subswath_id}/{subgroup}"] = subswath_data_path
+        for k, burst_id in enumerate(burst_ids):
+            groups[f"{subswath_id}/{burst_id}"] = {
+                "burst_position": k,
+                **subswath_data_path,
+            }
+    return groups
+
+
+def filter_missing_path(path_dict: T.Dict[str, T.Any]) -> T.Dict[str, T.Any]:
+
+    path_dict_copy = path_dict.copy()
+    for k in path_dict:
+        if isinstance(path_dict[k], dict):
+            path_dict_copy[k] = filter_missing_path(path_dict[k])
+        else:
+            if not os.path.exists(path_dict[k]):
+                del path_dict_copy[k]
+    return path_dict_copy
+
+
+def open_root_dataset(
+    manifest_path: PathType, groups: T.Dict[str, T.Dict[str, T.Collection[str]]]
+) -> xr.Dataset:
+    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-    sub_swaths = product_attrs["xs:instrument_mode_swaths"]
-    groups_lev0 = sub_swaths
-    groups_lev1 = []
-    for sub_swath in sub_swaths:
-        for data in METADATA_OPENERS:
-            groups_lev1.append(f"{sub_swath}/{data}")
-    return groups_lev0, groups_lev1
+    attrs = dict(product_attrs, groups=list(groups.keys()))
+    return xr.Dataset(attrs=attrs)  # type: ignore
 
 
-def open_root_dataset(product_path: str) -> xr.Dataset:
-    _, manifest = esa_safe.open_manifest(product_path)
+def open_swath_dataset(manifest_path: PathType, subgrups: T.List[int],) -> xr.Dataset:
+    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-    sub_swaths = product_attrs["xs:instrument_mode_swaths"]
-    product_attrs["groups"] = []
-    for sub_swath in sub_swaths:
-        for data in METADATA_OPENERS:
-            product_attrs["groups"].append(f"{sub_swath}/{data}")
-    return xr.Dataset(attrs=product_attrs)  # type: ignore
+    attrs = dict(product_attrs, groups=subgrups)
+    return xr.Dataset(attrs=attrs)  # type: ignore
 
 
-def open_swath_dataset(product_path: str, group: str) -> xr.Dataset:
-    product_attrs = {"groups": ["orbit", "attitude", "gcp"]}
-    return xr.Dataset(attrs=product_attrs)  # type: ignore
+def open_burst_dataset(
+    manifest_path: PathType,
+    burst_position: int,
+    measurement_paths: T.Dict[str, PathType],
+    annotation_path: PathType,
+) -> xr.Dataset:
+    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    ds_pol = {
+        pol.upper(): rioxarray.open_rasterio(datafile)
+        for pol, datafile in measurement_paths.items()
+    }
+
+    swath_timing = esa_safe.parse_swath_timing(annotation_path)
+    linesPerBurst = swath_timing["linesPerBurst"]
+    samplesPerBurst = swath_timing["samplesPerBurst"]
+
+    burst_first_line = burst_position * linesPerBurst
+    burst_last_line = (burst_position + 1) * linesPerBurst - 1
+    burst_first_pixel = 0
+    burst_last_pixel = samplesPerBurst - 1
+
+    ds = xr.merge([ds_pol])  # type: ignore
+    ds.attrs.update(product_attrs)  # type: ignore
+    ds = ds.squeeze("band").drop_vars(["band", "spatial_ref"])
+    ds = ds.isel(
+        x=slice(burst_first_pixel, burst_last_pixel + 1),
+        y=slice(burst_first_line, burst_last_line + 1),
+    )
+    return ds
+
+
+def build_burst_id(lat: float, lon: float, relative_orbit: int,) -> str:
+    lat = int(round(lat * 10))
+    lon = int(round(lon * 10))
+
+    n_or_s = "N" if lat >= 0 else "S"
+    e_or_w = "E" if lon >= 0 else "W"
+    burst_id = f"R{relative_orbit:03}" f"-{n_or_s}{lat:03}" f"-{e_or_w}{lon:04}"
+    return burst_id
+
+
+def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[np.ndarray, np.ndarray]:
+    gcp_rolling = gcp.rolling(azimuth_time=2, min_periods=1)
+    gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
+    centre = gc_az_win.mean(["az_win", "slant_range_time"])
+    centre = centre.isel(azimuth_time=slice(1, None))
+    return centre.latitude.values, centre.longitude.values
 
 
 class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
@@ -139,22 +226,36 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         group: T.Optional[str] = None,
     ) -> xr.Dataset:
 
-        groups_lev0, groups_lev1 = find_avalable_groups(filename_or_obj)
+        manifest_path, manifest = esa_safe.open_manifest(filename_or_obj)
+        product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+        ancillary_data_paths = esa_safe.get_ancillary_data_paths(
+            manifest_path, product_files
+        )
+
+        groups = find_avalable_groups(ancillary_data_paths, product_attrs)
 
         if group is None:
-            ds = open_root_dataset(filename_or_obj)
-        elif group in groups_lev0:
-            ds = open_swath_dataset(filename_or_obj, group)
-        elif group in groups_lev1:
-            subswath, subgroup = group.split("/")
-            annotation_path = esa_safe.get_annotation_path(filename_or_obj, subswath)
-            ds = METADATA_OPENERS[subgroup](annotation_path)
-        else:
+            ds = open_root_dataset(manifest_path, groups)
+        elif group not in groups:
             raise ValueError(
                 f"Invalid group {group}, please select one of the following groups:"
-                f"\n{groups_lev0+groups_lev1}"
+                f"\n{list(groups.keys())}"
             )
-
+        elif "/" not in group:
+            ds = open_swath_dataset(manifest_path, groups[group]["subgroups"])
+        else:
+            subswath, subgroup = group.split("/", 1)
+            if subgroup in METADATA_OPENERS:
+                annotation_path = list(groups[group]["annotation_path"].values())[0]
+                ds = METADATA_OPENERS[subgroup](annotation_path)
+            else:
+                annotation_path = list(groups[group]["annotation_path"].values())[0]
+                ds = open_burst_dataset(
+                    manifest_path,
+                    measurement_paths=groups[group]["measurement_path"],
+                    burst_position=groups[group]["burst_position"],
+                    annotation_path=annotation_path,
+                )
         return ds
 
     def guess_can_open(self, filename_or_obj: T.Any) -> bool:
