@@ -96,6 +96,12 @@ def parse_product_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation_path, "product", ".//productInformation")
 
 
+def parse_processing_information(
+    annotation_path: PathType,
+) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation_path, "product", ".//processingInformation")
+
+
 def parse_image_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation_path, "product", ".//imageInformation")
 
