@@ -108,5 +108,5 @@ def test_open_burst() -> None:
     for attr_name in COMMON_ATTRIBUTES:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
-    assert res.dims == {"x": 21632, "y": 1501}
-    assert set(res.variables) == {"VH", "VV", "x", "y"}
+    assert res.dims == {"slant_range_time": 21632, "azimuth_time": 1501}
+    assert set(res.variables) == {"VH", "VV", "slant_range_time", "azimuth_time"}
