@@ -31,7 +31,7 @@ GROUP_ATTRIBUTES = {
         "comment": (
             "The dataset contains geolocation grid point entries for each line/pixel"
             " combination based on a configured resolution."
-            " The list contains an entry for each update made along azimuth",
+            " The list contains an entry for each update made along azimuth"
         ),
     },
 }
@@ -53,9 +53,9 @@ VARIABLE_ATTRIBUTES = {
     "roll": {"units": "°", "long_name": "platform roll"},
     "pitch": {"units": "°", "long_name": "platform pitch"},
     "yaw": {"units": "°", "long_name": "platform yaw"},
-    "wx": {"units": "° s-1", "long_name": "X component of angular velocity vector",},
-    "wy": {"units": "° s-1", "long_name": "Y component of angular velocity vector",},
-    "wz": {"units": "° s-1", "long_name": "Z component of angular velocity vector",},
+    "wx": {"units": "° s-1", "long_name": "X component of angular velocity vector"},
+    "wy": {"units": "° s-1", "long_name": "Y component of angular velocity vector"},
+    "wz": {"units": "° s-1", "long_name": "Z component of angular velocity vector"},
     "time": {"standard_name": "time"},
     "x": {"units": "m", "long_name": "position x"},
     "y": {"units": "m", "long_name": "position y"},
@@ -66,11 +66,11 @@ VARIABLE_ATTRIBUTES = {
 }
 
 
-def update_attributes(ds: xr.Dataset, group=None) -> xr.Dataset:
+def update_attributes(ds: xr.Dataset, group: str = "") -> xr.Dataset:
     # NOTE: keep the version in sync with the capabilities of CF compliance checkers
     ds.attrs["Conventions"] = "CF-1.7"
     ds.attrs["history"] = f"created by xarray_sentinel-{__version__}"
-    ds.attrs.update(GROUP_ATTRIBUTES.get(group, {}))
+    ds.attrs.update(GROUP_ATTRIBUTES.get(group, {}))  # type: ignore
     for var in ds.variables:
         attrs = VARIABLE_ATTRIBUTES.get(str(var), {})
         ds.variables[var].attrs.update(attrs)  # type: ignore
