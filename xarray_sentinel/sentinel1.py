@@ -218,16 +218,12 @@ def open_burst_dataset(
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     image_information = esa_safe.parse_image_information(annotation_path)
     processing_information = esa_safe.parse_processing_information(annotation_path)
-    ds_pol = {
-        pol.upper(): rioxarray.open_rasterio(datafile)
-        for pol, datafile in measurement_paths.items()
-    }
 
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = swath_timing["linesPerBurst"]
     samplesPerBurst = swath_timing["samplesPerBurst"]
     first_azimuth_time = pd.to_datetime(
-        swath_timing["burstList"][burst_position]["azimuthTime"]
+        swath_timing["burstList"]["burst"][burst_position]["azimuthTime"]
     )
     azimuth_time_interval = pd.to_timedelta(
         image_information["azimuthTimeInterval"], "s"
@@ -241,14 +237,21 @@ def open_burst_dataset(
     burst_first_pixel = 0
     burst_last_pixel = samplesPerBurst - 1
 
-    ds = xr.merge([ds_pol])  # type: ignore
-    ds = xr.merge([ds_pol, dict(azimuth_time=azimuth_time)])  # type: ignore
-    ds.attrs.update(product_attrs)  # type: ignore
-    ds = ds.squeeze("band").drop_vars(["band", "spatial_ref"])
+    data_vars = {
+        pol.upper(): rioxarray.open_rasterio(datafile)
+        for pol, datafile in measurement_paths.items()
+    }
+    ds = xr.Dataset(data_vars)  # type: ignore
+    ds = ds.squeeze("band")
+    ds = ds.drop_vars(["band", "spatial_ref"])
     ds = ds.isel(
         x=slice(burst_first_pixel, burst_last_pixel + 1),
         y=slice(burst_first_line, burst_last_line + 1),
     )
+    ds = ds.rename({"y": "azimuth_time"})
+    ds.coords.update({"azimuth_time": azimuth_time})
+    ds.attrs.update(product_attrs)  # type: ignore
+
     return ds
 
 
