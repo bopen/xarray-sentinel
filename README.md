@@ -92,7 +92,6 @@ Attributes:
 ```python
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")
 <xarray.Dataset>
-<xarray.Dataset>
 Dimensions:  (time: 17)
 Coordinates:
   * time     (time) datetime64[ns] 2021-04-01T05:25:19 ... 2021-04-01T05:27:59
