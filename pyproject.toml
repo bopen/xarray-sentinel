@@ -12,3 +12,10 @@ write_to_template = '''
 # don't change, don't track in version control
 __version__ = "{version}"
 '''
+
+[tool.coverage.run]
+branch = true
+omit = ["setup.py"]
+
+[tool.isort]
+profile = "black"
