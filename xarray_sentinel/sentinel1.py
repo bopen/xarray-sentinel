@@ -217,7 +217,7 @@ def open_burst_dataset(
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     image_information = esa_safe.parse_image_information(annotation_path)
-    processing_information = esa_safe.parse_processing_information(annotation_path)
+    procduct_information = esa_safe.parse_product_information(annotation_path)
 
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = swath_timing["linesPerBurst"]
@@ -230,6 +230,14 @@ def open_burst_dataset(
     )
     azimuth_time = pd.date_range(
         start=first_azimuth_time, periods=linesPerBurst, freq=azimuth_time_interval,
+    )
+    slantRangeTime = image_information["slantRangeTime"]
+    slant_range_sampling = 1 / procduct_information["rangeSamplingRate"]
+
+    slant_range_time = np.linspace(
+        slantRangeTime,
+        slantRangeTime + slant_range_sampling * (samplesPerBurst - 1),
+        samplesPerBurst
     )
 
     burst_first_line = burst_position * linesPerBurst
@@ -248,8 +256,8 @@ def open_burst_dataset(
         x=slice(burst_first_pixel, burst_last_pixel + 1),
         y=slice(burst_first_line, burst_last_line + 1),
     )
-    ds = ds.rename({"y": "azimuth_time"})
-    ds.coords.update({"azimuth_time": azimuth_time})
+    ds = ds.rename({"y": "azimuth_time", "x": "slant_range_time"})
+    ds.coords.update({"azimuth_time": azimuth_time, "slant_range_time": slant_range_time})
     ds.attrs.update(product_attrs)  # type: ignore
 
     return ds
