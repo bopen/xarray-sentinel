@@ -1,6 +1,8 @@
 # xarray-sentinel
 
-Xarray backend to explore and load Copernicus Sentinel-1 satellite data products
+Xarray backend to explore and load Copernicus Sentinel-1 satellite data products.
+
+**xarray >= 0.18.0 is needed**
 
 
 ## Product support status:
