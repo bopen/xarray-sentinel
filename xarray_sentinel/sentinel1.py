@@ -172,7 +172,10 @@ def find_avalable_groups(
         for subgroup in METADATA_OPENERS.keys():
             groups[f"{subswath_id}/{subgroup}"] = subswath_data_path
         for k, burst_id in enumerate(burst_ids):
-            groups[f"{subswath_id}/{burst_id}"] = {"position": k, **subswath_data_path}
+            groups[f"{subswath_id}/{burst_id}"] = {
+                "burst_position": k,
+                **subswath_data_path,
+            }
     return groups
 
 
@@ -189,41 +192,44 @@ def filter_missing_path(path_dict: T.Dict[str, T.Any]) -> T.Dict[str, T.Any]:
 
 
 def open_root_dataset(
-    product_attrs: T.Dict[str, str], groups: T.Dict[str, T.Dict[str, T.Collection[str]]]
+    manifest_path: PathType, groups: T.Dict[str, T.Dict[str, T.Collection[str]]]
 ) -> xr.Dataset:
+    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=list(groups.keys()))
     return xr.Dataset(attrs=attrs)  # type: ignore
 
 
-def open_swath_dataset(
-    product_attrs: T.Dict[str, str],
-    swath_id: str,
-    swath_data: T.Dict[str, T.Collection[str]],
-) -> xr.Dataset:
-    attrs = dict(product_attrs, groups=swath_data["subgroups"])
+def open_swath_dataset(manifest_path: PathType, subgrups: T.List[int],) -> xr.Dataset:
+    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    attrs = dict(product_attrs, groups=subgrups)
     return xr.Dataset(attrs=attrs)  # type: ignore
 
 
 def open_burst_dataset(
-    product_attrs: T.Dict[str, str], burst_id: str, burst_data: T.Dict[str, T.Any],
+    manifest_path: PathType,
+    burst_position: int,
+    measurement_paths: T.Dict[str, PathType],
+    annotation_path: PathType,
 ) -> xr.Dataset:
+    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     ds_pol = {
         pol.upper(): rioxarray.open_rasterio(datafile)
-        for pol, datafile in burst_data["measurement_path"].items()
+        for pol, datafile in measurement_paths.items()
     }
-    annotation_path = list(burst_data["annotation_path"].values())[0]
-    burst_pos = burst_data["position"]
 
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = swath_timing["linesPerBurst"]
     samplesPerBurst = swath_timing["samplesPerBurst"]
 
-    burst_first_line = burst_pos * linesPerBurst
-    burst_last_line = (burst_pos + 1) * linesPerBurst - 1
+    burst_first_line = burst_position * linesPerBurst
+    burst_last_line = (burst_position + 1) * linesPerBurst - 1
     burst_first_pixel = 0
     burst_last_pixel = samplesPerBurst - 1
 
-    ds = xr.merge([ds_pol])
+    ds = xr.merge([ds_pol])  # type: ignore
     ds.attrs.update(product_attrs)  # type: ignore
     ds = ds.squeeze("band").drop_vars(["band", "spatial_ref"])
     ds = ds.isel(
@@ -268,22 +274,27 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         groups = find_avalable_groups(ancillary_data_paths, product_attrs)
 
         if group is None:
-            ds = open_root_dataset(product_attrs, groups)
+            ds = open_root_dataset(manifest_path, groups)
         elif group not in groups:
             raise ValueError(
                 f"Invalid group {group}, please select one of the following groups:"
                 f"\n{list(groups.keys())}"
             )
         elif "/" not in group:
-            ds = open_swath_dataset(product_attrs, group, groups[group])
+            ds = open_swath_dataset(manifest_path, groups[group]["subgroups"])
         else:
             subswath, subgroup = group.split("/", 1)
             if subgroup in METADATA_OPENERS:
                 annotation_path = list(groups[group]["annotation_path"].values())[0]
                 ds = METADATA_OPENERS[subgroup](annotation_path)
             else:
-                ds = open_burst_dataset(product_attrs, group, groups[group])
-
+                annotation_path = list(groups[group]["annotation_path"].values())[0]
+                ds = open_burst_dataset(
+                    manifest_path,
+                    measurement_paths=groups[group]["measurement_path"],
+                    burst_position=groups[group]["burst_position"],
+                    annotation_path=annotation_path,
+                )
         return ds
 
     def guess_can_open(self, filename_or_obj: T.Any) -> bool:
@@ -299,5 +310,3 @@ METADATA_OPENERS = {
     "attitude": open_attitude_dataset,
     "orbit": open_orbit_dataset,
 }
-
-
