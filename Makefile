@@ -10,6 +10,9 @@ fix-code-style:
 unit-test:
 	python -m pytest --cov=. --cov-report=$(COV_REPORT) .
 
+doctests:
+	python -m pytest --cov=. --cov-report=$(COV_REPORT) --doctest-glob="*.md" README.md
+
 code-quality:
 	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 	flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
