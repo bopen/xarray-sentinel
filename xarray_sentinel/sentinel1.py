@@ -227,11 +227,11 @@ def open_burst_dataset(
     linesPerBurst = swath_timing["linesPerBurst"]
     samplesPerBurst = swath_timing["samplesPerBurst"]
     first_azimuth_time = pd.to_datetime(swath_timings[burst_position]["azimuthTime"])
-    azimuth_time_interval = pd.to_timedelta(image_information["azimuthTimeInterval"], "s")
+    azimuth_time_interval = pd.to_timedelta(
+        image_information["azimuthTimeInterval"], "s"
+    )
     azimuth_time = pd.date_range(
-        start=first_azimuth_time,
-        periods=linesPerBurst
-        freq=azimuth_time_interval,
+        start=first_azimuth_time, periods=linesPerBurst, freq=azimuth_time_interval,
     )
 
     burst_first_line = burst_position * linesPerBurst
