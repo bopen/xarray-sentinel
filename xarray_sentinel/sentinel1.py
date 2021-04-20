@@ -8,10 +8,9 @@ import rioxarray  # type: ignore
 import xarray as xr
 
 from xarray_sentinel import conventions, esa_safe
-from xarray_sentinel.esa_safe import PathType
 
 
-def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
+def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_path)
     azimuth_time = []
     slant_range_time = []
@@ -25,32 +24,13 @@ def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
             slant_range_time.append(ggp["slantRangeTime"])
             pixel_set.add(ggp["pixel"])
     shape = (len(azimuth_time), len(slant_range_time))
+    dims = ("azimuth_time", "slant_range_time")
     data_vars = {
-        "latitude": (
-            ("azimuth_time", "slant_range_time"),
-            np.full(shape, np.nan),
-            {"units": "degrees_north"},
-        ),
-        "longitude": (
-            ("azimuth_time", "slant_range_time"),
-            np.full(shape, np.nan),
-            {"units": "degrees_east"},
-        ),
-        "height": (
-            ("azimuth_time", "slant_range_time"),
-            np.full(shape, np.nan),
-            {"units": "m"},
-        ),
-        "incidenceAngle": (
-            ("azimuth_time", "slant_range_time"),
-            np.full(shape, np.nan),
-            {"units": "degrees"},
-        ),
-        "elevationAngle": (
-            ("azimuth_time", "slant_range_time"),
-            np.full(shape, np.nan),
-            {"units": "degrees"},
-        ),
+        "latitude": (dims, np.full(shape, np.nan)),
+        "longitude": (dims, np.full(shape, np.nan)),
+        "height": (dims, np.full(shape, np.nan)),
+        "incidenceAngle": (dims, np.full(shape, np.nan)),
+        "elevationAngle": (dims, np.full(shape, np.nan)),
     }
     line = sorted(line_set)
     pixel = sorted(pixel_set)
@@ -63,23 +43,15 @@ def open_gcp_dataset(annotation_path: PathType) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         coords={
-            "azimuth_time": (
-                "azimuth_time",
-                [np.datetime64(dt) for dt in sorted(azimuth_time)],
-                {"standard_name": "time", "long_name": "azimuth time"},
-            ),
-            "slant_range_time": (
-                "slant_range_time",
-                sorted(slant_range_time),
-                {"units": "s", "long_name": "slant range time / two-way delay"},
-            ),
+            "azimuth_time": [np.datetime64(dt) for dt in sorted(azimuth_time)],
+            "slant_range_time": sorted(slant_range_time),
         },
-        attrs={"Conventions": "CF-1.7"},
     )
+    conventions.update_attributes(ds)
     return ds
 
 
-def open_attitude_dataset(annotation_path: PathType) -> xr.Dataset:
+def open_attitude_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     attitude = esa_safe.parse_attitude(annotation_path)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw"]
@@ -90,21 +62,15 @@ def open_attitude_dataset(annotation_path: PathType) -> xr.Dataset:
         for var in variables:
             data_vars[var][1].append(attitude[k][var])
 
-    coords = {
-        "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
-    }
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
-        attrs={"Conventions": "CF-1.7"},
-        coords=coords,  # type: ignore
+        coords={"time": [np.datetime64(dt) for dt in time]},
     )
-
-    ds = ds.update({"time": ds.time.astype(np.datetime64)})
     ds = conventions.update_attributes(ds)
     return ds
 
 
-def open_orbit_dataset(annotation_path: PathType) -> xr.Dataset:
+def open_orbit_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     orbit = esa_safe.parse_orbit(annotation_path)
     shape = len(orbit)
 
@@ -123,24 +89,19 @@ def open_orbit_dataset(annotation_path: PathType) -> xr.Dataset:
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 f"reference_system is not consistent in all the state vectors. "
-                f"xpath: .//orbit//frame \n File: {str(annotation_path)}"
+                f"xpath: .//orbit//frame \nFile: {str(annotation_path)}"
             )
             reference_system = None
 
-    coords = {
-        "time": ("time", time, {"standard_name": "time", "long_name": "time"},),
-    }
-
-    attrs = {"Conventions": "CF-1.7"}
+    attrs = {}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
 
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs=attrs,  # type: ignore
-        coords=coords,  # type: ignore
+        coords={"time": [np.datetime64(dt) for dt in time]},
     )
-    ds = ds.update({"time": ds.time.astype(np.datetime64)})
     ds = conventions.update_attributes(ds)
     return ds
 
@@ -193,26 +154,33 @@ def filter_missing_path(path_dict: T.Dict[str, T.Any]) -> T.Dict[str, T.Any]:
 
 
 def open_root_dataset(
-    manifest_path: PathType, groups: T.Dict[str, T.Dict[str, T.Collection[str]]]
+    manifest_path: esa_safe.PathType,
+    groups: T.Dict[str, T.Dict[str, T.Collection[str]]],
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=list(groups.keys()))
-    return xr.Dataset(attrs=attrs)  # type: ignore
+    ds = xr.Dataset(attrs=attrs)  # type: ignore
+    conventions.update_attributes(ds)
+    return ds
 
 
-def open_swath_dataset(manifest_path: PathType, subgrups: T.List[int],) -> xr.Dataset:
+def open_swath_dataset(
+    manifest_path: esa_safe.PathType, subgrups: T.List[int],
+) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=subgrups)
-    return xr.Dataset(attrs=attrs)  # type: ignore
+    ds = xr.Dataset(attrs=attrs)  # type: ignore
+    conventions.update_attributes(ds)
+    return ds
 
 
 def open_burst_dataset(
-    manifest_path: PathType,
+    manifest_path: esa_safe.PathType,
     burst_position: int,
-    measurement_paths: T.Dict[str, PathType],
-    annotation_path: PathType,
+    measurement_paths: T.Dict[str, esa_safe.PathType],
+    annotation_path: esa_safe.PathType,
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
@@ -263,7 +231,7 @@ def open_burst_dataset(
         coords={"azimuth_time": azimuth_time, "slant_range_time": slant_range_time},
         attrs=product_attrs,  # type: ignore
     )
-
+    conventions.update_attributes(ds)
     return ds
 
 
@@ -330,7 +298,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
             _, ext = os.path.splitext(filename_or_obj)
         except TypeError:
             return False
-        return ext.lower() in {".safe"}
+        return ext.lower() in {".safe", ".safe/"}
 
 
 METADATA_OPENERS = {

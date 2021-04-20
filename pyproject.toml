@@ -8,3 +8,10 @@ requires = [
 
 [tool.setuptools_scm]
 fallback_version = "999"
+
+[tool.coverage.run]
+branch = true
+omit = ["setup.py"]
+
+[tool.isort]
+profile = "black"
