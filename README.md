@@ -35,7 +35,7 @@ using `azimuth_time` and `slant_range_time` dimensions.
 Dimensions:  ()
 Data variables:
     *empty*
-Attributes: (12/14)
+Attributes: (12/15)
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
@@ -43,12 +43,12 @@ Attributes: (12/14)
     sat:absolute_orbit:         26269
     sat:relative_orbit:         168
     ...                         ...
-    sar:instrument_mode:        IW
     sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     groups:                     ['IW1', 'IW1/gcp', 'IW1/attitude', 'IW1/orbit...
     Conventions:                CF-1.7
+    history:                    created by xarray_sentinel-...
 
 ```
 
@@ -72,6 +72,7 @@ Data variables:
     elevationAngle    (azimuth_time, slant_range_time) float64 ...
 Attributes:
     Conventions:  CF-1.7
+    history:      created by xarray_sentinel-...
 
 ```
 
@@ -95,6 +96,7 @@ Data variables:
     yaw      (time) float64 ...
 Attributes:
     Conventions:  CF-1.7
+    history:      created by xarray_sentinel-...
 
 ```
 
@@ -116,6 +118,7 @@ Data variables:
 Attributes:
     reference_system:  Earth Fixed
     Conventions:       CF-1.7
+    history:           created by xarray_sentinel-...
 
 ```
 
@@ -124,26 +127,26 @@ Attributes:
 ```python
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/R168-N459-E0115")
 <xarray.Dataset>
-    Dimensions:  (x: 21632, y: 1501)
-    Coordinates:
-      * y        (y) float64 1.051e+04 1.051e+04 1.051e+04 ... 1.201e+04 1.201e+04
-      * x        (x) float64 0.5 1.5 2.5 3.5 ... 2.163e+04 2.163e+04 2.163e+04
-    Data variables:
-        VH       (y, x) complex128 ...
-        VV       (y, x) complex128 ...
-    Attributes: (12/13)
-        constellation:              sentinel-1
-        platform:                   sentinel-1b
-        instrument:                 ['c-sar']
-        sat:orbit_state:            descending
-        sat:absolute_orbit:         26269
-        sat:relative_orbit:         168
-        ...                         ...
-        sar:frequency_band:         C
-        sar:instrument_mode:        IW
-        sar:polarizations:          ['VV', 'VH']
-        sar:product_type:           SLC
-        xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-        Conventions:                CF-1.7
+Dimensions:           (azimuth_time: 1501, slant_range_time: 21632)
+Coordinates:
+  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:43.51577...
+  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
+Data variables:
+    VH                (azimuth_time, slant_range_time) complex128 ...
+    VV                (azimuth_time, slant_range_time) complex128 ...
+Attributes: (12/14)
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
+    ...                         ...
+    sar:instrument_mode:        IW
+    sar:polarizations:          ['VV', 'VH']
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    Conventions:                CF-1.7
+    history:                    created by xarray_sentinel-...
 
 ```
