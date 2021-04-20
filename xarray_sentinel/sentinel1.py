@@ -47,7 +47,7 @@ def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
             "slant_range_time": sorted(slant_range_time),
         },
     )
-    conventions.update_attributes(ds)
+    conventions.update_attributes(ds, group="gcp")
     return ds
 
 
@@ -66,7 +66,7 @@ def open_attitude_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
         data_vars=data_vars,  # type: ignore
         coords={"time": [np.datetime64(dt) for dt in time]},
     )
-    ds = conventions.update_attributes(ds)
+    ds = conventions.update_attributes(ds, group="attitude")
     return ds
 
 
@@ -102,7 +102,7 @@ def open_orbit_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
         attrs=attrs,  # type: ignore
         coords={"time": [np.datetime64(dt) for dt in time]},
     )
-    ds = conventions.update_attributes(ds)
+    ds = conventions.update_attributes(ds, group="orbit")
     return ds
 
 
