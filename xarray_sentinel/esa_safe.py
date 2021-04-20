@@ -91,6 +91,7 @@ def parse_swath_timing(annotation_path: PathType,) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation_path, "product", ".//swathTiming")
 
 
+@functools.lru_cache()
 def open_manifest(
     product_path: PathType,
 ) -> T.Tuple[pathlib.Path, ElementTree.ElementTree]:
@@ -100,6 +101,7 @@ def open_manifest(
     return product_path, ElementTree.parse(product_path)
 
 
+@functools.lru_cache()
 def parse_manifest_sentinel1(
     manifest: ElementTree.ElementTree,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
