@@ -300,10 +300,4 @@ METADATA_OPENERS = {
     "orbit": open_orbit_dataset,
 }
 
-# def compute_burst_coordinate(annotation_path):
-#     azimuth_start = annot['azimuthTime'], epoch_utc_calendar)
-#     azimuth_sampling = float(annot['azimuthTimeInterval'])
-#     azimuth_count = int(annot['linesPerBurst'])
-#     slant_range_start = float(annot['imageInformation/slantRangeTime'])
-#     slant_range_sampling = 1 / float(annot['rangeSamplingRate'])
-#     slant_range_count = int(annot['samplesPerBurst'])
+
