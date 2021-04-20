@@ -25,7 +25,7 @@ using `aximuth_time` and `slant_range_time` refence system.
 
 ## Examples:
 
-####Open root dataset
+### Open root dataset
 ```python
 >>> xr.open_dataset(product_path, engine="sentinel-1")
 Dimensions:  ()
@@ -49,7 +49,7 @@ Attributes: (12/13)
 the attributes `groups` show the avaible groups to be loaded. The key `group`
 shall be used to select the dataset to be loaded.
 
-###Open gcp dataset
+### Open gcp dataset
 To load the gcp relative to the first swath use the key `group="IW1/gcp"`:
 ```python
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/gcp")
@@ -67,7 +67,7 @@ Data variables:
 Attributes:
     Conventions:  CF-1.7
 ```
-###Open attitude dataset
+### Open attitude dataset
 ```python
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")<xarray.Dataset>
 Dimensions:  (time: 25)
@@ -87,7 +87,7 @@ Attributes:
     Conventions:  CF-1.7
 ```
 
-###Open orbit dataset
+### Open orbit dataset
 ```python
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")<xarray.Dataset>
 <xarray.Dataset>
