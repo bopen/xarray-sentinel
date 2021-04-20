@@ -222,6 +222,7 @@ def open_burst_dataset(
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = swath_timing["linesPerBurst"]
     samplesPerBurst = swath_timing["samplesPerBurst"]
+
     first_azimuth_time = pd.to_datetime(
         swath_timing["burstList"]["burst"][burst_position]["azimuthTime"]
     )
@@ -231,13 +232,14 @@ def open_burst_dataset(
     azimuth_time = pd.date_range(
         start=first_azimuth_time, periods=linesPerBurst, freq=azimuth_time_interval,
     )
+
     slantRangeTime = image_information["slantRangeTime"]
     slant_range_sampling = 1 / procduct_information["rangeSamplingRate"]
 
     slant_range_time = np.linspace(
         slantRangeTime,
         slantRangeTime + slant_range_sampling * (samplesPerBurst - 1),
-        samplesPerBurst
+        samplesPerBurst,
     )
 
     burst_first_line = burst_position * linesPerBurst
@@ -245,20 +247,22 @@ def open_burst_dataset(
     burst_first_pixel = 0
     burst_last_pixel = samplesPerBurst - 1
 
-    data_vars = {
-        pol.upper(): rioxarray.open_rasterio(datafile)
-        for pol, datafile in measurement_paths.items()
-    }
-    ds = xr.Dataset(data_vars)  # type: ignore
-    ds = ds.squeeze("band")
-    ds = ds.drop_vars(["band", "spatial_ref"])
-    ds = ds.isel(
-        x=slice(burst_first_pixel, burst_last_pixel + 1),
-        y=slice(burst_first_line, burst_last_line + 1),
+    data_vars = {}
+    for pol, data_path in measurement_paths.items():
+        arr = rioxarray.open_rasterio(data_path)
+        arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
+        arr = arr.isel(
+            x=slice(burst_first_pixel, burst_last_pixel + 1),
+            y=slice(burst_first_line, burst_last_line + 1),
+        )
+        arr = arr.rename({"y": "azimuth_time", "x": "slant_range_time"})
+        data_vars[pol.upper()] = arr
+
+    ds = xr.Dataset(
+        data_vars=data_vars,  # type: ignore
+        coords={"azimuth_time": azimuth_time, "slant_range_time": slant_range_time},
+        attrs=product_attrs,  # type: ignore
     )
-    ds = ds.rename({"y": "azimuth_time", "x": "slant_range_time"})
-    ds.coords.update({"azimuth_time": azimuth_time, "slant_range_time": slant_range_time})
-    ds.attrs.update(product_attrs)  # type: ignore
 
     return ds
 
