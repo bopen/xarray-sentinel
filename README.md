@@ -46,7 +46,7 @@ Attributes: (12/13)
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     groups:                     ['IW1', 'IW1/gcp', 'IW1/attitude', 'IW1/orbit...
 ```
-the attributes `groups` show the avaible groups to be loaded. The key `group`
+the attributes `groups` shows the avaible groups to be loaded. The key `group`
 shall be used to select the dataset to be loaded.
 
 ### Open gcp dataset
@@ -69,7 +69,8 @@ Attributes:
 ```
 ### Open attitude dataset
 ```python
->>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")<xarray.Dataset>
+>>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")
+<xarray.Dataset>
 Dimensions:  (time: 25)
 Coordinates:
   * time     (time) datetime64[ns] 2021-04-01T05:26:24.750001 ... 2021-04-01T...
@@ -89,7 +90,8 @@ Attributes:
 
 ### Open orbit dataset
 ```python
->>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")<xarray.Dataset>
+>>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")
+<xarray.Dataset>
 <xarray.Dataset>
 Dimensions:  (time: 17)
 Coordinates:
