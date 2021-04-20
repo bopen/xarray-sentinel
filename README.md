@@ -3,8 +3,12 @@
 Xarray backend to explore and load Copernicus Sentinel-1 satellite data products
 
 
-## Products currently supported:
-- Sentinel-1 SLC IWS (interferometric wide swath)
+## Product support status:
+- Sentinel-1 SLC IWS (Interferometric Wide Swath): work-in-progress
+- Sentinel-1 SLC EWS (Extended Wide Swath): in roadmap
+- Sentinel-1 SLC SM (Stripmap): in roadmap
+- Sentinel-1 GRD SM/IWS/EWS: in roadmap
+- Sentinel-2 L1C/L2A: in roadmap
 
 
 ## Sentinel-1 SLC IWS
