@@ -7,7 +7,11 @@ requires = [
 ]
 
 [tool.setuptools_scm]
-fallback_version = "999"
+write_to = "xarray_sentinel/version.py"
+write_to_template = '''
+# don't change, don't track in version control
+__version__ = "{version}"
+'''
 
 [tool.coverage.run]
 branch = true
