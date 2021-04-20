@@ -74,6 +74,8 @@ Data variables:
     elevationAngle    (azimuth_time, slant_range_time) float64 ...
 Attributes:
     Conventions:  CF-1.7
+    title:        Geolocation grid
+    comment:      The dataset contains geolocation grid point entries for eac...
     history:      created by xarray_sentinel-...
 
 ```
@@ -98,6 +100,8 @@ Data variables:
     yaw      (time) float64 ...
 Attributes:
     Conventions:  CF-1.7
+    title:        Attitude information used by the IPF during processing
+    comment:      The dataset contains a sets of attitude data records that a...
     history:      created by xarray_sentinel-...
 
 ```
@@ -120,6 +124,8 @@ Data variables:
 Attributes:
     reference_system:  Earth Fixed
     Conventions:       CF-1.7
+    title:             Orbit information used by the IPF during processing
+    comment:           The dataset contains a sets of orbit state vectors tha...
     history:           created by xarray_sentinel-...
 
 ```
