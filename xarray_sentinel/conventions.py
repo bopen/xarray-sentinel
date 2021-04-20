@@ -1,5 +1,7 @@
 import xarray as xr
 
+from . import __version__
+
 VARIABLE_ATTRIBUTES = {
     "azimuth_time": {"long_name": "azimuth time", "standard_name": "time"},
     # NOTE: `slant_range_time` is not expressed as `np.timedelta64[ns]` in order to keep enough
@@ -30,6 +32,7 @@ VARIABLE_ATTRIBUTES = {
 def update_attributes(ds: xr.Dataset) -> xr.Dataset:
     # NOTE: keep the version in sync with the capabilities of CF compliance checkers
     ds.attrs["Conventions"] = "CF-1.7"
+    ds.attrs["history"] = f"created by xarray_sentinel-{__version__}"
     for var in ds.variables:
         attrs = VARIABLE_ATTRIBUTES.get(str(var), {})
         ds.variables[var].attrs.update(attrs)  # type: ignore
