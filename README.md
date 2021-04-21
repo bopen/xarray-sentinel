@@ -12,7 +12,7 @@ The easier way to install *xarray-sentinel* is via *conda*.
 Create a new environment, activate it and install the packege with the correct dependecies,
 as follows:
 
-```
+```shell
     conda create -n xarray-sentinel
     conda activate xarray-sentinel
     conda install -c conda-forge rioxarray xmlschema
@@ -47,7 +47,7 @@ using `azimuth_time` and `slant_range_time` dimensions.
 
 ### Open root dataset
 
-```python
+```python-repl
 >>> import xarray as xr
 >>> product_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
 >>> xr.open_dataset(product_path, engine="sentinel-1")
