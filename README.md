@@ -78,7 +78,7 @@ shall be used to select the dataset to be loaded.
 ### Open gcp dataset
 
 To load the gcp relative to the first swath use the key `group="IW1/gcp"`:
-```python
+```python-repl
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/gcp")
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 10, slant_range_time: 21)
@@ -101,7 +101,7 @@ Attributes:
 
 ### Open attitude dataset
 
-```python
+```python-repl
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")
 <xarray.Dataset>
 Dimensions:       (azimuth_time: 25)
@@ -128,7 +128,7 @@ Attributes:
 
 ### Open orbit dataset
 
-```python
+```python-repl
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/orbit")
 <xarray.Dataset>
 Dimensions:       (azimuth_time: 17)
@@ -152,7 +152,7 @@ Attributes:
 
 ### Open a single burst
 
-```python
+```python-repl
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/R168-N459-E0115")
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 1501, slant_range_time: 21632)
@@ -193,7 +193,7 @@ Lead developer:
 
 Main contributors:
 
-- [Alessandro Amici](https://github.com/alexamici) - B-Open
+- [Alessandro Amici](https://github.com/alexamici) - [B-Open](https://www.bopen.eu/)
 - [Corrado Avolio](https://github.com/corrado9999) - [e-GEOS](https://www.e-geos.it/)
 
 See also the list of [contributors](https://github.com/bopen/xarray-sentinel/contributors) who participated in this project.
