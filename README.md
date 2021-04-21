@@ -1,23 +1,34 @@
 # xarray-sentinel
 
+**WARNING: this is v0.1 "technology preview", needs xarray >= 0.18.0**
+
 Xarray backend to explore and load Copernicus Sentinel-1 satellite data products.
 
-**xarray >= 0.18.0 is needed**
+## Install
 
+```
+    git clone https://github.com/bopen/xarray-sentinel.git
+    cd xarray-sentinel
+    conda install -c conda-forge rioxarray xarray xmlschema
+    pip install --no-deps https://github.com/pydata/xarray/archive/master.zip  # for xarray version>= 0.17.0
+    pip install -e .
+```
 
 ## Product support status:
-- Sentinel-1 SLC IWS (Interferometric Wide Swath): work-in-progress
-- Sentinel-1 SLC EWS (Extended Wide Swath): in roadmap
+
+- Sentinel-1 SLC IW (Interferometric Wide Swath): **work-in-progress**
+- Sentinel-1 SLC EW (Extended Wide Swath): in roadmap
 - Sentinel-1 SLC SM (Stripmap): in roadmap
-- Sentinel-1 GRD SM/IWS/EWS: in roadmap
+- Sentinel-1 GRD SM/IW/EW: in roadmap
 - Sentinel-2 L1C/L2A: in roadmap
 
 
-## Sentinel-1 SLC IWS
+## Sentinel-1 SLC IW
 
 ### Data
 
 Currently, xarray-sentinel provides access as Xarray datsets to the following data:
+
 - burst data
 - gcp
 - orbit
@@ -29,6 +40,7 @@ using `azimuth_time` and `slant_range_time` dimensions.
 ## Examples:
 
 ### Open root dataset
+
 ```python
 >>> import xarray as xr
 >>> product_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
@@ -158,3 +170,19 @@ Attributes: (12/14)
     history:                    created by xarray_sentinel-...
 
 ```
+
+# License
+
+    Copyright 2021, B-Open Solutions srl and the xarray-sentinel authors.
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+        http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
