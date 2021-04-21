@@ -9,14 +9,15 @@ The development is sponsored by B-Open - https://www.bopen.eu
 ## Install
 
 The easier way to install *xarray-sentinel* is via *conda*.
-Create a new environment, activate it and execute:
+Create a new environment, activate it and install the packege with the correct dependecies,
+as follows:
 
 ```
-    git clone https://github.com/bopen/xarray-sentinel.git
-    cd xarray-sentinel
-    conda install -c conda-forge rioxarray xarray xmlschema
+    conda create -n xarray-sentinel
+    conda activate xarray-sentinel
+    conda install -c conda-forge rioxarray xmlschema
     pip install --no-deps https://github.com/pydata/xarray/archive/master.zip  # for xarray version>= 0.17.0
-    pip install -e .
+    pip install xarray-sentinel
 ```
 
 ## Product support status:
