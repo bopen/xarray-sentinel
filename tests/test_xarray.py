@@ -57,7 +57,8 @@ def test_open_dataset_orbit() -> None:
     res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW1/orbit")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"time"}
+    assert set(res.dims) == {"azimuth_time"}
+    assert set(res.variables) == {"azimuth_time", "vx", "vy", "vz", "x", "y", "z"}
 
 
 def test_open_dataset_attitude() -> None:
@@ -68,7 +69,20 @@ def test_open_dataset_attitude() -> None:
     res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW1/attitude")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"time"}
+    assert set(res.dims) == {"azimuth_time"}
+    assert set(res.variables) == {
+        "azimuth_time",
+        "roll",
+        "pitch",
+        "yaw",
+        "q0",
+        "q1",
+        "q2",
+        "q3",
+        "wx",
+        "wy",
+        "wz",
+    }
 
 
 def test_open_dataset_gcp() -> None:
