@@ -1,5 +1,6 @@
 import pathlib
 
+import numpy as np
 import xarray as xr
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
@@ -108,6 +109,8 @@ def test_open_burst() -> None:
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
     assert res.dims == {"slant_range_time": 21632, "azimuth_time": 1501}
     assert set(res.variables) == {"VH", "VV", "slant_range_time", "azimuth_time"}
+    assert not np.all(np.isnan(res.VH))
+    assert not np.all(np.isnan(res.VH))
 
 
 def test_open_burst_one_pol() -> None:
