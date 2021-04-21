@@ -225,10 +225,12 @@ def open_burst_dataset(
         )
         data_vars[pol.upper()] = arr
 
-    import pdb; pdb.set_trace()
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
-        coords={"azimuth_time": ("y", azimuth_time), "slant_range_time": ("x", slant_range_time)},
+        coords={
+            "azimuth_time": ("y", azimuth_time),
+            "slant_range_time": ("x", slant_range_time),
+        },
         attrs=product_attrs,  # type: ignore
     )
     ds.VH.swap_dims({"y": "azimuth_time", "x": "slant_range_time"})
