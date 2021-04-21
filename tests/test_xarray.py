@@ -1,6 +1,5 @@
 import pathlib
 
-import pytest
 import xarray as xr
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
@@ -96,7 +95,6 @@ def test_open_subswath() -> None:
     assert not res.variables
 
 
-@pytest.mark.xfail
 def test_open_burst() -> None:
     product_path = (
         DATA_FOLDER
