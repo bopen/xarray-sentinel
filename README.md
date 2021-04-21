@@ -1,8 +1,10 @@
 # xarray-sentinel
 
-**WARNING: this is a "technology preview", it needs xarray >= 0.18.0**
+**WARNING: this product is a "technology preview" / pre-Alpha, it needs xarray >= 0.18.0**
 
 Xarray backend to explore and load Copernicus Sentinel-1 satellite data products.
+
+The development is sponsored by B-Open - https://www.bopen.eu
 
 ## Install
 
@@ -73,6 +75,7 @@ the attributes `groups` shows the avaible groups to be loaded. The key `group`
 shall be used to select the dataset to be loaded.
 
 ### Open gcp dataset
+
 To load the gcp relative to the first swath use the key `group="IW1/gcp"`:
 ```python
 >>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/gcp")
@@ -175,7 +178,27 @@ Attributes: (12/14)
 
 ```
 
-# License
+
+## Contributing
+
+The main repository is hosted on GitHub,
+testing, bug reports and contributions are highly welcomed and appreciated:
+
+https://github.com/bopen/xarray-sentinel
+
+Lead developer:
+
+- [Aureliana Barghini](https://github.com/aurghs) - [B-Open](https://www.bopen.eu/)
+
+Main contributors:
+
+- [Alessandro Amici](https://github.com/alexamici) - B-Open
+- [Corrado Avolio](https://github.com/corrado9999) - [e-GEOS](https://www.e-geos.it/)
+
+See also the list of [contributors](https://github.com/bopen/xarray-sentinel/contributors) who participated in this project.
+
+
+## License
 
     Copyright 2021, B-Open Solutions srl and the xarray-sentinel authors.
     
