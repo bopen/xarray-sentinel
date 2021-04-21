@@ -4,12 +4,12 @@
 
 Xarray backend to explore and load Copernicus Sentinel-1 satellite data products.
 
-The development is sponsored by B-Open - https://www.bopen.eu
+This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
 ## Install
 
-The easier way to install *xarray-sentinel* is via *conda*.
-Create a new environment, activate it and install the packege with the correct dependecies,
+The easiest way to install *xarray-sentinel* is via *conda*.
+Create a new environment, activate it, install the package and its dependencies,
 as follows:
 
 ```shell
@@ -33,7 +33,7 @@ as follows:
 
 ### Data
 
-Currently, xarray-sentinel provides access as Xarray datsets to the following data:
+Currently, xarray-sentinel provides access as Xarray datasets to the following data:
 
 - burst data
 - gcp
@@ -72,7 +72,7 @@ Attributes: (12/15)
 
 ```
 
-the attributes `groups` shows the avaible groups to be loaded. The key `group`
+the attribute `groups` shows the available groups to be loaded. The key `group`
 shall be used to select the dataset to be loaded.
 
 ### Open gcp dataset
