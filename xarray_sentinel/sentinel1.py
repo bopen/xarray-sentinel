@@ -54,7 +54,7 @@ def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
 def open_attitude_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     attitude = esa_safe.parse_attitude(annotation_path)
     shape = len(attitude)
-    variables = ["q0", "q1", "q2", "wx", "wy", "wz", "pitch", "roll", "yaw"]
+    variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     time: T.List[T.Any] = []
     data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
     for k in range(shape):
