@@ -209,7 +209,6 @@ def open_burst_dataset(
         slantRangeTime + slant_range_sampling * (samplesPerBurst - 1),
         samplesPerBurst,
     )
-
     burst_first_line = burst_position * linesPerBurst
     burst_last_line = (burst_position + 1) * linesPerBurst - 1
     burst_first_pixel = 0
@@ -218,19 +217,24 @@ def open_burst_dataset(
     data_vars = {}
     for pol, data_path in measurement_paths.items():
         arr = rioxarray.open_rasterio(data_path)
+
         arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
         arr = arr.isel(
             x=slice(burst_first_pixel, burst_last_pixel + 1),
             y=slice(burst_first_line, burst_last_line + 1),
         )
-        arr = arr.rename({"y": "azimuth_time", "x": "slant_range_time"})
         data_vars[pol.upper()] = arr
 
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
-        coords={"azimuth_time": azimuth_time, "slant_range_time": slant_range_time},
+        coords={
+            "azimuth_time": ("y", azimuth_time),
+            "slant_range_time": ("x", slant_range_time),
+        },
         attrs=product_attrs,  # type: ignore
     )
+    ds = ds.swap_dims({"y": "azimuth_time", "x": "slant_range_time"})
+    ds = ds.drop_vars({"y", "x"})
     conventions.update_attributes(ds)
     return ds
 
