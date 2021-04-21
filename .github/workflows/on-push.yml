@@ -91,7 +91,7 @@ jobs:
         $CONDA/bin/conda install isort
         $CONDA/bin/isort --check .
 
- distribution:
+  distribution:
     runs-on: ubuntu-latest
 
     steps:
