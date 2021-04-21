@@ -38,7 +38,7 @@ jobs:
         make unit-test COV_REPORT=xml
     - name: Run doc tests
       run: |
-        make doc-test COV_REPORT=xml
+        make doc-test
     - name: Upload code coverage to Codecov
       uses: codecov/codecov-action@v1
 
