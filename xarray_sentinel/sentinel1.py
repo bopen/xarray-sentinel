@@ -233,7 +233,8 @@ def open_burst_dataset(
         },
         attrs=product_attrs,  # type: ignore
     )
-    ds.VH.swap_dims({"y": "azimuth_time", "x": "slant_range_time"})
+    ds = ds.swap_dims({"y": "azimuth_time", "x": "slant_range_time"})
+    ds = ds.drop_vars({"y", "x"})
     conventions.update_attributes(ds)
     return ds
 
