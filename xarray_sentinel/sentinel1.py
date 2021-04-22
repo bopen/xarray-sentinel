@@ -261,7 +261,7 @@ def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[np.ndarray, np.ndarray]:
 
 
 def open_dataset(
-    filename_or_obj: str,
+    filename_or_obj: esa_safe.PathType,
     drop_variables: T.Optional[T.Tuple[str]] = None,
     group: T.Optional[str] = None,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
