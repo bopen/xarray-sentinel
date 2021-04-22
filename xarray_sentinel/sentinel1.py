@@ -218,7 +218,6 @@ def open_burst_dataset(
 
     data_vars = {}
     for pol, data_path in measurement_paths.items():
-        arr = rioxarray.open_rasterio(data_path)
 
         arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
         arr = arr.isel(
@@ -259,6 +258,44 @@ def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[np.ndarray, np.ndarray]:
     return centre.latitude.values, centre.longitude.values
 
 
+def open_dataset(
+    filename_or_obj: str,
+    drop_variables: T.Optional[T.Tuple[str]] = None,
+    group: T.Optional[str] = None,
+) -> xr.Dataset:
+    manifest_path, manifest = esa_safe.open_manifest(filename_or_obj)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    ancillary_data_paths = esa_safe.get_ancillary_data_paths(
+        manifest_path, product_files
+    )
+
+    groups = find_avalable_groups(ancillary_data_paths, product_attrs)
+
+    if group is None:
+        ds = open_root_dataset(manifest_path, groups)
+    elif group not in groups:
+        raise ValueError(
+            f"Invalid group {group}, please select one of the following groups:"
+            f"\n{list(groups.keys())}"
+        )
+    elif "/" not in group:
+        ds = open_swath_dataset(manifest_path, groups[group]["subgroups"])
+    else:
+        subswath, subgroup = group.split("/", 1)
+        if subgroup in METADATA_OPENERS:
+            annotation_path = list(groups[group]["annotation_path"].values())[0]
+            ds = METADATA_OPENERS[subgroup](annotation_path)
+        else:
+            annotation_path = list(groups[group]["annotation_path"].values())[0]
+            ds = open_burst_dataset(
+                manifest_path,
+                measurement_paths=groups[group]["measurement_path"],
+                burst_position=groups[group]["burst_position"],
+                annotation_path=annotation_path,
+            )
+    return ds
+
+
 class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
     def open_dataset(  # type: ignore
         self,
@@ -267,37 +304,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         group: T.Optional[str] = None,
     ) -> xr.Dataset:
 
-        manifest_path, manifest = esa_safe.open_manifest(filename_or_obj)
-        product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
-        ancillary_data_paths = esa_safe.get_ancillary_data_paths(
-            manifest_path, product_files
-        )
-
-        groups = find_avalable_groups(ancillary_data_paths, product_attrs)
-
-        if group is None:
-            ds = open_root_dataset(manifest_path, groups)
-        elif group not in groups:
-            raise ValueError(
-                f"Invalid group {group}, please select one of the following groups:"
-                f"\n{list(groups.keys())}"
-            )
-        elif "/" not in group:
-            ds = open_swath_dataset(manifest_path, groups[group]["subgroups"])
-        else:
-            subswath, subgroup = group.split("/", 1)
-            if subgroup in METADATA_OPENERS:
-                annotation_path = list(groups[group]["annotation_path"].values())[0]
-                ds = METADATA_OPENERS[subgroup](annotation_path)
-            else:
-                annotation_path = list(groups[group]["annotation_path"].values())[0]
-                ds = open_burst_dataset(
-                    manifest_path,
-                    measurement_paths=groups[group]["measurement_path"],
-                    burst_position=groups[group]["burst_position"],
-                    annotation_path=annotation_path,
-                )
-        return ds
+        return open_dataset(filename_or_obj, drop_variables, group)
 
     def guess_can_open(self, filename_or_obj: T.Any) -> bool:
         try:
