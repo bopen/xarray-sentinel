@@ -1,6 +1,6 @@
 # xarray-sentinel
 
-**WARNING: this product is a "technology preview" / pre-Alpha, it needs xarray >= 0.18.0**
+**WARNING: this product is a "technology preview" / pre-Alpha**
 
 Xarray backend to explore and load Copernicus Sentinel-1 satellite data products.
 
@@ -16,7 +16,6 @@ as follows:
     conda create -n xarray-sentinel
     conda activate xarray-sentinel
     conda install -c conda-forge rioxarray xmlschema
-    pip install --no-deps https://github.com/pydata/xarray/archive/master.zip  # for xarray version>= 0.17.0
     pip install xarray-sentinel
 ```
 
@@ -179,8 +178,8 @@ Attributes: (12/14)
 
 ```
 
-With the release of Xarray v0.18.0, xarray-sentinel will be automatically available as
- an Xarray bakend:
+With the upcoming release of Xarray v0.18.0, xarray-sentinel will be automatically available as
+an Xarray bakend:
  
 ```python-repl
 >>> import xarray as xr
