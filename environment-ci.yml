@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - black = 19.10b0
+  - dask
   - flake8
   - isort
   - make

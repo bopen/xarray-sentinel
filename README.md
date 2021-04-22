@@ -48,9 +48,9 @@ using `azimuth_time` and `slant_range_time` dimensions.
 ### Open root dataset
 
 ```python-repl
->>> import xarray as xr
+>>> from xarray_sentinel import sentinel1
 >>> product_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
->>> xr.open_dataset(product_path, engine="sentinel-1")
+>>> sentinel1.open_dataset(product_path)
 <xarray.Dataset>
 Dimensions:  ()
 Data variables:
@@ -79,7 +79,7 @@ shall be used to select the dataset to be loaded.
 
 To load the gcp relative to the first swath use the key `group="IW1/gcp"`:
 ```python-repl
->>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/gcp")
+>>> sentinel1.open_dataset(product_path, group="IW1/gcp")
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 10, slant_range_time: 21)
 Coordinates:
@@ -102,7 +102,7 @@ Attributes:
 ### Open attitude dataset
 
 ```python-repl
->>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/attitude")
+>>> sentinel1.open_dataset(product_path, group="IW1/attitude")
 <xarray.Dataset>
 Dimensions:       (azimuth_time: 25)
 Coordinates:
@@ -129,7 +129,7 @@ Attributes:
 ### Open orbit dataset
 
 ```python-repl
->>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/orbit")
+>>> sentinel1.open_dataset(product_path, group="IW1/orbit")
 <xarray.Dataset>
 Dimensions:       (azimuth_time: 17)
 Coordinates:
@@ -153,7 +153,7 @@ Attributes:
 ### Open a single burst
 
 ```python-repl
->>> xr.open_dataset(product_path, engine="sentinel-1", group="IW1/R168-N459-E0115")
+>>> sentinel1.open_dataset(product_path, group="IW1/R168-N459-E0115")
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 1501, slant_range_time: 21632)
 Coordinates:
@@ -176,6 +176,15 @@ Attributes: (12/14)
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     Conventions:                CF-1.7
     history:                    created by xarray_sentinel-...
+
+```
+
+With the release of Xarray v0.18.0, xarray-sentinel will be automatically available as
+ an Xarray bakend:
+ 
+```python-repl
+>>> import xarray as xr
+>>> ds = xr.open_dataset(product_path, engine="sentinel-1")
 
 ```
 
