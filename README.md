@@ -6,6 +6,19 @@ Xarray backend to explore and load Copernicus Sentinel-1 satellite data products
 
 This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
+## Features
+
+- access to SLC burst data - **technology preview**
+- access to metadata: product, orbit, attitude, GCPs - **technology preview**
+- access to metadata: calibration, deramp - in roadmap 
+- products:
+    - Sentinel-1 SLC IW (Interferometric Wide Swath): **technology preview**
+    - Sentinel-1 SLC EW (Extended Wide Swath): **technology preview**
+    - Sentinel-1 SLC SM (Stripmap): in roadmap
+    - Sentinel-1 GRD SM/IW/EW: in roadmap
+    - Sentinel-2 L1C/L2A: in roadmap
+
+
 ## Install
 
 The easiest way to install *xarray-sentinel* is via *conda*.
@@ -18,14 +31,6 @@ as follows:
     conda install -c conda-forge rioxarray xmlschema
     pip install xarray-sentinel
 ```
-
-## Product support status:
-
-- Sentinel-1 SLC IW (Interferometric Wide Swath): **work-in-progress**
-- Sentinel-1 SLC EW (Extended Wide Swath): in roadmap
-- Sentinel-1 SLC SM (Stripmap): in roadmap
-- Sentinel-1 GRD SM/IW/EW: in roadmap
-- Sentinel-2 L1C/L2A: in roadmap
 
 
 ## Sentinel-1 SLC IW
