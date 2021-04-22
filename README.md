@@ -179,6 +179,15 @@ Attributes: (12/14)
 
 ```
 
+With the release of Xarray v0.18.0, xarray-sentinel will be automatically available as
+ an Xarray bakend:
+ 
+```python-repl
+>>> import xarray as xr
+>>> ds = xr.open_dataset(product_path, engine="sentinel-1")
+
+```
+
 
 ## Contributing
 
