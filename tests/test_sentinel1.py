@@ -87,3 +87,18 @@ def test_compute_burst_centres() -> None:
     lat, lon = sentinel1.compute_burst_centres(gcp)
     assert np.allclose(lat, [0.5, 1.5, 2.5, 3.5])
     assert np.allclose(lon, [5, 15, 25, 35])
+
+
+def test_open_dataset_chunks_bursts() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    res = sentinel1.open_dataset(product_path, group="IW1/R168-N471-E0118", chunks=100)
+
+    assert len(res.VH.dims) == 2
+    assert np.allclose(res.VH.chunks[0][:-1], 100)
+    assert np.allclose(res.VH.chunks[1][:-1], 100)
+    assert isinstance(res, xr.Dataset)
+    assert not np.all(np.isnan(res.VH))
+    assert not np.all(np.isnan(res.VH))
