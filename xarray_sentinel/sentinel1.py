@@ -183,6 +183,7 @@ def open_burst_dataset(
     burst_position: int,
     measurement_paths: T.Dict[str, esa_safe.PathType],
     annotation_path: esa_safe.PathType,
+    chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
@@ -218,6 +219,7 @@ def open_burst_dataset(
 
     data_vars = {}
     for pol, data_path in measurement_paths.items():
+        arr = rioxarray.open_rasterio(data_path, chunks=chunks)
 
         arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
         arr = arr.isel(
@@ -262,6 +264,7 @@ def open_dataset(
     filename_or_obj: str,
     drop_variables: T.Optional[T.Tuple[str]] = None,
     group: T.Optional[str] = None,
+    chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(filename_or_obj)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
@@ -292,6 +295,7 @@ def open_dataset(
                 measurement_paths=groups[group]["measurement_path"],
                 burst_position=groups[group]["burst_position"],
                 annotation_path=annotation_path,
+                chunks=chunks,
             )
     return ds
 
