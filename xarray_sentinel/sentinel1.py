@@ -181,11 +181,11 @@ def open_swath_dataset(
     for pol, data_path in measurement_paths.items():
         arr = rioxarray.open_rasterio(data_path, chunks=chunks)
         arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
+        arr = arr.rename({"y": "line", "x": "pixel"})
         data_vars[pol.upper()] = arr
 
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
-        coords={"azimuth_time": ("y", "line"), "slant_range_time": ("x", "pixel"),},
         attrs=attrs,  # type: ignore
     )
     conventions.update_attributes(ds)
