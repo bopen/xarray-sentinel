@@ -124,7 +124,14 @@ def test_open_burst() -> None:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
     assert res.dims == {"slant_range_time": 21632, "azimuth_time": 1501}
-    assert set(res.variables) == {"VH", "VV", "slant_range_time", "azimuth_time"}
+    assert set(res.variables) == {
+        "VH",
+        "VV",
+        "slant_range_time",
+        "azimuth_time",
+        "line",
+        "pixel",
+    }
     assert not np.all(np.isnan(res.VH))
     assert not np.all(np.isnan(res.VH))
 
@@ -141,4 +148,10 @@ def test_open_burst_one_pol() -> None:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
     assert res.dims == {"slant_range_time": 25508, "azimuth_time": 1513}
-    assert set(res.variables) == {"VH", "slant_range_time", "azimuth_time"}
+    assert set(res.variables) == {
+        "VH",
+        "slant_range_time",
+        "azimuth_time",
+        "line",
+        "pixel",
+    }

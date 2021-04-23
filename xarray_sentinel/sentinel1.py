@@ -240,18 +240,18 @@ def open_burst_dataset(
             x=slice(burst_first_pixel, burst_last_pixel + 1),
             y=slice(burst_first_line, burst_last_line + 1),
         )
+        arr = arr.rename({"y": "line", "x": "pixel"})
         data_vars[pol.upper()] = arr
 
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         coords={
-            "azimuth_time": ("y", azimuth_time),
-            "slant_range_time": ("x", slant_range_time),
+            "azimuth_time": ("line", azimuth_time),
+            "slant_range_time": ("pixel", slant_range_time),
         },
         attrs=product_attrs,  # type: ignore
     )
-    ds = ds.swap_dims({"y": "azimuth_time", "x": "slant_range_time"})
-    ds = ds.drop_vars({"y", "x"})
+    ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
     conventions.update_attributes(ds)
     return ds
 
