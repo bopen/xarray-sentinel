@@ -181,7 +181,7 @@ Attributes: (12/14)
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     Conventions:                CF-1.7
-    history:                    created by xarray_sentinel-999
+    history:                    created by xarray_sentinel-...
 
 ```
 
