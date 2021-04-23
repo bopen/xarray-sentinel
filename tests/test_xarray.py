@@ -107,7 +107,9 @@ def test_open_subswath() -> None:
     for attr_name in COMMON_ATTRIBUTES:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
-    assert not res.variables
+
+    assert set(res.dims) == {"line", "pixel"}
+    assert set(res.variables) == {"VH", "VV", "line", "pixel"}
 
 
 def test_open_burst() -> None:
