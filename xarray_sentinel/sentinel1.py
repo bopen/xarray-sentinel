@@ -271,6 +271,11 @@ def open_dataset(
     ancillary_data_paths = esa_safe.get_ancillary_data_paths(
         manifest_path, product_files
     )
+    if drop_variables:
+        warnings.warn(
+            "The key 'drop_variables' is currently ignored. This functionality is not implemented yet",
+            UserWarning
+        )
 
     groups = find_avalable_groups(ancillary_data_paths, product_attrs)
 
