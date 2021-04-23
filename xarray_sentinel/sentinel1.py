@@ -271,7 +271,7 @@ def open_dataset(
     ancillary_data_paths = esa_safe.get_ancillary_data_paths(
         manifest_path, product_files
     )
-    if drop_variables:
+    if drop_variables is not None:
         warnings.warn(
             "The key 'drop_variables' is currently ignored. This functionality is not implemented yet",
             UserWarning,
