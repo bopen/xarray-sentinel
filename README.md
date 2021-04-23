@@ -161,6 +161,8 @@ Attributes:
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 1501, slant_range_time: 21632)
 Coordinates:
+    line              (azimuth_time) float64 1.051e+04 1.051e+04 ... 1.201e+04
+    pixel             (slant_range_time) float64 0.5 1.5 ... 2.163e+04 2.163e+04
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:43.51577...
   * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
 Data variables:
@@ -179,7 +181,7 @@ Attributes: (12/14)
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     Conventions:                CF-1.7
-    history:                    created by xarray_sentinel-...
+    history:                    created by xarray_sentinel-999
 
 ```
 
