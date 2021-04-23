@@ -274,7 +274,7 @@ def open_dataset(
     if drop_variables:
         warnings.warn(
             "The key 'drop_variables' is currently ignored. This functionality is not implemented yet",
-            UserWarning
+            UserWarning,
         )
 
     groups = find_avalable_groups(ancillary_data_paths, product_attrs)
