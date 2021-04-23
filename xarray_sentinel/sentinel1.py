@@ -168,12 +168,26 @@ def open_root_dataset(
 
 
 def open_swath_dataset(
-    manifest_path: esa_safe.PathType, subgrups: T.List[int],
+    manifest_path: esa_safe.PathType,
+    measurement_paths: T.Dict[str, esa_safe.PathType],
+    subgrups: T.List[int],
+    chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=subgrups)
-    ds = xr.Dataset(attrs=attrs)  # type: ignore
+
+    data_vars = {}
+    for pol, data_path in measurement_paths.items():
+        arr = rioxarray.open_rasterio(data_path, chunks=chunks)
+        arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
+        data_vars[pol.upper()] = arr
+
+    ds = xr.Dataset(
+        data_vars=data_vars,  # type: ignore
+        coords={"azimuth_time": ("y", "line"), "slant_range_time": ("x", "pixel"),},
+        attrs=attrs,  # type: ignore
+    )
     conventions.update_attributes(ds)
     return ds
 
@@ -282,7 +296,9 @@ def open_dataset(
             f"\n{list(groups.keys())}"
         )
     elif "/" not in group:
-        ds = open_swath_dataset(manifest_path, groups[group]["subgroups"])
+        ds = open_swath_dataset(
+            manifest_path, groups[group]["measurement_path"], groups[group]["subgroups"]
+        )
     else:
         subswath, subgroup = group.split("/", 1)
         if subgroup in METADATA_OPENERS:
