@@ -184,7 +184,7 @@ Attributes: (12/14)
 ```
 
 With the upcoming release of Xarray v0.18.0, xarray-sentinel will be automatically available as
-an Xarray bakend:
+an Xarray backend:
  
 ```python-repl
 >>> import xarray as xr
