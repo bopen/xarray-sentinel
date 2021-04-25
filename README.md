@@ -76,7 +76,7 @@ Attributes: (12/15)
 
 ```
 
-the attribute `groups` shows the available groups to be loaded. The key `group`
+The attribute `groups` shows the available groups to be loaded. The key `group`
 shall be used to select the dataset to be loaded.
 
 ### Open gcp dataset
