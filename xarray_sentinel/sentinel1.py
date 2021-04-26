@@ -114,9 +114,10 @@ def open_orbit_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
 def find_avalable_groups(
     ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]],
     product_attrs: T.Dict[str, T.Any],
+    fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
 ) -> T.Dict[str, T.Dict[str, T.Any]]:
 
-    ancillary_data_paths = filter_missing_path(ancillary_data_paths)
+    ancillary_data_paths = filter_missing_path(ancillary_data_paths, fs)
     groups: T.Dict[str, T.Dict[str, T.Any]] = {}
     for subswath_id, subswath_data_path in ancillary_data_paths.items():
         subswath_id = subswath_id.upper()
@@ -146,14 +147,17 @@ def find_avalable_groups(
     return groups
 
 
-def filter_missing_path(path_dict: T.Dict[str, T.Any]) -> T.Dict[str, T.Any]:
+def filter_missing_path(
+    path_dict: T.Dict[str, T.Any],
+    fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
+) -> T.Dict[str, T.Any]:
 
     path_dict_copy = path_dict.copy()
     for k in path_dict:
         if isinstance(path_dict[k], dict):
-            path_dict_copy[k] = filter_missing_path(path_dict[k])
+            path_dict_copy[k] = filter_missing_path(path_dict[k], fs)
         else:
-            if not os.path.exists(path_dict[k]):
+            if not fs.exists(path_dict[k]):
                 del path_dict_copy[k]
     return path_dict_copy
 
@@ -300,7 +304,7 @@ def open_dataset(
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
 
-    groups = find_avalable_groups(ancillary_data_paths, product_attrs)
+    groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs)
 
     if group is None:
         ds = open_root_dataset(product_attrs, groups)
