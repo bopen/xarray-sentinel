@@ -45,6 +45,8 @@ def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
         coords={
             "azimuth_time": [np.datetime64(dt) for dt in sorted(azimuth_time)],
             "slant_range_time": sorted(slant_range_time),
+            "line": ("azimuth_time", line),
+            "pixel": ("slant_range_time", pixel),
         },
     )
     conventions.update_attributes(ds, group="gcp")
