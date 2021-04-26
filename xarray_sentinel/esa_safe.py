@@ -21,7 +21,7 @@ SENTINEL2_NAMESPACES = {
 
 
 def get_ancillary_data_paths(
-    base_path: str, product_files: T.Dict[str, str],
+    base_path: PathType, product_files: T.Dict[str, str],
 ) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
     type_mapping = {
         "s1Level1CalibrationSchema": "calibration_path",
