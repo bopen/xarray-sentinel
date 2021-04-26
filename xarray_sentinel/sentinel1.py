@@ -45,6 +45,8 @@ def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
         coords={
             "azimuth_time": [np.datetime64(dt) for dt in sorted(azimuth_time)],
             "slant_range_time": sorted(slant_range_time),
+            "line": ("azimuth_time", line),
+            "pixel": ("slant_range_time", pixel),
         },
     )
     conventions.update_attributes(ds, group="gcp")
@@ -168,12 +170,26 @@ def open_root_dataset(
 
 
 def open_swath_dataset(
-    manifest_path: esa_safe.PathType, subgrups: T.List[int],
+    manifest_path: esa_safe.PathType,
+    measurement_paths: T.Dict[str, esa_safe.PathType],
+    subgrups: T.List[int],
+    chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
     manifest_path, manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=subgrups)
-    ds = xr.Dataset(attrs=attrs)  # type: ignore
+
+    data_vars = {}
+    for pol, data_path in measurement_paths.items():
+        arr = rioxarray.open_rasterio(data_path, chunks=chunks)
+        arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
+        arr = arr.rename({"y": "line", "x": "pixel"})
+        data_vars[pol.upper()] = arr
+
+    ds = xr.Dataset(
+        data_vars=data_vars,  # type: ignore
+        attrs=attrs,  # type: ignore
+    )
     conventions.update_attributes(ds)
     return ds
 
@@ -226,18 +242,18 @@ def open_burst_dataset(
             x=slice(burst_first_pixel, burst_last_pixel + 1),
             y=slice(burst_first_line, burst_last_line + 1),
         )
+        arr = arr.rename({"y": "line", "x": "pixel"})
         data_vars[pol.upper()] = arr
 
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         coords={
-            "azimuth_time": ("y", azimuth_time),
-            "slant_range_time": ("x", slant_range_time),
+            "azimuth_time": ("line", azimuth_time),
+            "slant_range_time": ("pixel", slant_range_time),
         },
         attrs=product_attrs,  # type: ignore
     )
-    ds = ds.swap_dims({"y": "azimuth_time", "x": "slant_range_time"})
-    ds = ds.drop_vars({"y", "x"})
+    ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
     conventions.update_attributes(ds)
     return ds
 
@@ -284,7 +300,9 @@ def open_dataset(
             f"\n{list(groups.keys())}"
         )
     elif "/" not in group:
-        ds = open_swath_dataset(manifest_path, groups[group]["subgroups"])
+        ds = open_swath_dataset(
+            manifest_path, groups[group]["measurement_path"], groups[group]["subgroups"]
+        )
     else:
         subswath, subgroup = group.split("/", 1)
         if subgroup in METADATA_OPENERS:

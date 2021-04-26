@@ -70,7 +70,7 @@ def test_open_dataset_attitude() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time"}
-    assert set(res.variables) == {
+    expected = {
         "azimuth_time",
         "roll",
         "pitch",
@@ -83,6 +83,7 @@ def test_open_dataset_attitude() -> None:
         "wy",
         "wz",
     }
+    assert set(res.variables) == expected
 
 
 def test_open_dataset_gcp() -> None:
@@ -107,7 +108,9 @@ def test_open_subswath() -> None:
     for attr_name in COMMON_ATTRIBUTES:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
-    assert not res.variables
+
+    assert set(res.dims) == {"line", "pixel"}
+    assert set(res.variables) == {"VH", "VV", "line", "pixel"}
 
 
 def test_open_burst() -> None:
@@ -122,9 +125,18 @@ def test_open_burst() -> None:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
     assert res.dims == {"slant_range_time": 21632, "azimuth_time": 1501}
-    assert set(res.variables) == {"VH", "VV", "slant_range_time", "azimuth_time"}
     assert not np.all(np.isnan(res.VH))
     assert not np.all(np.isnan(res.VH))
+
+    expected = {
+        "VH",
+        "VV",
+        "slant_range_time",
+        "azimuth_time",
+        "line",
+        "pixel",
+    }
+    assert set(res.variables) == expected
 
 
 def test_open_burst_one_pol() -> None:
@@ -139,4 +151,12 @@ def test_open_burst_one_pol() -> None:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
     assert res.dims == {"slant_range_time": 25508, "azimuth_time": 1513}
-    assert set(res.variables) == {"VH", "slant_range_time", "azimuth_time"}
+
+    expected = {
+        "VH",
+        "slant_range_time",
+        "azimuth_time",
+        "line",
+        "pixel",
+    }
+    assert set(res.variables) == expected

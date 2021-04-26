@@ -252,12 +252,14 @@ def test_parse_original_manifest_sentinel1() -> None:
 
     assert isinstance(res, dict)
     assert "safe:platform" in res
-    assert set(res["safe:platform"]) == {
+
+    expected = {
         "safe:nssdcIdentifier",
         "safe:familyName",
         "safe:number",
         "safe:instrument",
     }
+    assert set(res["safe:platform"]) == expected
 
     _, res = esa_safe.parse_original_manifest_sentinel1(manifest_path)
 
