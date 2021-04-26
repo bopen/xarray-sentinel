@@ -10,6 +10,38 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
+def open_calibration_dataset(calibration_path: esa_safe.PathType):
+    calibration_vectors = esa_safe.parse_calibration_vectors(calibration_path)
+    azimuth_time = []
+    pixel = []
+    line = []
+    sigmaNought = []
+    betaNought = []
+    gamma = []
+    dn = []
+
+    for vector in calibration_vectors:
+        azimuth_time.append(vector["azimuthTime"])
+        line.append(vector["line"])
+        pixel.append(vector["pixel"]["$"])
+        sigmaNought.append(vector["sigmaNought"]["$"])
+        betaNought.append(vector["betaNought"]["$"])
+        gamma.append(vector["gamma"]["$"])
+        dn.append(vector["dn"]["$"])
+
+    data_vars = dict(
+        line=xr.DataArray(line,  dims="line"),
+        azimuth_time=xr.DataArray(azimuth_time, dims="line"),
+        pixel=xr.DataArray(pixel, dims=("line", "dim_0")),
+        sigmaNought=xr.DataArray(sigmaNought, dims=("line", "dim_0")),
+        betaNought=xr.DataArray(betaNought, dims=("line", "dim_0")),
+        gamma=xr.DataArray(gamma, dims=("line", "dim_0")),
+        dn=xr.DataArray(dn, dims=("line", "dim_0")),
+    )
+    calibration_vectors = xr.Dataset(data_vars=data_vars)
+    return calibration_vectors
+
+
 def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_path)
     azimuth_time = []
@@ -107,7 +139,7 @@ def open_orbit_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     ds = conventions.update_attributes(ds, group="orbit")
     return ds
 
-
+#@functools.lru_cache()
 def find_avalable_groups(
     ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]],
     product_attrs: T.Dict[str, T.Any],
@@ -130,9 +162,10 @@ def find_avalable_groups(
                 )
             )
 
-        subgroups = list(METADATA_OPENERS.keys()) + burst_ids
+        subgroups = list(METADATA_OPENERS.keys()) + ["calibration"] + burst_ids
 
         groups[subswath_id] = {"subgroups": subgroups, **subswath_data_path}
+        groups[f"{subswath_id}/calibration"] = subswath_data_path
         for subgroup in METADATA_OPENERS.keys():
             groups[f"{subswath_id}/{subgroup}"] = subswath_data_path
         for k, burst_id in enumerate(burst_ids):
@@ -288,6 +321,9 @@ def open_dataset(
         if subgroup in METADATA_OPENERS:
             annotation_path = list(groups[group]["annotation_path"].values())[0]
             ds = METADATA_OPENERS[subgroup](annotation_path)
+        elif subgroup == "calibration":
+            calibration_path = list(groups[group]["calibration_path"].values())[0]
+            ds = open_calibration_dataset(calibration_path)
         else:
             annotation_path = list(groups[group]["annotation_path"].values())[0]
             ds = open_burst_dataset(
@@ -323,3 +359,4 @@ METADATA_OPENERS = {
     "attitude": open_attitude_dataset,
     "orbit": open_orbit_dataset,
 }
+
