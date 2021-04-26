@@ -159,10 +159,9 @@ def filter_missing_path(path_dict: T.Dict[str, T.Any]) -> T.Dict[str, T.Any]:
 
 
 def open_root_dataset(
-    manifest_path: esa_safe.PathType,
+    product_attrs: T.Dict[str, T.Any],
     groups: T.Dict[str, T.Dict[str, T.Collection[str]]],
 ) -> xr.Dataset:
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
     attrs = dict(product_attrs, groups=list(groups.keys()))
     ds = xr.Dataset(attrs=attrs)  # type: ignore
     conventions.update_attributes(ds)
@@ -292,7 +291,7 @@ def open_dataset(
     if fs.isdir(manifest_path):
         manifest_path = os.path.join(product_urlpath, "manifest.safe")
 
-    base_path = os.path.basename(manifest_path)
+    base_path = os.path.dirname(manifest_path)
 
     with fs.open(manifest_path) as file:
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
@@ -304,7 +303,7 @@ def open_dataset(
     groups = find_avalable_groups(ancillary_data_paths, product_attrs)
 
     if group is None:
-        ds = open_root_dataset(manifest_path, groups)
+        ds = open_root_dataset(product_attrs, groups)
     elif group not in groups:
         raise ValueError(
             f"Invalid group {group}, please select one of the following groups:"
