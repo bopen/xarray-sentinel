@@ -272,7 +272,7 @@ def open_dataset(
         manifest_path, product_files
     )
     if drop_variables is not None:
-        warnings.warn("The key 'drop_variables' is currently ignored.")
+        warnings.warn("'drop_variables' is currently ignored")
 
     groups = find_avalable_groups(ancillary_data_paths, product_attrs)
 
