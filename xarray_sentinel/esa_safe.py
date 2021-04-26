@@ -33,12 +33,13 @@ def get_ancillary_data_paths(
     for filename, filetype in product_files.items():
         if filetype not in type_mapping:
             continue
-        file_path = os.path.join(base_path, filename)
+        # HACK: no easy way to normalise the path component of a urlpath
+        file_path = os.path.join(base_path, os.path.normpath(filename))
         name = os.path.basename(filename)
         subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
         swath_dict = ancillary_data_paths.setdefault(subswath, {})
         type_dict = swath_dict.setdefault(type_mapping[filetype], {})
-        type_dict[pol] = str(file_path)
+        type_dict[pol] = file_path
     return ancillary_data_paths
 
 
@@ -64,7 +65,6 @@ def parse_tag_dict(
 def parse_tag_list(
     xml_path: PathType, schema_type: str, query: str,
 ) -> T.List[T.Dict[str, T.Any]]:
-    xml_path = os.fspath(xml_path)
     schema = sentinel1_schemas(schema_type)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)
     return tag_list
@@ -78,9 +78,7 @@ def parse_orbit(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation_path, "product", ".//orbit")
 
 
-def parse_geolocation_grid_points(
-    annotation_path: PathType,
-) -> T.List[T.Dict[str, T.Any]]:
+def parse_geolocation_grid_points(annotation_path: str,) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
 
 

@@ -12,7 +12,8 @@ from xarray_sentinel import conventions, esa_safe
 
 
 def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
-    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_path)
+    with fsspec.open(annotation_path) as file:
+        geolocation_grid_points = esa_safe.parse_geolocation_grid_points(file)
     azimuth_time = []
     slant_range_time = []
     line_set = set()
