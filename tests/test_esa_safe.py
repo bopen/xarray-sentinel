@@ -267,10 +267,9 @@ def test_parse_original_manifest_sentinel1() -> None:
 
 
 def test_get_ancillary_data() -> None:
-    manifest_path = (
+    base_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "manifest.safe"
     )
 
     product_files = {
@@ -284,9 +283,7 @@ def test_get_ancillary_data() -> None:
         "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
     }
 
-    ancillary_data_paths = esa_safe.get_ancillary_data_paths(
-        manifest_path, product_files
-    )
+    ancillary_data_paths = esa_safe.get_ancillary_data_paths(base_path, product_files)
 
     expected = {"iw1"}
     assert set(ancillary_data_paths) == expected

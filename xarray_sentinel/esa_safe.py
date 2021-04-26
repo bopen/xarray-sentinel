@@ -22,10 +22,8 @@ SENTINEL2_NAMESPACES = {
 
 
 def get_ancillary_data_paths(
-    manifest_path: PathType, product_files: T.Dict[str, str],
+    base_path: str, product_files: T.Dict[str, str],
 ) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
-    folder = pathlib.Path(manifest_path).parent
-
     type_mapping = {
         "s1Level1CalibrationSchema": "calibration_path",
         "s1Level1MeasurementSchema": "measurement_path",
@@ -36,7 +34,7 @@ def get_ancillary_data_paths(
     for filename, filetype in product_files.items():
         if filetype not in type_mapping:
             continue
-        file_path = folder / filename
+        file_path = os.path.join(base_path, filename)
         name = os.path.basename(filename)
         subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
         swath_dict = ancillary_data_paths.setdefault(subswath, {})

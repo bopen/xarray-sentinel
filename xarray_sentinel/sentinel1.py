@@ -292,12 +292,12 @@ def open_dataset(
     if fs.isdir(manifest_path):
         manifest_path = os.path.join(product_urlpath, "manifest.safe")
 
+    base_path = os.path.basename(manifest_path)
+
     with fs.open(manifest_path) as file:
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
 
-    ancillary_data_paths = esa_safe.get_ancillary_data_paths(
-        manifest_path, product_files
-    )
+    ancillary_data_paths = esa_safe.get_ancillary_data_paths(base_path, product_files)
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
 
