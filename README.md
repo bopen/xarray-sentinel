@@ -76,7 +76,7 @@ Attributes: (12/15)
 
 ```
 
-the attribute `groups` shows the available groups to be loaded. The key `group`
+The attribute `groups` shows the available groups to be loaded. The key `group`
 shall be used to select the dataset to be loaded.
 
 ### Open gcp dataset
@@ -184,7 +184,7 @@ Attributes: (12/14)
 ```
 
 With the upcoming release of Xarray v0.18.0, xarray-sentinel will be automatically available as
-an Xarray bakend:
+an Xarray backend:
  
 ```python-repl
 >>> import xarray as xr
