@@ -1,4 +1,5 @@
 import os
+import pathlib
 import typing as T
 import warnings
 
@@ -161,7 +162,7 @@ def open_root_dataset(
     manifest_path: esa_safe.PathType,
     groups: T.Dict[str, T.Dict[str, T.Collection[str]]],
 ) -> xr.Dataset:
-    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
+    manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=list(groups.keys()))
     ds = xr.Dataset(attrs=attrs)  # type: ignore
@@ -175,7 +176,7 @@ def open_swath_dataset(
     subgrups: T.List[int],
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
+    manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     attrs = dict(product_attrs, groups=subgrups)
 
@@ -201,7 +202,7 @@ def open_burst_dataset(
     annotation_path: esa_safe.PathType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    manifest_path, manifest = esa_safe.open_manifest(manifest_path)
+    manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     image_information = esa_safe.parse_image_information(annotation_path)
     procduct_information = esa_safe.parse_product_information(annotation_path)
@@ -282,7 +283,11 @@ def open_dataset(
     group: T.Optional[str] = None,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    manifest_path, manifest = esa_safe.open_manifest(filename_or_obj)
+    manifest_path = pathlib.Path(filename_or_obj)
+    if manifest_path.is_dir():
+        manifest_path = manifest_path / "manifest.safe"
+
+    manifest = esa_safe.open_manifest(manifest_path)
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     ancillary_data_paths = esa_safe.get_ancillary_data_paths(
         manifest_path, product_files

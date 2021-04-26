@@ -125,13 +125,8 @@ def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
     return dc_estimate
 
 
-def open_manifest(
-    product_path: PathType,
-) -> T.Tuple[pathlib.Path, ElementTree.ElementTree]:
-    product_path = pathlib.Path(product_path)
-    if product_path.is_dir():
-        product_path = product_path / "manifest.safe"
-    return product_path, ElementTree.parse(product_path)
+def open_manifest(manifest__path: PathType,) -> ElementTree.ElementTree:
+    return ElementTree.parse(manifest__path)
 
 
 @functools.lru_cache()
