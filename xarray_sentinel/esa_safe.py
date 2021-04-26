@@ -127,7 +127,7 @@ def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
 
 @functools.lru_cache()
 def parse_manifest_sentinel1(
-    manifest_path: PathType,
+    manifest_path: T.Union[PathType, T.TextIO],
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
     manifest = ElementTree.parse(manifest_path)
     familyName = manifest.findtext(

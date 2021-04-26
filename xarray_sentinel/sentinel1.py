@@ -1,8 +1,8 @@
 import os
-import pathlib
 import typing as T
 import warnings
 
+import fsspec  # type: ignore
 import numpy as np
 import pandas as pd  # type: ignore
 import rioxarray  # type: ignore
@@ -275,16 +275,26 @@ def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[np.ndarray, np.ndarray]:
 
 
 def open_dataset(
-    filename_or_obj: esa_safe.PathType,
+    product_urlpath: esa_safe.PathType,
     drop_variables: T.Optional[T.Tuple[str]] = None,
     group: T.Optional[str] = None,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    manifest_path = pathlib.Path(filename_or_obj)
-    if manifest_path.is_dir():
-        manifest_path = manifest_path / "manifest.safe"
+    fs, _, paths = fsspec.get_fs_token_paths(product_urlpath)
 
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
+    if len(paths) == 0:
+        raise ValueError(f"file or object not found {product_urlpath!r}")
+    elif len(paths) > 1:
+        raise ValueError(f"multiple files or objects found {product_urlpath!r}")
+
+    manifest_path = paths[0]
+
+    if fs.isdir(manifest_path):
+        manifest_path = os.path.join(product_urlpath, "manifest.safe")
+
+    open_file = fsspec.open(manifest_path) if fs is None else fs.open(manifest_path)
+    with open_file as file:
+        product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
     ancillary_data_paths = esa_safe.get_ancillary_data_paths(
         manifest_path, product_files
     )
