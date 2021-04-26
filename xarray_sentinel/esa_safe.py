@@ -125,14 +125,11 @@ def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
     return dc_estimate
 
 
-def open_manifest(manifest__path: PathType,) -> ElementTree.ElementTree:
-    return ElementTree.parse(manifest__path)
-
-
 @functools.lru_cache()
 def parse_manifest_sentinel1(
-    manifest: ElementTree.ElementTree,
+    manifest_path: PathType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
+    manifest = ElementTree.parse(manifest_path)
     familyName = manifest.findtext(
         ".//safe:platform/safe:familyName", namespaces=SENTINEL1_NAMESPACES
     )
@@ -241,8 +238,9 @@ def parse_original_manifest_sentinel1(
 
 
 def parse_manifest_sentinel2(
-    manifest: ElementTree.ElementTree,
+    manifest_path: PathType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
+    manifest = ElementTree.parse(manifest_path)
     familyName = manifest.findtext(
         ".//safe:platform/safe:familyName", namespaces=SENTINEL2_NAMESPACES
     )

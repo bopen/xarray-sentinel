@@ -162,8 +162,7 @@ def open_root_dataset(
     manifest_path: esa_safe.PathType,
     groups: T.Dict[str, T.Dict[str, T.Collection[str]]],
 ) -> xr.Dataset:
-    manifest = esa_safe.open_manifest(manifest_path)
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
     attrs = dict(product_attrs, groups=list(groups.keys()))
     ds = xr.Dataset(attrs=attrs)  # type: ignore
     conventions.update_attributes(ds)
@@ -176,8 +175,7 @@ def open_swath_dataset(
     subgrups: T.List[int],
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    manifest = esa_safe.open_manifest(manifest_path)
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
     attrs = dict(product_attrs, groups=subgrups)
 
     data_vars = {}
@@ -202,8 +200,7 @@ def open_burst_dataset(
     annotation_path: esa_safe.PathType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    manifest = esa_safe.open_manifest(manifest_path)
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
     image_information = esa_safe.parse_image_information(annotation_path)
     procduct_information = esa_safe.parse_product_information(annotation_path)
 
@@ -287,8 +284,7 @@ def open_dataset(
     if manifest_path.is_dir():
         manifest_path = manifest_path / "manifest.safe"
 
-    manifest = esa_safe.open_manifest(manifest_path)
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
     ancillary_data_paths = esa_safe.get_ancillary_data_paths(
         manifest_path, product_files
     )

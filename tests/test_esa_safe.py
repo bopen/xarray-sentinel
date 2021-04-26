@@ -221,10 +221,9 @@ def test_parse_dc_estimate() -> None:
 def test_parse_manifest_sentinel1(
     product_id: str, expected: T.Dict[str, T.Any]
 ) -> None:
-    product_folder = DATA_FOLDER / (product_id + ".SAFE") / "manifest.safe"
-    manifest = esa_safe.open_manifest(product_folder)
+    manifest_path = DATA_FOLDER / (product_id + ".SAFE") / "manifest.safe"
 
-    res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest)
+    res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest_path)
 
     assert res_attrs == expected
 
@@ -233,10 +232,9 @@ def test_parse_manifest_sentinel1(
 def test_parse_manifest_sentinel2(
     product_id: str, expected: T.Dict[str, T.Any]
 ) -> None:
-    product_folder = DATA_FOLDER / (product_id + ".SAFE") / "manifest.safe"
-    manifest = esa_safe.open_manifest(product_folder)
+    manifest_path = DATA_FOLDER / (product_id + ".SAFE") / "manifest.safe"
 
-    res_attrs, res_files = esa_safe.parse_manifest_sentinel2(manifest)
+    res_attrs, res_files = esa_safe.parse_manifest_sentinel2(manifest_path)
 
     assert res_attrs == expected
 
