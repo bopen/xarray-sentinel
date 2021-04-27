@@ -12,33 +12,47 @@ from xarray_sentinel import conventions, esa_safe
 
 def open_calibration_dataset(calibration_path: esa_safe.PathType):
     calibration_vectors = esa_safe.parse_calibration_vectors(calibration_path)
-    azimuth_time = []
-    pixel = []
-    line = []
-    sigmaNought = []
-    betaNought = []
-    gamma = []
-    dn = []
+    azimuth_time_list = []
+    pixel_list = []
+    line_list = []
+    sigmaNought_list = []
+    betaNought_list = []
+    gamma_list = []
+    dn_list = []
 
     for vector in calibration_vectors:
-        azimuth_time.append(vector["azimuthTime"])
-        line.append(vector["line"])
-        pixel.append(vector["pixel"]["$"])
-        sigmaNought.append(vector["sigmaNought"]["$"])
-        betaNought.append(vector["betaNought"]["$"])
-        gamma.append(vector["gamma"]["$"])
-        dn.append(vector["dn"]["$"])
+        azimuth_time_list.append(vector["azimuthTime"])
+        line_list.append(vector["line"])
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=float, sep=" ")
+        pixel_list.append(pixel)
+        sigmaNought = np.fromstring(vector["sigmaNought"]["$"], dtype=float, sep=" ")
+        sigmaNought_list.append(sigmaNought)
+        betaNought = np.fromstring(vector["betaNought"]["$"], dtype=float, sep=" ")
+        betaNought_list.append(betaNought)
+        gamma = np.fromstring(vector["gamma"]["$"], dtype=float, sep=" ")
+        gamma_list.append(gamma)
+        dn = np.fromstring(vector["dn"]["$"], dtype=float, sep=" ")
+        dn_list.append(dn)
 
-    data_vars = dict(
-        line=xr.DataArray(line, dims="line"),
-        azimuth_time=xr.DataArray(azimuth_time, dims="line"),
-        pixel=xr.DataArray(pixel, dims=("line", "dim_0")),
-        sigmaNought=xr.DataArray(sigmaNought, dims=("line", "dim_0")),
-        betaNought=xr.DataArray(betaNought, dims=("line", "dim_0")),
-        gamma=xr.DataArray(gamma, dims=("line", "dim_0")),
-        dn=xr.DataArray(dn, dims=("line", "dim_0")),
-    )
-    calibration_vectors = xr.Dataset(data_vars=data_vars)
+    pixel = np.array(pixel_list)
+    if np.allclose(pixel, pixel[0]):
+        data_vars = dict(
+            azimuth_time=xr.DataArray(azimuth_time_list, dims="line"),
+            sigmaNought=xr.DataArray(sigmaNought_list, dims=("line", "pixel")),
+            betaNought=xr.DataArray(betaNought_list, dims=("line", "pixel")),
+            gamma=xr.DataArray(gamma_list, dims=("line", "pixel")),
+            dn=xr.DataArray(dn_list, dims=("line", "pixel")),
+        )
+        coords = dict(
+            line=xr.DataArray(line_list, dims="line"),
+            pixel=xr.DataArray(pixel_list[0], dims="pixel"),
+        )
+        calibration_vectors = xr.Dataset(data_vars=data_vars, coords=coords,)
+    else:
+        raise ValueError(
+            "Unable to organise calibration vectors in a regular line-pixel grid"
+        )
+
     return calibration_vectors
 
 
