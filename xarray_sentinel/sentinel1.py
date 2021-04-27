@@ -10,7 +10,7 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_calibration_dataset(calibration_path: esa_safe.PathType):
+def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
     calibration_vectors = esa_safe.parse_calibration_vectors(calibration_path)
     azimuth_time_list = []
     pixel_list = []
@@ -35,25 +35,23 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType):
         dn_list.append(dn)
 
     pixel = np.array(pixel_list)
-    if np.allclose(pixel, pixel[0]):
-        data_vars = dict(
-            azimuth_time=xr.DataArray(azimuth_time_list, dims="line"),
-            sigmaNought=xr.DataArray(sigmaNought_list, dims=("line", "pixel")),
-            betaNought=xr.DataArray(betaNought_list, dims=("line", "pixel")),
-            gamma=xr.DataArray(gamma_list, dims=("line", "pixel")),
-            dn=xr.DataArray(dn_list, dims=("line", "pixel")),
-        )
-        coords = dict(
-            line=xr.DataArray(line_list, dims="line"),
-            pixel=xr.DataArray(pixel_list[0], dims="pixel"),
-        )
-        calibration_vectors = xr.Dataset(data_vars=data_vars, coords=coords,)
-    else:
+    if not np.allclose(pixel, pixel[0]):
         raise ValueError(
             "Unable to organise calibration vectors in a regular line-pixel grid"
         )
+    data_vars = dict(
+        azimuth_time=xr.DataArray(azimuth_time_list, dims="line"),
+        sigmaNought=xr.DataArray(sigmaNought_list, dims=("line", "pixel")),
+        betaNought=xr.DataArray(betaNought_list, dims=("line", "pixel")),
+        gamma=xr.DataArray(gamma_list, dims=("line", "pixel")),
+        dn=xr.DataArray(dn_list, dims=("line", "pixel")),
+    )
+    coords = dict(
+        line=xr.DataArray(line_list, dims="line"),
+        pixel=xr.DataArray(pixel_list[0], dims="pixel"),
+    )
 
-    return calibration_vectors
+    return xr.Dataset(data_vars=data_vars, coords=coords,)  # type: ignore
 
 
 def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
