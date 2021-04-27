@@ -5,6 +5,7 @@ dependencies:
   - black = 19.10b0
   - dask
   - flake8
+  - fsspec
   - isort
   - make
   - mypy
