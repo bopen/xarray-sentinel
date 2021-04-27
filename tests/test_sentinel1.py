@@ -94,11 +94,11 @@ def test_open_dataset_chunks_bursts() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = sentinel1.open_dataset(product_path, group="IW1/R168-N471-E0118", chunks=100)
+    res = sentinel1.open_dataset(product_path, group="IW1/R168-N471-E0118", chunks=1000)
 
-    assert len(res.VH.dims) == 2
-    assert np.allclose(res.VH.chunks[0][:-1], 100)
-    assert np.allclose(res.VH.chunks[1][:-1], 100)
     assert isinstance(res, xr.Dataset)
+    assert len(res.VH.dims) == 2
+    assert np.allclose(res.VH.chunks[0][:-1], 1000)
+    assert np.allclose(res.VH.chunks[1][:-1], 1000)
     assert not np.all(np.isnan(res.VH))
     assert not np.all(np.isnan(res.VH))
