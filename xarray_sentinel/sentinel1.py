@@ -293,13 +293,13 @@ def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[np.ndarray, np.ndarray]:
 
 
 def open_dataset(
-    product_urlpath: esa_safe.PathType,
+    urlpath: esa_safe.PathType,
     drop_variables: T.Optional[T.Tuple[str]] = None,
     group: T.Optional[str] = None,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
-    fs, manifest_path = get_fs_path(product_urlpath, fs)
+    fs, manifest_path = get_fs_path(urlpath, fs)
 
     if fs.isdir(manifest_path):
         manifest_path = os.path.join(manifest_path, "manifest.safe")
@@ -345,7 +345,7 @@ def open_dataset(
     ds.encoding = {
         "engine": "sentinel-1",
         "group": group,
-        "filename_or_obj": filename_or_obj,
+        "urlpath": urlpath,
     }
     return ds
 
@@ -355,7 +355,7 @@ class Sentinel1Accessor:
     def __init__(self, xarray_obj: xr.Dataset) -> None:
         if xarray_obj.encoding.get("engine") != "sentinel-1":
             raise TypeError("not a 'sentinel-1' 'Dataset'")
-        self.filename_or_obj = xarray_obj.encoding["filename_or_obj"]
+        self.urlpath = xarray_obj.encoding["urlpath"]
         self.group = xarray_obj.encoding["group"]
 
 
