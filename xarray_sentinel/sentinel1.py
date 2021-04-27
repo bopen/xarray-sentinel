@@ -11,9 +11,8 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
-    with fsspec.open(annotation_path) as file:
-        geolocation_grid_points = esa_safe.parse_geolocation_grid_points(file)
+def open_gcp_dataset(annotation_file: T.TextIO) -> xr.Dataset:
+    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_file)
     azimuth_time = []
     slant_range_time = []
     line_set = set()
@@ -55,8 +54,8 @@ def open_gcp_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     return ds
 
 
-def open_attitude_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
-    attitude = esa_safe.parse_attitude(annotation_path)
+def open_attitude_dataset(annotation_file: T.TextIO) -> xr.Dataset:
+    attitude = esa_safe.parse_attitude(annotation_file)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     time: T.List[T.Any] = []
@@ -75,8 +74,8 @@ def open_attitude_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     return ds
 
 
-def open_orbit_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
-    orbit = esa_safe.parse_orbit(annotation_path)
+def open_orbit_dataset(annotation_file: T.TextIO) -> xr.Dataset:
+    orbit = esa_safe.parse_orbit(annotation_file)
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
@@ -93,8 +92,7 @@ def open_orbit_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
         data_vars["vz"][1].append(orbit[k]["velocity"]["z"])
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
-                f"reference_system is not consistent in all the state vectors. "
-                f"xpath: .//orbit//frame \nFile: {str(annotation_path)}"
+                "reference_system is not consistent in all the state vectors. "
             )
             reference_system = None
 
@@ -125,7 +123,8 @@ def find_avalable_groups(
         if len(subswath_data_path["annotation_path"]) == 0:
             continue
         annotation_path = list(subswath_data_path["annotation_path"].values())[0]
-        gcp = open_gcp_dataset(annotation_path)
+        with fs.open(annotation_path) as annotation_file:
+            gcp = open_gcp_dataset(annotation_file)
         centres_lat, centres_lon = compute_burst_centres(gcp)
         burst_ids: T.List[str] = []
         for k in range(len(centres_lat)):
@@ -260,7 +259,7 @@ def open_burst_dataset(
     return ds
 
 
-def build_burst_id(lat: float, lon: float, relative_orbit: int,) -> str:
+def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
     lat = int(round(lat * 10))
     lon = int(round(lon * 10))
 
@@ -283,6 +282,7 @@ def open_dataset(
     drop_variables: T.Optional[T.Tuple[str]] = None,
     group: T.Optional[str] = None,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
+    fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
     fs, _, paths = fsspec.get_fs_token_paths(product_urlpath)
 
@@ -294,7 +294,7 @@ def open_dataset(
     manifest_path = paths[0]
 
     if fs.isdir(manifest_path):
-        manifest_path = os.path.join(product_urlpath, "manifest.safe")
+        manifest_path = os.path.join(manifest_path, "manifest.safe")
 
     base_path = os.path.dirname(manifest_path)
 
@@ -305,7 +305,7 @@ def open_dataset(
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
 
-    groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs)
+    groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs=fs)
 
     if group is None:
         ds = open_root_dataset(product_attrs, groups)
@@ -322,7 +322,8 @@ def open_dataset(
         subswath, subgroup = group.split("/", 1)
         if subgroup in METADATA_OPENERS:
             annotation_path = list(groups[group]["annotation_path"].values())[0]
-            ds = METADATA_OPENERS[subgroup](annotation_path)
+            with fs.open(annotation_path) as annotation_file:
+                ds = METADATA_OPENERS[subgroup](annotation_file)
         else:
             annotation_path = list(groups[group]["annotation_path"].values())[0]
             ds = open_burst_dataset(

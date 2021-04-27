@@ -7,6 +7,7 @@ import pkg_resources
 import xmlschema
 
 PathType = T.Union[str, "os.PathLike[str]"]
+PathOrFileType = T.Union[PathType, T.TextIO]
 
 
 SENTINEL1_NAMESPACES = {
@@ -54,32 +55,33 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
 
 
 def parse_tag_dict(
-    xml_path: PathType, schema_type: str, query: str,
+    xml_path: PathOrFileType, schema_type: str, query: str,
 ) -> T.Dict[str, T.Any]:
-    xml_path = os.fspath(xml_path)
     schema = sentinel1_schemas(schema_type)
     tag_list: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)
     return tag_list
 
 
 def parse_tag_list(
-    xml_path: PathType, schema_type: str, query: str,
+    xml_path: PathOrFileType, schema_type: str, query: str,
 ) -> T.List[T.Dict[str, T.Any]]:
     schema = sentinel1_schemas(schema_type)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)
     return tag_list
 
 
-def parse_attitude(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//attitude")
+def parse_attitude(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation, "product", ".//attitude")
 
 
-def parse_orbit(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//orbit")
+def parse_orbit(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation, "product", ".//orbit")
 
 
-def parse_geolocation_grid_points(annotation_path: str,) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
+def parse_geolocation_grid_points(
+    annotation: PathOrFileType,
+) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation, "product", ".//geolocationGridPoint")
 
 
 def parse_swath_timing(annotation_path: PathType) -> T.Dict[str, T.Any]:
