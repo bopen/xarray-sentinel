@@ -26,8 +26,8 @@ def get_fs_path(
     return fs, path
 
 
-def open_gcp_dataset(annotation_file: T.TextIO) -> xr.Dataset:
-    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_file)
+def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation)
     azimuth_time = []
     slant_range_time = []
     line_set = set()
@@ -69,8 +69,8 @@ def open_gcp_dataset(annotation_file: T.TextIO) -> xr.Dataset:
     return ds
 
 
-def open_attitude_dataset(annotation_file: T.TextIO) -> xr.Dataset:
-    attitude = esa_safe.parse_attitude(annotation_file)
+def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+    attitude = esa_safe.parse_attitude(annotation)
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     time: T.List[T.Any] = []
@@ -89,8 +89,8 @@ def open_attitude_dataset(annotation_file: T.TextIO) -> xr.Dataset:
     return ds
 
 
-def open_orbit_dataset(annotation_file: T.TextIO) -> xr.Dataset:
-    orbit = esa_safe.parse_orbit(annotation_file)
+def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+    orbit = esa_safe.parse_orbit(annotation)
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
