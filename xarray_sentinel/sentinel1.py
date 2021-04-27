@@ -11,6 +11,21 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
+def get_fs_path(
+    urlpath_or_path: esa_safe.PathType, fs: T.Optional[fsspec.AbstractFileSystem] = None
+) -> T.Tuple[fsspec.AbstractFileSystem, str]:
+    if fs is None:
+        fs, _, paths = fsspec.get_fs_token_paths(urlpath_or_path)
+        if len(paths) == 0:
+            raise ValueError(f"file or object not found {urlpath_or_path!r}")
+        elif len(paths) > 1:
+            raise ValueError(f"multiple files or objects found {urlpath_or_path!r}")
+        path = paths[0]
+    else:
+        path = urlpath_or_path
+    return fs, path
+
+
 def open_gcp_dataset(annotation_file: T.TextIO) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation_file)
     azimuth_time = []
@@ -284,14 +299,7 @@ def open_dataset(
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
-    fs, _, paths = fsspec.get_fs_token_paths(product_urlpath)
-
-    if len(paths) == 0:
-        raise ValueError(f"file or object not found {product_urlpath!r}")
-    elif len(paths) > 1:
-        raise ValueError(f"multiple files or objects found {product_urlpath!r}")
-
-    manifest_path = paths[0]
+    fs, manifest_path = get_fs_path(product_urlpath, fs)
 
     if fs.isdir(manifest_path):
         manifest_path = os.path.join(manifest_path, "manifest.safe")
