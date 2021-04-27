@@ -74,7 +74,10 @@ def parse_tag_list(
 def parse_attitude(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation, "product", ".//attitude")
 
-def parse_calibration_vectors(calibration_path: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
+
+def parse_calibration_vectors(
+    calibration_path: PathOrFileType,
+) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(calibration_path, "calibration", ".//calibrationVector")
 
 
