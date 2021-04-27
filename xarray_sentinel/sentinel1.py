@@ -330,11 +330,10 @@ def open_dataset(
 @xr.register_dataset_accessor("sentinel1")  # type: ignore
 class Sentinel1Accessor:
     def __init__(self, xarray_obj: xr.Dataset) -> None:
-        self.disabled = True
-        if xarray_obj.encoding.get("engine") == "sentinel-1":
-            self.disabled = False
-            self.filename_or_obj = xarray_obj.encoding["filename_or_obj"]
-            self.group = xarray_obj.encoding["group"]
+        if xarray_obj.encoding.get("engine") != "sentinel-1":
+            raise TypeError("not a 'sentinel-1' 'Dataset'")
+        self.filename_or_obj = xarray_obj.encoding["filename_or_obj"]
+        self.group = xarray_obj.encoding["group"]
 
 
 class Sentinel1Backend(xr.backends.common.BackendEntrypoint):

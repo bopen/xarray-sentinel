@@ -61,8 +61,8 @@ def test_open_dataset_root_accessor() -> None:
 
     res1 = xr.zeros_like(res, 0)
 
-    with pytest.raises(AttributeError):
-        res1.sentinel1.group
+    with pytest.raises(RuntimeError):
+        res1.sentinel1
 
 
 def test_open_dataset_orbit() -> None:
