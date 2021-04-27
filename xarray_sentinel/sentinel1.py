@@ -327,9 +327,9 @@ def open_dataset(
     return ds
 
 
-@xr.register_dataset_accessor("sentinel1")
+@xr.register_dataset_accessor("sentinel1")  # type: ignore
 class Sentinel1Accessor:
-    def __init__(self, xarray_obj):
+    def __init__(self, xarray_obj: xr.Dataset) -> None:
         self.disabled = True
         if xarray_obj.encoding.get("engine") == "sentinel-1":
             self.disabled = False
