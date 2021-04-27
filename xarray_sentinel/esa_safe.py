@@ -58,8 +58,9 @@ def parse_tag_dict(
     xml_path: PathOrFileType, schema_type: str, query: str,
 ) -> T.Dict[str, T.Any]:
     schema = sentinel1_schemas(schema_type)
-    tag_list: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)
-    return tag_list
+    tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)
+    assert isinstance(tag_dict, dict)
+    return tag_dict
 
 
 def parse_tag_list(
@@ -67,6 +68,7 @@ def parse_tag_list(
 ) -> T.List[T.Dict[str, T.Any]]:
     schema = sentinel1_schemas(schema_type)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)
+    assert isinstance(tag_list, list)
     return tag_list
 
 
