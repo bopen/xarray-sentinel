@@ -90,16 +90,65 @@ def test_compute_burst_centres() -> None:
     assert np.allclose(lon, [5, 15, 25, 35])
 
 
+def test_open_dataset() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    expected_groups = [
+        "IW1",
+        "IW1/gcp",
+        "IW1/attitude",
+        "IW1/orbit",
+        "IW1/R168-N471-E0118",
+    ]
+
+    res = sentinel1.open_dataset(product_path)
+
+    assert isinstance(res, xr.Dataset)
+    assert res.attrs["groups"][:5] == expected_groups
+
+    res = sentinel1.open_dataset(product_path, group="IW1/orbit")
+
+    assert isinstance(res, xr.Dataset)
+    assert res.dims == {"azimuth_time": 17}
+
+
+def test_open_dataset_zip() -> None:
+    zip_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
+    )
+    zip_urlpath = f"zip://*/manifest.safe::{zip_path}"
+    expected_groups = [
+        "IW1",
+        "IW1/gcp",
+        "IW1/attitude",
+        "IW1/orbit",
+        "IW1/R168-N471-E0118",
+    ]
+
+    res = sentinel1.open_dataset(zip_urlpath)
+
+    assert isinstance(res, xr.Dataset)
+    assert res.attrs["groups"][:5] == expected_groups
+
+    res = sentinel1.open_dataset(zip_urlpath, group="IW1/orbit")
+
+    assert isinstance(res, xr.Dataset)
+    assert res.dims == {"azimuth_time": 17}
+
+
 def test_open_dataset_chunks_bursts() -> None:
     product_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = sentinel1.open_dataset(product_path, group="IW1/R168-N471-E0118", chunks=100)
+    res = sentinel1.open_dataset(product_path, group="IW1/R168-N471-E0118", chunks=1000)
 
-    assert len(res.VH.dims) == 2
-    assert np.allclose(res.VH.chunks[0][:-1], 100)
-    assert np.allclose(res.VH.chunks[1][:-1], 100)
     assert isinstance(res, xr.Dataset)
+    assert len(res.VH.dims) == 2
+    assert np.allclose(res.VH.chunks[0][:-1], 1000)
+    assert np.allclose(res.VH.chunks[1][:-1], 1000)
     assert not np.all(np.isnan(res.VH))
     assert not np.all(np.isnan(res.VH))

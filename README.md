@@ -76,7 +76,7 @@ Attributes: (12/15)
 
 ```
 
-the attribute `groups` shows the available groups to be loaded. The key `group`
+The attribute `groups` shows the available groups to be loaded. The key `group`
 shall be used to select the dataset to be loaded.
 
 ### Open gcp dataset
@@ -89,6 +89,8 @@ Dimensions:           (azimuth_time: 10, slant_range_time: 21)
 Coordinates:
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:24.20973...
   * slant_range_time  (slant_range_time) float64 0.005343 0.00536 ... 0.005679
+    line              (azimuth_time) int64 0 1501 3002 ... 10507 12008 13508
+    pixel             (slant_range_time) int64 0 1082 2164 ... 19476 20558 21631
 Data variables:
     latitude          (azimuth_time, slant_range_time) float64 ...
     longitude         (azimuth_time, slant_range_time) float64 ...
@@ -161,6 +163,8 @@ Attributes:
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 1501, slant_range_time: 21632)
 Coordinates:
+    line              (azimuth_time) float64 1.051e+04 1.051e+04 ... 1.201e+04
+    pixel             (slant_range_time) float64 0.5 1.5 ... 2.163e+04 2.163e+04
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:43.51577...
   * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
 Data variables:
@@ -184,7 +188,7 @@ Attributes: (12/14)
 ```
 
 With the upcoming release of Xarray v0.18.0, xarray-sentinel will be automatically available as
-an Xarray bakend:
+an Xarray backend:
  
 ```python-repl
 >>> import xarray as xr

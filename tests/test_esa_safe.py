@@ -107,7 +107,7 @@ SENTINEL2_ATTRIBUTES = {
     },
 }
 
-ANNOTATION_PATH = (
+ANNOTATION_PATH = str(
     DATA_FOLDER
     / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     / "annotation"
@@ -221,10 +221,9 @@ def test_parse_dc_estimate() -> None:
 def test_parse_manifest_sentinel1(
     product_id: str, expected: T.Dict[str, T.Any]
 ) -> None:
-    product_folder = DATA_FOLDER / (product_id + ".SAFE")
-    _, manifest = esa_safe.open_manifest(product_folder)
+    manifest_path = DATA_FOLDER / (product_id + ".SAFE") / "manifest.safe"
 
-    res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest)
+    res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest_path)
 
     assert res_attrs == expected
 
@@ -233,10 +232,9 @@ def test_parse_manifest_sentinel1(
 def test_parse_manifest_sentinel2(
     product_id: str, expected: T.Dict[str, T.Any]
 ) -> None:
-    product_folder = DATA_FOLDER / (product_id + ".SAFE")
-    _, manifest = esa_safe.open_manifest(product_folder)
+    manifest_path = DATA_FOLDER / (product_id + ".SAFE") / "manifest.safe"
 
-    res_attrs, res_files = esa_safe.parse_manifest_sentinel2(manifest)
+    res_attrs, res_files = esa_safe.parse_manifest_sentinel2(manifest_path)
 
     assert res_attrs == expected
 
@@ -252,12 +250,14 @@ def test_parse_original_manifest_sentinel1() -> None:
 
     assert isinstance(res, dict)
     assert "safe:platform" in res
-    assert set(res["safe:platform"]) == {
+
+    expected = {
         "safe:nssdcIdentifier",
         "safe:familyName",
         "safe:number",
         "safe:instrument",
     }
+    assert set(res["safe:platform"]) == expected
 
     _, res = esa_safe.parse_original_manifest_sentinel1(manifest_path)
 
@@ -267,10 +267,9 @@ def test_parse_original_manifest_sentinel1() -> None:
 
 
 def test_get_ancillary_data() -> None:
-    manifest_path = (
+    base_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "manifest.safe"
     )
 
     product_files = {
@@ -284,9 +283,7 @@ def test_get_ancillary_data() -> None:
         "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
     }
 
-    ancillary_data_paths = esa_safe.get_ancillary_data_paths(
-        manifest_path, product_files
-    )
+    ancillary_data_paths = esa_safe.get_ancillary_data_paths(base_path, product_files)
 
     expected = {"iw1"}
     assert set(ancillary_data_paths) == expected

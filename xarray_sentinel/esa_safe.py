@@ -1,6 +1,5 @@
 import functools
 import os
-import pathlib
 import typing as T
 from xml.etree import ElementTree
 
@@ -8,6 +7,7 @@ import pkg_resources
 import xmlschema
 
 PathType = T.Union[str, "os.PathLike[str]"]
+PathOrFileType = T.Union[PathType, T.TextIO]
 
 
 SENTINEL1_NAMESPACES = {
@@ -22,10 +22,8 @@ SENTINEL2_NAMESPACES = {
 
 
 def get_ancillary_data_paths(
-    manifest_path: PathType, product_files: T.Dict[str, str],
+    base_path: PathType, product_files: T.Dict[str, str],
 ) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
-    folder = pathlib.Path(manifest_path).parent
-
     type_mapping = {
         "s1Level1CalibrationSchema": "calibration_path",
         "s1Level1MeasurementSchema": "measurement_path",
@@ -36,12 +34,13 @@ def get_ancillary_data_paths(
     for filename, filetype in product_files.items():
         if filetype not in type_mapping:
             continue
-        file_path = folder / filename
+        # HACK: no easy way to normalise the path component of a urlpath
+        file_path = os.path.join(base_path, os.path.normpath(filename))
         name = os.path.basename(filename)
         subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
         swath_dict = ancillary_data_paths.setdefault(subswath, {})
         type_dict = swath_dict.setdefault(type_mapping[filetype], {})
-        type_dict[pol] = str(file_path)
+        type_dict[pol] = file_path
     return ancillary_data_paths
 
 
@@ -57,24 +56,25 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
 
 
 def parse_tag_dict(
-    xml_path: PathType, schema_type: str, query: str,
+    xml_path: PathOrFileType, schema_type: str, query: str,
 ) -> T.Dict[str, T.Any]:
-    xml_path = os.fspath(xml_path)
     schema = sentinel1_schemas(schema_type)
     tag_list: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)
     return tag_list
 
 
 def parse_tag_list(
-    xml_path: PathType, schema_type: str, query: str,
+    xml_path: PathOrFileType, schema_type: str, query: str,
 ) -> T.List[T.Dict[str, T.Any]]:
-    xml_path = os.fspath(xml_path)
     schema = sentinel1_schemas(schema_type)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)
     return tag_list
 
 
-def parse_calibration_vectors(calibration_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+def parse_attitude(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation, "product", ".//attitude")
+
+def parse_calibration_vectors(calibration_path: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(calibration_path, "calibration", ".//calibrationVector")
 
 
@@ -82,14 +82,14 @@ def parse_attitude(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation_path, "product", ".//attitude")
 
 
-def parse_orbit(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//orbit")
+def parse_orbit(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(annotation, "product", ".//orbit")
 
 
 def parse_geolocation_grid_points(
-    annotation_path: PathType,
+    annotation: PathOrFileType,
 ) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//geolocationGridPoint")
+    return parse_tag_list(annotation, "product", ".//geolocationGridPoint")
 
 
 def parse_swath_timing(annotation_path: PathType) -> T.Dict[str, T.Any]:
@@ -130,19 +130,11 @@ def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
     return dc_estimate
 
 
-def open_manifest(
-    product_path: PathType,
-) -> T.Tuple[pathlib.Path, ElementTree.ElementTree]:
-    product_path = pathlib.Path(product_path)
-    if product_path.is_dir():
-        product_path = product_path / "manifest.safe"
-    return product_path, ElementTree.parse(product_path)
-
-
 @functools.lru_cache()
 def parse_manifest_sentinel1(
-    manifest: ElementTree.ElementTree,
+    manifest_path: T.Union[PathType, T.TextIO],
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
+    manifest = ElementTree.parse(manifest_path)
     familyName = manifest.findtext(
         ".//safe:platform/safe:familyName", namespaces=SENTINEL1_NAMESPACES
     )
@@ -251,8 +243,9 @@ def parse_original_manifest_sentinel1(
 
 
 def parse_manifest_sentinel2(
-    manifest: ElementTree.ElementTree,
+    manifest_path: PathType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
+    manifest = ElementTree.parse(manifest_path)
     familyName = manifest.findtext(
         ".//safe:platform/safe:familyName", namespaces=SENTINEL2_NAMESPACES
     )
