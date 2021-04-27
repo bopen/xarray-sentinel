@@ -1,6 +1,7 @@
 import pathlib
 
 import numpy as np
+import pytest
 import xarray as xr
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
@@ -47,6 +48,21 @@ def test_open_dataset_root() -> None:
     res = xr.open_dataset(product_path)  # type: ignore
 
     assert isinstance(res, xr.Dataset)
+
+
+def test_open_dataset_root_accessor() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    res = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
+
+    assert res.sentinel1.group is None
+
+    res1 = xr.zeros_like(res, 0)
+
+    with pytest.raises(AttributeError):
+        res1.sentinel1.group
 
 
 def test_open_dataset_orbit() -> None:
