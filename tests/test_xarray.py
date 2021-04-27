@@ -61,7 +61,7 @@ def test_open_dataset_root_accessor() -> None:
 
     res1 = xr.zeros_like(res, 0)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(TypeError):
         res1.sentinel1
 
 
