@@ -30,7 +30,7 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType):
         dn.append(vector["dn"]["$"])
 
     data_vars = dict(
-        line=xr.DataArray(line,  dims="line"),
+        line=xr.DataArray(line, dims="line"),
         azimuth_time=xr.DataArray(azimuth_time, dims="line"),
         pixel=xr.DataArray(pixel, dims=("line", "dim_0")),
         sigmaNought=xr.DataArray(sigmaNought, dims=("line", "dim_0")),
@@ -139,7 +139,7 @@ def open_orbit_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     ds = conventions.update_attributes(ds, group="orbit")
     return ds
 
-#@functools.lru_cache()
+
 def find_avalable_groups(
     ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]],
     product_attrs: T.Dict[str, T.Any],
@@ -359,4 +359,3 @@ METADATA_OPENERS = {
     "attitude": open_attitude_dataset,
     "orbit": open_orbit_dataset,
 }
-

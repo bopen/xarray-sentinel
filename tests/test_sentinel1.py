@@ -56,6 +56,7 @@ def test_find_avalable_groups() -> None:
         "IW1/attitude",
         "IW1/gcp",
         "IW1/orbit",
+        "IW1/calibration",
         "IW1/R168-N471-E0118",
         "IW1/R168-N469-E0118",
         "IW1/R168-N468-E0117",
