@@ -140,3 +140,14 @@ def test_open_burst_one_pol() -> None:
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
     assert res.dims == {"slant_range_time": 25508, "azimuth_time": 1513}
     assert set(res.variables) == {"VH", "slant_range_time", "azimuth_time"}
+
+
+def test_open_calibration_dataset() -> None:
+    annotation_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="IW1/calibration")  # type: ignore
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.dims) == {"line", "pixel"}
