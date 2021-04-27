@@ -81,10 +81,6 @@ def parse_calibration_vectors(
     return parse_tag_list(calibration_path, "calibration", ".//calibrationVector")
 
 
-def parse_attitude(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//attitude")
-
-
 def parse_orbit(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation, "product", ".//orbit")
 
