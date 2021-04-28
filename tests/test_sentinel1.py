@@ -56,6 +56,7 @@ def test_find_avalable_groups() -> None:
         "IW1/attitude",
         "IW1/gcp",
         "IW1/orbit",
+        "IW1/calibration",
         "IW1/R168-N471-E0118",
         "IW1/R168-N469-E0118",
         "IW1/R168-N468-E0117",
@@ -94,18 +95,19 @@ def test_open_dataset() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    expected_groups = [
+    expected_groups = {
         "IW1",
         "IW1/gcp",
         "IW1/attitude",
         "IW1/orbit",
+        "IW1/calibration",
         "IW1/R168-N471-E0118",
-    ]
+    }
 
     res = sentinel1.open_dataset(product_path)
 
     assert isinstance(res, xr.Dataset)
-    assert res.attrs["groups"][:5] == expected_groups
+    assert set(res.attrs["groups"]) >= expected_groups
 
     res = sentinel1.open_dataset(product_path, group="IW1/orbit")
 
@@ -119,18 +121,19 @@ def test_open_dataset_zip() -> None:
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
     )
     zip_urlpath = f"zip://*/manifest.safe::{zip_path}"
-    expected_groups = [
+    expected_groups = {
         "IW1",
         "IW1/gcp",
         "IW1/attitude",
+        "IW1/calibration",
         "IW1/orbit",
         "IW1/R168-N471-E0118",
-    ]
+    }
 
     res = sentinel1.open_dataset(zip_urlpath)
 
     assert isinstance(res, xr.Dataset)
-    assert res.attrs["groups"][:5] == expected_groups
+    assert set(res.attrs["groups"]) >= expected_groups
 
     res = sentinel1.open_dataset(zip_urlpath, group="IW1/orbit")
 

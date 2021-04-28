@@ -11,6 +11,50 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
+def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
+    calibration_vectors = esa_safe.parse_calibration_vectors(calibration_path)
+    azimuth_time_list = []
+    pixel_list = []
+    line_list = []
+    sigmaNought_list = []
+    betaNought_list = []
+    gamma_list = []
+    dn_list = []
+
+    for vector in calibration_vectors:
+        azimuth_time_list.append(vector["azimuthTime"])
+        line_list.append(vector["line"])
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=float, sep=" ")
+        pixel_list.append(pixel)
+        sigmaNought = np.fromstring(vector["sigmaNought"]["$"], dtype=float, sep=" ")
+        sigmaNought_list.append(sigmaNought)
+        betaNought = np.fromstring(vector["betaNought"]["$"], dtype=float, sep=" ")
+        betaNought_list.append(betaNought)
+        gamma = np.fromstring(vector["gamma"]["$"], dtype=float, sep=" ")
+        gamma_list.append(gamma)
+        dn = np.fromstring(vector["dn"]["$"], dtype=float, sep=" ")
+        dn_list.append(dn)
+
+    pixel = np.array(pixel_list)
+    if not np.allclose(pixel, pixel[0]):
+        raise ValueError(
+            "Unable to organise calibration vectors in a regular line-pixel grid"
+        )
+    data_vars = dict(
+        azimuth_time=xr.DataArray(azimuth_time_list, dims="line"),
+        sigmaNought=xr.DataArray(sigmaNought_list, dims=("line", "pixel")),
+        betaNought=xr.DataArray(betaNought_list, dims=("line", "pixel")),
+        gamma=xr.DataArray(gamma_list, dims=("line", "pixel")),
+        dn=xr.DataArray(dn_list, dims=("line", "pixel")),
+    )
+    coords = dict(
+        line=xr.DataArray(line_list, dims="line"),
+        pixel=xr.DataArray(pixel_list[0], dims="pixel"),
+    )
+
+    return xr.Dataset(data_vars=data_vars, coords=coords,)  # type: ignore
+
+
 def get_fs_path(
     urlpath_or_path: esa_safe.PathType, fs: T.Optional[fsspec.AbstractFileSystem] = None
 ) -> T.Tuple[fsspec.AbstractFileSystem, str]:
@@ -149,9 +193,10 @@ def find_avalable_groups(
                 )
             )
 
-        subgroups = list(METADATA_OPENERS.keys()) + burst_ids
+        subgroups = list(METADATA_OPENERS.keys()) + ["calibration"] + burst_ids
 
         groups[subswath_id] = {"subgroups": subgroups, **subswath_data_path}
+        groups[f"{subswath_id}/calibration"] = subswath_data_path
         for subgroup in METADATA_OPENERS.keys():
             groups[f"{subswath_id}/{subgroup}"] = subswath_data_path
         for k, burst_id in enumerate(burst_ids):
@@ -332,6 +377,10 @@ def open_dataset(
             annotation_path = list(groups[group]["annotation_path"].values())[0]
             with fs.open(annotation_path) as annotation_file:
                 ds = METADATA_OPENERS[subgroup](annotation_file)
+        elif subgroup == "calibration":
+            calibration_path = list(groups[group]["calibration_path"].values())[0]
+            with fs.open(calibration_path) as calibration_path:
+                ds = open_calibration_dataset(calibration_path)
         else:
             annotation_path = list(groups[group]["annotation_path"].values())[0]
             ds = open_burst_dataset(

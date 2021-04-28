@@ -50,6 +50,7 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     schema_paths = {
         "manifest": os.path.join(support_dir, "my-xfdu.xsd"),
         "product": os.path.join(support_dir, "s1-level-1-product.xsd"),
+        "calibration": os.path.join(support_dir, "s1-level-1-calibration.xsd"),
     }
     return xmlschema.XMLSchema(schema_paths[schema_type])
 
@@ -74,6 +75,12 @@ def parse_tag_list(
 
 def parse_attitude(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation, "product", ".//attitude")
+
+
+def parse_calibration_vectors(
+    calibration_path: PathOrFileType,
+) -> T.List[T.Dict[str, T.Any]]:
+    return parse_tag_list(calibration_path, "calibration", ".//calibrationVector")
 
 
 def parse_orbit(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
