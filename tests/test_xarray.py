@@ -1,7 +1,10 @@
 import pathlib
 
 import numpy as np
+import pytest
 import xarray as xr
+
+from xarray_sentinel import esa_safe
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
@@ -20,6 +23,20 @@ COMMON_ATTRIBUTES = {
     "sar:product_type": "SLC",
     "xs:instrument_mode_swaths": ["IW1", "IW2", "IW3"],
 }
+
+
+SENTINEL1_PRODUCTS = [
+    (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE",
+        "IW1",
+    ),
+    (
+        DATA_FOLDER
+        / "S1A_EW_SLC__1SDH_20210403T122536_20210403T122630_037286_046484_8152.SAFE",
+        "EW1",
+    ),
+]
 
 
 def test_open_dataset_root() -> None:
@@ -49,24 +66,18 @@ def test_open_dataset_root() -> None:
     assert isinstance(res, xr.Dataset)
 
 
-def test_open_dataset_orbit() -> None:
-    manifest_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-    )
-    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW1/orbit")  # type: ignore
+@pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
+def test_open_dataset_orbit(product_path: esa_safe.PathType, swath: str,) -> None:
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/orbit")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time"}
     assert set(res.variables) == {"azimuth_time", "vx", "vy", "vz", "x", "y", "z"}
 
 
-def test_open_dataset_attitude() -> None:
-    manifest_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-    )
-    res = xr.open_dataset(manifest_path, engine="sentinel-1", group="IW1/attitude")  # type: ignore
+@pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
+def test_open_dataset_attitude(product_path: esa_safe.PathType, swath: str,) -> None:
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/attitude")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time"}
@@ -86,12 +97,9 @@ def test_open_dataset_attitude() -> None:
     assert set(res.variables) == expected
 
 
-def test_open_dataset_gcp() -> None:
-    annotation_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-    )
-    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="IW1/gcp")  # type: ignore
+@pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
+def test_open_dataset_gcp(product_path: esa_safe.PathType, swath: str,) -> None:
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/gcp")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
