@@ -73,9 +73,7 @@ def parse_tag_list(
     return tag_list
 
 
-def parse_coordinate_conversion(
-    annotation: PathOrFileType,
-) -> T.Dict[str, T.Any]:
+def parse_coordinate_conversion(annotation: PathOrFileType,) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation, "product", ".//coordinateConversionList")
 
 
