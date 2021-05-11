@@ -112,7 +112,7 @@ def test_open_dataset() -> None:
     res = sentinel1.open_dataset(product_path, group="IW1/orbit")
 
     assert isinstance(res, xr.Dataset)
-    assert res.dims == {"azimuth_time": 17}
+    assert res.dims == {"axis": 3, "azimuth_time": 17}
 
 
 def test_open_dataset_zip() -> None:
@@ -138,7 +138,7 @@ def test_open_dataset_zip() -> None:
     res = sentinel1.open_dataset(zip_urlpath, group="IW1/orbit")
 
     assert isinstance(res, xr.Dataset)
-    assert res.dims == {"azimuth_time": 17}
+    assert res.dims == {"axis": 3, "azimuth_time": 17}
 
 
 def test_open_dataset_chunks_bursts() -> None:
