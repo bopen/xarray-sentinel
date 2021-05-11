@@ -138,23 +138,27 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     shape = len(orbit)
 
     reference_system = orbit[0]["frame"]
-    variables = ["x", "y", "z", "vx", "vy", "vz"]
-    data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
+    variables = ["position", "velocity"]
+    data_vars: T.Dict[str, T.List[T.Any]] = {var: [[], [], []] for var in variables}
     time: T.List[T.Any] = []
     for k in range(shape):
         time.append(orbit[k]["time"])
-        data_vars["x"][1].append(orbit[k]["position"]["x"])
-        data_vars["y"][1].append(orbit[k]["position"]["y"])
-        data_vars["z"][1].append(orbit[k]["position"]["z"])
-        data_vars["vx"][1].append(orbit[k]["velocity"]["x"])
-        data_vars["vy"][1].append(orbit[k]["velocity"]["y"])
-        data_vars["vz"][1].append(orbit[k]["velocity"]["z"])
+        data_vars["position"][0].append(orbit[k]["position"]["x"])
+        data_vars["position"][1].append(orbit[k]["position"]["y"])
+        data_vars["position"][2].append(orbit[k]["position"]["z"])
+        data_vars["velocity"][0].append(orbit[k]["velocity"]["x"])
+        data_vars["velocity"][1].append(orbit[k]["velocity"]["y"])
+        data_vars["velocity"][2].append(orbit[k]["velocity"]["z"])
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 "reference_system is not consistent in all the state vectors. "
             )
             reference_system = None
 
+    data_vars = {
+        "position": [("axis", "time"), data_vars["position"]],
+        "velocity": [("axis", "time"), data_vars["position"]],
+    }
     attrs = {}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
@@ -162,7 +166,7 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars=data_vars,  # type: ignore
         attrs=attrs,  # type: ignore
-        coords={"time": [np.datetime64(dt) for dt in time]},
+        coords={"time": [np.datetime64(dt) for dt in time], "axis": ["x", "y", "z"]},
     )
     ds = ds.rename({"time": "azimuth_time"})
     ds = conventions.update_attributes(ds, group="orbit")
