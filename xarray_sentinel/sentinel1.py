@@ -156,8 +156,8 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
             reference_system = None
 
     data_vars = {
-        "position": (("axis", "time"), data_vars["position"]),
-        "velocity": (("axis", "time"), data_vars["velocity"]),
+        "position": [("axis", "time"), data_vars["position"]],
+        "velocity": [("axis", "time"), data_vars["velocity"]],
     }
     attrs = {}
     if reference_system is not None:
