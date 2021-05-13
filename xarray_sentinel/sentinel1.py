@@ -139,32 +139,31 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
     reference_system = orbit[0]["frame"]
     variables = ["position", "velocity"]
-    data_vars: T.Dict[str, T.List[T.Any]] = {var: [[], [], []] for var in variables}
+    data: T.Dict[str, T.List[T.Any]] = {var: [[], [], []] for var in variables}
     time: T.List[T.Any] = []
     for k in range(shape):
         time.append(orbit[k]["time"])
-        data_vars["position"][0].append(orbit[k]["position"]["x"])
-        data_vars["position"][1].append(orbit[k]["position"]["y"])
-        data_vars["position"][2].append(orbit[k]["position"]["z"])
-        data_vars["velocity"][0].append(orbit[k]["velocity"]["x"])
-        data_vars["velocity"][1].append(orbit[k]["velocity"]["y"])
-        data_vars["velocity"][2].append(orbit[k]["velocity"]["z"])
+        data["position"][0].append(orbit[k]["position"]["x"])
+        data["position"][1].append(orbit[k]["position"]["y"])
+        data["position"][2].append(orbit[k]["position"]["z"])
+        data["velocity"][0].append(orbit[k]["velocity"]["x"])
+        data["velocity"][1].append(orbit[k]["velocity"]["y"])
+        data["velocity"][2].append(orbit[k]["velocity"]["z"])
         if orbit[k]["frame"] != reference_system:
             warnings.warn(
                 "reference_system is not consistent in all the state vectors. "
             )
             reference_system = None
 
-    data_vars = {
-        "position": [("axis", "time"), data_vars["position"]],
-        "velocity": [("axis", "time"), data_vars["velocity"]],
-    }
+    position = xr.Variable(data=data["position"], dims=("axis", "time"))  # type: ignore
+    velocity = xr.Variable(data=data["velocity"], dims=("axis", "time"))  # type: ignore
+
     attrs = {}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
 
     ds = xr.Dataset(
-        data_vars=data_vars,  # type: ignore
+        data_vars={"position": position, "velocity": velocity},
         attrs=attrs,  # type: ignore
         coords={"time": [np.datetime64(dt) for dt in time], "axis": ["x", "y", "z"]},
     )
