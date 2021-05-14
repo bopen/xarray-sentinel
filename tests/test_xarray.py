@@ -71,8 +71,8 @@ def test_open_dataset_orbit(product_path: esa_safe.PathType, swath: str,) -> Non
     res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/orbit")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"azimuth_time"}
-    assert set(res.variables) == {"azimuth_time", "vx", "vy", "vz", "x", "y", "z"}
+    assert set(res.dims) == {"axis", "azimuth_time"}
+    assert set(res.variables) == {"azimuth_time", "axis", "velocity", "position"}
 
 
 @pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
