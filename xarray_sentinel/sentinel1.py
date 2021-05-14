@@ -24,7 +24,7 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
     for vector in calibration_vectors:
         azimuth_time_list.append(vector["azimuthTime"])
         line_list.append(vector["line"])
-        pixel = np.fromstring(vector["pixel"]["$"], dtype=float, sep=" ")
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")
         pixel_list.append(pixel)
         sigmaNought = np.fromstring(vector["sigmaNought"]["$"], dtype=float, sep=" ")
         sigmaNought_list.append(sigmaNought)
@@ -249,7 +249,10 @@ def open_swath_dataset(
         arr = rioxarray.open_rasterio(data_path, chunks=chunks)
         arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
         arr.coords.update(
-            {"x": np.arange(0, arr["x"].size), "y": np.arange(0, arr["y"].size)}
+            {
+                "x": np.arange(0, arr["x"].size, dtype=int),
+                "y": np.arange(0, arr["y"].size, dtype=int),
+            }
         )
         arr = arr.rename({"y": "line", "x": "pixel"})
         data_vars[pol.upper()] = arr
@@ -311,8 +314,8 @@ def open_burst_dataset(
         )
         arr.coords.update(
             {
-                "x": np.arange(burst_first_pixel, burst_last_pixel + 1),
-                "y": np.arange(burst_first_line, burst_last_line + 1),
+                "x": np.arange(burst_first_pixel, burst_last_pixel + 1, dtype=int),
+                "y": np.arange(burst_first_line, burst_last_line + 1, dtype=int),
             }
         )
         arr = arr.rename({"y": "line", "x": "pixel"})
@@ -351,6 +354,7 @@ def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[np.ndarray, np.ndarray]:
 
 def open_dataset(
     product_urlpath: esa_safe.PathType,
+    *,
     drop_variables: T.Optional[T.Tuple[str]] = None,
     group: T.Optional[str] = None,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
@@ -413,7 +417,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         group: T.Optional[str] = None,
     ) -> xr.Dataset:
 
-        return open_dataset(filename_or_obj, drop_variables, group)
+        return open_dataset(filename_or_obj, drop_variables=drop_variables, group=group)
 
     def guess_can_open(self, filename_or_obj: T.Any) -> bool:
         try:
