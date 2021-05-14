@@ -306,6 +306,12 @@ def open_burst_dataset(
             x=slice(burst_first_pixel, burst_last_pixel + 1),
             y=slice(burst_first_line, burst_last_line + 1),
         )
+        arr.coords.update(
+            {
+                "x": np.arange(burst_first_pixel, burst_last_pixel + 1),
+                "y": np.arange(burst_first_line, burst_last_line + 1),
+            }
+        )
         arr = arr.rename({"y": "line", "x": "pixel"})
         data_vars[pol.upper()] = arr
 
