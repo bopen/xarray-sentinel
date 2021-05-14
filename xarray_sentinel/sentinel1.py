@@ -248,6 +248,9 @@ def open_swath_dataset(
     for pol, data_path in measurement_paths.items():
         arr = rioxarray.open_rasterio(data_path, chunks=chunks)
         arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
+        arr.coords.update(
+            {"x": np.arange(0, arr["x"].size), "y": np.arange(0, arr["y"].size)}
+        )
         arr = arr.rename({"y": "line", "x": "pixel"})
         data_vars[pol.upper()] = arr
 
