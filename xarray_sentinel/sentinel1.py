@@ -248,7 +248,7 @@ def open_swath_dataset(
     for pol, data_path in measurement_paths.items():
         arr = rioxarray.open_rasterio(data_path, chunks=chunks)
         arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
-        arr.coords.update(
+        arr = arr.assign_coords(
             {
                 "x": np.arange(0, arr["x"].size, dtype=int),
                 "y": np.arange(0, arr["y"].size, dtype=int),
@@ -312,7 +312,7 @@ def open_burst_dataset(
             x=slice(burst_first_pixel, burst_last_pixel + 1),
             y=slice(burst_first_line, burst_last_line + 1),
         )
-        arr.coords.update(
+        arr = arr.assign_coords(
             {
                 "x": np.arange(burst_first_pixel, burst_last_pixel + 1, dtype=int),
                 "y": np.arange(burst_first_line, burst_last_line + 1, dtype=int),
