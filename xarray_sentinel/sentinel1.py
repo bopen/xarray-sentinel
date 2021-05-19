@@ -55,6 +55,48 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
     return xr.Dataset(data_vars=data_vars, coords=coords,)  # type: ignore
 
 
+def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
+
+    coordinateConversionList = esa_safe.parse_tag_dict(
+        annotation_path, "product", ".//coordinateConversionList"
+    )
+    gr0 = []
+    sr0 = []
+    azimuthTime = []
+    slantRangeTime = []
+    srgrCoefficients = []
+    grsrCoefficients = []
+    for values in coordinateConversionList["coordinateConversion"]:
+        sr0.append(values["sr0"])
+        gr0.append(values["gr0"])
+        azimuthTime.append(values["azimuthTime"])
+        slantRangeTime.append(values["slantRangeTime"])
+        srgrCoefficients.append(
+            np.fromstring(values["srgrCoefficients"]["$"], dtype=float, sep=" ")
+        )
+        grsrCoefficients.append(
+            np.fromstring(values["grsrCoefficients"]["$"], dtype=float, sep=" ")
+        )
+
+    coords = {
+        "azimuth_time": xr.DataArray(azimuthTime, dims="azimuth_time"),
+        "exponent": xr.DataArray(np.arange(len(srgrCoefficients[0])), dims="exponent"),
+    }
+
+    data_vars = {
+        "gr0": xr.DataArray(gr0, dims="azimuth_time"),
+        "sr0": xr.DataArray(sr0, dims="azimuth_time"),
+        "slant_range_time": xr.DataArray(slantRangeTime, dims=("azimuth_time")),
+        "srgr_coefficients": xr.DataArray(
+            srgrCoefficients, dims=("azimuth_time", "exponent")
+        ),
+        "grsr_coefficients": xr.DataArray(
+            grsrCoefficients, dims=("azimuth_time", "exponent")
+        ),
+    }
+    return xr.Dataset(data_vars=data_vars, coords=coords,)  # type: ignore
+
+
 def get_fs_path(
     urlpath_or_path: esa_safe.PathType, fs: T.Optional[fsspec.AbstractFileSystem] = None
 ) -> T.Tuple[fsspec.AbstractFileSystem, str]:
@@ -185,16 +227,26 @@ def find_avalable_groups(
         if len(subswath_data_path["annotation_path"]) == 0:
             continue
         annotation_path = list(subswath_data_path["annotation_path"].values())[0]
+
         with fs.open(annotation_path) as annotation_file:
-            gcp = open_gcp_dataset(annotation_file)
-        centres_lat, centres_lon = compute_burst_centres(gcp)
+            swath_timing = esa_safe.parse_swath_timing(annotation_file)
+
+        number_of_bursts = swath_timing["burstList"]["@count"]
+
         burst_ids: T.List[str] = []
-        for k in range(len(centres_lat)):
-            burst_ids.append(
-                build_burst_id(
-                    centres_lat[k], centres_lon[k], product_attrs["sat:relative_orbit"]
+        if number_of_bursts > 0:
+            with fs.open(annotation_path) as annotation_file:
+                gcp = open_gcp_dataset(annotation_file)
+            centres_lat, centres_lon = compute_burst_centres(gcp)
+
+            for k in range(len(centres_lat)):
+                burst_ids.append(
+                    build_burst_id(
+                        centres_lat[k],
+                        centres_lon[k],
+                        product_attrs["sat:relative_orbit"],
+                    )
                 )
-            )
 
         subgroups = list(METADATA_OPENERS.keys()) + ["calibration"] + burst_ids
 
