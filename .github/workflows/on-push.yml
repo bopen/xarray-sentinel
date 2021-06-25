@@ -35,7 +35,6 @@ jobs:
     - name: Install conda dependencies
       run: |
         mamba env update -f environment-ci.yml
-        python -m pip install --no-deps https://github.com/pydata/xarray/archive/master.zip  # to enable plugins
     - name: Install xarray-sentinel
       run: |
         python -m pip install --no-deps -e .
