@@ -4,7 +4,6 @@ Sentinel-1 SLC IW product structure:
 
 ```
 /
-├─ ecef_axis (ecef_axis)  # "x", "y", "z"
 ├─ IW1
 │  ├─ VH
 │  │  ├─ azimuth_time (azimuth_time)
@@ -14,8 +13,9 @@ Sentinel-1 SLC IW product structure:
 │  │  ├─ VH (azimuth_time, slant_range_time)  # "measurements"?
 │  │  ├─ orbit
 │  │  │  ├─ azimuth_time (azimuth_time)
-│  │  │  ├─ position (ecef_axis, azimuth_time)
-│  │  │  └─ velocity (ecef_axis, azimuth_time)
+│  │  │  ├─ ecef_axis (ecef_axis)  # "x", "y", "z"
+│  │  │  ├─ position (azimuth_time, ecef_axis)
+│  │  │  └─ velocity (azimuth_time, ecef_axis)
 │  │  ├─ attitude
 │  │  │  ├─ azimuth_time (azimuth_time)
 │  │  │  ├─ q0 (azimuth_time)
