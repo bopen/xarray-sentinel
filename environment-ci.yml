@@ -9,7 +9,7 @@ dependencies:
   - isort
   - make
   - mdformat
-  - mypy
+  - mypy = 0.812
   - nomkl
   - numpy >= 1.20.0
   - pip
