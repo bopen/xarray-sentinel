@@ -10,14 +10,13 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
 - access to SLC burst data - **technology preview**
 - access to metadata: product, orbit, attitude, GCPs - **technology preview**
-- access to metadata: calibration, deramp - in roadmap 
+- access to metadata: calibration, deramp - in roadmap
 - products:
-    - Sentinel-1 SLC IW (Interferometric Wide Swath): **technology preview**
-    - Sentinel-1 SLC EW (Extended Wide Swath): **technology preview**
-    - Sentinel-1 SLC SM (Stripmap): in roadmap
-    - Sentinel-1 GRD SM/IW/EW: in roadmap
-    - Sentinel-2 L1C/L2A: in roadmap
-
+  - Sentinel-1 SLC IW (Interferometric Wide Swath): **technology preview**
+  - Sentinel-1 SLC EW (Extended Wide Swath): **technology preview**
+  - Sentinel-1 SLC SM (Stripmap): in roadmap
+  - Sentinel-1 GRD SM/IW/EW: in roadmap
+  - Sentinel-2 L1C/L2A: in roadmap
 
 ## Install
 
@@ -32,7 +31,6 @@ as follows:
     pip install xarray-sentinel
 ```
 
-
 ## Sentinel-1 SLC IW
 
 ### Data
@@ -45,7 +43,6 @@ Currently, xarray-sentinel provides access as Xarray datasets to the following d
 - attitude
 
 using `azimuth_time` and `slant_range_time` dimensions.
-
 
 ## Examples:
 
@@ -82,6 +79,7 @@ shall be used to select the dataset to be loaded.
 ### Open gcp dataset
 
 To load the gcp relative to the first swath use the key `group="IW1/gcp"`:
+
 ```python-repl
 >>> sentinel1.open_dataset(product_path, group="IW1/gcp")
 <xarray.Dataset>
@@ -186,13 +184,12 @@ Attributes: (12/14)
 
 With the upcoming release of Xarray v0.18.0, xarray-sentinel will be automatically available as
 an Xarray backend:
- 
+
 ```python-repl
 >>> import xarray as xr
 >>> ds = xr.open_dataset(product_path, engine="sentinel-1")
 
 ```
-
 
 ## Contributing
 
@@ -212,19 +209,20 @@ Main contributors:
 
 See also the list of [contributors](https://github.com/bopen/xarray-sentinel/contributors) who participated in this project.
 
-
 ## License
 
-    Copyright 2021, B-Open Solutions srl and the xarray-sentinel authors.
-    
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-    
-        http://www.apache.org/licenses/LICENSE-2.0
-    
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+```
+Copyright 2021, B-Open Solutions srl and the xarray-sentinel authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```

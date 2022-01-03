@@ -1,4 +1,3 @@
-
 Data groups:
 
 - SLC complex measurements by swath and burst
@@ -15,9 +14,10 @@ Data groups:
   - attitude / quaternions
 - antenna pattern
 - Doppler centroid / Doppler rate
-- incidence angle & Co. 
+- incidence angle & Co.
 
 Not loaded:
+
 - noise
 
 Attributes:
@@ -34,7 +34,6 @@ High level requirements:
 - keep all naming as close to the original al possible (with XML camel case to Python snake case?)
 - support opening a swath when other swaths are missing (especially the tifs)
 
-
 # User experience
 
 ```python
@@ -49,16 +48,16 @@ High level requirements:
 
 Structure:
 
-* root / SAFE
-  * swaths "IW1" "IW2" "S3" etc / duplicated in VH-VV annotation XML
-    * bursts "R022_N433_E0120" etc
-      * polarizations are data variables
-    * gcp "gcp"
-    * calibration "calibration"
-    * orbit "orbit" / duplicated in annotation XML for different polarizations
-    * attitude "attitude" / same as above
-    * antenna pattern "antenna"
-    * zero-Doppler "doppler"
+- root / SAFE
+  - swaths "IW1" "IW2" "S3" etc / duplicated in VH-VV annotation XML
+    - bursts "R022_N433_E0120" etc
+      - polarizations are data variables
+    - gcp "gcp"
+    - calibration "calibration"
+    - orbit "orbit" / duplicated in annotation XML for different polarizations
+    - attitude "attitude" / same as above
+    - antenna pattern "antenna"
+    - zero-Doppler "doppler"
 
 examples: `group="IW2/orbit"`, `group="IW2/N433_E0120`, `group="S3/gcp"` etc
 
@@ -70,9 +69,8 @@ or going for easier-to-use choices.
 In all cases we add the XML tag name in the long_name so it is clear the provenance of the
 information: e.g. for `slant_range_time` -> `"long_name": "two way delay (slantRangeTime)"`
 
-* `azimuth_time` as CF time in UTC (warn: may fail on leap seconds)
-* `slant_range_time` as CF time interval in `"s"`
-
+- `azimuth_time` as CF time in UTC (warn: may fail on leap seconds)
+- `slant_range_time` as CF time interval in `"s"`
 
 # Accuracy considerations
 
@@ -83,4 +81,3 @@ information: e.g. for `slant_range_time` -> `"long_name": "two way delay (slantR
   that it is not enough for interferometric applications.
   `slant_range_time` needs a spatial resolution of 0.001cm at a 1_000km distance
   so around 1e-9 that is well within 1e-15 resolution of IEEE-754 float64.
-
