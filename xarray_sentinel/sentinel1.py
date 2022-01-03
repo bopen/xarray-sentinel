@@ -4,6 +4,7 @@ import warnings
 
 import fsspec  # type: ignore
 import numpy as np
+import numpy.typing as NT
 import pandas as pd  # type: ignore
 import rioxarray  # type: ignore
 import xarray as xr
@@ -167,8 +168,7 @@ def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
             data_vars[var][1].append(attitude[k][var])
 
     ds = xr.Dataset(
-        data_vars=data_vars,
-        coords={"time": [np.datetime64(dt) for dt in time]},
+        data_vars=data_vars, coords={"time": [np.datetime64(dt) for dt in time]},
     )
     ds = ds.rename({"time": "azimuth_time"})
     ds = conventions.update_attributes(ds, group="attitude")
@@ -309,10 +309,7 @@ def open_swath_dataset(
         arr = arr.rename({"y": "line", "x": "pixel"})
         data_vars[pol.upper()] = arr
 
-    ds = xr.Dataset(
-        data_vars=data_vars,
-        attrs=attrs,
-    )
+    ds = xr.Dataset(data_vars=data_vars, attrs=attrs,)
     conventions.update_attributes(ds)
     return ds
 
@@ -396,7 +393,7 @@ def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
     return burst_id
 
 
-def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[np.ndarray, np.ndarray]:
+def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[NT.NDArray[float], NT.NDArray[float]]:
     gcp_rolling = gcp.rolling(azimuth_time=2, min_periods=1)
     gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
     centre = gc_az_win.mean(["az_win", "slant_range_time"])
