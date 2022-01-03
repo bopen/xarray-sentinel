@@ -25,8 +25,8 @@ Create a new environment, activate it, install the package and its dependencies,
 as follows:
 
 ```shell
-    conda create -n xarray-sentinel
-    conda activate xarray-sentinel
+    conda create -n XARRAY-SENTINEL
+    conda activate XARRAY-SENTINEL
     conda install -c conda-forge rioxarray xmlschema
     pip install xarray-sentinel
 ```
