@@ -146,8 +146,8 @@ def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars=data_vars,
         coords={
-            "azimuth_time": [np.datetime64(dt) for dt in sorted(azimuth_time)],
-            "slant_range_time": sorted(slant_range_time),
+            "azimuth_time": [np.datetime64(dt) for dt in azimuth_time],
+            "slant_range_time": slant_range_time,
             "line": ("azimuth_time", line),
             "pixel": ("slant_range_time", pixel),
         },
@@ -161,7 +161,7 @@ def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     time: T.List[T.Any] = []
-    data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}
+    data_vars: T.Dict[str, T.Any] = {var: ("time", []) for var in variables}
     for k in range(shape):
         time.append(attitude[k]["time"])
         for var in variables:
@@ -395,7 +395,7 @@ def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
 
 def compute_burst_centres(
     gcp: xr.Dataset,
-) -> T.Tuple[NT.NDArray[float], NT.NDArray[float]]:
+) -> T.Tuple[NT.NDArray[np.float_], NT.NDArray[np.float_]]:
     gcp_rolling = gcp.rolling(azimuth_time=2, min_periods=1)
     gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
     centre = gc_az_win.mean(["az_win", "slant_range_time"])
