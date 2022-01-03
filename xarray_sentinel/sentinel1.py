@@ -393,7 +393,9 @@ def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
     return burst_id
 
 
-def compute_burst_centres(gcp: xr.Dataset) -> T.Tuple[NT.NDArray[float], NT.NDArray[float]]:
+def compute_burst_centres(
+    gcp: xr.Dataset,
+) -> T.Tuple[NT.NDArray[float], NT.NDArray[float]]:
     gcp_rolling = gcp.rolling(azimuth_time=2, min_periods=1)
     gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
     centre = gc_az_win.mean(["az_win", "slant_range_time"])

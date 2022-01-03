@@ -15,6 +15,7 @@ dependencies:
   - pip
   - pytest
   - pytest-cov
+  - rasterio >= 1.2.4
   - rioxarray
   - xarray >= 0.20.2
   - xmlschema
