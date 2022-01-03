@@ -65,18 +65,18 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
     sr0 = []
     azimuthTime = []
     slantRangeTime = []
-    srgrCoefficients = []
-    grsrCoefficients = []
+    srgrCoefficients: T.List[NT.NDArray[np.float_]] = []
+    grsrCoefficients: T.List[NT.NDArray[np.float_]] = []
     for values in coordinateConversionList["coordinateConversion"]:
         sr0.append(values["sr0"])
         gr0.append(values["gr0"])
         azimuthTime.append(values["azimuthTime"])
         slantRangeTime.append(values["slantRangeTime"])
         srgrCoefficients.append(
-            np.fromstring(values["srgrCoefficients"]["$"], dtype=float, sep=" ")  # type: ignore
+            np.fromstring(values["srgrCoefficients"]["$"], dtype=float, sep=" ")
         )
         grsrCoefficients.append(
-            np.fromstring(values["grsrCoefficients"]["$"], dtype=float, sep=" ")  # type: ignore
+            np.fromstring(values["grsrCoefficients"]["$"], dtype=float, sep=" ")
         )
 
     coords = {
