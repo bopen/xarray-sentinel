@@ -2,16 +2,21 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - black = 19.10b0
+  - black
   - dask
   - flake8
   - fsspec
   - isort
   - make
+  - mdformat
   - mypy
+  - nomkl
   - numpy >= 1.20.0
+  - pip
   - pytest
   - pytest-cov
   - rioxarray
   - xarray >= 0.18.0
   - xmlschema
+  - pip:
+    - mdformat-gfm

@@ -1,23 +1,36 @@
-COV_REPORT = html
+ENVIRONMENT := XARRAY_SENTINEL
+COV_REPORT := html
+CONDA := conda
 
-
-default: fix-code-style unit-test doc-test
+default: fix-code-style test code-quality
 
 fix-code-style:
 	black .
 	isort .
+	mdformat .
+
+test: unit-test doc-test
 
 unit-test:
-	python -m pytest --cov=. --cov-report=$(COV_REPORT) tests/
+	python -m pytest -v --cov=. --cov-report=$(COV_REPORT) tests/
 
 doc-test:
-	python -m pytest README.md
+	python -m pytest -v README.md
 
 code-quality:
-	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	flake8 . --max-complexity=10 --max-line-length=127
 	mypy --strict .
 
 code-style:
 	black --check .
 	isort --check .
+	mdformat --check .
+
+# deploy
+
+conda-env-create:
+	$(CONDA) env create -n $(ENVIRONMENT) -f environment-ci.yml
+
+conda-env-update:
+	$(CONDA) env update -n $(ENVIRONMENT) -f environment-ci.yml
+	$(CONDA) env update -n $(ENVIRONMENT) -f environment-dev.yml
