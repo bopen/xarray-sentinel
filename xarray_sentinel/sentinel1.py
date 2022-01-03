@@ -24,15 +24,15 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
     for vector in calibration_vectors:
         azimuth_time_list.append(vector["azimuthTime"])
         line_list.append(vector["line"])
-        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")  # type: ignore
         pixel_list.append(pixel)
-        sigmaNought = np.fromstring(vector["sigmaNought"]["$"], dtype=float, sep=" ")
+        sigmaNought = np.fromstring(vector["sigmaNought"]["$"], dtype=float, sep=" ")  # type: ignore
         sigmaNought_list.append(sigmaNought)
-        betaNought = np.fromstring(vector["betaNought"]["$"], dtype=float, sep=" ")
+        betaNought = np.fromstring(vector["betaNought"]["$"], dtype=float, sep=" ")  # type: ignore
         betaNought_list.append(betaNought)
-        gamma = np.fromstring(vector["gamma"]["$"], dtype=float, sep=" ")
+        gamma = np.fromstring(vector["gamma"]["$"], dtype=float, sep=" ")  # type: ignore
         gamma_list.append(gamma)
-        dn = np.fromstring(vector["dn"]["$"], dtype=float, sep=" ")
+        dn = np.fromstring(vector["dn"]["$"], dtype=float, sep=" ")  # type: ignore
         dn_list.append(dn)
 
     pixel = np.array(pixel_list)
@@ -52,7 +52,7 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
         pixel=xr.DataArray(pixel_list[0], dims="pixel"),
     )
 
-    return xr.Dataset(data_vars=data_vars, coords=coords,)  # type: ignore
+    return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
 def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
@@ -72,10 +72,10 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
         azimuthTime.append(values["azimuthTime"])
         slantRangeTime.append(values["slantRangeTime"])
         srgrCoefficients.append(
-            np.fromstring(values["srgrCoefficients"]["$"], dtype=float, sep=" ")
+            np.fromstring(values["srgrCoefficients"]["$"], dtype=float, sep=" ")  # type: ignore
         )
         grsrCoefficients.append(
-            np.fromstring(values["grsrCoefficients"]["$"], dtype=float, sep=" ")
+            np.fromstring(values["grsrCoefficients"]["$"], dtype=float, sep=" ")  # type: ignore
         )
 
     coords = {
@@ -94,7 +94,7 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
             grsrCoefficients, dims=("azimuth_time", "exponent")
         ),
     }
-    return xr.Dataset(data_vars=data_vars, coords=coords,)  # type: ignore
+    return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
 def get_fs_path(
@@ -143,7 +143,7 @@ def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
             data_vars[var][1][j, i] = ggp[var]
 
     ds = xr.Dataset(
-        data_vars=data_vars,  # type: ignore
+        data_vars=data_vars,
         coords={
             "azimuth_time": [np.datetime64(dt) for dt in sorted(azimuth_time)],
             "slant_range_time": sorted(slant_range_time),
@@ -160,14 +160,14 @@ def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     shape = len(attitude)
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     time: T.List[T.Any] = []
-    data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}  # type: ignore
+    data_vars: T.Dict[str, T.List[T.Any]] = {var: ("time", []) for var in variables}
     for k in range(shape):
         time.append(attitude[k]["time"])
         for var in variables:
             data_vars[var][1].append(attitude[k][var])
 
     ds = xr.Dataset(
-        data_vars=data_vars,  # type: ignore
+        data_vars=data_vars,
         coords={"time": [np.datetime64(dt) for dt in time]},
     )
     ds = ds.rename({"time": "azimuth_time"})
@@ -206,7 +206,7 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
     ds = xr.Dataset(
         data_vars={"position": position, "velocity": velocity},
-        attrs=attrs,  # type: ignore
+        attrs=attrs,
         coords={"time": [np.datetime64(dt) for dt in time], "axis": ["x", "y", "z"]},
     )
     ds = ds.rename({"time": "azimuth_time"})
@@ -282,7 +282,7 @@ def open_root_dataset(
     groups: T.Dict[str, T.Dict[str, T.Collection[str]]],
 ) -> xr.Dataset:
     attrs = dict(product_attrs, groups=list(groups.keys()))
-    ds = xr.Dataset(attrs=attrs)  # type: ignore
+    ds = xr.Dataset(attrs=attrs)
     conventions.update_attributes(ds)
     return ds
 
@@ -310,8 +310,8 @@ def open_swath_dataset(
         data_vars[pol.upper()] = arr
 
     ds = xr.Dataset(
-        data_vars=data_vars,  # type: ignore
-        attrs=attrs,  # type: ignore
+        data_vars=data_vars,
+        attrs=attrs,
     )
     conventions.update_attributes(ds)
     return ds
@@ -374,12 +374,12 @@ def open_burst_dataset(
         data_vars[pol.upper()] = arr
 
     ds = xr.Dataset(
-        data_vars=data_vars,  # type: ignore
+        data_vars=data_vars,
         coords={
             "azimuth_time": ("line", azimuth_time),
             "slant_range_time": ("pixel", slant_range_time),
         },
-        attrs=product_attrs,  # type: ignore
+        attrs=product_attrs,
     )
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
     conventions.update_attributes(ds)
