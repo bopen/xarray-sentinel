@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+dependencies:
+  - gcsfs
+  - matplotlib
+  - notebook
