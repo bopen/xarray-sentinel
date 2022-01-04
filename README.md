@@ -181,6 +181,29 @@ Attributes: ...
 ### Open a single swath and polarisation
 
 ```python-repl
+>>> sentinel1.open_dataset(product_path, group="IW1")
+<xarray.Dataset>
+Dimensions:  ()
+Data variables:
+    *empty*
+Attributes: ...
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
+    ...                         ...
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      IW1
+    subgroups:                  ['VH', 'VH/gcp', 'VH/orbit', 'VH/attitude', ...
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+
+```
+
+```python-repl
 >>> sentinel1.open_dataset(product_path, group="IW1/VV")
 <xarray.Dataset>
 Dimensions:      (pixel: 21632, line: 13509)
@@ -200,7 +223,7 @@ Attributes: ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      IW1/VV
-    subgroups:                  ['IW1/VV/gcp', 'IW1/VV/orbit', 'IW1/VV/attitu...
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'calibration']
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 

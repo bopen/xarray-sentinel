@@ -405,35 +405,40 @@ def open_dataset(
             f"\n{list(groups.keys())}"
         )
 
-    product_attrs["group"] = group
     metadata = ""
 
     if group is None:
         ds = xr.Dataset()
-        product_attrs["subgroups"] = list(groups)
-    elif "/" not in group:
-        product_attrs["subgroups"] = [
-            g for g in groups if g.startswith(group) and g != group
-        ]
-        ds = xr.Dataset()
-    elif group.count("/") == 1:
-        subswath, pol = group.split("/", 1)
-        product_attrs["subgroups"] = [
-            g for g in groups if g.startswith(group) and g != group
-        ]
-        ds = open_pol_dataset(ancillary_data_paths[subswath][pol]["measurement_path"])
+        subgroups = list(groups)
     else:
-        subswath, pol, metadata = group.split("/", 2)
-        if metadata in METADATA_OPENERS:
-            with fs.open(groups[group]) as annotation_file:
-                ds = METADATA_OPENERS[metadata](annotation_file)
-        elif metadata == "calibration":
-            with fs.open(groups[group]) as calibration_path:
-                ds = open_calibration_dataset(calibration_path)
+        subgroups = [
+            g[len(group) + 1 :] for g in groups if g.startswith(group) and g != group
+        ]
+
+        if "/" not in group:
+            ds = xr.Dataset()
+        elif group.count("/") == 1:
+            subswath, pol = group.split("/", 1)
+            ds = open_pol_dataset(
+                ancillary_data_paths[subswath][pol]["measurement_path"]
+            )
         else:
-            raise RuntimeError
+            subswath, pol, metadata = group.split("/", 2)
+            if metadata in METADATA_OPENERS:
+                with fs.open(groups[group]) as annotation_file:
+                    ds = METADATA_OPENERS[metadata](annotation_file)
+            elif metadata == "calibration":
+                with fs.open(groups[group]) as calibration_path:
+                    ds = open_calibration_dataset(calibration_path)
+            else:
+                raise RuntimeError
+
+    product_attrs["group"] = group
+    if len(subgroups):
+        product_attrs["subgroups"] = subgroups
     ds.attrs.update(product_attrs)  # type: ignore
     conventions.update_attributes(ds, group=metadata)
+
     return ds
 
 
