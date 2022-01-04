@@ -152,7 +152,6 @@ def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
             "pixel": ("slant_range_time", pixel),
         },
     )
-    conventions.update_attributes(ds, group="gcp")
     return ds
 
 
@@ -172,7 +171,6 @@ def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
         coords={"time": [np.datetime64(dt) for dt in time]},
     )
     ds = ds.rename({"time": "azimuth_time"})
-    ds = conventions.update_attributes(ds, group="attitude")
     return ds
 
 
@@ -211,7 +209,6 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
         coords={"time": [np.datetime64(dt) for dt in time], "axis": ["x", "y", "z"]},
     )
     ds = ds.rename({"time": "azimuth_time"})
-    ds = conventions.update_attributes(ds, group="orbit")
     return ds
 
 
@@ -267,22 +264,10 @@ def filter_missing_path(
     return path_dict_copy
 
 
-def open_empty_dataset(
-    product_attrs: T.Dict[str, T.Any], **kwargs: T.Any
-) -> xr.Dataset:
-    attrs = dict(product_attrs, **kwargs)
-    ds = xr.Dataset(attrs=attrs)
-    return ds
-
-
 def open_pol_dataset(
-    product_attrs: T.Dict[str, T.Any],
     measurement_path: esa_safe.PathType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
-    **kwargs: T.Any,
 ) -> xr.Dataset:
-    attrs = dict(product_attrs, **kwargs)
-
     arr = rioxarray.open_rasterio(measurement_path, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.assign_coords(
@@ -295,9 +280,7 @@ def open_pol_dataset(
 
     ds = xr.Dataset(
         data_vars={"measurement": arr},
-        attrs=attrs,
     )
-    conventions.update_attributes(ds)
     return ds
 
 
@@ -423,31 +406,34 @@ def open_dataset(
         )
 
     product_attrs["group"] = group
+    metadata = ""
 
     if group is None:
-        ds = open_empty_dataset(product_attrs, subgroups=list(groups))
+        ds = xr.Dataset()
+        product_attrs["subgroups"] = list(groups)
     elif "/" not in group:
-        subgroups = [g for g in groups if g.startswith(group) and g != group]
-        ds = open_empty_dataset(product_attrs, subgroups=subgroups)
+        product_attrs["subgroups"] = [
+            g for g in groups if g.startswith(group) and g != group
+        ]
+        ds = xr.Dataset()
     elif group.count("/") == 1:
         subswath, pol = group.split("/", 1)
-        subgroups = [g for g in groups if g.startswith(group) and g != group]
-        ds = open_pol_dataset(
-            product_attrs,
-            ancillary_data_paths[subswath][pol]["measurement_path"],
-            subgroups=subgroups,
-        )
+        product_attrs["subgroups"] = [
+            g for g in groups if g.startswith(group) and g != group
+        ]
+        ds = open_pol_dataset(ancillary_data_paths[subswath][pol]["measurement_path"])
     else:
-        subswath, pol, subgroup = group.split("/", 2)
-        if subgroup in METADATA_OPENERS:
+        subswath, pol, metadata = group.split("/", 2)
+        if metadata in METADATA_OPENERS:
             with fs.open(groups[group]) as annotation_file:
-                ds = METADATA_OPENERS[subgroup](annotation_file)
-        elif subgroup == "calibration":
+                ds = METADATA_OPENERS[metadata](annotation_file)
+        elif metadata == "calibration":
             with fs.open(groups[group]) as calibration_path:
                 ds = open_calibration_dataset(calibration_path)
         else:
             raise RuntimeError
-    conventions.update_attributes(ds)
+    ds.attrs.update(product_attrs)  # type: ignore
+    conventions.update_attributes(ds, group=metadata)
     return ds
 
 
