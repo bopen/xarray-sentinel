@@ -139,6 +139,7 @@ def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
 def parse_manifest_sentinel1(
     manifest_path: T.Union[PathType, T.TextIO],
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
+    # We use ElementTree because we didn't find a XSD definition for the manifest
     manifest = ElementTree.parse(manifest_path)
     familyName = manifest.findtext(
         ".//safe:platform/safe:familyName", namespaces=SENTINEL1_NAMESPACES
