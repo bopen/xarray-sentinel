@@ -68,7 +68,7 @@ VARIABLE_ATTRIBUTES = {
 
 def update_attributes(ds: xr.Dataset, group: str = "") -> xr.Dataset:
     # NOTE: keep the version in sync with the capabilities of CF compliance checkers
-    ds.attrs["Conventions"] = "CF-1.7"
+    ds.attrs["Conventions"] = "CF-1.8"
     ds.attrs.update(GROUP_ATTRIBUTES.get(group, {}))  # type: ignore
     ds.attrs["history"] = f"created by xarray_sentinel-{__version__}"
     for var in ds.variables:
