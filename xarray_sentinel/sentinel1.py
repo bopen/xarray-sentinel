@@ -23,7 +23,7 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
     dn_list = []
 
     for vector in calibration_vectors:
-        azimuth_time_list.append(vector["azimuthTime"])
+        azimuth_time_list.append(np.datetime64(vector["azimuthTime"]))
         line_list.append(vector["line"])
         pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")  # type: ignore
         pixel_list.append(pixel)
@@ -206,7 +206,7 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars={"position": position, "velocity": velocity},
         attrs=attrs,
-        coords={"time": [np.datetime64(dt) for dt in time], "axis": ["x", "y", "z"]},
+        coords={"time": [np.datetime64(dt) for dt in time], "axis": [0, 1, 2]},
     )
     ds = ds.rename({"time": "azimuth_time"})
     return ds
