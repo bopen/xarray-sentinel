@@ -288,10 +288,10 @@ def test_get_ancillary_data() -> None:
     expected = {"iw1"}
     assert set(ancillary_data_paths) == expected
 
-    expected = {"annotation_path", "noise_path", "calibration_path", "measurement_path"}
+    expected = {"vv", "vh"}
     assert set(ancillary_data_paths["iw1"]) == expected
 
-    expected = {"vv", "vh"}
-    assert set(ancillary_data_paths["iw1"]["annotation_path"]) == expected
+    expected = {"annotation_path", "noise_path", "calibration_path", "measurement_path"}
+    assert set(ancillary_data_paths["iw1"]["vv"]) == expected
 
-    assert isinstance(ancillary_data_paths["iw1"]["annotation_path"]["vv"], str)
+    assert isinstance(ancillary_data_paths["iw1"]["vv"]["annotation_path"], str)
