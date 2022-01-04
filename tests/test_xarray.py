@@ -125,12 +125,12 @@ def test_open_dataset_gcp(
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
 
 
-def test_open_subswath() -> None:
+def test_open_pol_dataset() -> None:
     product_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     for attr_name in COMMON_ATTRIBUTES:
@@ -138,7 +138,7 @@ def test_open_subswath() -> None:
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
 
     assert set(res.dims) == {"line", "pixel"}
-    assert set(res.variables) == {"VH", "VV", "line", "pixel"}
+    assert set(res.variables) == {"measurement", "line", "pixel"}
 
 
 @pytest.mark.xfail
@@ -197,7 +197,7 @@ def test_open_calibration_dataset() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="IW1/calibration")  # type: ignore
+    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="IW1/VV/calibration")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"line", "pixel"}

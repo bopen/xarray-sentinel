@@ -67,8 +67,8 @@ Attributes: (12/15)
     sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    groups:                     ['IW1', 'IW1/calibration', 'IW1/gcp', 'IW1/at...
-    Conventions:                CF-1.7
+    groups:                     ['IW1', 'IW1/VH', 'IW1/VH/gcp', 'IW1/VH/attit...
+    Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
 ```
@@ -81,7 +81,7 @@ shall be used to select the dataset to be loaded.
 To load the gcp relative to the first swath use the key `group="IW1/gcp"`:
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/gcp")
+>>> sentinel1.open_dataset(product_path, group="IW1/VV/gcp")
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 10, slant_range_time: 21)
 Coordinates:
@@ -96,7 +96,7 @@ Data variables:
     incidenceAngle    (azimuth_time, slant_range_time) float64 ...
     elevationAngle    (azimuth_time, slant_range_time) float64 ...
 Attributes:
-    Conventions:  CF-1.7
+    Conventions:  CF-1.8
     title:        Geolocation grid
     comment:      The dataset contains geolocation grid point entries for eac...
     history:      created by xarray_sentinel-...
@@ -106,7 +106,7 @@ Attributes:
 ### Open attitude dataset
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/attitude")
+>>> sentinel1.open_dataset(product_path, group="IW1/VV/attitude")
 <xarray.Dataset>
 Dimensions:       (azimuth_time: 25)
 Coordinates:
@@ -123,7 +123,7 @@ Data variables:
     roll          (azimuth_time) float64 ...
     yaw           (azimuth_time) float64 ...
 Attributes:
-    Conventions:  CF-1.7
+    Conventions:  CF-1.8
     title:        Attitude information used by the IPF during processing
     comment:      The dataset contains a sets of attitude data records that a...
     history:      created by xarray_sentinel-...
@@ -133,7 +133,7 @@ Attributes:
 ### Open orbit dataset
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/orbit")
+>>> sentinel1.open_dataset(product_path, group="IW1/VV/orbit")
 <xarray.Dataset>
 Dimensions:       (axis: 3, azimuth_time: 17)
 Coordinates:
@@ -144,28 +144,25 @@ Data variables:
     velocity      (axis, azimuth_time) ...
 Attributes:
     reference_system:  Earth Fixed
-    Conventions:       CF-1.7
+    Conventions:       CF-1.8
     title:             Orbit information used by the IPF during processing
     comment:           The dataset contains a sets of orbit state vectors tha...
     history:           created by xarray_sentinel-...
 
 ```
 
-### Open a single burst
+### Open a single swath and polarisation
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/R168-N459-E0115")
+>>> sentinel1.open_dataset(product_path, group="IW1/VV")
 <xarray.Dataset>
-Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
+Dimensions:      (pixel: 21632, line: 13509)
 Coordinates:
-    pixel             (slant_range_time) int64 0 1 2 3 ... 21629 21630 21631
-    line              (azimuth_time) int64 10507 10508 10509 ... 12006 12007
-  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:43.51577...
-  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
+  * pixel        (pixel) int64 0 1 2 3 4 5 ... 21627 21628 21629 21630 21631
+  * line         (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
 Data variables:
-    VH                (azimuth_time, slant_range_time) complex64 ...
-    VV                (azimuth_time, slant_range_time) complex64 ...
-Attributes: (12/14)
+    measurement  (line, pixel) complex64 ...
+Attributes: (12/15)
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
@@ -173,11 +170,11 @@ Attributes: (12/14)
     sat:absolute_orbit:         26269
     sat:relative_orbit:         168
     ...                         ...
-    sar:instrument_mode:        IW
     sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    Conventions:                CF-1.7
+    groups:                     ['IW1/VV/gcp', 'IW1/VV/attitude', 'IW1/VV/orb...
+    Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
 ```

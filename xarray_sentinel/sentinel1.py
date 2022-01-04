@@ -219,8 +219,8 @@ def find_avalable_groups(
     ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]],
     product_attrs: T.Dict[str, T.Any],
     fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
-) -> T.Dict[str, T.Dict[str, T.Any]]:
-    groups: T.Dict[str, T.Dict[str, T.Any]] = {}
+) -> T.Dict[str, str]:
+    groups: T.Dict[str, str] = {}
     for subswath_id, subswath_data_path in ancillary_data_paths.items():
         for pol_id, pol_data_paths in subswath_data_path.items():
             if "annotation_path" not in pol_data_paths:
@@ -230,7 +230,7 @@ def find_avalable_groups(
                     pass
             except FileNotFoundError:
                 continue
-            groups[subswath_id] = None
+            groups[subswath_id] = ""
             groups[f"{subswath_id}/{pol_id}"] = pol_data_paths["annotation_path"]
             for metadata_group in METADATA_OPENERS:
                 groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
@@ -267,40 +267,52 @@ def filter_missing_path(
     return path_dict_copy
 
 
+def open_empty_dataset(
+    product_attrs: T.Dict[str, T.Any],
+    groups: T.List[str],
+) -> xr.Dataset:
+    attrs = dict(product_attrs, groups=groups)
+    ds = xr.Dataset(attrs=attrs)
+    return ds
+
+
 def open_root_dataset(
     product_attrs: T.Dict[str, T.Any],
-    groups: T.Dict[str, T.Dict[str, T.Collection[str]]],
+    groups: T.List[str],
 ) -> xr.Dataset:
-    attrs = dict(product_attrs, groups=list(groups.keys()))
-    ds = xr.Dataset(attrs=attrs)
+    ds = open_empty_dataset(product_attrs, groups)
     conventions.update_attributes(ds)
     return ds
 
 
 def open_swath_dataset(
+    product_attrs: T.Dict[str, T.Any],
+    groups: T.List[str],
+) -> xr.Dataset:
+    return open_empty_dataset(product_attrs, groups)
+
+
+def open_pol_dataset(
     manifest_path: esa_safe.PathType,
-    measurement_paths: T.Dict[str, esa_safe.PathType],
+    measurement_path: esa_safe.PathType,
     subgrups: T.List[str],
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
     attrs = dict(product_attrs, groups=subgrups)
 
-    data_vars = {}
-    for pol, data_path in measurement_paths.items():
-        arr = rioxarray.open_rasterio(data_path, chunks=chunks)
-        arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
-        arr = arr.assign_coords(
-            {
-                "x": np.arange(0, arr["x"].size, dtype=int),
-                "y": np.arange(0, arr["y"].size, dtype=int),
-            }
-        )
-        arr = arr.rename({"y": "line", "x": "pixel"})
-        data_vars[pol.upper()] = arr
+    arr = rioxarray.open_rasterio(measurement_path, chunks=chunks)
+    arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
+    arr = arr.assign_coords(
+        {
+            "x": np.arange(0, arr["x"].size, dtype=int),
+            "y": np.arange(0, arr["y"].size, dtype=int),
+        }
+    )
+    arr = arr.rename({"y": "line", "x": "pixel"})
 
     ds = xr.Dataset(
-        data_vars=data_vars,
+        data_vars={"measurement": arr},
         attrs=attrs,
     )
     conventions.update_attributes(ds)
@@ -423,15 +435,22 @@ def open_dataset(
     groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs=fs)
 
     if group is None:
-        ds = open_root_dataset(product_attrs, groups)
+        ds = open_root_dataset(product_attrs, list(groups))
     elif group not in groups:
         raise ValueError(
             f"Invalid group {group}, please select one of the following groups:"
             f"\n{list(groups.keys())}"
         )
     elif "/" not in group:
-        ds = open_swath_dataset(
-            manifest_path, groups[group]["measurement_path"], groups[group]["subgroups"]
+        subgroups = [g for g in groups if g.startswith(group) and g != group]
+        ds = open_swath_dataset(product_attrs, subgroups)
+    elif group.count("/") == 1:
+        subswath, pol = group.split("/", 1)
+        subgroups = [g for g in groups if g.startswith(group) and g != group]
+        ds = open_pol_dataset(
+            manifest_path,
+            ancillary_data_paths[subswath][pol]["measurement_path"],
+            subgroups,
         )
     else:
         subswath, pol, subgroup = group.split("/", 2)
@@ -442,14 +461,7 @@ def open_dataset(
             with fs.open(groups[group]) as calibration_path:
                 ds = open_calibration_dataset(calibration_path)
         else:
-            annotation_path = list(groups[group]["annotation_path"].values())[0]
-            ds = open_burst_dataset(
-                manifest_path,
-                measurement_paths=groups[group]["measurement_path"],
-                burst_position=groups[group]["burst_position"],
-                annotation_path=annotation_path,
-                chunks=chunks,
-            )
+            raise RuntimeError
     return ds
 
 
