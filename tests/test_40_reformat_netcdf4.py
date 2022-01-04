@@ -10,7 +10,6 @@ pytest.importorskip("netCDF4")
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.mark.xfail
 def test_to_group_netcdf(tmpdir: T.Any) -> None:
     product_path = (
         DATA_FOLDER
