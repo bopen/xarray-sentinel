@@ -216,15 +216,15 @@ def parse_manifest_sentinel1(
         "constellation": "sentinel-1",
         "platform": "sentinel-1" + number.lower(),
         "instrument": ["c-sar"],
-        "sat:orbit_state": orbitProperties_pass.lower(),
-        "sat:absolute_orbit": int(orbitNumber[0].text),
-        "sat:relative_orbit": int(relativeOrbitNumber[0].text),
-        "sat:anx_datetime": ascendingNodeTime + "Z",
-        "sar:frequency_band": "C",
-        "sar:instrument_mode": instrumentMode,
-        "sar:polarizations": [p.text for p in transmitterReceiverPolarisation],
-        "sar:product_type": productType,
-        "xs:instrument_mode_swaths": [s.text for s in swaths],
+        "sat_orbit_state": orbitProperties_pass.lower(),
+        "sat_absolute_orbit": int(orbitNumber[0].text),
+        "sat_relative_orbit": int(relativeOrbitNumber[0].text),
+        "sat_anx_datetime": ascendingNodeTime + "Z",
+        "sar_frequency_band": "C",
+        "sar_instrument_mode": instrumentMode,
+        "sar_polarizations": [p.text for p in transmitterReceiverPolarisation],
+        "sar_product_type": productType,
+        "xs_instrument_mode_swaths": [s.text for s in swaths],
     }
 
     files = {}
@@ -308,10 +308,10 @@ def parse_manifest_sentinel2(
         "constellation": "sentinel-2",
         "platform": "sentinel-" + number.lower(),
         "instrument": ["msi"],
-        "sat:orbit_state": groundTrackDirection.lower(),
-        "sat:absolute_orbit": int(orbitNumber),
-        "sat:relative_orbit": int(relativeOrbitNumber),
-        "xs:product_type": product_type,
+        "sat_orbit_state": groundTrackDirection.lower(),
+        "sat_absolute_orbit": int(orbitNumber),
+        "sat_relative_orbit": int(relativeOrbitNumber),
+        "xs_product_type": product_type,
     }
 
     files = {}
