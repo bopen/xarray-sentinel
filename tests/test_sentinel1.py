@@ -102,7 +102,7 @@ def test_open_dataset() -> None:
     res = sentinel1.open_dataset(product_path)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.attrs["groups"]) >= expected_groups
+    assert set(res.attrs["subgroups"]) >= expected_groups
 
     res = sentinel1.open_dataset(product_path, group="IW1/VV/orbit")
 
@@ -128,7 +128,7 @@ def test_open_dataset_zip() -> None:
     res = sentinel1.open_dataset(zip_urlpath)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.attrs["groups"]) >= expected_groups
+    assert set(res.attrs["subgroups"]) >= expected_groups
 
     res = sentinel1.open_dataset(zip_urlpath, group="IW1/VV/orbit")
 

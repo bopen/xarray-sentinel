@@ -57,7 +57,7 @@ using `azimuth_time` and `slant_range_time` dimensions.
 Dimensions:  ()
 Data variables:
     *empty*
-Attributes: (12/15)
+Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
@@ -65,10 +65,10 @@ Attributes: (12/15)
     sat:absolute_orbit:         26269
     sat:relative_orbit:         168
     ...                         ...
-    sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    groups:                     ['IW1', 'IW1/VH', 'IW1/VH/gcp', 'IW1/VH/orbit...
+    group:                      None
+    subgroups:                  ['IW1', 'IW1/VH', 'IW1/VH/gcp', 'IW1/VH/orbit...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
@@ -163,7 +163,7 @@ Coordinates:
   * line         (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
 Data variables:
     measurement  (line, pixel) complex64 ...
-Attributes: (12/15)
+Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
@@ -171,10 +171,10 @@ Attributes: (12/15)
     sat:absolute_orbit:         26269
     sat:relative_orbit:         168
     ...                         ...
-    sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    groups:                     ['IW1/VV/gcp', 'IW1/VV/orbit', 'IW1/VV/attitu...
+    group:                      IW1/VV
+    subgroups:                  ['IW1/VV/gcp', 'IW1/VV/orbit', 'IW1/VV/attitu...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 

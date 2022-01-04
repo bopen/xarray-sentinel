@@ -268,38 +268,20 @@ def filter_missing_path(
 
 
 def open_empty_dataset(
-    product_attrs: T.Dict[str, T.Any],
-    groups: T.List[str],
+    product_attrs: T.Dict[str, T.Any], **kwargs: T.Any
 ) -> xr.Dataset:
-    attrs = dict(product_attrs, groups=groups)
+    attrs = dict(product_attrs, **kwargs)
     ds = xr.Dataset(attrs=attrs)
     return ds
 
 
-def open_root_dataset(
-    product_attrs: T.Dict[str, T.Any],
-    groups: T.List[str],
-) -> xr.Dataset:
-    ds = open_empty_dataset(product_attrs, groups)
-    conventions.update_attributes(ds)
-    return ds
-
-
-def open_swath_dataset(
-    product_attrs: T.Dict[str, T.Any],
-    groups: T.List[str],
-) -> xr.Dataset:
-    return open_empty_dataset(product_attrs, groups)
-
-
 def open_pol_dataset(
-    manifest_path: esa_safe.PathType,
+    product_attrs: T.Dict[str, T.Any],
     measurement_path: esa_safe.PathType,
-    subgrups: T.List[str],
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
+    **kwargs: T.Any,
 ) -> xr.Dataset:
-    product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
-    attrs = dict(product_attrs, groups=subgrups)
+    attrs = dict(product_attrs, **kwargs)
 
     arr = rioxarray.open_rasterio(measurement_path, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
@@ -434,23 +416,26 @@ def open_dataset(
 
     groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs=fs)
 
-    if group is None:
-        ds = open_root_dataset(product_attrs, list(groups))
-    elif group not in groups:
+    if group is not None and group not in groups:
         raise ValueError(
             f"Invalid group {group}, please select one of the following groups:"
             f"\n{list(groups.keys())}"
         )
+
+    product_attrs["group"] = group
+
+    if group is None:
+        ds = open_empty_dataset(product_attrs, subgroups=list(groups))
     elif "/" not in group:
         subgroups = [g for g in groups if g.startswith(group) and g != group]
-        ds = open_swath_dataset(product_attrs, subgroups)
+        ds = open_empty_dataset(product_attrs, subgroups=subgroups)
     elif group.count("/") == 1:
         subswath, pol = group.split("/", 1)
         subgroups = [g for g in groups if g.startswith(group) and g != group]
         ds = open_pol_dataset(
-            manifest_path,
+            product_attrs,
             ancillary_data_paths[subswath][pol]["measurement_path"],
-            subgroups,
+            subgroups=subgroups,
         )
     else:
         subswath, pol, subgroup = group.split("/", 2)
@@ -462,6 +447,7 @@ def open_dataset(
                 ds = open_calibration_dataset(calibration_path)
         else:
             raise RuntimeError
+    conventions.update_attributes(ds)
     return ds
 
 
