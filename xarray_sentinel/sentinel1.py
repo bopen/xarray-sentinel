@@ -416,11 +416,8 @@ def open_dataset(
             )
         else:
             subswath, pol, metadata = group.split("/", 2)
-            if metadata in METADATA_OPENERS:
-                with fs.open(groups[group]) as file:
-                    ds = METADATA_OPENERS[metadata](file)
-            else:
-                raise RuntimeError
+            with fs.open(groups[group]) as file:
+                ds = METADATA_OPENERS[metadata](file)
 
     product_attrs["group"] = absgroup
     if len(subgroups):
