@@ -90,6 +90,9 @@ def test_open_dataset() -> None:
     assert isinstance(res, xr.Dataset)
     assert res.dims == {"axis": 3, "azimuth_time": 17}
 
+    with pytest.raises(ValueError):
+        sentinel1.open_dataset(product_path, group="IW1/VV/non-existent")
+
 
 def test_open_dataset_zip() -> None:
     zip_path = (
@@ -117,7 +120,7 @@ def test_open_dataset_zip() -> None:
     assert res.dims == {"axis": 3, "azimuth_time": 17}
 
 
-@pytest.mark.xfail
+@pytest.mark.skip
 def test_open_dataset_chunks_bursts() -> None:
     product_path = (
         DATA_FOLDER

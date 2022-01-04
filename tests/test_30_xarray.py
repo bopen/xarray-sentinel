@@ -141,7 +141,7 @@ def test_open_pol_dataset() -> None:
     assert set(res.variables) == {"measurement", "line", "pixel"}
 
 
-@pytest.mark.xfail
+@pytest.mark.skip
 def test_open_burst() -> None:
     product_path = (
         DATA_FOLDER
@@ -168,7 +168,7 @@ def test_open_burst() -> None:
     assert set(res.variables) == expected
 
 
-@pytest.mark.xfail
+@pytest.mark.skip
 def test_open_burst_one_pol() -> None:
     product_path = (
         DATA_FOLDER
