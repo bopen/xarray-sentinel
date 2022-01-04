@@ -229,12 +229,12 @@ Coordinates:
 Data variables:
     measurement  (line, pixel) complex64 ...
 Attributes: ...
+    xs_number_of_bursts:        9
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
     sat_orbit_state:            descending
     sat_absolute_orbit:         26269
-    sat_relative_orbit:         168
     ...                         ...
     sar_product_type:           SLC
     xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']

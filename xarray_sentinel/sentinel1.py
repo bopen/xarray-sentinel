@@ -247,8 +247,11 @@ def find_avalable_groups(
 
 def open_pol_dataset(
     measurement_path: esa_safe.PathType,
+    annotation_path: esa_safe.PathType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
+    swath_timing = esa_safe.parse_swath_timing(annotation_path)
+
     arr = rioxarray.open_rasterio(measurement_path, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.assign_coords(
@@ -260,6 +263,7 @@ def open_pol_dataset(
     arr = arr.rename({"y": "line", "x": "pixel"})
 
     ds = xr.Dataset(
+        attrs={"xs_number_of_bursts": swath_timing["burstList"]["@count"]},
         data_vars={"measurement": arr},
     )
     return ds
@@ -412,7 +416,8 @@ def open_dataset(
         elif group.count("/") == 1:
             subswath, pol = group.split("/", 1)
             ds = open_pol_dataset(
-                ancillary_data_paths[subswath][pol]["s1Level1MeasurementSchema"]
+                ancillary_data_paths[subswath][pol]["s1Level1MeasurementSchema"],
+                ancillary_data_paths[subswath][pol]["s1Level1ProductSchema"],
             )
         else:
             subswath, pol, metadata = group.split("/", 2)
