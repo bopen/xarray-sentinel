@@ -383,6 +383,13 @@ def open_dataset(
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
+    group = group or "/"
+    if group.startswith("/"):
+        absgroup = group
+        group = group[1:]
+    else:
+        absgroup = f"/{group}"
+
     fs, manifest_path = get_fs_path(product_urlpath, fs)
 
     if fs.isdir(manifest_path):
@@ -399,15 +406,15 @@ def open_dataset(
 
     groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs=fs)
 
-    if group is not None and group not in groups:
+    if group != "" and group not in groups:
         raise ValueError(
-            f"Invalid group {group}, please select one of the following groups:"
+            f"Invalid group {group!r}, please select one of the following groups:"
             f"\n{list(groups.keys())}"
         )
 
     metadata = ""
 
-    if group is None:
+    if group == "":
         ds = xr.Dataset()
         subgroups = list(groups)
     else:
@@ -433,7 +440,7 @@ def open_dataset(
             else:
                 raise RuntimeError
 
-    product_attrs["group"] = group
+    product_attrs["group"] = absgroup
     if len(subgroups):
         product_attrs["subgroups"] = subgroups
     ds.attrs.update(product_attrs)  # type: ignore
