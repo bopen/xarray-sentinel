@@ -238,6 +238,11 @@ an Xarray backend:
 
 ```
 
+## Project badges
+
+[![on-push](https://github.com/bopen/xarray-sentinel/actions/workflows/on-push.yml/badge.svg)](https://github.com/bopen/xarray-sentinel/actions/workflows/on-push.yml)
+[![codecov](https://codecov.io/gh/bopen/xarray-sentinel/branch/main/graph/badge.svg?token=OLw9it0i18)](https://codecov.io/gh/bopen/xarray-sentinel)
+
 ## Contributing
 
 The main repository is hosted on GitHub,
