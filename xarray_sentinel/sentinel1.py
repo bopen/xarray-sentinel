@@ -249,21 +249,6 @@ def find_avalable_groups(
     return groups
 
 
-def filter_missing_path(
-    path_dict: T.Dict[str, T.Any],
-    fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
-) -> T.Dict[str, T.Any]:
-
-    path_dict_copy = path_dict.copy()
-    for k in path_dict:
-        if isinstance(path_dict[k], dict):
-            path_dict_copy[k] = filter_missing_path(path_dict[k], fs)
-        else:
-            if not fs.exists(path_dict[k]):
-                del path_dict_copy[k]
-    return path_dict_copy
-
-
 def open_pol_dataset(
     measurement_path: esa_safe.PathType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
