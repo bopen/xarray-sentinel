@@ -229,7 +229,7 @@ def find_avalable_groups(
                 continue
             groups[subswath_id] = ""
             groups[f"{subswath_id}/{pol_id}"] = pol_data_paths["annotation_path"]
-            for metadata_group in METADATA_OPENERS:
+            for metadata_group in ["gcp", "orbit", "attitude"]:
                 groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
                     "annotation_path"
                 ]
@@ -421,11 +421,8 @@ def open_dataset(
         else:
             subswath, pol, metadata = group.split("/", 2)
             if metadata in METADATA_OPENERS:
-                with fs.open(groups[group]) as annotation_file:
-                    ds = METADATA_OPENERS[metadata](annotation_file)
-            elif metadata == "calibration":
-                with fs.open(groups[group]) as calibration_path:
-                    ds = open_calibration_dataset(calibration_path)
+                with fs.open(groups[group]) as file:
+                    ds = METADATA_OPENERS[metadata](file)
             else:
                 raise RuntimeError
 
@@ -460,4 +457,5 @@ METADATA_OPENERS = {
     "gcp": open_gcp_dataset,
     "orbit": open_orbit_dataset,
     "attitude": open_attitude_dataset,
+    "calibration": open_calibration_dataset,
 }
