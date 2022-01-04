@@ -39,8 +39,8 @@ def get_ancillary_data_paths(
         file_path = os.path.join(base_path, os.path.normpath(filename))
         name = os.path.basename(filename)
         subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
-        swath_dict = ancillary_data_paths.setdefault(subswath, {})
-        pol_dict = swath_dict.setdefault(pol, {})
+        swath_dict = ancillary_data_paths.setdefault(subswath.upper(), {})
+        pol_dict = swath_dict.setdefault(pol.upper(), {})
         pol_dict[type_mapping[filetype]] = file_path
     return ancillary_data_paths
 
