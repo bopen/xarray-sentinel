@@ -34,6 +34,14 @@ GROUP_ATTRIBUTES = {
             " The list contains an entry for each update made along azimuth"
         ),
     },
+    "calibration": {
+        "title": "Calibration coefficients",
+        "comment": (
+            "The dataset contains calibration information and the beta nought, sigma nought,"
+            " gamma and digital number (DN) Look-up Tables (LUT) that can be used for"
+            " absolute product calibration"
+        ),
+    },
 }
 
 VARIABLE_ATTRIBUTES = {

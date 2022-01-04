@@ -47,7 +47,7 @@ using `azimuth_time` and `slant_range_time` dimensions.
 
 ## Examples:
 
-### Open root dataset
+### Open the root dataset
 
 ```python-repl
 >>> from xarray_sentinel import sentinel1
@@ -77,9 +77,9 @@ Attributes: ...
 The attribute `subgroups` shows the available groups to be loaded. The keyword `group`
 shall be used to select the dataset to be loaded.
 
-### Open gcp dataset
+### Open the gcp dataset
 
-To load the gcp relative to the first swath use the key `group="IW1/gcp"`:
+To load the gcp relative to the VV polarisation of first swath use the key `group="IW1/VV/gcp"`:
 
 ```python-repl
 >>> sentinel1.open_dataset(product_path, group="IW1/VV/gcp")
@@ -113,7 +113,40 @@ Attributes: ...
 
 ```
 
-### Open attitude dataset
+### Open the orbit dataset
+
+Similarly for orbit data use `group="IW1/VV/attitude"`:
+
+```python-repl
+>>> sentinel1.open_dataset(product_path, group="IW1/VV/orbit")
+<xarray.Dataset>
+Dimensions:       (axis: 3, azimuth_time: 17)
+Coordinates:
+  * azimuth_time  (azimuth_time) datetime64[ns] 2021-04-01T05:25:19 ... 2021-...
+  * axis          (axis) int64 0 1 2
+Data variables:
+    position      (axis, azimuth_time) ...
+    velocity      (axis, azimuth_time) ...
+Attributes: ...
+    reference_system:           Earth Fixed
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat_orbit_state:            descending
+    sat_absolute_orbit:         26269
+    ...                         ...
+    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VV/orbit
+    Conventions:                CF-1.8
+    title:                      Orbit information used by the IPF during proc...
+    comment:                    The dataset contains a sets of orbit state ve...
+    history:                    created by xarray_sentinel-...
+
+```
+
+### Attitude and calibration datasets
+
+For attitude data use `group="IW1/VV/attitude"`:
 
 ```python-repl
 >>> sentinel1.open_dataset(product_path, group="IW1/VV/attitude")
@@ -149,31 +182,34 @@ Attributes: ...
 
 ```
 
-### Open orbit dataset
+and for calibration data use `group="IW1/VV/calibration"`:
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/VV/orbit")
+>>> sentinel1.open_dataset(product_path, group="IW1/VV/calibration")
 <xarray.Dataset>
-Dimensions:       (axis: 3, azimuth_time: 17)
+Dimensions:       (line: 30, pixel: 542)
 Coordinates:
-  * azimuth_time  (azimuth_time) datetime64[ns] 2021-04-01T05:25:19 ... 2021-...
-  * axis          (axis) int64 0 1 2
+  * line          (line) int64 -1042 -556 91 577 ... 13042 13688 14175 14661
+  * pixel         (pixel) int64 0 40 80 120 160 ... 21520 21560 21600 21631
 Data variables:
-    position      (axis, azimuth_time) ...
-    velocity      (axis, azimuth_time) ...
+    azimuth_time  (line) datetime64[ns] ...
+    sigmaNought   (line, pixel) float64 ...
+    betaNought    (line, pixel) float64 ...
+    gamma         (line, pixel) float64 ...
+    dn            (line, pixel) float64 ...
 Attributes: ...
-    reference_system:           Earth Fixed
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
     sat_orbit_state:            descending
     sat_absolute_orbit:         26269
+    sat_relative_orbit:         168
     ...                         ...
     xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VV/orbit
+    group:                      /IW1/VV/calibration
     Conventions:                CF-1.8
-    title:                      Orbit information used by the IPF during proc...
-    comment:                    The dataset contains a sets of orbit state ve...
+    title:                      Calibration coefficients
+    comment:                    The dataset contains calibration information ...
     history:                    created by xarray_sentinel-...
 
 ```
