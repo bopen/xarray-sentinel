@@ -30,16 +30,19 @@ SENTINEL1_PRODUCTS = [
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE",
         "IW1",
+        "VV",
     ),
     (
         DATA_FOLDER
         / "S1A_EW_SLC__1SDH_20210403T122536_20210403T122630_037286_046484_8152.SAFE",
         "EW1",
+        "HH",
     ),
     (
         DATA_FOLDER
         / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE",
         "IW",
+        "VV",
     ),
 ]
 
@@ -71,24 +74,26 @@ def test_open_dataset_root() -> None:
     assert isinstance(res, xr.Dataset)
 
 
-@pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
+@pytest.mark.parametrize("product_path,swath,pol", SENTINEL1_PRODUCTS)
 def test_open_dataset_orbit(
     product_path: esa_safe.PathType,
     swath: str,
+    pol: str,
 ) -> None:
-    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/orbit")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/{pol}/orbit")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"axis", "azimuth_time"}
     assert set(res.variables) == {"azimuth_time", "axis", "velocity", "position"}
 
 
-@pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
+@pytest.mark.parametrize("product_path,swath,pol", SENTINEL1_PRODUCTS)
 def test_open_dataset_attitude(
     product_path: esa_safe.PathType,
     swath: str,
+    pol: str,
 ) -> None:
-    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/attitude")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/{pol}/attitude")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time"}
@@ -108,23 +113,24 @@ def test_open_dataset_attitude(
     assert set(res.variables) == expected
 
 
-@pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
+@pytest.mark.parametrize("product_path,swath,pol", SENTINEL1_PRODUCTS)
 def test_open_dataset_gcp(
     product_path: esa_safe.PathType,
     swath: str,
+    pol: str,
 ) -> None:
-    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/gcp")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/{pol}/gcp")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
 
 
-def test_open_subswath() -> None:
+def test_open_pol_dataset() -> None:
     product_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     for attr_name in COMMON_ATTRIBUTES:
@@ -132,9 +138,10 @@ def test_open_subswath() -> None:
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
 
     assert set(res.dims) == {"line", "pixel"}
-    assert set(res.variables) == {"VH", "VV", "line", "pixel"}
+    assert set(res.variables) == {"measurement", "line", "pixel"}
 
 
+@pytest.mark.xfail
 def test_open_burst() -> None:
     product_path = (
         DATA_FOLDER
@@ -161,6 +168,7 @@ def test_open_burst() -> None:
     assert set(res.variables) == expected
 
 
+@pytest.mark.xfail
 def test_open_burst_one_pol() -> None:
     product_path = (
         DATA_FOLDER
@@ -189,7 +197,7 @@ def test_open_calibration_dataset() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="IW1/calibration")  # type: ignore
+    res = xr.open_dataset(annotation_path, engine="sentinel-1", group="IW1/VV/calibration")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"line", "pixel"}

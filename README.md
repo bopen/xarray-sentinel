@@ -1,6 +1,6 @@
 # xarray-sentinel
 
-**WARNING: this product is a "technology preview" / pre-Alpha**
+**WARNING: development stage is Alpha**
 
 Xarray backend to explore and load Copernicus Sentinel-1 satellite data products.
 
@@ -8,14 +8,14 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
 ## Features
 
+- access to metadata: product, orbit, attitude, GCPs, calibration - **Alpha**
+- access to metadata: deramp - in roadmap
 - access to SLC burst data - **technology preview**
-- access to metadata: product, orbit, attitude, GCPs - **technology preview**
-- access to metadata: calibration, deramp - in roadmap
 - products:
-  - Sentinel-1 SLC IW (Interferometric Wide Swath): **technology preview**
+  - Sentinel-1 SLC IW (Interferometric Wide Swath): **Alpha**
   - Sentinel-1 SLC EW (Extended Wide Swath): **technology preview**
   - Sentinel-1 SLC SM (Stripmap): in roadmap
-  - Sentinel-1 GRD SM/IW/EW: in roadmap
+  - Sentinel-1 GRD SM/IW/EW: **technology preview**
   - Sentinel-2 L1C/L2A: in roadmap
 
 ## Install
@@ -37,10 +37,11 @@ as follows:
 
 Currently, xarray-sentinel provides access as Xarray datasets to the following data:
 
-- burst data
 - gcp
 - orbit
 - attitude
+- calibration
+- swath data
 
 using `azimuth_time` and `slant_range_time` dimensions.
 
@@ -56,7 +57,7 @@ using `azimuth_time` and `slant_range_time` dimensions.
 Dimensions:  ()
 Data variables:
     *empty*
-Attributes: (12/15)
+Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
@@ -64,16 +65,16 @@ Attributes: (12/15)
     sat:absolute_orbit:         26269
     sat:relative_orbit:         168
     ...                         ...
-    sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    groups:                     ['IW1', 'IW1/calibration', 'IW1/gcp', 'IW1/at...
+    group:                      /
+    subgroups:                  ['IW1', 'IW1/VH', 'IW1/VH/gcp', 'IW1/VH/orbit...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
 ```
 
-The attribute `groups` shows the available groups to be loaded. The key `group`
+The attribute `subgroups` shows the available groups to be loaded. The keyword `group`
 shall be used to select the dataset to be loaded.
 
 ### Open gcp dataset
@@ -81,7 +82,7 @@ shall be used to select the dataset to be loaded.
 To load the gcp relative to the first swath use the key `group="IW1/gcp"`:
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/gcp")
+>>> sentinel1.open_dataset(product_path, group="IW1/VV/gcp")
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 10, slant_range_time: 21)
 Coordinates:
@@ -95,18 +96,27 @@ Data variables:
     height            (azimuth_time, slant_range_time) float64 ...
     incidenceAngle    (azimuth_time, slant_range_time) float64 ...
     elevationAngle    (azimuth_time, slant_range_time) float64 ...
-Attributes:
-    Conventions:  CF-1.8
-    title:        Geolocation grid
-    comment:      The dataset contains geolocation grid point entries for eac...
-    history:      created by xarray_sentinel-...
+Attributes: ...
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
+    ...                         ...
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VV/gcp
+    Conventions:                CF-1.8
+    title:                      Geolocation grid
+    comment:                    The dataset contains geolocation grid point e...
+    history:                    created by xarray_sentinel-...
 
 ```
 
 ### Open attitude dataset
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/attitude")
+>>> sentinel1.open_dataset(product_path, group="IW1/VV/attitude")
 <xarray.Dataset>
 Dimensions:       (azimuth_time: 25)
 Coordinates:
@@ -122,18 +132,27 @@ Data variables:
     pitch         (azimuth_time) float64 ...
     roll          (azimuth_time) float64 ...
     yaw           (azimuth_time) float64 ...
-Attributes:
-    Conventions:  CF-1.8
-    title:        Attitude information used by the IPF during processing
-    comment:      The dataset contains a sets of attitude data records that a...
-    history:      created by xarray_sentinel-...
+Attributes: ...
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
+    ...                         ...
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VV/attitude
+    Conventions:                CF-1.8
+    title:                      Attitude information used by the IPF during p...
+    comment:                    The dataset contains a sets of attitude data ...
+    history:                    created by xarray_sentinel-...
 
 ```
 
 ### Open orbit dataset
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/orbit")
+>>> sentinel1.open_dataset(product_path, group="IW1/VV/orbit")
 <xarray.Dataset>
 Dimensions:       (axis: 3, azimuth_time: 17)
 Coordinates:
@@ -142,30 +161,32 @@ Coordinates:
 Data variables:
     position      (axis, azimuth_time) ...
     velocity      (axis, azimuth_time) ...
-Attributes:
-    reference_system:  Earth Fixed
-    Conventions:       CF-1.8
-    title:             Orbit information used by the IPF during processing
-    comment:           The dataset contains a sets of orbit state vectors tha...
-    history:           created by xarray_sentinel-...
+Attributes: ...
+    reference_system:           Earth Fixed
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    ...                         ...
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VV/orbit
+    Conventions:                CF-1.8
+    title:                      Orbit information used by the IPF during proc...
+    comment:                    The dataset contains a sets of orbit state ve...
+    history:                    created by xarray_sentinel-...
 
 ```
 
-### Open a single burst
+### Open a single swath and polarisation
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/R168-N459-E0115")
+>>> sentinel1.open_dataset(product_path, group="IW1")
 <xarray.Dataset>
-Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
-Coordinates:
-    pixel             (slant_range_time) int64 0 1 2 3 ... 21629 21630 21631
-    line              (azimuth_time) int64 10507 10508 10509 ... 12006 12007
-  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:43.51577...
-  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
+Dimensions:  ()
 Data variables:
-    VH                (azimuth_time, slant_range_time) complex64 ...
-    VV                (azimuth_time, slant_range_time) complex64 ...
-Attributes: (12/14)
+    *empty*
+Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
@@ -173,10 +194,36 @@ Attributes: (12/14)
     sat:absolute_orbit:         26269
     sat:relative_orbit:         168
     ...                         ...
-    sar:instrument_mode:        IW
-    sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1
+    subgroups:                  ['VH', 'VH/gcp', 'VH/orbit', 'VH/attitude', ...
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+
+```
+
+```python-repl
+>>> sentinel1.open_dataset(product_path, group="IW1/VV")
+<xarray.Dataset>
+Dimensions:      (pixel: 21632, line: 13509)
+Coordinates:
+  * pixel        (pixel) int64 0 1 2 3 4 5 ... 21627 21628 21629 21630 21631
+  * line         (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+Data variables:
+    measurement  (line, pixel) complex64 ...
+Attributes: ...
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
+    ...                         ...
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VV
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'calibration']
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 

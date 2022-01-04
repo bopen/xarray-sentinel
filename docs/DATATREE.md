@@ -6,16 +6,24 @@ Sentinel-1 SLC IW product structure:
 /
 ├─ IW1
 │  ├─ VH
-│  │  ├─ azimuth_time (azimuth_time)
-│  │  ├─ slant_range_time (slant_range_time)
 │  │  ├─ line (azimuth_time)
 │  │  ├─ pixel (slant_range_time)
-│  │  ├─ VH (azimuth_time, slant_range_time)  # "measurements"?
+│  │  ├─ measurement (line, pixel)
+│  │  ├─ gcp
+│  │  │  ├─ azimuth_time (azimuth_time)
+│  │  │  ├─ slant_range_time (slant_range_time)
+│  │  │  ├─ line (azimuth_time)
+│  │  │  ├─ pixel (slant_range_time)
+│  │  │  ├─ latitude (azimuth_time, slant_range_time)
+│  │  │  ├─ longitude (azimuth_time, slant_range_time)
+│  │  │  ├─ height (azimuth_time, slant_range_time)
+│  │  │  ├─ incidenceAngle (azimuth_time, slant_range_time)
+│  │  │  └─ elevationAngle (azimuth_time, slant_range_time)
 │  │  ├─ orbit
 │  │  │  ├─ azimuth_time (azimuth_time)
-│  │  │  ├─ ecef_axis (ecef_axis)  # "x", "y", "z"
-│  │  │  ├─ position (azimuth_time, ecef_axis)
-│  │  │  └─ velocity (azimuth_time, ecef_axis)
+│  │  │  ├─ axis (axis)  # "x", "y", "z"
+│  │  │  ├─ position (azimuth_time, axis)
+│  │  │  └─ velocity (azimuth_time, axis)
 │  │  ├─ attitude
 │  │  │  ├─ azimuth_time (azimuth_time)
 │  │  │  ├─ q0 (azimuth_time)
@@ -28,16 +36,6 @@ Sentinel-1 SLC IW product structure:
 │  │  │  ├─ pitch (azimuth_time)
 │  │  │  ├─ roll (azimuth_time)
 │  │  │  └─ yaw (azimuth_time)
-│  │  ├─ gcp
-│  │  │  ├─ azimuth_time (azimuth_time)
-│  │  │  ├─ slant_range_time (slant_range_time)
-│  │  │  ├─ line (azimuth_time)
-│  │  │  ├─ pixel (slant_range_time)
-│  │  │  ├─ latitude (azimuth_time, slant_range_time)
-│  │  │  ├─ longitude (azimuth_time, slant_range_time)
-│  │  │  ├─ height (azimuth_time, slant_range_time)
-│  │  │  ├─ incidenceAngle (azimuth_time, slant_range_time)
-│  │  │  └─ elevationAngle (azimuth_time, slant_range_time)
 │  │  ├─ calibration
 │  │  │  ├─ azimuth_time (line)
 │  │  │  ├─ line (line)

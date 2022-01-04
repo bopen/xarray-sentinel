@@ -285,13 +285,13 @@ def test_get_ancillary_data() -> None:
 
     ancillary_data_paths = esa_safe.get_ancillary_data_paths(base_path, product_files)
 
-    expected = {"iw1"}
+    expected = {"IW1"}
     assert set(ancillary_data_paths) == expected
 
+    expected = {"VV", "VH"}
+    assert set(ancillary_data_paths["IW1"]) == expected
+
     expected = {"annotation_path", "noise_path", "calibration_path", "measurement_path"}
-    assert set(ancillary_data_paths["iw1"]) == expected
+    assert set(ancillary_data_paths["IW1"]["VV"]) == expected
 
-    expected = {"vv", "vh"}
-    assert set(ancillary_data_paths["iw1"]["annotation_path"]) == expected
-
-    assert isinstance(ancillary_data_paths["iw1"]["annotation_path"]["vv"], str)
+    assert isinstance(ancillary_data_paths["IW1"]["VV"]["annotation_path"], str)

@@ -2,6 +2,7 @@ import pathlib
 import tempfile
 
 import numpy as np
+import pytest
 import xarray as xr
 
 from xarray_sentinel import sentinel1
@@ -43,29 +44,23 @@ def test_find_avalable_groups() -> None:
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
     ancillary_data_paths = {
-        "iw1": {
-            "annotation_path": {
-                "vv": f"{base_path}/annotation/"
+        "IW1": {
+            "VV": {
+                "annotation_path": f"{base_path}/annotation/"
                 + "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
+                "calibration_path": f"{base_path}/annotation/calibration/"
+                + "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
             },
         },
     }
     product_attrs = {"sat:relative_orbit": 168}
     expected_groups = {
         "IW1",
-        "IW1/attitude",
-        "IW1/gcp",
-        "IW1/orbit",
-        "IW1/calibration",
-        "IW1/R168-N471-E0118",
-        "IW1/R168-N469-E0118",
-        "IW1/R168-N468-E0117",
-        "IW1/R168-N466-E0117",
-        "IW1/R168-N464-E0116",
-        "IW1/R168-N463-E0116",
-        "IW1/R168-N461-E0116",
-        "IW1/R168-N459-E0115",
-        "IW1/R168-N458-E0115",
+        "IW1/VV",
+        "IW1/VV/attitude",
+        "IW1/VV/gcp",
+        "IW1/VV/orbit",
+        "IW1/VV/calibration",
     }
 
     groups = sentinel1.find_avalable_groups(ancillary_data_paths, product_attrs)
@@ -97,19 +92,19 @@ def test_open_dataset() -> None:
     )
     expected_groups = {
         "IW1",
-        "IW1/gcp",
-        "IW1/attitude",
-        "IW1/orbit",
-        "IW1/calibration",
-        "IW1/R168-N471-E0118",
+        "IW1/VV",
+        "IW1/VV/gcp",
+        "IW1/VV/attitude",
+        "IW1/VV/orbit",
+        "IW1/VV/calibration",
     }
 
     res = sentinel1.open_dataset(product_path)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.attrs["groups"]) >= expected_groups
+    assert set(res.attrs["subgroups"]) >= expected_groups
 
-    res = sentinel1.open_dataset(product_path, group="IW1/orbit")
+    res = sentinel1.open_dataset(product_path, group="IW1/VV/orbit")
 
     assert isinstance(res, xr.Dataset)
     assert res.dims == {"axis": 3, "azimuth_time": 17}
@@ -123,24 +118,25 @@ def test_open_dataset_zip() -> None:
     zip_urlpath = f"zip://*/manifest.safe::{zip_path}"
     expected_groups = {
         "IW1",
-        "IW1/gcp",
-        "IW1/attitude",
-        "IW1/calibration",
-        "IW1/orbit",
-        "IW1/R168-N471-E0118",
+        "IW1/VV",
+        "IW1/VV/gcp",
+        "IW1/VV/attitude",
+        "IW1/VV/orbit",
+        "IW1/VV/calibration",
     }
 
     res = sentinel1.open_dataset(zip_urlpath)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.attrs["groups"]) >= expected_groups
+    assert set(res.attrs["subgroups"]) >= expected_groups
 
-    res = sentinel1.open_dataset(zip_urlpath, group="IW1/orbit")
+    res = sentinel1.open_dataset(zip_urlpath, group="IW1/VV/orbit")
 
     assert isinstance(res, xr.Dataset)
     assert res.dims == {"axis": 3, "azimuth_time": 17}
 
 
+@pytest.mark.xfail
 def test_open_dataset_chunks_bursts() -> None:
     product_path = (
         DATA_FOLDER
