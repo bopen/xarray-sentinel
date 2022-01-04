@@ -214,30 +214,10 @@ Attributes: ...
 
 ```
 
-### Open a single swath and polarisation
+### Open a swath and polarisation dataset
 
-```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1")
-<xarray.Dataset>
-Dimensions:  ()
-Data variables:
-    *empty*
-Attributes: ...
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
-    instrument:                 ['c-sar']
-    sat_orbit_state:            descending
-    sat_absolute_orbit:         26269
-    sat_relative_orbit:         168
-    ...                         ...
-    sar_product_type:           SLC
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1
-    subgroups:                  ['VH', 'VH/gcp', 'VH/orbit', 'VH/attitude', ...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
-
-```
+Finally the measurement data is found in a swath / polarisation groups accessed for
+example as `group="IW1/VV"` for the VV polarisation of the first IW swath:
 
 ```python-repl
 >>> sentinel1.open_dataset(product_path, group="IW1/VV")
@@ -265,7 +245,9 @@ Attributes: ...
 
 ```
 
-With the upcoming release of Xarray v0.18.0, xarray-sentinel will be automatically available as
+## Xarray integration
+
+Starting with Xarray v0.18.0, xarray-sentinel will be automatically available as
 an Xarray backend:
 
 ```python-repl
