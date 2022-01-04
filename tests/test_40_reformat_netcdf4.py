@@ -19,4 +19,4 @@ def test_to_group_netcdf(tmpdir: T.Any) -> None:
     tmp_path = str(tmpdir.join("tmp.nc"))
     groups = {"IW1/VV/gcp": "IW1/VV/gcp", "IW2/VH/attitude": "IW2/VH/attitude"}
 
-    reformat.to_group_netcdf(product_path, tmp_path, groups)
+    reformat.to_group_netcdf(product_path, tmp_path, groups, engine="netcdf4")
