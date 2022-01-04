@@ -72,7 +72,10 @@ def test_open_dataset_root() -> None:
 
 
 @pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
-def test_open_dataset_orbit(product_path: esa_safe.PathType, swath: str,) -> None:
+def test_open_dataset_orbit(
+    product_path: esa_safe.PathType,
+    swath: str,
+) -> None:
     res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/orbit")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
@@ -81,7 +84,10 @@ def test_open_dataset_orbit(product_path: esa_safe.PathType, swath: str,) -> Non
 
 
 @pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
-def test_open_dataset_attitude(product_path: esa_safe.PathType, swath: str,) -> None:
+def test_open_dataset_attitude(
+    product_path: esa_safe.PathType,
+    swath: str,
+) -> None:
     res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/attitude")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
@@ -103,7 +109,10 @@ def test_open_dataset_attitude(product_path: esa_safe.PathType, swath: str,) -> 
 
 
 @pytest.mark.parametrize("product_path,swath", SENTINEL1_PRODUCTS)
-def test_open_dataset_gcp(product_path: esa_safe.PathType, swath: str,) -> None:
+def test_open_dataset_gcp(
+    product_path: esa_safe.PathType,
+    swath: str,
+) -> None:
     res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath}/gcp")  # type: ignore
 
     assert isinstance(res, xr.Dataset)

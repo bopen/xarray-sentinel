@@ -86,7 +86,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Check code style with black
       run: |
-        $CONDA/bin/conda install black
+        $CONDA/bin/conda install -c conda-forge black=21.12b0
         $CONDA/bin/black --check .
     - name: Check code style with isort
       run: |

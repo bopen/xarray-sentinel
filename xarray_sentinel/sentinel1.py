@@ -168,7 +168,8 @@ def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
             data_vars[var][1].append(attitude[k][var])
 
     ds = xr.Dataset(
-        data_vars=data_vars, coords={"time": [np.datetime64(dt) for dt in time]},
+        data_vars=data_vars,
+        coords={"time": [np.datetime64(dt) for dt in time]},
     )
     ds = ds.rename({"time": "azimuth_time"})
     ds = conventions.update_attributes(ds, group="attitude")
@@ -309,7 +310,10 @@ def open_swath_dataset(
         arr = arr.rename({"y": "line", "x": "pixel"})
         data_vars[pol.upper()] = arr
 
-    ds = xr.Dataset(data_vars=data_vars, attrs=attrs,)
+    ds = xr.Dataset(
+        data_vars=data_vars,
+        attrs=attrs,
+    )
     conventions.update_attributes(ds)
     return ds
 
@@ -336,7 +340,9 @@ def open_burst_dataset(
         image_information["azimuthTimeInterval"], "s"
     )
     azimuth_time = pd.date_range(
-        start=first_azimuth_time, periods=linesPerBurst, freq=azimuth_time_interval,
+        start=first_azimuth_time,
+        periods=linesPerBurst,
+        freq=azimuth_time_interval,
     )
 
     slantRangeTime = image_information["slantRangeTime"]

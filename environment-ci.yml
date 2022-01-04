@@ -1,7 +1,7 @@
 channels:
   - conda-forge
 dependencies:
-  - black
+  - black = 21.12b0
   - dask
   - flake8
   - fsspec

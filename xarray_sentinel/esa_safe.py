@@ -22,7 +22,8 @@ SENTINEL2_NAMESPACES = {
 
 
 def get_ancillary_data_paths(
-    base_path: PathType, product_files: T.Dict[str, str],
+    base_path: PathType,
+    product_files: T.Dict[str, str],
 ) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
     type_mapping = {
         "s1Level1CalibrationSchema": "calibration_path",
@@ -56,7 +57,9 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
 
 
 def parse_tag_dict(
-    xml_path: PathOrFileType, schema_type: str, query: str,
+    xml_path: PathOrFileType,
+    schema_type: str,
+    query: str,
 ) -> T.Dict[str, T.Any]:
     schema = sentinel1_schemas(schema_type)
     tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)  # type: ignore
@@ -65,7 +68,9 @@ def parse_tag_dict(
 
 
 def parse_tag_list(
-    xml_path: PathOrFileType, schema_type: str, query: str,
+    xml_path: PathOrFileType,
+    schema_type: str,
+    query: str,
 ) -> T.List[T.Dict[str, T.Any]]:
     schema = sentinel1_schemas(schema_type)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)  # type: ignore
@@ -73,7 +78,9 @@ def parse_tag_list(
     return tag_list
 
 
-def parse_coordinate_conversion(annotation: PathOrFileType,) -> T.Dict[str, T.Any]:
+def parse_coordinate_conversion(
+    annotation: PathOrFileType,
+) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation, "product", ".//coordinateConversionList")
 
 
