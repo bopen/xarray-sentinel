@@ -375,6 +375,14 @@ def compute_burst_centres(
     return centre.latitude.values, centre.longitude.values
 
 
+def normalise_group(group: T.Optional[str]) -> str:
+    if group is None:
+        group = ""
+    if group.startswith("/"):
+        group = group[1:]
+    return group
+
+
 def open_dataset(
     product_urlpath: esa_safe.PathType,
     *,
@@ -383,12 +391,8 @@ def open_dataset(
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
-    group = group or "/"
-    if group.startswith("/"):
-        absgroup = group
-        group = group[1:]
-    else:
-        absgroup = f"/{group}"
+    group = normalise_group(group)
+    absgroup = f"/{group}"
 
     fs, manifest_path = get_fs_path(product_urlpath, fs)
 

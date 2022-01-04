@@ -3,6 +3,7 @@ channels:
 dependencies:
   - gcsfs
   - ipytree
+  - h5netcdf
   - matplotlib
   - mamba
   - netcdf4
