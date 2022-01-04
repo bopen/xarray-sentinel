@@ -33,4 +33,6 @@ conda-env-create:
 
 conda-env-update:
 	$(CONDA) env update -n $(ENVIRONMENT) -f environment-ci.yml
+
+conda-env-update-all: conda-env-update
 	$(CONDA) env update -n $(ENVIRONMENT) -f environment-dev.yml
