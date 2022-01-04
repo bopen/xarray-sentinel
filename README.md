@@ -1,6 +1,6 @@
 # xarray-sentinel
 
-**WARNING: this product is a "technology preview" / pre-Alpha**
+**WARNING: development stage is Alpha**
 
 Xarray backend to explore and load Copernicus Sentinel-1 satellite data products.
 
@@ -8,14 +8,14 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
 ## Features
 
+- access to metadata: product, orbit, attitude, GCPs, calibration - **Alpha**
+- access to metadata: deramp - in roadmap
 - access to SLC burst data - **technology preview**
-- access to metadata: product, orbit, attitude, GCPs - **technology preview**
-- access to metadata: calibration, deramp - in roadmap
 - products:
-  - Sentinel-1 SLC IW (Interferometric Wide Swath): **technology preview**
+  - Sentinel-1 SLC IW (Interferometric Wide Swath): **Alpha**
   - Sentinel-1 SLC EW (Extended Wide Swath): **technology preview**
   - Sentinel-1 SLC SM (Stripmap): in roadmap
-  - Sentinel-1 GRD SM/IW/EW: in roadmap
+  - Sentinel-1 GRD SM/IW/EW: **technology preview**
   - Sentinel-2 L1C/L2A: in roadmap
 
 ## Install
@@ -37,10 +37,11 @@ as follows:
 
 Currently, xarray-sentinel provides access as Xarray datasets to the following data:
 
-- burst data
 - gcp
 - orbit
 - attitude
+- calibration
+- swath data
 
 using `azimuth_time` and `slant_range_time` dimensions.
 
@@ -67,7 +68,7 @@ Attributes: (12/15)
     sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    groups:                     ['IW1', 'IW1/VH', 'IW1/VH/gcp', 'IW1/VH/attit...
+    groups:                     ['IW1', 'IW1/VH', 'IW1/VH/gcp', 'IW1/VH/orbit...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
@@ -173,7 +174,7 @@ Attributes: (12/15)
     sar:polarizations:          ['VV', 'VH']
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    groups:                     ['IW1/VV/gcp', 'IW1/VV/attitude', 'IW1/VV/orb...
+    groups:                     ['IW1/VV/gcp', 'IW1/VV/orbit', 'IW1/VV/attitu...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 

@@ -485,6 +485,6 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
 
 METADATA_OPENERS = {
     "gcp": open_gcp_dataset,
-    "attitude": open_attitude_dataset,
     "orbit": open_orbit_dataset,
+    "attitude": open_attitude_dataset,
 }
