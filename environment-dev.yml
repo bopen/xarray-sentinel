@@ -2,5 +2,9 @@ channels:
   - conda-forge
 dependencies:
   - gcsfs
+  - ipytree
   - matplotlib
+  - mamba
+  - netcdf4
   - notebook
+  - zarr
