@@ -37,6 +37,8 @@ GROUP_ATTRIBUTES = {
 }
 
 VARIABLE_ATTRIBUTES = {
+    "line": {"units": "1", "long_name": "product line number"},
+    "pixel": {"units": "1", "long_name": "product pixel number"},
     "azimuth_time": {"long_name": "zero Doppler azimuth time", "standard_name": "time"},
     # NOTE: `slant_range_time` is not expressed as `np.timedelta64[ns]` in order to keep enough
     #   accuracy for interferometric processing, i.e. c * 1ns / 2 ~= 15cm.
@@ -57,12 +59,13 @@ VARIABLE_ATTRIBUTES = {
     "wy": {"units": "° s-1", "long_name": "Y component of angular velocity vector"},
     "wz": {"units": "° s-1", "long_name": "Z component of angular velocity vector"},
     "time": {"standard_name": "time"},
-    "x": {"units": "m", "long_name": "position x"},
-    "y": {"units": "m", "long_name": "position y"},
-    "z": {"units": "m", "long_name": "position z"},
-    "vx": {"units": "m s-1", "long_name": "velocity x"},
-    "vy": {"units": "m s-1", "long_name": "velocity y"},
-    "vz": {"units": "m s-1", "long_name": "velocity z"},
+    "axis": {"units": "1", "long_name": "ECEF coordinate index"},
+    "position": {"units": "m", "long_name": "ECEF position"},
+    "velocity": {"units": "m s-1", "long_name": "ECEF velocity"},
+    "sigmaNought": {"units": "dB", "long_name": "sigma nought calibration LUT"},
+    "betaNought": {"units": "dB", "long_name": "beta nought calibration LUT"},
+    "gamma": {"units": "dB", "long_name": "gamma calibration LUT"},
+    "dn": {"units": "dB", "long_name": "original digital number calibration LUT"},
 }
 
 
