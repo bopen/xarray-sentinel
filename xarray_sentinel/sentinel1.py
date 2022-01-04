@@ -220,46 +220,35 @@ def find_avalable_groups(
     product_attrs: T.Dict[str, T.Any],
     fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
 ) -> T.Dict[str, T.Dict[str, T.Any]]:
-
-    ancillary_data_paths = filter_missing_path(ancillary_data_paths, fs)
     groups: T.Dict[str, T.Dict[str, T.Any]] = {}
     for subswath_id, subswath_data_path in ancillary_data_paths.items():
-        subswath_id = subswath_id.upper()
-        if len(subswath_data_path["annotation_path"]) == 0:
-            continue
-        annotation_path = list(subswath_data_path["annotation_path"].values())[0]
+        for pol_id, pol_data_paths in subswath_data_path.items():
+            if "annotation_path" not in pol_data_paths:
+                continue
+            try:
+                with fs.open(pol_data_paths["annotation_path"]):
+                    pass
+            except FileNotFoundError:
+                continue
+            groups[subswath_id] = None
+            groups[f"{subswath_id}/{pol_id}"] = pol_data_paths["annotation_path"]
+            for metadata_group in METADATA_OPENERS:
+                groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
+                    "annotation_path"
+                ]
 
-        with fs.open(annotation_path) as annotation_file:
-            swath_timing = esa_safe.parse_swath_timing(annotation_file)
+            if "calibration_path" not in pol_data_paths:
+                continue
+            try:
+                with fs.open(pol_data_paths["calibration_path"]):
+                    pass
+            except FileNotFoundError:
+                print(pol_data_paths["calibration_path"])
+                continue
+            groups[f"{subswath_id}/{pol_id}/calibration"] = pol_data_paths[
+                "calibration_path"
+            ]
 
-        number_of_bursts = swath_timing["burstList"]["@count"]
-
-        burst_ids: T.List[str] = []
-        if number_of_bursts > 0:
-            with fs.open(annotation_path) as annotation_file:
-                gcp = open_gcp_dataset(annotation_file)
-            centres_lat, centres_lon = compute_burst_centres(gcp)
-
-            for k in range(len(centres_lat)):
-                burst_ids.append(
-                    build_burst_id(
-                        centres_lat[k],
-                        centres_lon[k],
-                        product_attrs["sat:relative_orbit"],
-                    )
-                )
-
-        subgroups = list(METADATA_OPENERS.keys()) + ["calibration"] + burst_ids
-
-        groups[subswath_id] = {"subgroups": subgroups, **subswath_data_path}
-        groups[f"{subswath_id}/calibration"] = subswath_data_path
-        for subgroup in METADATA_OPENERS.keys():
-            groups[f"{subswath_id}/{subgroup}"] = subswath_data_path
-        for k, burst_id in enumerate(burst_ids):
-            groups[f"{subswath_id}/{burst_id}"] = {
-                "burst_position": k,
-                **subswath_data_path,
-            }
     return groups
 
 
@@ -291,7 +280,7 @@ def open_root_dataset(
 def open_swath_dataset(
     manifest_path: esa_safe.PathType,
     measurement_paths: T.Dict[str, esa_safe.PathType],
-    subgrups: T.List[int],
+    subgrups: T.List[str],
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
@@ -445,14 +434,12 @@ def open_dataset(
             manifest_path, groups[group]["measurement_path"], groups[group]["subgroups"]
         )
     else:
-        subswath, subgroup = group.split("/", 1)
+        subswath, pol, subgroup = group.split("/", 2)
         if subgroup in METADATA_OPENERS:
-            annotation_path = list(groups[group]["annotation_path"].values())[0]
-            with fs.open(annotation_path) as annotation_file:
+            with fs.open(groups[group]) as annotation_file:
                 ds = METADATA_OPENERS[subgroup](annotation_file)
         elif subgroup == "calibration":
-            calibration_path = list(groups[group]["calibration_path"].values())[0]
-            with fs.open(calibration_path) as calibration_path:
+            with fs.open(groups[group]) as calibration_path:
                 ds = open_calibration_dataset(calibration_path)
         else:
             annotation_path = list(groups[group]["annotation_path"].values())[0]
