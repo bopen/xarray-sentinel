@@ -220,30 +220,26 @@ def find_avalable_groups(
     groups: T.Dict[str, str] = {}
     for subswath_id, subswath_data_path in ancillary_data_paths.items():
         for pol_id, pol_data_paths in subswath_data_path.items():
-            if "annotation_path" not in pol_data_paths:
-                continue
             try:
-                with fs.open(pol_data_paths["annotation_path"]):
+                with fs.open(pol_data_paths["s1Level1ProductSchema"]):
                     pass
             except FileNotFoundError:
                 continue
             groups[subswath_id] = ""
-            groups[f"{subswath_id}/{pol_id}"] = pol_data_paths["annotation_path"]
+            groups[f"{subswath_id}/{pol_id}"] = pol_data_paths["s1Level1ProductSchema"]
             for metadata_group in ["gcp", "orbit", "attitude"]:
                 groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
-                    "annotation_path"
+                    "s1Level1ProductSchema"
                 ]
 
-            if "calibration_path" not in pol_data_paths:
-                continue
             try:
-                with fs.open(pol_data_paths["calibration_path"]):
+                with fs.open(pol_data_paths["s1Level1CalibrationSchema"]):
                     pass
             except FileNotFoundError:
-                print(pol_data_paths["calibration_path"])
+                print(pol_data_paths["s1Level1CalibrationSchema"])
                 continue
             groups[f"{subswath_id}/{pol_id}/calibration"] = pol_data_paths[
-                "calibration_path"
+                "s1Level1CalibrationSchema"
             ]
 
     return groups
@@ -416,7 +412,7 @@ def open_dataset(
         elif group.count("/") == 1:
             subswath, pol = group.split("/", 1)
             ds = open_pol_dataset(
-                ancillary_data_paths[subswath][pol]["measurement_path"]
+                ancillary_data_paths[subswath][pol]["s1Level1MeasurementSchema"]
             )
         else:
             subswath, pol, metadata = group.split("/", 2)

@@ -27,9 +27,9 @@ def test_find_avalable_groups() -> None:
     ancillary_data_paths = {
         "IW1": {
             "VV": {
-                "annotation_path": f"{base_path}/annotation/"
+                "s1Level1ProductSchema": f"{base_path}/annotation/"
                 + "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
-                "calibration_path": f"{base_path}/annotation/calibration/"
+                "s1Level1CalibrationSchema": f"{base_path}/annotation/calibration/"
                 + "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
             },
         },

@@ -291,7 +291,12 @@ def test_get_ancillary_data() -> None:
     expected = {"VV", "VH"}
     assert set(ancillary_data_paths["IW1"]) == expected
 
-    expected = {"annotation_path", "noise_path", "calibration_path", "measurement_path"}
+    expected = {
+        "s1Level1ProductSchema",
+        "s1Level1CalibrationSchema",
+        "s1Level1NoiseSchema",
+        "s1Level1MeasurementSchema",
+    }
     assert set(ancillary_data_paths["IW1"]["VV"]) == expected
 
-    assert isinstance(ancillary_data_paths["IW1"]["VV"]["annotation_path"], str)
+    assert isinstance(ancillary_data_paths["IW1"]["VV"]["s1Level1ProductSchema"], str)

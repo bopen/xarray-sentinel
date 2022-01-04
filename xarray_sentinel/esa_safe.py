@@ -25,23 +25,18 @@ def get_ancillary_data_paths(
     base_path: PathType,
     product_files: T.Dict[str, str],
 ) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
-    type_mapping = {
-        "s1Level1CalibrationSchema": "calibration_path",
-        "s1Level1MeasurementSchema": "measurement_path",
-        "s1Level1NoiseSchema": "noise_path",
-        "s1Level1ProductSchema": "annotation_path",
-    }
     ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
     for filename, filetype in product_files.items():
-        if filetype not in type_mapping:
-            continue
         # HACK: no easy way to normalise the path component of a urlpath
         file_path = os.path.join(base_path, os.path.normpath(filename))
         name = os.path.basename(filename)
-        subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
+        try:
+            subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
+        except ValueError:
+            continue
         swath_dict = ancillary_data_paths.setdefault(subswath.upper(), {})
         pol_dict = swath_dict.setdefault(pol.upper(), {})
-        pol_dict[type_mapping[filetype]] = file_path
+        pol_dict[filetype] = file_path
     return ancillary_data_paths
 
 
