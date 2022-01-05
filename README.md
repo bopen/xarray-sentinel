@@ -10,7 +10,7 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
 - access to metadata: product, orbit, attitude, GCPs, calibration - **Alpha**
 - access to metadata: deramp - in roadmap
-- access to data: full image, single swath, signle SLC burst - **technology preview**
+- access to data: full image, single swath, single SLC burst - **Alpha**
 - products:
   - Sentinel-1 SLC IW (Interferometric Wide Swath): **Alpha**
   - Sentinel-1 GRD SM/IW/EW: **technology preview**
@@ -40,9 +40,11 @@ Currently, xarray-sentinel provides access as Xarray datasets to the following d
 - orbit
 - attitude
 - calibration
-- swath data
+- full image
+- single swath
+- SLC burst
 
-using `azimuth_time` and `slant_range_time` dimensions.
+using `azimuth_time` and `slant_range_time` dimensions when it make sense.
 
 ## Examples:
 
@@ -213,35 +215,70 @@ Attributes: ...
 
 ```
 
-### Open a swath and polarisation dataset
+### Open a single swath / polarisation dataset
 
 Finally the measurement data is found in a swath / polarisation groups accessed for
 example as `group="IW1/VV"` for the VV polarisation of the first IW swath:
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/VV")
+>>> swath_polarisation_ds = sentinel1.open_dataset(product_path, group="IW1/VV")
+>>> swath_polarisation_ds
 <xarray.Dataset>
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
-  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
-  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+  * pixel             (pixel) int64 0 1 2 ... 21629 21630 21631
+  * line              (line) int64 0 1 2 ... 13506 13507 13508
     slant_range_time  (pixel) float64 0.005343 0.005343 ... 0.005679 0.005679
+    azimuth_time      (line) datetime64[ns] 2021-04-01T05:26:24.209990 ...
 Data variables:
     measurement       (line, pixel) complex64 ...
 Attributes: ...
-    number_of_bursts:            9
-    lines_per_burst:             1501
-    azimuth_time_interval:       0.002055556299999998
-    bursts_first_azimuth_times:  ['2021-04-01T05:26:24.209990', '2021-04-01T0...
-    constellation:               sentinel-1
-    platform:                    sentinel-1b
-    ...                          ...
-    sar_product_type:            SLC
-    xs_instrument_mode_swaths:   ['IW1', 'IW2', 'IW3']
-    group:                       /IW1/VV
-    subgroups:                   ['gcp', 'orbit', 'attitude', 'calibration']
-    Conventions:                 CF-1.8
-    history:                     created by xarray_sentinel-...
+    number_of_bursts:           9
+    lines_per_burst:            1501
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat_orbit_state:            descending
+    ...                         ...
+    sar_product_type:           SLC
+    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VV
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'calibration']
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+
+```
+
+### Crop single SLC burst dataset
+
+A single burst can be cropped out of the swath data. *xarray_sentinel* offer an helper function
+that also performs additional changes like swapping the dimenstions:
+
+```python-repl
+>>> sentinel1.crop_burst_dataset(swath_polarisation_ds, burst_index=8)
+<xarray.Dataset>
+Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
+Coordinates:
+    pixel             (slant_range_time) int64 0 1 2 3 ... 21629 21630 21631
+    line              (azimuth_time) int64 12008 12009 12010 ... 13507 13508
+  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
+  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:46.27227...
+Data variables:
+    measurement       (azimuth_time, slant_range_time) complex64 ...
+Attributes: ...
+    number_of_bursts:           9
+    lines_per_burst:            1501
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    instrument:                 ['c-sar']
+    sat_orbit_state:            descending
+    ...                         ...
+    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VV
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'calibration']
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+    burst_index:                8
 
 ```
 

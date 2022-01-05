@@ -130,6 +130,13 @@ def test_open_pol_dataset() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
+    expected_variables = {
+        "measurement",
+        "line",
+        "pixel",
+        "slant_range_time",
+        "azimuth_time",
+    }
     res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
@@ -138,7 +145,7 @@ def test_open_pol_dataset() -> None:
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
 
     assert set(res.dims) == {"line", "pixel"}
-    assert set(res.variables) == {"measurement", "line", "pixel", "slant_range_time"}
+    assert set(res.variables) == expected_variables
 
 
 @pytest.mark.skip
