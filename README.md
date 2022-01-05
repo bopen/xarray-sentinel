@@ -230,19 +230,19 @@ Coordinates:
 Data variables:
     measurement       (line, pixel) complex64 ...
 Attributes: ...
-    number_of_bursts:           9
-    lines_per_burst:            1501
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
-    instrument:                 ['c-sar']
-    sat_orbit_state:            descending
-    ...                         ...
-    sar_product_type:           SLC
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VV
-    subgroups:                  ['gcp', 'orbit', 'attitude', 'calibration']
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+    number_of_bursts:            9
+    lines_per_burst:             1501
+    azimuth_time_interval:       0.002055556299999998
+    bursts_first_azimuth_times:  ['2021-04-01T05:26:24.209990', '2021-04-01T0...
+    constellation:               sentinel-1
+    platform:                    sentinel-1b
+    ...                          ...
+    sar_product_type:            SLC
+    xs_instrument_mode_swaths:   ['IW1', 'IW2', 'IW3']
+    group:                       /IW1/VV
+    subgroups:                   ['gcp', 'orbit', 'attitude', 'calibration']
+    Conventions:                 CF-1.8
+    history:                     created by xarray_sentinel-...
 
 ```
 

@@ -276,8 +276,38 @@ def open_pol_dataset(
     attrs = {
         "number_of_bursts": swath_timing["burstList"]["@count"],
         "lines_per_burst": swath_timing["linesPerBurst"],
+        "azimuth_time_interval": image_information["azimuthTimeInterval"],
+        "bursts_first_azimuth_times": [
+            b["azimuthTime"] for b in swath_timing["burstList"]["burst"]
+        ],
     }
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
+
+
+def make_burst_dataset(pol_dataset: xr.Dataset, burst_number: int) -> xr.Dataset:
+    if burst_number < 0 or burst_number >= pol_dataset.attrs["number_of_bursts"]:
+        raise IndexError("{burst_number=} out of bounds")
+
+    lines_per_burst = pol_dataset.attrs["lines_per_burst"]
+
+    first_azimuth_time = pol_dataset.attrs["bursts_first_azimuth_times"][burst_number]
+    azimuth_time_interval = pol_dataset.attrs["azimuth_time_interval"]
+    azimuth_time = pd.date_range(
+        start=first_azimuth_time,
+        periods=lines_per_burst,
+        freq=pd.to_timedelta(azimuth_time_interval, "s"),
+    )
+
+    ds = pol_dataset.sel(
+        line=slice(
+            lines_per_burst * burst_number, lines_per_burst * (burst_number + 1) - 1
+        )
+    )
+    ds = ds.assign_coords({"azimuth_time": ("line", azimuth_time)})  # type: ignore
+    ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
+
+    ds.attrs["burst_number"] = burst_number
+    return ds
 
 
 def open_burst_dataset(
