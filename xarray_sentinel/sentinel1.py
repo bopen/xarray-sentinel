@@ -284,7 +284,7 @@ def open_pol_dataset(
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
 
-def make_burst_dataset(pol_dataset: xr.Dataset, burst_number: int) -> xr.Dataset:
+def crop_burst_dataset(pol_dataset: xr.Dataset, burst_number: int) -> xr.Dataset:
     if burst_number < 0 or burst_number >= pol_dataset.attrs["number_of_bursts"]:
         raise IndexError("{burst_number=} out of bounds")
 
@@ -307,6 +307,8 @@ def make_burst_dataset(pol_dataset: xr.Dataset, burst_number: int) -> xr.Dataset
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
 
     ds.attrs["burst_number"] = burst_number
+    ds.attrs.pop("bursts_first_azimuth_times")
+    ds.attrs.pop("azimuth_time_interval")
     return ds
 
 
