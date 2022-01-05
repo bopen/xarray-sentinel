@@ -13,9 +13,9 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu
 - access to data: full image, single swath, single SLC burst - **Alpha**
 - products:
   - Sentinel-1 SLC IW (Interferometric Wide Swath): **Alpha**
+  - Sentinel-1 SLC EW (Extended Wide Swath): **Alpha**
+  - Sentinel-1 SLC SM (Stripmap): **Alpha**
   - Sentinel-1 GRD SM/IW/EW: **technology preview**
-  - Sentinel-1 SLC EW (Extended Wide Swath): **technology preview**
-  - Sentinel-1 SLC SM (Stripmap): in roadmap
 
 ## Install
 

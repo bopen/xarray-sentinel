@@ -304,6 +304,9 @@ def open_pol_dataset(
         }
     )
 
+    if number_of_bursts == 0:
+        arr = arr.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
+
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
 
