@@ -256,7 +256,6 @@ def open_pol_dataset(
     number_of_samples = image_information["numberOfSamples"]
     first_slant_range_time = image_information["slantRangeTime"]
     slant_range_sampling = 1 / product_information["rangeSamplingRate"]
-
     slant_range_time = np.linspace(
         first_slant_range_time,
         first_slant_range_time + slant_range_sampling * (number_of_samples - 1),
@@ -265,23 +264,20 @@ def open_pol_dataset(
 
     arr = rioxarray.open_rasterio(measurement_path, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
+    arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(
         {
-            "x": np.arange(0, arr["x"].size, dtype=int),
-            "y": np.arange(0, arr["y"].size, dtype=int),
-            "slant_range_time": ("x", slant_range_time),
+            "pixel": np.arange(0, arr["pixel"].size, dtype=int),
+            "line": np.arange(0, arr["line"].size, dtype=int),
+            "slant_range_time": ("pixel", slant_range_time),
         }
     )
-    arr = arr.rename({"y": "line", "x": "pixel"})
 
     attrs = {
         "number_of_bursts": swath_timing["burstList"]["@count"],
         "lines_per_burst": swath_timing["linesPerBurst"],
     }
-    ds = xr.Dataset(
-        attrs=attrs,
-        data_vars={"measurement": arr},
-    )
+    ds = xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
     return ds
 
 
