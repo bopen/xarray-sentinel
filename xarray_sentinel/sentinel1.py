@@ -348,12 +348,17 @@ def compute_burst_centres(
     return centre.latitude.values, centre.longitude.values
 
 
-def normalise_group(group: T.Optional[str]) -> str:
+def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
     if group is None:
         group = ""
     if group.startswith("/"):
         group = group[1:]
-    return group
+    burst_index = None
+    parent_group, _, last_name = group.rpartition("/")
+    if parent_group.count("/") == 1 and last_name.isnumeric():
+        burst_index = int(last_name)
+        group = parent_group
+    return group, burst_index
 
 
 def open_dataset(
@@ -364,7 +369,7 @@ def open_dataset(
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
-    group = normalise_group(group)
+    group, burst_index = normalise_group(group)
     absgroup = f"/{group}"
 
     fs, manifest_path = get_fs_path(product_urlpath, fs)
@@ -408,6 +413,8 @@ def open_dataset(
                 ancillary_data_paths[subswath][pol]["s1Level1ProductSchema"],
                 chunks=chunks,
             )
+            if burst_index is not None:
+                ds = crop_burst_dataset(ds, burst_index=burst_index)
         else:
             subswath, pol, metadata = group.split("/", 2)
             with fs.open(groups[group]) as file:
