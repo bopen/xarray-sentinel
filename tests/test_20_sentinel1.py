@@ -132,3 +132,16 @@ def test_open_dataset_zip() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert res.dims == {"axis": 3, "azimuth_time": 17}
+
+
+def test_crop_burst_dataset() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    swath_polarisation_ds = sentinel1.open_dataset(product_path, group="IW1/VH")
+
+    res = sentinel1.crop_burst_dataset(swath_polarisation_ds, 8)
+
+    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert res.dims["azimuth_time"] == swath_polarisation_ds.attrs["lines_per_burst"]
