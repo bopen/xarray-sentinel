@@ -277,8 +277,7 @@ def open_pol_dataset(
         "number_of_bursts": swath_timing["burstList"]["@count"],
         "lines_per_burst": swath_timing["linesPerBurst"],
     }
-    ds = xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
-    return ds
+    return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
 
 def open_burst_dataset(
