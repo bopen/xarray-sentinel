@@ -10,13 +10,12 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
 - access to metadata: product, orbit, attitude, GCPs, calibration - **Alpha**
 - access to metadata: deramp - in roadmap
-- access to SLC burst data - **technology preview**
+- access to data: full image, single swath, signle SLC burst - **technology preview**
 - products:
   - Sentinel-1 SLC IW (Interferometric Wide Swath): **Alpha**
+  - Sentinel-1 GRD SM/IW/EW: **technology preview**
   - Sentinel-1 SLC EW (Extended Wide Swath): **technology preview**
   - Sentinel-1 SLC SM (Stripmap): in roadmap
-  - Sentinel-1 GRD SM/IW/EW: **technology preview**
-  - Sentinel-2 L1C/L2A: in roadmap
 
 ## Install
 

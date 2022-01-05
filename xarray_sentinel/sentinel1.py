@@ -278,7 +278,7 @@ def open_pol_dataset(
         "lines_per_burst": swath_timing["linesPerBurst"],
         "azimuth_time_interval": image_information["azimuthTimeInterval"],
         "bursts_first_azimuth_times": [
-            b["azimuthTime"] for b in swath_timing["burstList"]["burst"]
+            b["azimuthTime"] for b in swath_timing["burstList"].get("burst", [])
         ],
     }
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
