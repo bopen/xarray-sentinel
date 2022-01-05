@@ -236,7 +236,6 @@ def find_avalable_groups(
                 with fs.open(pol_data_paths["s1Level1CalibrationSchema"]):
                     pass
             except FileNotFoundError:
-                print(pol_data_paths["s1Level1CalibrationSchema"])
                 continue
             groups[f"{subswath_id}/{pol_id}/calibration"] = pol_data_paths[
                 "s1Level1CalibrationSchema"
@@ -250,7 +249,19 @@ def open_pol_dataset(
     annotation_path: esa_safe.PathType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
+    image_information = esa_safe.parse_image_information(annotation_path)
+    product_information = esa_safe.parse_product_information(annotation_path)
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
+
+    number_of_samples = image_information["numberOfSamples"]
+    first_slant_range_time = image_information["slantRangeTime"]
+    slant_range_sampling = 1 / product_information["rangeSamplingRate"]
+
+    slant_range_time = np.linspace(
+        first_slant_range_time,
+        first_slant_range_time + slant_range_sampling * (number_of_samples - 1),
+        number_of_samples,
+    )
 
     arr = rioxarray.open_rasterio(measurement_path, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
@@ -258,12 +269,17 @@ def open_pol_dataset(
         {
             "x": np.arange(0, arr["x"].size, dtype=int),
             "y": np.arange(0, arr["y"].size, dtype=int),
+            "slant_range_time": ("x", slant_range_time),
         }
     )
     arr = arr.rename({"y": "line", "x": "pixel"})
 
+    attrs = {
+        "number_of_bursts": swath_timing["burstList"]["@count"],
+        "lines_per_burst": swath_timing["linesPerBurst"],
+    }
     ds = xr.Dataset(
-        attrs={"xs_number_of_bursts": swath_timing["burstList"]["@count"]},
+        attrs=attrs,
         data_vars={"measurement": arr},
     )
     return ds
@@ -278,11 +294,10 @@ def open_burst_dataset(
 ) -> xr.Dataset:
     product_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest_path)
     image_information = esa_safe.parse_image_information(annotation_path)
-    procduct_information = esa_safe.parse_product_information(annotation_path)
+    product_information = esa_safe.parse_product_information(annotation_path)
 
     swath_timing = esa_safe.parse_swath_timing(annotation_path)
     linesPerBurst = swath_timing["linesPerBurst"]
-    samplesPerBurst = swath_timing["samplesPerBurst"]
 
     first_azimuth_time = pd.to_datetime(
         swath_timing["burstList"]["burst"][burst_position]["azimuthTime"]
@@ -296,18 +311,19 @@ def open_burst_dataset(
         freq=azimuth_time_interval,
     )
 
-    slantRangeTime = image_information["slantRangeTime"]
-    slant_range_sampling = 1 / procduct_information["rangeSamplingRate"]
+    number_of_samples = image_information["numberOfSamples"]
+    first_slant_range_time = image_information["slantRangeTime"]
+    slant_range_sampling = 1 / product_information["rangeSamplingRate"]
 
     slant_range_time = np.linspace(
-        slantRangeTime,
-        slantRangeTime + slant_range_sampling * (samplesPerBurst - 1),
-        samplesPerBurst,
+        first_slant_range_time,
+        first_slant_range_time + slant_range_sampling * (number_of_samples - 1),
+        number_of_samples,
     )
     burst_first_line = burst_position * linesPerBurst
     burst_last_line = (burst_position + 1) * linesPerBurst - 1
     burst_first_pixel = 0
-    burst_last_pixel = samplesPerBurst - 1
+    burst_last_pixel = number_of_samples - 1
 
     data_vars = {}
     for pol, data_path in measurement_paths.items():

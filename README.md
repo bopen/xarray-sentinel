@@ -222,19 +222,20 @@ example as `group="IW1/VV"` for the VV polarisation of the first IW swath:
 ```python-repl
 >>> sentinel1.open_dataset(product_path, group="IW1/VV")
 <xarray.Dataset>
-Dimensions:      (pixel: 21632, line: 13509)
+Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
-  * pixel        (pixel) int64 0 1 2 3 4 5 ... 21627 21628 21629 21630 21631
-  * line         (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
+  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+    slant_range_time  (pixel) float64 0.005343 0.005343 ... 0.005679 0.005679
 Data variables:
-    measurement  (line, pixel) complex64 ...
+    measurement       (line, pixel) complex64 ...
 Attributes: ...
-    xs_number_of_bursts:        9
+    number_of_bursts:           9
+    lines_per_burst:            1501
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
     sat_orbit_state:            descending
-    sat_absolute_orbit:         26269
     ...                         ...
     sar_product_type:           SLC
     xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']

@@ -6,8 +6,9 @@ Sentinel-1 SLC IW product structure:
 /
 ├─ IW1
 │  ├─ VH
-│  │  ├─ line (azimuth_time)
-│  │  ├─ pixel (slant_range_time)
+│  │  ├─ line (line)
+│  │  ├─ pixel (pixel)
+│  │  ├─ slant_range_time (pixel)
 │  │  ├─ measurement (line, pixel)
 │  │  ├─ gcp
 │  │  │  ├─ azimuth_time (azimuth_time)

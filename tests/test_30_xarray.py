@@ -138,7 +138,7 @@ def test_open_pol_dataset() -> None:
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
 
     assert set(res.dims) == {"line", "pixel"}
-    assert set(res.variables) == {"measurement", "line", "pixel"}
+    assert set(res.variables) == {"measurement", "line", "pixel", "slant_range_time"}
 
 
 @pytest.mark.skip
