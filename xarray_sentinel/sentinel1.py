@@ -472,6 +472,7 @@ def open_dataset(
             ds = open_pol_dataset(
                 ancillary_data_paths[subswath][pol]["s1Level1MeasurementSchema"],
                 ancillary_data_paths[subswath][pol]["s1Level1ProductSchema"],
+                chunks=chunks,
             )
         else:
             subswath, pol, metadata = group.split("/", 2)

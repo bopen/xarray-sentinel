@@ -94,6 +94,20 @@ def test_open_dataset() -> None:
         sentinel1.open_dataset(product_path, group="IW1/VV/non-existent")
 
 
+def test_open_dataset_chunks() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    res = sentinel1.open_dataset(product_path, group="IW1/VV", chunks=1000)
+
+    assert isinstance(res, xr.Dataset)
+    assert len(res.dims) == 2
+    assert np.allclose(res.measurement.chunks[0][:-1], 1000)
+    assert np.allclose(res.measurement.chunks[1][:-1], 1000)
+    assert not np.all(np.isnan(res.measurement))
+
+
 def test_open_dataset_zip() -> None:
     zip_path = (
         DATA_FOLDER
@@ -118,19 +132,3 @@ def test_open_dataset_zip() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert res.dims == {"axis": 3, "azimuth_time": 17}
-
-
-@pytest.mark.skip
-def test_open_dataset_chunks_bursts() -> None:
-    product_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-    )
-    res = sentinel1.open_dataset(product_path, group="IW1/R168-N471-E0118", chunks=1000)
-
-    assert isinstance(res, xr.Dataset)
-    assert len(res.VH.dims) == 2
-    assert np.allclose(res.VH.chunks[0][:-1], 1000)
-    assert np.allclose(res.VH.chunks[1][:-1], 1000)
-    assert not np.all(np.isnan(res.VH))
-    assert not np.all(np.isnan(res.VH))
