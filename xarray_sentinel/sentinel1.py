@@ -314,7 +314,7 @@ def open_pol_dataset(
 
 def crop_burst_dataset(pol_dataset: xr.Dataset, burst_index: int) -> xr.Dataset:
     if burst_index < 0 or burst_index >= pol_dataset.attrs["number_of_bursts"]:
-        raise IndexError("{burst_index=} out of bounds")
+        raise IndexError(f"{burst_index=} out of bounds")
 
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     ds = pol_dataset.sel(
