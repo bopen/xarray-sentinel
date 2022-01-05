@@ -273,8 +273,8 @@ def open_pol_dataset(
     attrs = {}
 
     number_of_bursts = swath_timing["burstList"]["@count"]
-    lines_per_burst = swath_timing["linesPerBurst"]
     if number_of_bursts:
+        lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
             {
                 "number_of_bursts": number_of_bursts,
@@ -291,6 +291,8 @@ def open_pol_dataset(
             azimuth_time[
                 lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
             ] = azimuth_time_burst
+        if chunks is None:
+            chunks = {"y": lines_per_burst}
 
     arr = rioxarray.open_rasterio(measurement_path, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
