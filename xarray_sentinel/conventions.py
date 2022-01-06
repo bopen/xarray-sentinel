@@ -51,6 +51,8 @@ VARIABLE_ATTRIBUTES = {
     # NOTE: `slant_range_time` is not expressed as `np.timedelta64[ns]` in order to keep enough
     #   accuracy for interferometric processing, i.e. c * 1ns / 2 ~= 15cm.
     "slant_range_time": {"units": "s", "long_name": "slant range time / two-way delay"},
+    "axis": {"units": "1", "long_name": "coordinate index"},
+    "degree": {"units": "1", "long_name": "polynomial degree"},
     "latitude": {"units": "degrees_north", "long_name": "geodetic latitude"},
     "longitude": {"units": "degrees_east", "long_name": "geodetic longitude"},
     "height": {"units": "m", "long_name": "height above sea level"},
@@ -66,8 +68,6 @@ VARIABLE_ATTRIBUTES = {
     "wx": {"units": "° s-1", "long_name": "X component of angular velocity vector"},
     "wy": {"units": "° s-1", "long_name": "Y component of angular velocity vector"},
     "wz": {"units": "° s-1", "long_name": "Z component of angular velocity vector"},
-    "time": {"standard_name": "time"},
-    "axis": {"units": "1", "long_name": "ECEF coordinate index"},
     "position": {"units": "m", "long_name": "ECEF position"},
     "velocity": {"units": "m s-1", "long_name": "ECEF velocity"},
     "sigmaNought": {"units": "dB", "long_name": "sigma nought calibration LUT"},
