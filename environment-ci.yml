@@ -9,6 +9,7 @@ dependencies:
   - make
   - mdformat
   - mypy = 0.812
+  - netcdf4
   - nomkl
   - numpy >= 1.22.0
   - pip
@@ -18,5 +19,6 @@ dependencies:
   - rioxarray
   - xarray >= 0.20.2
   - xmlschema
+  - zarr
   - pip:
     - mdformat-gfm
