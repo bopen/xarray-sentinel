@@ -248,15 +248,17 @@ def find_avalable_groups(
 
 
 def open_pol_dataset(
-    measurement_path: esa_safe.PathType,
-    annotation_path: esa_safe.PathType,
+    measurement: esa_safe.PathType,
+    annotation: esa_safe.PathType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    image_information = esa_safe.parse_image_information(annotation_path)
-    product_information = esa_safe.parse_product_information(annotation_path)
-    swath_timing = esa_safe.parse_tag_dict(
-        annotation_path, "annotation", ".//swathTiming"
+    image_information = esa_safe.parse_tag_dict(
+        annotation, "annotation", ".//imageInformation"
     )
+    product_information = esa_safe.parse_tag_dict(
+        annotation, "annotation", ".//productInformation"
+    )
+    swath_timing = esa_safe.parse_tag_dict(annotation, "annotation", ".//swathTiming")
 
     number_of_samples = image_information["numberOfSamples"]
     first_slant_range_time = image_information["slantRangeTime"]
@@ -299,7 +301,7 @@ def open_pol_dataset(
         if chunks is None:
             chunks = {"y": lines_per_burst}
 
-    arr = rioxarray.open_rasterio(measurement_path, chunks=chunks)
+    arr = rioxarray.open_rasterio(measurement, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(

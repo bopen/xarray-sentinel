@@ -51,6 +51,7 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     return xmlschema.XMLSchema(schema_paths[schema_type])
 
 
+@functools.lru_cache()
 def parse_tag_dict(
     xml_path: PathOrFileType,
     schema_type: str,
@@ -62,6 +63,7 @@ def parse_tag_dict(
     return tag_dict
 
 
+@functools.lru_cache()
 def parse_tag_list(
     xml_path: PathOrFileType,
     schema_type: str,
@@ -71,21 +73,6 @@ def parse_tag_list(
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)  # type: ignore
     assert isinstance(tag_list, list)
     return tag_list
-
-
-@functools.lru_cache()
-def parse_product_information(annotation_path: PathOrFileType) -> T.Dict[str, T.Any]:
-    return parse_tag_dict(annotation_path, "annotation", ".//productInformation")
-
-
-def parse_processing_information(
-    annotation_path: PathOrFileType,
-) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "annotation", ".//processingInformation")
-
-
-def parse_image_information(annotation_path: PathOrFileType) -> T.Dict[str, T.Any]:
-    return parse_tag_dict(annotation_path, "annotation", ".//imageInformation")
 
 
 def parse_azimuth_fm_rate(
