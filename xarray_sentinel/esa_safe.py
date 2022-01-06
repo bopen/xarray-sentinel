@@ -45,7 +45,6 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
     schema_paths = {
         "manifest": os.path.join(support_dir, "my-xfdu.xsd"),
-        "product": os.path.join(support_dir, "s1-level-1-product.xsd"),
         "annotation": os.path.join(support_dir, "s1-level-1-product.xsd"),
         "calibration": os.path.join(support_dir, "s1-level-1-calibration.xsd"),
     }
@@ -74,42 +73,26 @@ def parse_tag_list(
     return tag_list
 
 
-def parse_calibration_vectors(
-    calibration_path: PathOrFileType,
-) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(calibration_path, "calibration", ".//calibrationVector")
-
-
-def parse_geolocation_grid_points(
-    annotation: PathOrFileType,
-) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation, "product", ".//geolocationGridPoint")
-
-
-def parse_swath_timing(annotation_path: PathOrFileType) -> T.Dict[str, T.Any]:
-    return parse_tag_dict(annotation_path, "product", ".//swathTiming")
-
-
 @functools.lru_cache()
 def parse_product_information(annotation_path: PathOrFileType) -> T.Dict[str, T.Any]:
-    return parse_tag_dict(annotation_path, "product", ".//productInformation")
+    return parse_tag_dict(annotation_path, "annotation", ".//productInformation")
 
 
 def parse_processing_information(
     annotation_path: PathOrFileType,
 ) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation_path, "product", ".//processingInformation")
+    return parse_tag_list(annotation_path, "annotation", ".//processingInformation")
 
 
 def parse_image_information(annotation_path: PathOrFileType) -> T.Dict[str, T.Any]:
-    return parse_tag_dict(annotation_path, "product", ".//imageInformation")
+    return parse_tag_dict(annotation_path, "annotation", ".//imageInformation")
 
 
 def parse_azimuth_fm_rate(
     annotation_path: PathOrFileType,
 ) -> T.List[T.Dict[str, T.Any]]:
     azimuth_fm_rate = []
-    for afmr in parse_tag_list(annotation_path, "product", ".//azimuthFmRate"):
+    for afmr in parse_tag_list(annotation_path, "annotation", ".//azimuthFmRate"):
         poly = [float(c) for c in afmr["azimuthFmRatePolynomial"]["$"].split()]
         afmr["azimuthFmRatePolynomial"] = poly
         azimuth_fm_rate.append(afmr)
@@ -118,7 +101,7 @@ def parse_azimuth_fm_rate(
 
 def parse_dc_estimate(annotation_path: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
     dc_estimate = []
-    for de in parse_tag_list(annotation_path, "product", ".//dcEstimate"):
+    for de in parse_tag_list(annotation_path, "annotation", ".//dcEstimate"):
         poly = [float(c) for c in de["dataDcPolynomial"]["$"].split()]
         de["dataDcPolynomial"] = poly
         de.pop("fineDceList")  # drop large unused data

@@ -116,47 +116,9 @@ ANNOTATION_PATH = str(
 
 
 def test_sentinel1_schemas() -> None:
-    res = esa_safe.sentinel1_schemas("product")
+    res = esa_safe.sentinel1_schemas("annotation")
 
     assert isinstance(res, xmlschema.XMLSchema)
-
-
-def test_parse_geolocation_grid_points() -> None:
-    expected = {
-        "azimuthTime",
-        "slantRangeTime",
-        "line",
-        "pixel",
-        "latitude",
-        "longitude",
-        "height",
-        "incidenceAngle",
-        "elevationAngle",
-    }
-
-    res = esa_safe.parse_geolocation_grid_points(ANNOTATION_PATH)
-
-    assert isinstance(res, list)
-    assert set(res[0]) == expected
-
-
-def test_parse_swath_timing() -> None:
-    expected = {
-        "azimuthTime",
-        "azimuthAnxTime",
-        "sensingTime",
-        "byteOffset",
-        "firstValidSample",
-        "lastValidSample",
-    }
-    res = esa_safe.parse_swath_timing(ANNOTATION_PATH)
-
-    assert isinstance(res, dict)
-    assert "burstList" in res
-    assert "burst" in res["burstList"]
-    burst_list = res["burstList"]["burst"]
-    assert isinstance(burst_list, list)
-    assert set(burst_list[0]) == expected
 
 
 def test_parse_azimuth_fm_rate() -> None:
