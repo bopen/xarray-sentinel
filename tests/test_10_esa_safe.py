@@ -162,15 +162,6 @@ def test_parse_attitude() -> None:
     assert set(res[0]) == expected
 
 
-def test_parse_orbit() -> None:
-    expected = {"time", "frame", "position", "velocity"}
-
-    res = esa_safe.parse_orbit(ANNOTATION_PATH)
-
-    assert isinstance(res, list)
-    assert set(res[0]) == expected
-
-
 def test_parse_swath_timing() -> None:
     expected = {
         "azimuthTime",

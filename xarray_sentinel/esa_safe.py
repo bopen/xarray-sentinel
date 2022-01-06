@@ -46,6 +46,7 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     schema_paths = {
         "manifest": os.path.join(support_dir, "my-xfdu.xsd"),
         "product": os.path.join(support_dir, "s1-level-1-product.xsd"),
+        "annotation": os.path.join(support_dir, "s1-level-1-product.xsd"),
         "calibration": os.path.join(support_dir, "s1-level-1-calibration.xsd"),
     }
     return xmlschema.XMLSchema(schema_paths[schema_type])
@@ -89,36 +90,34 @@ def parse_calibration_vectors(
     return parse_tag_list(calibration_path, "calibration", ".//calibrationVector")
 
 
-def parse_orbit(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation, "product", ".//orbit")
-
-
 def parse_geolocation_grid_points(
     annotation: PathOrFileType,
 ) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation, "product", ".//geolocationGridPoint")
 
 
-def parse_swath_timing(annotation_path: PathType) -> T.Dict[str, T.Any]:
+def parse_swath_timing(annotation_path: PathOrFileType) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation_path, "product", ".//swathTiming")
 
 
 @functools.lru_cache()
-def parse_product_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
+def parse_product_information(annotation_path: PathOrFileType) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation_path, "product", ".//productInformation")
 
 
 def parse_processing_information(
-    annotation_path: PathType,
+    annotation_path: PathOrFileType,
 ) -> T.List[T.Dict[str, T.Any]]:
     return parse_tag_list(annotation_path, "product", ".//processingInformation")
 
 
-def parse_image_information(annotation_path: PathType) -> T.Dict[str, T.Any]:
+def parse_image_information(annotation_path: PathOrFileType) -> T.Dict[str, T.Any]:
     return parse_tag_dict(annotation_path, "product", ".//imageInformation")
 
 
-def parse_azimuth_fm_rate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+def parse_azimuth_fm_rate(
+    annotation_path: PathOrFileType,
+) -> T.List[T.Dict[str, T.Any]]:
     azimuth_fm_rate = []
     for afmr in parse_tag_list(annotation_path, "product", ".//azimuthFmRate"):
         poly = [float(c) for c in afmr["azimuthFmRatePolynomial"]["$"].split()]
@@ -127,7 +126,7 @@ def parse_azimuth_fm_rate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any
     return azimuth_fm_rate
 
 
-def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
+def parse_dc_estimate(annotation_path: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
     dc_estimate = []
     for de in parse_tag_list(annotation_path, "product", ".//dcEstimate"):
         poly = [float(c) for c in de["dataDcPolynomial"]["$"].split()]
@@ -139,7 +138,7 @@ def parse_dc_estimate(annotation_path: PathType) -> T.List[T.Dict[str, T.Any]]:
 
 @functools.lru_cache()
 def parse_manifest_sentinel1(
-    manifest_path: T.Union[PathType, T.TextIO],
+    manifest_path: PathOrFileType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
     # We use ElementTree because we didn't find a XSD definition for the manifest
     manifest = ElementTree.parse(manifest_path)
@@ -236,7 +235,7 @@ def parse_manifest_sentinel1(
 
 # unused until we add an interface to access original metadata
 def parse_original_manifest_sentinel1(
-    manifest_path: PathType,
+    manifest_path: PathOrFileType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
     schema = sentinel1_schemas("manifest")
 
@@ -251,7 +250,7 @@ def parse_original_manifest_sentinel1(
 
 
 def parse_manifest_sentinel2(
-    manifest_path: PathType,
+    manifest_path: PathOrFileType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
     manifest = ElementTree.parse(manifest_path)
     familyName = manifest.findtext(
