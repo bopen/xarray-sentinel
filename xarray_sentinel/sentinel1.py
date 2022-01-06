@@ -12,8 +12,11 @@ import xarray as xr
 from xarray_sentinel import conventions, esa_safe
 
 
-def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
-    calibration_vectors = esa_safe.parse_calibration_vectors(calibration_path)
+def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
+    calibration_vectors = esa_safe.parse_tag_list(
+        calibration, "calibration", ".//calibrationVector"
+    )
+
     azimuth_time_list = []
     pixel_list = []
     line_list = []
@@ -21,7 +24,6 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
     betaNought_list = []
     gamma_list = []
     dn_list = []
-
     for vector in calibration_vectors:
         azimuth_time_list.append(np.datetime64(vector["azimuthTime"]))
         line_list.append(vector["line"])
@@ -57,10 +59,10 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
 
 
 def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
-
     coordinateConversionList = esa_safe.parse_tag_dict(
         annotation_path, "annotation", ".//coordinateConversionList"
     )
+
     gr0 = []
     sr0 = []
     azimuthTime = []
@@ -114,7 +116,9 @@ def get_fs_path(
 
 
 def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    geolocation_grid_points = esa_safe.parse_geolocation_grid_points(annotation)
+    geolocation_grid_points = esa_safe.parse_tag_list(
+        annotation, "annotation", ".//geolocationGridPoint"
+    )
     azimuth_time = []
     slant_range_time = []
     line_set = set()
@@ -250,7 +254,9 @@ def open_pol_dataset(
 ) -> xr.Dataset:
     image_information = esa_safe.parse_image_information(annotation_path)
     product_information = esa_safe.parse_product_information(annotation_path)
-    swath_timing = esa_safe.parse_swath_timing(annotation_path)
+    swath_timing = esa_safe.parse_tag_dict(
+        annotation_path, "annotation", ".//swathTiming"
+    )
 
     number_of_samples = image_information["numberOfSamples"]
     first_slant_range_time = image_information["slantRangeTime"]
