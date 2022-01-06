@@ -2,7 +2,7 @@ ENVIRONMENT := XARRAY-SENTINEL
 COV_REPORT := html
 CONDA := conda
 
-default: fix-code-style test code-quality
+default: fix-code-style unit-test code-quality
 
 fix-code-style:
 	black .
