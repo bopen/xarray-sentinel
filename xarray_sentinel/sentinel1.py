@@ -1,6 +1,7 @@
 import os
 import typing as T
 import warnings
+from xml.etree import ElementTree
 
 import fsspec  # type: ignore
 import numpy as np
@@ -215,6 +216,71 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     return ds
 
 
+def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+    dc_estimates = esa_safe.parse_dc_estimate(annotation)
+
+    azimuth_time = []
+    t0 = []
+    data_dc_poly = []
+    for dc_estimate in dc_estimates:
+        azimuth_time.append(dc_estimate["azimuthTime"])
+        t0.append(dc_estimate["t0"])
+        data_dc_poly.append(dc_estimate["dataDcPolynomial"])
+
+    ds = xr.Dataset(
+        data_vars={
+            "t0": ("azimuth_time", t0),
+            "data_dc_polynomial": (
+                ("azimuth_time", "degree"),
+                data_dc_poly,
+            ),
+        },
+        coords={
+            "azimuth_time": [np.datetime64(at) for at in azimuth_time],
+            "degree": [0, 1, 2],
+        },
+    )
+    return ds
+
+
+def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+    # NOTE: passing the path twice to xmlschema produces a crash, apparently due to
+    # some internal file caching. Parsing the XML file with ElementTree solves the issue
+    annot = ElementTree.parse(annotation)
+    azimuth_fm_rates = esa_safe.parse_azimuth_fm_rate(annot)
+    product_information = esa_safe.parse_tag_dict(
+        annot, "annotation", ".//productInformation"
+    )
+
+    azimuth_time = []
+    t0 = []
+    azimuth_fm_rate_poly = []
+    for azimuth_fm_rate in azimuth_fm_rates:
+        azimuth_time.append(azimuth_fm_rate["azimuthTime"])
+        t0.append(azimuth_fm_rate["t0"])
+        azimuth_fm_rate_poly.append(azimuth_fm_rate["azimuthFmRatePolynomial"])
+
+    attrs = {
+        "azimuth_steering_rate": product_information["azimuthSteeringRate"],
+        "radar_frequency": product_information["radarFrequency"],
+    }
+    ds = xr.Dataset(
+        attrs=attrs,
+        data_vars={
+            "t0": ("azimuth_time", t0),
+            "azimuth_fm_rate_polynomial": (
+                ("azimuth_time", "degree"),
+                azimuth_fm_rate_poly,
+            ),
+        },
+        coords={
+            "azimuth_time": [np.datetime64(at) for at in azimuth_time],
+            "degree": [0, 1, 2],
+        },
+    )
+    return ds
+
+
 def find_avalable_groups(
     ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]],
     product_attrs: T.Dict[str, T.Any],
@@ -230,7 +296,13 @@ def find_avalable_groups(
                 continue
             groups[subswath_id] = ""
             groups[f"{subswath_id}/{pol_id}"] = pol_data_paths["s1Level1ProductSchema"]
-            for metadata_group in ["gcp", "orbit", "attitude"]:
+            for metadata_group in [
+                "gcp",
+                "orbit",
+                "attitude",
+                "dc_estimate",
+                "azimuth_fm_rate",
+            ]:
                 groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
                     "s1Level1ProductSchema"
                 ]
@@ -459,4 +531,6 @@ METADATA_OPENERS = {
     "orbit": open_orbit_dataset,
     "attitude": open_attitude_dataset,
     "calibration": open_calibration_dataset,
+    "dc_estimate": open_dc_estimate_dataset,
+    "azimuth_fm_rate": open_azimuth_fm_rate_dataset,
 }

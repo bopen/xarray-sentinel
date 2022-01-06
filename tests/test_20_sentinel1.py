@@ -42,6 +42,8 @@ def test_find_avalable_groups() -> None:
         "IW1/VV/gcp",
         "IW1/VV/orbit",
         "IW1/VV/calibration",
+        "IW1/VV/dc_estimate",
+        "IW1/VV/azimuth_fm_rate",
     }
 
     groups = sentinel1.find_avalable_groups(ancillary_data_paths, product_attrs)

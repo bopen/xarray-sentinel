@@ -76,7 +76,7 @@ def parse_tag_list(
 
 
 def parse_azimuth_fm_rate(
-    annotation_path: PathOrFileType,
+    annotation_path: T.Union[PathOrFileType, ElementTree.ElementTree],
 ) -> T.List[T.Dict[str, T.Any]]:
     azimuth_fm_rate = []
     for afmr in parse_tag_list(annotation_path, "annotation", ".//azimuthFmRate"):
