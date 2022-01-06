@@ -74,16 +74,6 @@ def parse_tag_list(
     return tag_list
 
 
-def parse_coordinate_conversion(
-    annotation: PathOrFileType,
-) -> T.Dict[str, T.Any]:
-    return parse_tag_dict(annotation, "product", ".//coordinateConversionList")
-
-
-def parse_attitude(annotation: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
-    return parse_tag_list(annotation, "product", ".//attitude")
-
-
 def parse_calibration_vectors(
     calibration_path: PathOrFileType,
 ) -> T.List[T.Dict[str, T.Any]]:

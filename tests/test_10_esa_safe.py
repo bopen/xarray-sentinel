@@ -140,28 +140,6 @@ def test_parse_geolocation_grid_points() -> None:
     assert set(res[0]) == expected
 
 
-def test_parse_attitude() -> None:
-    expected = {
-        "time",
-        "frame",
-        "q0",
-        "q1",
-        "q2",
-        "q3",
-        "wx",
-        "wy",
-        "wz",
-        "roll",
-        "pitch",
-        "yaw",
-    }
-
-    res = esa_safe.parse_attitude(ANNOTATION_PATH)
-
-    assert isinstance(res, list)
-    assert set(res[0]) == expected
-
-
 def test_parse_swath_timing() -> None:
     expected = {
         "azimuthTime",

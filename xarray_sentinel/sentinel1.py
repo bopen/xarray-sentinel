@@ -59,7 +59,7 @@ def open_calibration_dataset(calibration_path: esa_safe.PathType) -> xr.Dataset:
 def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
 
     coordinateConversionList = esa_safe.parse_tag_dict(
-        annotation_path, "product", ".//coordinateConversionList"
+        annotation_path, "annotation", ".//coordinateConversionList"
     )
     gr0 = []
     sr0 = []
@@ -156,12 +156,12 @@ def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    attitude = esa_safe.parse_attitude(annotation)
-    shape = len(attitude)
+    attitude = esa_safe.parse_tag_list(annotation, "annotation", ".//attitude")
+
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     time: T.List[T.Any] = []
     data_vars: T.Dict[str, T.Any] = {var: ("time", []) for var in variables}
-    for k in range(shape):
+    for k in range(len(attitude)):
         time.append(attitude[k]["time"])
         for var in variables:
             data_vars[var][1].append(attitude[k][var])
@@ -175,14 +175,13 @@ def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    orbit = esa_safe.parse_orbit(annotation)
-    shape = len(orbit)
+    orbit = esa_safe.parse_tag_list(annotation, "annotation", ".//orbit")
 
     reference_system = orbit[0]["frame"]
     variables = ["position", "velocity"]
     data: T.Dict[str, T.List[T.Any]] = {var: [[], [], []] for var in variables}
     time: T.List[T.Any] = []
-    for k in range(shape):
+    for k in range(len(orbit)):
         time.append(orbit[k]["time"])
         data["position"][0].append(orbit[k]["position"]["x"])
         data["position"][1].append(orbit[k]["position"]["y"])
