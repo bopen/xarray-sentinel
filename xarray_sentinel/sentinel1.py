@@ -258,7 +258,9 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
         attrs=attrs,
         data_vars={
             "t0": ("azimuth_time", t0),
-            "azimuth_fm_rate_polynomial": (("azimuth_time", "degree"), azimuth_fm_rate_poly,
+            "azimuth_fm_rate_polynomial": (
+                ("azimuth_time", "degree"),
+                azimuth_fm_rate_poly,
             ),
         },
         coords={
