@@ -396,19 +396,19 @@ def open_pol_dataset(
 
 def find_bursts_index(
     pol_dataset,
-    azimuth_anx_time_first_line: T.Optional[int] = None,
-    azimuth_anx_time_central_line: T.Optional[int] = None,
+    azimuth_anx_time: float,
+    use_center: bool = False,
 ):
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
-    if azimuth_anx_time_first_line is not None:
-        distance = abs(
-            pol_dataset.azimuth_anx_time[::lines_per_burst]
-            - pd.Timedelta(azimuth_anx_time_first_line, unit="s")
-        )
-    elif azimuth_anx_time_central_line is not None:
+    if use_center:
         distance = abs(
             pol_dataset.azimuth_anx_time[lines_per_burst // 2 :: lines_per_burst]
-            - pd.Timedelta(azimuth_anx_time_central_line, unit="s")
+            - pd.Timedelta(azimuth_anx_time, unit="s")
+        )
+    else:
+        distance = abs(
+            pol_dataset.azimuth_anx_time[::lines_per_burst]
+            - pd.Timedelta(azimuth_anx_time, unit="s")
         )
     return distance.argmin().item()
 
@@ -416,14 +416,19 @@ def find_bursts_index(
 def crop_burst_dataset(
     pol_dataset: xr.Dataset,
     index: T.Optional[int] = None,
-    azimuth_anx_time_first_line: T.Optional[int] = None,
-    azimuth_anx_time_central_line: T.Optional[int] = None,
+    azimuth_anx_time: T.Optional[float] = None,
+    use_center: bool = False,
 ) -> xr.Dataset:
-    # TODO add check at least one between index azimuth_anx_time_first_line azimuth_anx_time_central_line shall be defined
-    if index is None:
-        index = find_bursts_index(
-            pol_dataset, azimuth_anx_time_first_line, azimuth_anx_time_central_line
+
+    if ((index is None) and (azimuth_anx_time is None)) or (
+        (index is not None) and (azimuth_anx_time is not None)
+    ):
+        raise ValueError(
+            "one and only one keyword between 'index' and 'azimuth_anx_time' shall be defined"
         )
+
+    if index is None:
+        index = find_bursts_index(pol_dataset, azimuth_anx_time, use_center=use_center)
 
     if index < 0 or index >= pol_dataset.attrs["number_of_bursts"]:
         raise IndexError(f"{index=} out of bounds")
