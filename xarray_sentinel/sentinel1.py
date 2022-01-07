@@ -402,13 +402,13 @@ def find_bursts_index(
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     if azimuth_anx_time_first_line is not None:
         distance = abs(
-            pol_dataset.azimuth_anx_time[::lines_per_burst] -
-            pd.Timedelta(azimuth_anx_time_first_line, unit="s")
+            pol_dataset.azimuth_anx_time[::lines_per_burst]
+            - pd.Timedelta(azimuth_anx_time_first_line, unit="s")
         )
     elif azimuth_anx_time_central_line is not None:
         distance = abs(
-            pol_dataset.azimuth_anx_time[lines_per_burst // 2::lines_per_burst] -
-            pd.Timedelta(azimuth_anx_time_central_line, unit="s")
+            pol_dataset.azimuth_anx_time[lines_per_burst // 2 :: lines_per_burst]
+            - pd.Timedelta(azimuth_anx_time_central_line, unit="s")
         )
     return distance.argmin().item()
 
@@ -421,7 +421,9 @@ def crop_burst_dataset(
 ) -> xr.Dataset:
     # TODO add check at least one between index azimuth_anx_time_first_line azimuth_anx_time_central_line shall be defined
     if index is None:
-        index = find_bursts_index(pol_dataset, azimuth_anx_time_first_line, azimuth_anx_time_central_line)
+        index = find_bursts_index(
+            pol_dataset, azimuth_anx_time_first_line, azimuth_anx_time_central_line
+        )
 
     if index < 0 or index >= pol_dataset.attrs["number_of_bursts"]:
         raise IndexError(f"{index=} out of bounds")
