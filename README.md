@@ -62,12 +62,12 @@ Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
-    sat_orbit_state:            descending
-    sat_absolute_orbit:         26269
-    sat_relative_orbit:         168
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
     ...                         ...
-    sar_product_type:           SLC
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /
     subgroups:                  ['IW1', 'IW1/VH', 'IW1/VH/gcp', 'IW1/VH/orbit...
     Conventions:                CF-1.8
@@ -130,11 +130,11 @@ Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
-    sat_orbit_state:            descending
-    sat_absolute_orbit:         26269
-    sat_relative_orbit:         168
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
     ...                         ...
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VV/gcp
     Conventions:                CF-1.8
     title:                      Geolocation grid
@@ -162,10 +162,10 @@ Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
-    sat_orbit_state:            descending
-    sat_absolute_orbit:         26269
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
     ...                         ...
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VV/orbit
     Conventions:                CF-1.8
     title:                      Orbit information used by the IPF during proc...
@@ -199,11 +199,11 @@ Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
-    sat_orbit_state:            descending
-    sat_absolute_orbit:         26269
-    sat_relative_orbit:         168
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
     ...                         ...
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VV/attitude
     Conventions:                CF-1.8
     title:                      Attitude information used by the IPF during p...
@@ -231,11 +231,11 @@ Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1b
     instrument:                 ['c-sar']
-    sat_orbit_state:            descending
-    sat_absolute_orbit:         26269
-    sat_relative_orbit:         168
+    sat:orbit_state:            descending
+    sat:absolute_orbit:         26269
+    sat:relative_orbit:         168
     ...                         ...
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VV/calibration
     Conventions:                CF-1.8
     title:                      Calibration coefficients
@@ -262,15 +262,15 @@ Coordinates:
 Data variables:
     measurement       (line, pixel) complex64 ...
 Attributes: ...
+    azimuth_steering_rate:      1.590368784
+    sar:center_frequency:       5.40500045433435
     number_of_bursts:           9
     lines_per_burst:            1501
     constellation:              sentinel-1
     platform:                   sentinel-1b
-    instrument:                 ['c-sar']
-    sat_orbit_state:            descending
     ...                         ...
-    sar_product_type:           SLC
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VV
     subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
     Conventions:                CF-1.8
@@ -295,14 +295,14 @@ Coordinates:
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
 Attributes: ...
+    azimuth_steering_rate:      1.590368784
+    sar:center_frequency:       5.40500045433435
     number_of_bursts:           9
     lines_per_burst:            1501
     constellation:              sentinel-1
     platform:                   sentinel-1b
-    instrument:                 ['c-sar']
-    sat_orbit_state:            descending
     ...                         ...
-    xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VV
     subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
     Conventions:                CF-1.8
