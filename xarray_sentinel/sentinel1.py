@@ -307,14 +307,14 @@ def find_avalable_groups(
     return groups
 
 
-def read_first_azimuth_time(swath_timing):
+def read_first_azimuth_times(swath_timing):
     first_azimuth_time = []
     for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
         first_azimuth_time.append(burst["azimuthTime"])
     return pd.DatetimeIndex(first_azimuth_time).values
 
 
-def read_first_azimuth_anx_time(swath_timing):
+def read_first_azimuth_anx_times(swath_timing):
     first_azimuth_anx_time = []
     for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
         first_azimuth_anx_time.append(burst["azimuthAnxTime"])
@@ -339,7 +339,7 @@ def open_pol_dataset(
         number_of_samples,
     )
 
-    azimuth_time_interval = image_information["azimuthTimeInterval"]
+    azimuth_time_interval = pd.to_timedelta(image_information["azimuthTimeInterval"], unit="s")
     attrs = {}
 
     number_of_bursts = swath_timing["burstList"]["@count"]
@@ -351,17 +351,15 @@ def open_pol_dataset(
                 "lines_per_burst": lines_per_burst,
             }
         )
-        first_azimuth_time = read_first_azimuth_time(swath_timing)
-        first_azimuth_anx_time = read_first_azimuth_anx_time(swath_timing)
+        first_azimuth_times = read_first_azimuth_times(swath_timing)
+        first_azimuth_anx_times = read_first_azimuth_anx_times(swath_timing)
 
-        burst_lines_delta_times = pd.to_timedelta(
-            np.arange(lines_per_burst) * azimuth_time_interval, unit="s"
-        ).values
+        burst_lines_delta_times = np.arange(lines_per_burst) * azimuth_time_interval
         azimuth_time = (
-            burst_lines_delta_times[None, :] + first_azimuth_time[:, None]
+            burst_lines_delta_times[None, :] + first_azimuth_times[:, None]
         ).ravel()
         azimuth_anx_time = (
-            burst_lines_delta_times[None, :] + first_azimuth_anx_time[:, None]
+            burst_lines_delta_times[None, :] + first_azimuth_anx_times[:, None]
         ).ravel()
 
         if chunks is None:
@@ -373,7 +371,7 @@ def open_pol_dataset(
             start=first_azimuth_time,
             periods=number_of_lines,
             freq=pd.to_timedelta(azimuth_time_interval, "s"),
-        ).values
+        )
 
     arr = rioxarray.open_rasterio(measurement, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
