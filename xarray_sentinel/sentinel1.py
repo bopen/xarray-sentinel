@@ -394,11 +394,37 @@ def open_pol_dataset(
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
 
-def crop_burst_dataset(pol_dataset: xr.Dataset, index: T.Optional[int],
+def find_bursts_index(
+    pol_dataset,
+    azimuth_anx_time_first_line: T.Optional[int] = None,
+    azimuth_anx_time_central_line: T.Optional[int] = None,
+):
+    lines_per_burst = pol_dataset.attrs["lines_per_burst"]
+    if azimuth_anx_time_first_line is not None:
+        distance = abs(
+            pol_dataset.azimuth_anx_time[::lines_per_burst] -
+            pd.Timedelta(azimuth_anx_time_first_line, unit="s")
+        )
+    elif azimuth_anx_time_central_line is not None:
+        distance = abs(
+            pol_dataset.azimuth_anx_time[lines_per_burst // 2::lines_per_burst] -
+            pd.Timedelta(azimuth_anx_time_central_line, unit="s")
+        )
+    return distance.argmin().item()
+
+
+def crop_burst_dataset(
+    pol_dataset: xr.Dataset,
+    index: T.Optional[int] = None,
+    azimuth_anx_time_first_line: T.Optional[int] = None,
+    azimuth_anx_time_central_line: T.Optional[int] = None,
 ) -> xr.Dataset:
-    if index:
-        if index < 0 or index >= pol_dataset.attrs["number_of_bursts"]:
-            raise IndexError(f"{index=} out of bounds")
+    # TODO add check at least one between index azimuth_anx_time_first_line azimuth_anx_time_central_line shall be defined
+    if index is None:
+        index = find_bursts_index(pol_dataset, azimuth_anx_time_first_line, azimuth_anx_time_central_line)
+
+    if index < 0 or index >= pol_dataset.attrs["number_of_bursts"]:
+        raise IndexError(f"{index=} out of bounds")
 
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     ds = pol_dataset.sel(
