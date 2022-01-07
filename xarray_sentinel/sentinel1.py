@@ -15,7 +15,7 @@ from xarray_sentinel import conventions, esa_safe
 
 def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
     calibration_vectors = esa_safe.parse_tag_list(
-        calibration, "calibration", ".//calibrationVector"
+        calibration, ".//calibrationVector", "calibration"
     )
 
     azimuth_time_list = []
@@ -60,8 +60,8 @@ def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
 
 
 def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
-    coordinateConversionList = esa_safe.parse_tag_dict(
-        annotation_path, "annotation", ".//coordinateConversionList"
+    coordinate_conversion = esa_safe.parse_tag(
+        annotation_path, ".//coordinateConversionList"
     )
 
     gr0 = []
@@ -70,7 +70,7 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
     slantRangeTime = []
     srgrCoefficients: T.List[NT.NDArray[np.float_]] = []
     grsrCoefficients: T.List[NT.NDArray[np.float_]] = []
-    for values in coordinateConversionList["coordinateConversion"]:
+    for values in coordinate_conversion["coordinateConversion"]:
         sr0.append(values["sr0"])
         gr0.append(values["gr0"])
         azimuthTime.append(values["azimuthTime"])
@@ -118,8 +118,9 @@ def get_fs_path(
 
 def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_tag_list(
-        annotation, "annotation", ".//geolocationGridPoint"
+        annotation, ".//geolocationGridPoint"
     )
+
     azimuth_time = []
     slant_range_time = []
     line_set = set()
@@ -161,47 +162,47 @@ def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    attitude = esa_safe.parse_tag_list(annotation, "annotation", ".//attitude")
+    attitudes = esa_safe.parse_tag_list(annotation, ".//attitude")
 
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
-    time: T.List[T.Any] = []
-    data_vars: T.Dict[str, T.Any] = {var: ("time", []) for var in variables}
-    for k in range(len(attitude)):
-        time.append(attitude[k]["time"])
+    azimuth_time: T.List[T.Any] = []
+    data_vars: T.Dict[str, T.Any] = {var: ("azimuth_time", []) for var in variables}
+    for attitude in attitudes:
+        azimuth_time.append(attitude["time"])
         for var in variables:
-            data_vars[var][1].append(attitude[k][var])
+            data_vars[var][1].append(attitude[var])
 
     ds = xr.Dataset(
         data_vars=data_vars,
-        coords={"time": [np.datetime64(dt) for dt in time]},
+        coords={"azimuth_time": [np.datetime64(dt) for dt in azimuth_time]},
     )
-    ds = ds.rename({"time": "azimuth_time"})
+
     return ds
 
 
 def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    orbit = esa_safe.parse_tag_list(annotation, "annotation", ".//orbit")
+    orbits = esa_safe.parse_tag_list(annotation, ".//orbit")
 
-    reference_system = orbit[0]["frame"]
+    reference_system = orbits[0]["frame"]
     variables = ["position", "velocity"]
     data: T.Dict[str, T.List[T.Any]] = {var: [[], [], []] for var in variables}
-    time: T.List[T.Any] = []
-    for k in range(len(orbit)):
-        time.append(orbit[k]["time"])
-        data["position"][0].append(orbit[k]["position"]["x"])
-        data["position"][1].append(orbit[k]["position"]["y"])
-        data["position"][2].append(orbit[k]["position"]["z"])
-        data["velocity"][0].append(orbit[k]["velocity"]["x"])
-        data["velocity"][1].append(orbit[k]["velocity"]["y"])
-        data["velocity"][2].append(orbit[k]["velocity"]["z"])
-        if orbit[k]["frame"] != reference_system:
+    azimuth_time: T.List[T.Any] = []
+    for orbit in orbits:
+        azimuth_time.append(orbit["time"])
+        data["position"][0].append(orbit["position"]["x"])
+        data["position"][1].append(orbit["position"]["y"])
+        data["position"][2].append(orbit["position"]["z"])
+        data["velocity"][0].append(orbit["velocity"]["x"])
+        data["velocity"][1].append(orbit["velocity"]["y"])
+        data["velocity"][2].append(orbit["velocity"]["z"])
+        if orbit["frame"] != reference_system:
             warnings.warn(
                 "reference_system is not consistent in all the state vectors. "
             )
             reference_system = None
 
-    position = xr.Variable(data=data["position"], dims=("axis", "time"))  # type: ignore
-    velocity = xr.Variable(data=data["velocity"], dims=("axis", "time"))  # type: ignore
+    position = xr.Variable(data=data["position"], dims=("axis", "azimuth_time"))  # type: ignore
+    velocity = xr.Variable(data=data["velocity"], dims=("axis", "azimuth_time"))  # type: ignore
 
     attrs = {}
     if reference_system is not None:
@@ -210,9 +211,12 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars={"position": position, "velocity": velocity},
         attrs=attrs,
-        coords={"time": [np.datetime64(dt) for dt in time], "axis": [0, 1, 2]},
+        coords={
+            "azimuth_time": [np.datetime64(dt) for dt in azimuth_time],
+            "axis": [0, 1, 2],
+        },
     )
-    ds = ds.rename({"time": "azimuth_time"})
+
     return ds
 
 
@@ -248,9 +252,7 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
     # some internal file caching. Parsing the XML file with ElementTree solves the issue
     annot = ElementTree.parse(annotation)
     azimuth_fm_rates = esa_safe.parse_azimuth_fm_rate(annot)
-    product_information = esa_safe.parse_tag_dict(
-        annot, "annotation", ".//productInformation"
-    )
+    product_information = esa_safe.parse_tag(annot, ".//productInformation")
 
     azimuth_time = []
     t0 = []
@@ -324,13 +326,9 @@ def open_pol_dataset(
     annotation: esa_safe.PathType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    image_information = esa_safe.parse_tag_dict(
-        annotation, "annotation", ".//imageInformation"
-    )
-    product_information = esa_safe.parse_tag_dict(
-        annotation, "annotation", ".//productInformation"
-    )
-    swath_timing = esa_safe.parse_tag_dict(annotation, "annotation", ".//swathTiming")
+    image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
+    product_information = esa_safe.parse_tag(annotation, ".//productInformation")
+    swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
 
     number_of_samples = image_information["numberOfSamples"]
     first_slant_range_time = image_information["slantRangeTime"]

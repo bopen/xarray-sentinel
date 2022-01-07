@@ -52,10 +52,10 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
 
 
 @functools.lru_cache()
-def parse_tag_dict(
+def parse_tag(
     xml_path: PathOrFileType,
-    schema_type: str,
     query: str,
+    schema_type: str = "annotation",
 ) -> T.Dict[str, T.Any]:
     schema = sentinel1_schemas(schema_type)
     tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)  # type: ignore
@@ -66,8 +66,8 @@ def parse_tag_dict(
 @functools.lru_cache()
 def parse_tag_list(
     xml_path: PathOrFileType,
-    schema_type: str,
     query: str,
+    schema_type: str = "annotation",
 ) -> T.List[T.Dict[str, T.Any]]:
     schema = sentinel1_schemas(schema_type)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)  # type: ignore
@@ -79,7 +79,7 @@ def parse_azimuth_fm_rate(
     annotation_path: T.Union[PathOrFileType, ElementTree.ElementTree],
 ) -> T.List[T.Dict[str, T.Any]]:
     azimuth_fm_rate = []
-    for afmr in parse_tag_list(annotation_path, "annotation", ".//azimuthFmRate"):
+    for afmr in parse_tag_list(annotation_path, ".//azimuthFmRate"):
         poly = [float(c) for c in afmr["azimuthFmRatePolynomial"]["$"].split()]
         afmr["azimuthFmRatePolynomial"] = poly
         azimuth_fm_rate.append(afmr)
@@ -88,7 +88,7 @@ def parse_azimuth_fm_rate(
 
 def parse_dc_estimate(annotation_path: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
     dc_estimate = []
-    for de in parse_tag_list(annotation_path, "annotation", ".//dcEstimate"):
+    for de in parse_tag_list(annotation_path, ".//dcEstimate"):
         poly = [float(c) for c in de["dataDcPolynomial"]["$"].split()]
         de["dataDcPolynomial"] = poly
         de.pop("fineDceList")  # drop large unused data
