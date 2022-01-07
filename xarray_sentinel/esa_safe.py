@@ -100,89 +100,74 @@ def parse_dc_estimate(annotation_path: PathOrFileType) -> T.List[T.Dict[str, T.A
     return dc_estimate
 
 
+def findtext(
+    tree: ElementTree.ElementTree,
+    query: str,
+    namespaces: T.Dict[str, str] = SENTINEL1_NAMESPACES,
+) -> str:
+    value = tree.findtext(query, namespaces=namespaces)
+    if value is None:
+        raise ValueError(f"{query=} returned None")
+    return value
+
+
+def findall(
+    tree: ElementTree.ElementTree,
+    query: str,
+    namespaces: T.Dict[str, str] = SENTINEL1_NAMESPACES,
+) -> T.List[str]:
+    tags = tree.findall(query, namespaces=namespaces)
+    values: T.List[str] = []
+    for tag in tags:
+        if tag.text is None:
+            raise ValueError(f"{query=} returned None")
+        values.append(tag.text)
+    return values
+
+
 @functools.lru_cache
 def parse_manifest_sentinel1(
     manifest_path: PathOrFileType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
     # We use ElementTree because we didn't find a XSD definition for the manifest
     manifest = ElementTree.parse(manifest_path)
-    familyName = manifest.findtext(
-        ".//safe:platform/safe:familyName", namespaces=SENTINEL1_NAMESPACES
-    )
+
+    familyName = findtext(manifest, ".//safe:platform/safe:familyName")
     if familyName != "SENTINEL-1":
         raise ValueError(f"{familyName=} not supported")
 
-    number = manifest.findtext(
-        ".//safe:platform/safe:number", namespaces=SENTINEL1_NAMESPACES
-    )
-    if number is None:
-        raise ValueError(f"{number=} not supported")
+    number = findtext(manifest, ".//safe:platform/safe:number")
+    instrumentMode = findtext(manifest, ".//s1sarl1:instrumentMode/s1sarl1:mode")
+    swaths = findall(manifest, ".//s1sarl1:instrumentMode/s1sarl1:swath")
+    polarizations = findall(manifest, ".//s1sarl1:transmitterReceiverPolarisation")
+    productType = findtext(manifest, ".//s1sarl1:productType")
+    ascendingNodeTime = findtext(manifest, ".//s1:ascendingNodeTime")
 
-    instrumentMode = manifest.findtext(
-        ".//s1sarl1:instrumentMode/s1sarl1:mode", namespaces=SENTINEL1_NAMESPACES
-    )
-
-    swaths = manifest.findall(
-        ".//s1sarl1:instrumentMode/s1sarl1:swath", namespaces=SENTINEL1_NAMESPACES
-    )
-
-    transmitterReceiverPolarisation = manifest.findall(
-        ".//s1sarl1:transmitterReceiverPolarisation", namespaces=SENTINEL1_NAMESPACES
-    )
-
-    productType = manifest.findtext(
-        ".//s1sarl1:standAloneProductInformation/s1sarl1:productType",
-        namespaces=SENTINEL1_NAMESPACES,
-    )
-
-    orbitProperties_pass = manifest.findtext(
-        ".//s1:orbitProperties/s1:pass", namespaces=SENTINEL1_NAMESPACES
-    )
+    orbitProperties_pass = findtext(manifest, ".//s1:pass")
     if orbitProperties_pass not in {"ASCENDING", "DESCENDING"}:
         raise ValueError(f"{orbitProperties_pass=} not supported")
 
-    ascendingNodeTime = manifest.findtext(
-        ".//s1:orbitProperties/s1:ascendingNodeTime", namespaces=SENTINEL1_NAMESPACES
-    )
-    if ascendingNodeTime is None:
-        raise ValueError(f"{ascendingNodeTime=} not supported")
+    orbitNumber = findall(manifest, ".//safe:orbitNumber")
+    if len(orbitNumber) != 2 or orbitNumber[0] != orbitNumber[1]:
+        raise ValueError(f"orbitNumber={orbitNumber} not supported")
 
-    orbitNumber = manifest.findall(
-        ".//safe:orbitReference/safe:orbitNumber", namespaces=SENTINEL1_NAMESPACES
-    )
-    if (
-        len(orbitNumber) != 2
-        or orbitNumber[0].text != orbitNumber[1].text
-        or orbitNumber[0].text is None
-    ):
-        raise ValueError(f"orbitNumber={[o.text for o in orbitNumber]} not supported")
-
-    relativeOrbitNumber = manifest.findall(
-        ".//safe:orbitReference/safe:relativeOrbitNumber",
-        namespaces=SENTINEL1_NAMESPACES,
-    )
-    if (
-        len(relativeOrbitNumber) != 2
-        or relativeOrbitNumber[0].text != relativeOrbitNumber[1].text
-        or relativeOrbitNumber[0].text is None
-    ):
-        raise ValueError(
-            f"relativeOrbitNumber={[o.text for o in relativeOrbitNumber]} not supported"
-        )
+    relative_orbit = findall(manifest, ".//safe:relativeOrbitNumber")
+    if len(relative_orbit) != 2 or relative_orbit[0] != relative_orbit[1]:
+        raise ValueError(f"relativeOrbitNumber={relative_orbit} not supported")
 
     attributes = {
         "constellation": "sentinel-1",
         "platform": "sentinel-1" + number.lower(),
         "instrument": ["c-sar"],
         "sat_orbit_state": orbitProperties_pass.lower(),
-        "sat_absolute_orbit": int(orbitNumber[0].text),
-        "sat_relative_orbit": int(relativeOrbitNumber[0].text),
+        "sat_absolute_orbit": int(orbitNumber[0]),
+        "sat_relative_orbit": int(relative_orbit[0]),
         "sat_anx_datetime": ascendingNodeTime + "Z",
         "sar_frequency_band": "C",
         "sar_instrument_mode": instrumentMode,
-        "sar_polarizations": [p.text for p in transmitterReceiverPolarisation],
+        "sar_polarizations": polarizations,
         "sar_product_type": productType,
-        "xs_instrument_mode_swaths": [s.text for s in swaths],
+        "xs_instrument_mode_swaths": swaths,
     }
 
     files = {}
