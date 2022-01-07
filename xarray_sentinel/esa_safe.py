@@ -40,7 +40,7 @@ def get_ancillary_data_paths(
     return ancillary_data_paths
 
 
-@functools.lru_cache()
+@functools.lru_cache
 def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
     schema_paths = {
@@ -51,32 +51,37 @@ def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     return xmlschema.XMLSchema(schema_paths[schema_type])
 
 
-@functools.lru_cache()
+@functools.lru_cache
+def parse_xml(xml_path: PathOrFileType) -> ElementTree.ElementTree:
+    return ElementTree.parse(xml_path)
+
+
 def parse_tag(
     xml_path: PathOrFileType,
     query: str,
     schema_type: str = "annotation",
 ) -> T.Dict[str, T.Any]:
     schema = sentinel1_schemas(schema_type)
-    tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_path, query)  # type: ignore
+    xml_tree = parse_xml(xml_path)
+    tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_tree, query)  # type: ignore
     assert isinstance(tag_dict, dict)
     return tag_dict
 
 
-@functools.lru_cache()
 def parse_tag_list(
     xml_path: PathOrFileType,
     query: str,
     schema_type: str = "annotation",
 ) -> T.List[T.Dict[str, T.Any]]:
     schema = sentinel1_schemas(schema_type)
-    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_path, query)  # type: ignore
+    xml_tree = parse_xml(xml_path)
+    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_tree, query)  # type: ignore
     assert isinstance(tag_list, list)
     return tag_list
 
 
 def parse_azimuth_fm_rate(
-    annotation_path: T.Union[PathOrFileType, ElementTree.ElementTree],
+    annotation_path: PathOrFileType,
 ) -> T.List[T.Dict[str, T.Any]]:
     azimuth_fm_rate = []
     for afmr in parse_tag_list(annotation_path, ".//azimuthFmRate"):
@@ -96,7 +101,7 @@ def parse_dc_estimate(annotation_path: PathOrFileType) -> T.List[T.Dict[str, T.A
     return dc_estimate
 
 
-@functools.lru_cache()
+@functools.lru_cache
 def parse_manifest_sentinel1(
     manifest_path: PathOrFileType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:

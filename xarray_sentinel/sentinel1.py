@@ -1,7 +1,6 @@
 import os
 import typing as T
 import warnings
-from xml.etree import ElementTree
 
 import fsspec  # type: ignore
 import numpy as np
@@ -250,9 +249,8 @@ def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     # NOTE: passing the path twice to xmlschema produces a crash, apparently due to
     # some internal file caching. Parsing the XML file with ElementTree solves the issue
-    annot = ElementTree.parse(annotation)
-    azimuth_fm_rates = esa_safe.parse_azimuth_fm_rate(annot)
-    product_information = esa_safe.parse_tag(annot, ".//productInformation")
+    azimuth_fm_rates = esa_safe.parse_azimuth_fm_rate(annotation)
+    product_information = esa_safe.parse_tag(annotation, ".//productInformation")
 
     azimuth_time = []
     t0 = []
