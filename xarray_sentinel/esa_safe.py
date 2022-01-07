@@ -16,6 +16,13 @@ SENTINEL1_NAMESPACES = {
     "s1sarl1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1",
 }
 
+SENTINEL1_FOLDER = pkg_resources.resource_filename(__name__, "resources/sentinel1")
+SENTINEL1_SCHEMAS = {
+    "manifest": os.path.join(SENTINEL1_FOLDER, "my-xfdu.xsd"),
+    "annotation": os.path.join(SENTINEL1_FOLDER, "s1-level-1-product.xsd"),
+    "calibration": os.path.join(SENTINEL1_FOLDER, "s1-level-1-calibration.xsd"),
+}
+
 SENTINEL2_NAMESPACES = {
     "safe": "http://www.esa.int/safe/sentinel/1.1",
 }
@@ -41,19 +48,11 @@ def get_ancillary_data_paths(
 
 
 @functools.lru_cache
-def sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
-    support_dir = pkg_resources.resource_filename(__name__, "resources/sentinel1")
-    schema_paths = {
-        "manifest": os.path.join(support_dir, "my-xfdu.xsd"),
-        "annotation": os.path.join(support_dir, "s1-level-1-product.xsd"),
-        "calibration": os.path.join(support_dir, "s1-level-1-calibration.xsd"),
-    }
-    return xmlschema.XMLSchema(schema_paths[schema_type])
+def cached_sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
+    return xmlschema.XMLSchema(SENTINEL1_SCHEMAS[schema_type])
 
 
-@functools.lru_cache
-def parse_xml(xml_path: PathOrFileType) -> ElementTree.ElementTree:
-    return ElementTree.parse(xml_path)
+cached_ElementTree_parse = functools.lru_cache(ElementTree.parse)
 
 
 def parse_tag(
@@ -61,8 +60,8 @@ def parse_tag(
     query: str,
     schema_type: str = "annotation",
 ) -> T.Dict[str, T.Any]:
-    schema = sentinel1_schemas(schema_type)
-    xml_tree = parse_xml(xml_path)
+    schema = cached_sentinel1_schemas(schema_type)
+    xml_tree = cached_ElementTree_parse(xml_path)
     tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_tree, query)  # type: ignore
     assert isinstance(tag_dict, dict)
     return tag_dict
@@ -73,8 +72,8 @@ def parse_tag_list(
     query: str,
     schema_type: str = "annotation",
 ) -> T.List[T.Dict[str, T.Any]]:
-    schema = sentinel1_schemas(schema_type)
-    xml_tree = parse_xml(xml_path)
+    schema = cached_sentinel1_schemas(schema_type)
+    xml_tree = cached_ElementTree_parse(xml_path)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_tree, query)  # type: ignore
     assert isinstance(tag_list, list)
     return tag_list
@@ -202,7 +201,7 @@ def parse_manifest_sentinel1(
 def parse_original_manifest_sentinel1(
     manifest_path: PathOrFileType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
-    schema = sentinel1_schemas("manifest")
+    schema = cached_sentinel1_schemas("manifest")
 
     xml_metadata = {}
     for xml_tags in schema.to_dict(manifest_path, ".//xmlData"):  # type: ignore

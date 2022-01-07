@@ -115,8 +115,8 @@ ANNOTATION_PATH = str(
 )
 
 
-def test_sentinel1_schemas() -> None:
-    res = esa_safe.sentinel1_schemas("annotation")
+def test_cached_sentinel1_schemas() -> None:
+    res = esa_safe.cached_sentinel1_schemas("annotation")
 
     assert isinstance(res, xmlschema.XMLSchema)
 
