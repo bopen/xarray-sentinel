@@ -25,7 +25,7 @@ def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
     gamma_list = []
     dn_list = []
     for vector in calibration_vectors:
-        azimuth_time_list.append(np.datetime64(vector["azimuthTime"]))
+        azimuth_time_list.append(vector["azimuthTime"])
         line_list.append(vector["line"])
         pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")  # type: ignore
         pixel_list.append(pixel)
@@ -43,17 +43,14 @@ def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
         raise ValueError(
             "Unable to organise calibration vectors in a regular line-pixel grid"
         )
-    data_vars = dict(
-        azimuth_time=xr.DataArray(azimuth_time_list, dims="line"),
-        sigmaNought=xr.DataArray(sigmaNought_list, dims=("line", "pixel")),
-        betaNought=xr.DataArray(betaNought_list, dims=("line", "pixel")),
-        gamma=xr.DataArray(gamma_list, dims=("line", "pixel")),
-        dn=xr.DataArray(dn_list, dims=("line", "pixel")),
-    )
-    coords = dict(
-        line=xr.DataArray(line_list, dims="line"),
-        pixel=xr.DataArray(pixel_list[0], dims="pixel"),
-    )
+    data_vars = {
+        "azimuth_time": ("line", [np.datetime64(dt) for dt in azimuth_time_list]),
+        "sigmaNought": (("line", "pixel"), sigmaNought_list),
+        "betaNought": (("line", "pixel"), betaNought_list),
+        "gamma": (("line", "pixel"), gamma_list),
+        "dn": (("line", "pixel"), dn_list),
+    }
+    coords = {"line": line_list, "pixel": pixel_list[0]}
 
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
@@ -65,15 +62,15 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
 
     gr0 = []
     sr0 = []
-    azimuthTime = []
-    slantRangeTime = []
+    azimuth_time = []
+    slant_range_time = []
     srgrCoefficients: T.List[NT.NDArray[np.float_]] = []
     grsrCoefficients: T.List[NT.NDArray[np.float_]] = []
     for values in coordinate_conversion["coordinateConversion"]:
         sr0.append(values["sr0"])
         gr0.append(values["gr0"])
-        azimuthTime.append(values["azimuthTime"])
-        slantRangeTime.append(values["slantRangeTime"])
+        azimuth_time.append(values["azimuthTime"])
+        slant_range_time.append(values["slantRangeTime"])
         srgrCoefficients.append(
             np.fromstring(values["srgrCoefficients"]["$"], dtype=float, sep=" ")
         )
@@ -82,20 +79,16 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
         )
 
     coords = {
-        "azimuth_time": xr.DataArray(azimuthTime, dims="azimuth_time"),
-        "exponent": xr.DataArray(np.arange(len(srgrCoefficients[0])), dims="exponent"),
+        "azimuth_time": [np.datetime64(dt) for dt in azimuth_time],
+        "degree": list(range(len(srgrCoefficients[0]))),
     }
 
     data_vars = {
-        "gr0": xr.DataArray(gr0, dims="azimuth_time"),
-        "sr0": xr.DataArray(sr0, dims="azimuth_time"),
-        "slant_range_time": xr.DataArray(slantRangeTime, dims=("azimuth_time")),
-        "srgr_coefficients": xr.DataArray(
-            srgrCoefficients, dims=("azimuth_time", "exponent")
-        ),
-        "grsr_coefficients": xr.DataArray(
-            grsrCoefficients, dims=("azimuth_time", "exponent")
-        ),
+        "gr0": ("azimuth_time", gr0),
+        "sr0": ("azimuth_time", sr0),
+        "slant_range_time": ("azimuth_time", slant_range_time),
+        "srgr_coefficients": (("azimuth_time", "degree"), srgrCoefficients),
+        "grsr_coefficients": (("azimuth_time", "degree"), grsrCoefficients),
     }
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
@@ -233,14 +226,11 @@ def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars={
             "t0": ("azimuth_time", t0),
-            "data_dc_polynomial": (
-                ("azimuth_time", "degree"),
-                data_dc_poly,
-            ),
+            "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly),
         },
         coords={
             "azimuth_time": [np.datetime64(at) for at in azimuth_time],
-            "degree": [0, 1, 2],
+            "degree": list(range(len(data_dc_poly[0]))),
         },
     )
     return ds
@@ -268,14 +258,12 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
         attrs=attrs,
         data_vars={
             "t0": ("azimuth_time", t0),
-            "azimuth_fm_rate_polynomial": (
-                ("azimuth_time", "degree"),
-                azimuth_fm_rate_poly,
+            "azimuth_fm_rate_polynomial": (("azimuth_time", "degree"), azimuth_fm_rate_poly,
             ),
         },
         coords={
             "azimuth_time": [np.datetime64(at) for at in azimuth_time],
-            "degree": [0, 1, 2],
+            "degree": list(range(len(azimuth_fm_rate_poly[0]))),
         },
     )
     return ds
