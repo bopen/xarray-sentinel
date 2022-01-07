@@ -127,6 +127,7 @@ def test_open_pol_dataset_iw() -> None:
     assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
 
+@pytest.mark.xfail
 def test_open_pol_dataset_sm() -> None:
     res = sentinel1.open_pol_dataset(SLC_S3_VV_measurement, SLC_S3_VV_annotation)
 
