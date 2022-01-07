@@ -13,6 +13,19 @@ SLC_IW = (
     DATA_FOLDER
     / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
 )
+SLC_IW1_VV_annotation = (
+    DATA_FOLDER
+    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    / "annotation"
+    / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+)
+SLC_IW1_VV_calibration = (
+    DATA_FOLDER
+    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    / "annotation"
+    / "calibration"
+    / "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+)
 
 
 def test_get_fs_path() -> None:
@@ -31,6 +44,27 @@ def test_get_fs_path() -> None:
 
     with pytest.raises(ValueError):
         sentinel1.get_fs_path("*")
+
+
+def test_open_calibration_dataset() -> None:
+    res = sentinel1.open_calibration_dataset(SLC_IW1_VV_calibration)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"line", "pixel"}
+
+
+def test_open_gcp_dataset() -> None:
+    res = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"line", "pixel", "azimuth_time", "slant_range_time"}
+
+
+def test_open_attitude_dataset() -> None:
+    res = sentinel1.open_attitude_dataset(SLC_IW1_VV_annotation)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"azimuth_time"}
 
 
 def test_build_burst_id() -> None:
