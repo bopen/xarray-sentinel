@@ -121,6 +121,39 @@ def test_cached_sentinel1_schemas() -> None:
     assert isinstance(res, xmlschema.XMLSchema)
 
 
+def test_parse_tag() -> None:
+    expected = {
+        "timelinessCategory",
+        "platformHeading",
+        "radarFrequency",
+        "rangeSamplingRate",
+        "projection",
+        "pass",
+        "azimuthSteeringRate",
+    }
+
+    res = esa_safe.parse_tag(ANNOTATION_PATH, ".//productInformation")
+
+    assert isinstance(res, dict)
+    assert set(res) == expected
+
+
+def test_parse_tag_list() -> None:
+    expected = {
+        "azimuthTime",
+        "firstValidSample",
+        "sensingTime",
+        "lastValidSample",
+        "byteOffset",
+        "azimuthAnxTime",
+    }
+
+    res = esa_safe.parse_tag_list(ANNOTATION_PATH, ".//burst")
+
+    assert isinstance(res, list)
+    assert set(res[0]) == expected
+
+
 def test_parse_azimuth_fm_rate() -> None:
     res = esa_safe.parse_azimuth_fm_rate(ANNOTATION_PATH)
     expected = {"azimuthTime", "t0", "azimuthFmRatePolynomial"}
