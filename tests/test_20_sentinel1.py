@@ -38,12 +38,17 @@ SLC_S3_VV_annotation = (
     / "annotation"
     / "s1a-s3-slc-vv-20210401t152855-20210401t152914-037258-04638e-002.xml"
 )
-
 SLC_S3_VV_measurement = (
     DATA_FOLDER
     / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
     / "measurement"
     / "s1a-s3-slc-vv-20210401t152855-20210401t152914-037258-04638e-002.tiff"
+)
+GRD_IW_VV_annotation = (
+    DATA_FOLDER
+    / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE"
+    / "annotation"
+    / "s1b-iw-grd-vv-20210401t052623-20210401t052648-026269-032297-001.xml"
 )
 
 
@@ -70,6 +75,13 @@ def test_open_calibration_dataset() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"line", "pixel"}
+
+
+def test_open_coordinateConversion_dataset() -> None:
+    res = sentinel1.open_coordinateConversion_dataset(GRD_IW_VV_annotation)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"azimuth_time", "degree"}
 
 
 def test_open_gcp_dataset() -> None:
