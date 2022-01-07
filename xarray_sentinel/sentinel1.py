@@ -237,10 +237,7 @@ def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    # NOTE: passing the path twice to xmlschema produces a crash, apparently due to
-    # some internal file caching. Parsing the XML file with ElementTree solves the issue
     azimuth_fm_rates = esa_safe.parse_azimuth_fm_rate(annotation)
-    product_information = esa_safe.parse_tag(annotation, ".//productInformation")
 
     azimuth_time = []
     t0 = []
@@ -250,12 +247,7 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
         t0.append(azimuth_fm_rate["t0"])
         azimuth_fm_rate_poly.append(azimuth_fm_rate["azimuthFmRatePolynomial"])
 
-    attrs = {
-        "azimuth_steering_rate": product_information["azimuthSteeringRate"],
-        "radar_frequency": product_information["radarFrequency"],
-    }
     ds = xr.Dataset(
-        attrs=attrs,
         data_vars={
             "t0": ("azimuth_time", t0),
             "azimuth_fm_rate_polynomial": (
@@ -335,7 +327,10 @@ def open_pol_dataset(
         periods=number_of_lines,
         freq=pd.to_timedelta(azimuth_time_interval, "s"),
     ).values
-    attrs = {}
+    attrs = {
+        "azimuth_steering_rate": product_information["azimuthSteeringRate"],
+        "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
+    }
 
     number_of_bursts = swath_timing["burstList"]["@count"]
     if number_of_bursts:
