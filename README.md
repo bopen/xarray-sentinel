@@ -78,6 +78,36 @@ Attributes: ...
 The attribute `subgroups` shows the available groups to be loaded. The keyword `group`
 shall be used to select the dataset to be loaded.
 
+The groups present in a typical SLC SAFE package are:
+
+```
+/
+├─ IW1
+│  ├─ VH
+│  │  ├─ gcp
+│  │  ├─ orbit
+│  │  ├─ attitude
+│  │  ├─ dc_estimate
+│  │  ├─ azimuth_fm_rate
+│  │  └─ calibration
+│  └─ VV
+│     ├─ gcp
+│     ├─ orbit
+│     ├─ attitude
+│     ├─ dc_estimate
+│     ├─ azimuth_fm_rate
+│     └─ calibration
+├─ IW2
+│  ├─ VH
+│  │  ├─ gcp
+...
+│  └─ VV
+│     ├─ gcp
+...
+
+```
+
+
 ### Open the gcp dataset
 
 To load the gcp relative to the VV polarisation of first swath use the key `group="IW1/VV/gcp"`:
