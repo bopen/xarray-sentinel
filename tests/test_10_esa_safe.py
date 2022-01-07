@@ -192,44 +192,6 @@ def test_parse_manifest_sentinel1(
     assert res_attrs == expected
 
 
-@pytest.mark.parametrize("product_id,expected", SENTINEL2_ATTRIBUTES.items())
-def test_parse_manifest_sentinel2(
-    product_id: str, expected: T.Dict[str, T.Any]
-) -> None:
-    manifest_path = DATA_FOLDER / (product_id + ".SAFE") / "manifest.safe"
-
-    res_attrs, res_files = esa_safe.parse_manifest_sentinel2(manifest_path)
-
-    assert res_attrs == expected
-
-
-def test_parse_original_manifest_sentinel1() -> None:
-    manifest_path = str(
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-        / "manifest.safe"
-    )
-
-    res, _ = esa_safe.parse_original_manifest_sentinel1(manifest_path)
-
-    assert isinstance(res, dict)
-    assert "safe:platform" in res
-
-    expected = {
-        "safe:nssdcIdentifier",
-        "safe:familyName",
-        "safe:number",
-        "safe:instrument",
-    }
-    assert set(res["safe:platform"]) == expected
-
-    _, res = esa_safe.parse_original_manifest_sentinel1(manifest_path)
-
-    assert isinstance(res, list)
-    assert isinstance(res[0], dict)
-    assert "@href" in res[0]
-
-
 def test_get_ancillary_data() -> None:
     base_path = (
         DATA_FOLDER
