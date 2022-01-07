@@ -26,6 +26,25 @@ SLC_IW1_VV_calibration = (
     / "calibration"
     / "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
 )
+SLC_IW1_VV_measurement = (
+    DATA_FOLDER
+    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    / "measurement"
+    / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.tiff"
+)
+SLC_S3_VV_annotation = (
+    DATA_FOLDER
+    / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
+    / "annotation"
+    / "s1a-s3-slc-vv-20210401t152855-20210401t152914-037258-04638e-002.xml"
+)
+
+SLC_S3_VV_measurement = (
+    DATA_FOLDER
+    / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
+    / "measurement"
+    / "s1a-s3-slc-vv-20210401t152855-20210401t152914-037258-04638e-002.tiff"
+)
 
 
 def test_get_fs_path() -> None:
@@ -65,6 +84,43 @@ def test_open_attitude_dataset() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"azimuth_time"}
+
+
+def test_open_orbit_dataset() -> None:
+    res = sentinel1.open_orbit_dataset(SLC_IW1_VV_annotation)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"axis", "azimuth_time"}
+
+
+def test_open_dc_estimate_dataset() -> None:
+    res = sentinel1.open_dc_estimate_dataset(SLC_IW1_VV_annotation)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"degree", "azimuth_time"}
+
+
+def test_open_azimuth_fm_rate_dataset() -> None:
+    res = sentinel1.open_azimuth_fm_rate_dataset(SLC_IW1_VV_annotation)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"degree", "azimuth_time"}
+
+
+def test_open_pol_dataset_iw() -> None:
+    res = sentinel1.open_pol_dataset(SLC_IW1_VV_measurement, SLC_IW1_VV_annotation)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.dims) == {"line", "pixel"}
+    assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
+
+
+def test_open_pol_dataset_sm() -> None:
+    res = sentinel1.open_pol_dataset(SLC_S3_VV_measurement, SLC_S3_VV_annotation)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.dims) == {"slant_range_time", "azimuth_time"}
+    assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
 
 def test_build_burst_id() -> None:
@@ -122,6 +178,15 @@ def test_compute_burst_centres() -> None:
     assert np.allclose(lon, [5, 15, 25, 35])
 
 
+def test_normalise_group() -> None:
+    assert sentinel1.normalise_group(None) == ("", None)
+    assert sentinel1.normalise_group("/") == ("", None)
+    assert sentinel1.normalise_group("IW1") == ("IW1", None)
+    assert sentinel1.normalise_group("/IW1") == ("IW1", None)
+    assert sentinel1.normalise_group("/IW1/VH/0") == ("IW1/VH", 0)
+    assert sentinel1.normalise_group("/IW1/VH/orbit") == ("IW1/VH/orbit", None)
+
+
 def test_open_dataset() -> None:
     expected_groups = {
         "IW1",
@@ -135,7 +200,13 @@ def test_open_dataset() -> None:
     res = sentinel1.open_dataset(SLC_IW)
 
     assert isinstance(res, xr.Dataset)
+    assert len(res.data_vars) == 0
     assert set(res.attrs["subgroups"]) >= expected_groups
+
+    res = sentinel1.open_dataset(SLC_IW, group="IW1")
+
+    assert isinstance(res, xr.Dataset)
+    assert len(res.data_vars) == 0
 
     res = sentinel1.open_dataset(SLC_IW, group="IW1/VV/orbit")
 
@@ -144,6 +215,14 @@ def test_open_dataset() -> None:
 
     with pytest.raises(ValueError):
         sentinel1.open_dataset(SLC_IW, group="IW1/VV/non-existent")
+
+
+def test_open_dataset_virtual_groups() -> None:
+    res = sentinel1.open_dataset(SLC_IW, group="IW1/VV/0")
+
+    assert isinstance(res, xr.Dataset)
+    assert len(res.data_vars) == 1
+    assert res.attrs["burst_index"] == 0
 
 
 def test_open_dataset_chunks() -> None:
