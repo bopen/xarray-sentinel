@@ -95,18 +95,6 @@ SENTINEL1_ATTRIBUTES = {
     },
 }
 
-SENTINEL2_ATTRIBUTES = {
-    "S2A_MSIL1C_20210403T101021_N0300_R022_T33TUM_20210403T110551": {
-        "constellation": "sentinel-2",
-        "platform": "sentinel-2a",
-        "instrument": ["msi"],
-        "sat_orbit_state": "descending",
-        "sat_absolute_orbit": 30192,
-        "sat_relative_orbit": 22,
-        "xs_product_type": "S2MSIl1C",
-    },
-}
-
 ANNOTATION_PATH = str(
     DATA_FOLDER
     / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
