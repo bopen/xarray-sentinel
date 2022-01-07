@@ -418,11 +418,13 @@ def crop_burst_dataset(
     use_center: bool = False,
 ) -> xr.Dataset:
 
-    if ((index is None) and (azimuth_anx_time is None)) or (
-        (index is not None) and (azimuth_anx_time is not None)
-    ):
+    if (index is None) and (azimuth_anx_time is None):
         raise ValueError(
-            "one and only one keyword between 'index' and 'azimuth_anx_time' shall be defined"
+            "one keyword between 'index' and 'azimuth_anx_time' must be defined"
+        )
+    elif (index is not None) and (azimuth_anx_time is not None):
+        raise ValueError(
+            "only one keyword between 'index' and 'azimuth_anx_time' must be defined"
         )
 
     if index is None:
