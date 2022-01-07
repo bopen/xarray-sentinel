@@ -530,7 +530,7 @@ METADATA_OPENERS = {
     "gcp": open_gcp_dataset,
     "orbit": open_orbit_dataset,
     "attitude": open_attitude_dataset,
-    "calibration": open_calibration_dataset,
     "dc_estimate": open_dc_estimate_dataset,
     "azimuth_fm_rate": open_azimuth_fm_rate_dataset,
+    "calibration": open_calibration_dataset,
 }

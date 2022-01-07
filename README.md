@@ -7,8 +7,7 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu
 ## Features
 
 - read SAR imagery data: full image, individual swaths, individual SLC bursts - **Alpha**
-- read metadata: product, orbit, attitude, GCPs, calibration - **Alpha**
-- read metadata: deramp - in roadmap
+- read metadata: orbit, attitude, GCPs, calibration, dc_estimate, azimuth_fm_rate - **Alpha**
 - supported products:
   - Sentinel-1 SLC IW (Interferometric Wide Swath): **Alpha**
   - Sentinel-1 SLC EW (Extended Wide Swath): **Alpha**
@@ -35,13 +34,15 @@ with the following commands:
 
 Currently, xarray-sentinel provides access as Xarray datasets to the following data:
 
+- full image
+- individual swaths
+- individual SLC bursts
 - gcp
 - orbit
 - attitude
 - calibration
-- full image
-- single swath
-- SLC burst
+- dc_estimate
+- azimuth_fm_rate
 
 using `azimuth_time` and `slant_range_time` dimensions when it make sense.
 
@@ -242,7 +243,7 @@ Attributes: ...
     sar_product_type:           SLC
     xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VV
-    subgroups:                  ['gcp', 'orbit', 'attitude', 'calibration']
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
@@ -274,7 +275,7 @@ Attributes: ...
     ...                         ...
     xs_instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VV
-    subgroups:                  ['gcp', 'orbit', 'attitude', 'calibration']
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
     burst_index:                8
