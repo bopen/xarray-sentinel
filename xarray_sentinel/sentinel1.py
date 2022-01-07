@@ -307,20 +307,6 @@ def find_avalable_groups(
     return groups
 
 
-def read_first_azimuth_times(swath_timing):
-    first_azimuth_time = []
-    for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
-        first_azimuth_time.append(burst["azimuthTime"])
-    return pd.DatetimeIndex(first_azimuth_time).values
-
-
-def read_first_azimuth_anx_times(swath_timing):
-    first_azimuth_anx_time = []
-    for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
-        first_azimuth_anx_time.append(burst["azimuthAnxTime"])
-    return pd.TimedeltaIndex(first_azimuth_anx_time, unit="s").values
-
-
 def open_pol_dataset(
     measurement: esa_safe.PathType,
     annotation: esa_safe.PathType,
@@ -339,7 +325,14 @@ def open_pol_dataset(
         number_of_samples,
     )
 
-    azimuth_time_interval = pd.to_timedelta(image_information["azimuthTimeInterval"], unit="s")
+    number_of_lines = image_information["numberOfLines"]
+    first_azimuth_time = image_information["productFirstLineUtcTime"]
+    azimuth_time_interval = image_information["azimuthTimeInterval"]
+    azimuth_time = pd.date_range(
+        start=first_azimuth_time,
+        periods=number_of_lines,
+        freq=pd.to_timedelta(azimuth_time_interval, "s"),
+    ).values
     attrs = {}
 
     number_of_bursts = swath_timing["burstList"]["@count"]
@@ -351,27 +344,18 @@ def open_pol_dataset(
                 "lines_per_burst": lines_per_burst,
             }
         )
-        first_azimuth_times = read_first_azimuth_times(swath_timing)
-        first_azimuth_anx_times = read_first_azimuth_anx_times(swath_timing)
-
-        burst_lines_delta_times = np.arange(lines_per_burst) * azimuth_time_interval
-        azimuth_time = (
-            burst_lines_delta_times[None, :] + first_azimuth_times[:, None]
-        ).ravel()
-        azimuth_anx_time = (
-            burst_lines_delta_times[None, :] + first_azimuth_anx_times[:, None]
-        ).ravel()
-
+        for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
+            first_azimuth_time_burst = burst["azimuthTime"]
+            azimuth_time_burst = pd.date_range(
+                start=first_azimuth_time_burst,
+                periods=lines_per_burst,
+                freq=pd.to_timedelta(azimuth_time_interval, "s"),
+            )
+            azimuth_time[
+                lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
+            ] = azimuth_time_burst
         if chunks is None:
             chunks = {"y": lines_per_burst}
-    else:
-        number_of_lines = image_information["numberOfLines"]
-        first_azimuth_time = image_information["productFirstLineUtcTime"]
-        azimuth_time = pd.date_range(
-            start=first_azimuth_time,
-            periods=number_of_lines,
-            freq=pd.to_timedelta(azimuth_time_interval, "s"),
-        )
 
     arr = rioxarray.open_rasterio(measurement, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
@@ -382,7 +366,6 @@ def open_pol_dataset(
             "line": np.arange(0, arr["line"].size, dtype=int),
             "slant_range_time": ("pixel", slant_range_time),
             "azimuth_time": ("line", azimuth_time),
-            "azimuth_anx_time": ("line", azimuth_anx_time),
         }
     )
 
@@ -398,14 +381,18 @@ def find_bursts_index(
     use_center: bool = False,
 ):
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
+    anx_datetime = pol_dataset.attrs["sat_anx_datetime"]
     if use_center:
         distance = abs(
-            pol_dataset.azimuth_anx_time[lines_per_burst // 2 :: lines_per_burst]
+            (
+                pol_dataset.azimuth_time[lines_per_burst // 2 :: lines_per_burst]
+                - np.datetime64(anx_datetime)
+            )
             - pd.Timedelta(azimuth_anx_time, unit="s")
         )
     else:
         distance = abs(
-            pol_dataset.azimuth_anx_time[::lines_per_burst]
+            (pol_dataset.azimuth_time[::lines_per_burst] - np.datetime64(anx_datetime))
             - pd.Timedelta(azimuth_anx_time, unit="s")
         )
     return distance.argmin().item()

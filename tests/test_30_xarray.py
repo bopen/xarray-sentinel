@@ -135,7 +135,6 @@ def test_open_pol_dataset() -> None:
         "pixel",
         "slant_range_time",
         "azimuth_time",
-        "azimuth_anx_time"
     }
     res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")  # type: ignore
 
