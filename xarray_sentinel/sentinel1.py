@@ -314,11 +314,11 @@ def read_first_azimuth_time(swath_timing):
     return pd.DatetimeIndex(first_azimuth_time).values
 
 
-def read_first_ascending_node_time(swath_timing):
-    first_ascending_node_time = []
+def read_first_azimuth_anx_time(swath_timing):
+    first_azimuth_anx_time = []
     for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
-        first_ascending_node_time.append(burst["azimuthAnxTime"])
-    return pd.TimedeltaIndex(first_ascending_node_time, unit="s").values
+        first_azimuth_anx_time.append(burst["azimuthAnxTime"])
+    return pd.TimedeltaIndex(first_azimuth_anx_time, unit="s").values
 
 
 def open_pol_dataset(
@@ -352,7 +352,7 @@ def open_pol_dataset(
             }
         )
         first_azimuth_time = read_first_azimuth_time(swath_timing)
-        first_ascending_node_time = read_first_ascending_node_time(swath_timing)
+        first_azimuth_anx_time = read_first_azimuth_anx_time(swath_timing)
 
         burst_lines_delta_times = pd.to_timedelta(
             np.arange(lines_per_burst) * azimuth_time_interval, unit="s"
@@ -360,12 +360,20 @@ def open_pol_dataset(
         azimuth_time = (
             burst_lines_delta_times[None, :] + first_azimuth_time[:, None]
         ).ravel()
-        ascending_node_time = (
-            burst_lines_delta_times[None, :] + first_ascending_node_time[:, None]
+        azimuth_anx_time = (
+            burst_lines_delta_times[None, :] + first_azimuth_anx_time[:, None]
         ).ravel()
 
         if chunks is None:
             chunks = {"y": lines_per_burst}
+    else:
+        number_of_lines = image_information["numberOfLines"]
+        first_azimuth_time = image_information["productFirstLineUtcTime"]
+        azimuth_time = pd.date_range(
+            start=first_azimuth_time,
+            periods=number_of_lines,
+            freq=pd.to_timedelta(azimuth_time_interval, "s"),
+        ).values
 
     arr = rioxarray.open_rasterio(measurement, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
@@ -376,7 +384,7 @@ def open_pol_dataset(
             "line": np.arange(0, arr["line"].size, dtype=int),
             "slant_range_time": ("pixel", slant_range_time),
             "azimuth_time": ("line", azimuth_time),
-            "ascending_node_time": ("line", ascending_node_time),
+            "azimuth_anx_time": ("line", azimuth_anx_time),
         }
     )
 
@@ -386,18 +394,21 @@ def open_pol_dataset(
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
 
-def crop_burst_dataset(pol_dataset: xr.Dataset, burst_index: int) -> xr.Dataset:
-    if burst_index < 0 or burst_index >= pol_dataset.attrs["number_of_bursts"]:
-        raise IndexError(f"{burst_index=} out of bounds")
+def crop_burst_dataset(pol_dataset: xr.Dataset, index: T.Optional[int],
+) -> xr.Dataset:
+    if index:
+        if index < 0 or index >= pol_dataset.attrs["number_of_bursts"]:
+            raise IndexError(f"{index=} out of bounds")
 
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     ds = pol_dataset.sel(
-        line=slice(
-            lines_per_burst * burst_index, lines_per_burst * (burst_index + 1) - 1
+            line=slice(
+                lines_per_burst * index, lines_per_burst * (index + 1) - 1
         )
     )
+
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
-    ds.attrs["burst_index"] = burst_index
+    ds.attrs["burst_index"] = index
 
     return ds
 
