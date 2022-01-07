@@ -307,6 +307,20 @@ def find_avalable_groups(
     return groups
 
 
+def read_first_azimuth_time(swath_timing):
+    first_azimuth_time = []
+    for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
+        first_azimuth_time.append(burst["azimuthTime"])
+    return pd.DatetimeIndex(first_azimuth_time).values
+
+
+def read_first_ascending_node_time(swath_timing):
+    first_ascending_node_time = []
+    for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
+        first_ascending_node_time.append(burst["azimuthAnxTime"])
+    return pd.TimedeltaIndex(first_ascending_node_time, unit="s").values
+
+
 def open_pol_dataset(
     measurement: esa_safe.PathType,
     annotation: esa_safe.PathType,
@@ -325,14 +339,7 @@ def open_pol_dataset(
         number_of_samples,
     )
 
-    number_of_lines = image_information["numberOfLines"]
-    first_azimuth_time = image_information["productFirstLineUtcTime"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
-    azimuth_time = pd.date_range(
-        start=first_azimuth_time,
-        periods=number_of_lines,
-        freq=pd.to_timedelta(azimuth_time_interval, "s"),
-    ).values
     attrs = {}
 
     number_of_bursts = swath_timing["burstList"]["@count"]
@@ -344,16 +351,19 @@ def open_pol_dataset(
                 "lines_per_burst": lines_per_burst,
             }
         )
-        for burst_index, burst in enumerate(swath_timing["burstList"]["burst"]):
-            first_azimuth_time_burst = burst["azimuthTime"]
-            azimuth_time_burst = pd.date_range(
-                start=first_azimuth_time_burst,
-                periods=lines_per_burst,
-                freq=pd.to_timedelta(azimuth_time_interval, "s"),
-            )
-            azimuth_time[
-                lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
-            ] = azimuth_time_burst
+        first_azimuth_time = read_first_azimuth_time(swath_timing)
+        first_ascending_node_time = read_first_ascending_node_time(swath_timing)
+
+        burst_lines_delta_times = pd.to_timedelta(
+            np.arange(lines_per_burst) * azimuth_time_interval, unit="s"
+        ).values
+        azimuth_time = (
+            burst_lines_delta_times[None, :] + first_azimuth_time[:, None]
+        ).ravel()
+        ascending_node_time = (
+            burst_lines_delta_times[None, :] + first_ascending_node_time[:, None]
+        ).ravel()
+
         if chunks is None:
             chunks = {"y": lines_per_burst}
 
@@ -366,6 +376,7 @@ def open_pol_dataset(
             "line": np.arange(0, arr["line"].size, dtype=int),
             "slant_range_time": ("pixel", slant_range_time),
             "azimuth_time": ("line", azimuth_time),
+            "ascending_node_time": ("line", ascending_node_time),
         }
     )
 
