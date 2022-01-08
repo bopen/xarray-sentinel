@@ -426,7 +426,7 @@ def crop_burst_dataset(
         )
     )
 
-    sat_anx_datetime = pol_dataset.attrs.get("sat:anx_datetime", '2021-04-01T04:49:55.637823Z')
+    sat_anx_datetime = pol_dataset.attrs["sat:anx_datetime"]
     sat_anx_datetime = np.datetime64(sat_anx_datetime)
     burst_azimuth_anx_times = ds.azimuth_time - sat_anx_datetime
     ds.attrs["azimuth_anx_time"] = (
