@@ -52,16 +52,13 @@ def cached_sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     return xmlschema.XMLSchema(SENTINEL1_SCHEMAS[schema_type])
 
 
-cached_ElementTree_parse = functools.lru_cache(ElementTree.parse)
-
-
 def parse_tag(
     xml_path: PathOrFileType,
     query: str,
     schema_type: str = "annotation",
 ) -> T.Dict[str, T.Any]:
     schema = cached_sentinel1_schemas(schema_type)
-    xml_tree = cached_ElementTree_parse(xml_path)
+    xml_tree = ElementTree.parse(xml_path)
     tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_tree, query)  # type: ignore
     assert isinstance(tag_dict, dict)
     return tag_dict
@@ -73,7 +70,7 @@ def parse_tag_list(
     schema_type: str = "annotation",
 ) -> T.List[T.Dict[str, T.Any]]:
     schema = cached_sentinel1_schemas(schema_type)
-    xml_tree = cached_ElementTree_parse(xml_path)
+    xml_tree = ElementTree.parse(xml_path)
     tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_tree, query)  # type: ignore
     assert isinstance(tag_list, list)
     return tag_list
