@@ -107,7 +107,6 @@ The groups present in a typical SLC SAFE package are:
 
 ```
 
-
 ### Open the gcp dataset
 
 To load the gcp relative to the VV polarisation of first swath use the key `group="IW1/VV/gcp"`:
