@@ -1,8 +1,5 @@
 import pathlib
 
-import fsspec  # type: ignore
-import numpy as np
-import pytest
 import xarray as xr
 
 from xarray_sentinel import sentinel1
