@@ -402,19 +402,19 @@ def find_bursts_index(
 
 def crop_burst_dataset(
     pol_dataset: xr.Dataset,
-    index: T.Optional[int] = None,
+    burst_index: T.Optional[int] = None,
     azimuth_anx_time: T.Optional[float] = None,
     use_center: bool = False,
 ) -> xr.Dataset:
 
-    if (index is not None) and (azimuth_anx_time is not None):
+    if (burst_index is not None) and (azimuth_anx_time is not None):
         raise ValueError(
             "only one keyword between 'index' and 'azimuth_anx_time' must be defined"
         )
 
-    if index is None:
+    if burst_index is None:
         if azimuth_anx_time is not None:
-            index = find_bursts_index(
+            burst_index = find_bursts_index(
                 pol_dataset, azimuth_anx_time, use_center=use_center
             )
         else:
@@ -422,16 +422,18 @@ def crop_burst_dataset(
                 "one keyword between 'index' and 'azimuth_anx_time' must be defined"
             )
 
-    if index < 0 or index >= pol_dataset.attrs["number_of_bursts"]:
-        raise IndexError(f"{index=} out of bounds")
+    if burst_index < 0 or burst_index >= pol_dataset.attrs["number_of_bursts"]:
+        raise IndexError(f"{burst_index=} out of bounds")
 
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     ds = pol_dataset.sel(
-        line=slice(lines_per_burst * index, lines_per_burst * (index + 1) - 1)
+        line=slice(
+            lines_per_burst * burst_index, lines_per_burst * (burst_index + 1) - 1
+        )
     )
 
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
-    ds.attrs["burst_index"] = index
+    ds.attrs["burst_index"] = burst_index
 
     return ds
 
@@ -522,7 +524,7 @@ def open_dataset(
                 chunks=chunks,
             )
             if burst_index is not None:
-                ds = crop_burst_dataset(ds, index=burst_index)
+                ds = crop_burst_dataset(ds, burst_index=burst_index)
         else:
             subswath, pol, metadata = group.split("/", 2)
             with fs.open(groups[group]) as file:

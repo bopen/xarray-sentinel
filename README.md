@@ -284,7 +284,7 @@ A single burst can be cropped out of the swath data. *xarray_sentinel* offer an 
 that also performs additional changes like swapping the dimenstions:
 
 ```python-repl
->>> sentinel1.crop_burst_dataset(swath_polarisation_ds, index=8)
+>>> sentinel1.crop_burst_dataset(swath_polarisation_ds, burst_index=8)
 <xarray.Dataset>
 Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
 Coordinates:
