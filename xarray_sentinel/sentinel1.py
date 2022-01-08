@@ -9,7 +9,7 @@ import pandas as pd  # type: ignore
 import rioxarray  # type: ignore
 import xarray as xr
 
-from xarray_sentinel import conventions, esa_safe
+from . import conventions, esa_safe
 
 
 def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
@@ -237,10 +237,7 @@ def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    # NOTE: passing the path twice to xmlschema produces a crash, apparently due to
-    # some internal file caching. Parsing the XML file with ElementTree solves the issue
     azimuth_fm_rates = esa_safe.parse_azimuth_fm_rate(annotation)
-    product_information = esa_safe.parse_tag(annotation, ".//productInformation")
 
     azimuth_time = []
     t0 = []
@@ -250,12 +247,7 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
         t0.append(azimuth_fm_rate["t0"])
         azimuth_fm_rate_poly.append(azimuth_fm_rate["azimuthFmRatePolynomial"])
 
-    attrs = {
-        "azimuth_steering_rate": product_information["azimuthSteeringRate"],
-        "radar_frequency": product_information["radarFrequency"],
-    }
     ds = xr.Dataset(
-        attrs=attrs,
         data_vars={
             "t0": ("azimuth_time", t0),
             "azimuth_fm_rate_polynomial": (
@@ -335,7 +327,10 @@ def open_pol_dataset(
         periods=number_of_lines,
         freq=pd.to_timedelta(azimuth_time_interval, "s"),
     ).values
-    attrs = {}
+    attrs = {
+        "azimuth_steering_rate": product_information["azimuthSteeringRate"],
+        "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
+    }
 
     number_of_bursts = swath_timing["burstList"]["@count"]
     if number_of_bursts:
@@ -543,24 +538,6 @@ def open_dataset(
     conventions.update_attributes(ds, group=metadata)
 
     return ds
-
-
-class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
-    def open_dataset(  # type: ignore
-        self,
-        filename_or_obj: str,
-        drop_variables: T.Optional[T.Tuple[str]] = None,
-        group: T.Optional[str] = None,
-    ) -> xr.Dataset:
-
-        return open_dataset(filename_or_obj, drop_variables=drop_variables, group=group)
-
-    def guess_can_open(self, filename_or_obj: T.Any) -> bool:
-        try:
-            _, ext = os.path.splitext(filename_or_obj)
-        except TypeError:
-            return False
-        return ext.lower() in {".safe", ".safe/"}
 
 
 METADATA_OPENERS = {

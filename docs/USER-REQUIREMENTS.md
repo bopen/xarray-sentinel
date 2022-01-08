@@ -4,7 +4,7 @@ Data groups:
   - azimuth / time, slant_range as dimensions, polarisation as variables
   - azimuth / slant_range coordinates as distances instead of times for
     easier interpretation? (slant_range == two-ways-time * speed-of-light,
-    azimuth as linear distance from ascending node?)
+    azimuth as linear distance from ascending node?) - rejected for now
   - keep time coordinates as UTC, TAI, UT1 and elapsed time from ascending node (NOT PRESENT??)
 - calibration information (azimuth / slant_range dimensions on a reduced grid)
 - ground control points (azimuth / slant_range dimensions on one more reduced grid)
@@ -24,10 +24,10 @@ Attributes:
 
 - mission, acquisition, processing, etc
 
-Conformance:
+Conformance in order of precedence:
 
-- CF conventions for the coordinates (with special attentions to time)
 - STAC metadata for attributes with SAT and SAR extensions
+- CF conventions for the coordinates (with special attentions to time)
 
 High level requirements:
 
