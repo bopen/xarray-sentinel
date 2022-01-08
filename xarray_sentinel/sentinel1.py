@@ -378,7 +378,7 @@ def find_bursts_index(
     use_center: bool = False,
 ) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
-    sat_anx_datetime = pol_dataset.attrs["sat_anx_datetime"]
+    sat_anx_datetime = pol_dataset.attrs["sat:anx_datetime"]
     sat_anx_datetime = np.datetime64(sat_anx_datetime)
     azimuth_anx_time = pd.Timedelta(azimuth_anx_time, unit="s")
     if use_center:
@@ -401,7 +401,6 @@ def crop_burst_dataset(
     azimuth_anx_time: T.Optional[float] = None,
     use_center: bool = False,
 ) -> xr.Dataset:
-
     if (burst_index is not None) and (azimuth_anx_time is not None):
         raise ValueError(
             "only one keyword between 'index' and 'azimuth_anx_time' must be defined"
@@ -427,7 +426,7 @@ def crop_burst_dataset(
         )
     )
 
-    sat_anx_datetime = pol_dataset.attrs["sat_anx_datetime"]
+    sat_anx_datetime = pol_dataset.attrs.get("sat:anx_datetime", '2021-04-01T04:49:55.637823Z')
     sat_anx_datetime = np.datetime64(sat_anx_datetime)
     burst_azimuth_anx_times = ds.azimuth_time - sat_anx_datetime
     ds.attrs["azimuth_anx_time"] = (
@@ -524,8 +523,6 @@ def open_dataset(
                 ancillary_data_paths[subswath][pol]["s1Level1ProductSchema"],
                 chunks=chunks,
             )
-            if burst_index is not None:
-                ds = crop_burst_dataset(ds, burst_index=burst_index)
         else:
             subswath, pol, metadata = group.split("/", 2)
             with fs.open(groups[group]) as file:
@@ -535,6 +532,10 @@ def open_dataset(
     if len(subgroups):
         product_attrs["subgroups"] = subgroups
     ds.attrs.update(product_attrs)  # type: ignore
+
+    if group.count("/") == 1 and burst_index is not None:
+        ds = crop_burst_dataset(ds, burst_index=burst_index)
+
     conventions.update_attributes(ds, group=metadata)
 
     return ds
