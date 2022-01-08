@@ -248,32 +248,6 @@ def test_open_dataset_chunks() -> None:
     assert not np.all(np.isnan(res.measurement))
 
 
-def test_open_dataset_zip() -> None:
-    zip_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
-    )
-    zip_urlpath = f"zip://*/manifest.safe::{zip_path}"
-    expected_groups = {
-        "IW1",
-        "IW1/VV",
-        "IW1/VV/gcp",
-        "IW1/VV/attitude",
-        "IW1/VV/orbit",
-        "IW1/VV/calibration",
-    }
-
-    res = sentinel1.open_dataset(zip_urlpath)
-
-    assert isinstance(res, xr.Dataset)
-    assert set(res.attrs["subgroups"]) >= expected_groups
-
-    res = sentinel1.open_dataset(zip_urlpath, group="IW1/VV/orbit")
-
-    assert isinstance(res, xr.Dataset)
-    assert res.dims == {"axis": 3, "azimuth_time": 17}
-
-
 def test_crop_burst_dataset() -> None:
     swath_polarisation_ds = sentinel1.open_dataset(SLC_IW, group="IW1/VH")
 
