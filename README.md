@@ -1,19 +1,32 @@
 # xarray-sentinel
 
-Xarray backend to explore and read Copernicus Sentinel-1 SAR data products.
+Easily explore and access the SAR data products of the
+[Copernicus Sentinel-1](https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1)
+satellite mission.
 
 This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
 ## Features
 
-- read SAR imagery data: full image, individual swaths, individual SLC bursts - **Alpha**
-- read metadata: orbit, attitude, GCPs, calibration, dc_estimate, azimuth_fm_rate - **Alpha**
-- supported products:
-  - Sentinel-1 SLC IW (Interferometric Wide Swath): **Alpha**
-  - Sentinel-1 SLC EW (Extended Wide Swath): **Alpha**
-  - Sentinel-1 SLC SM (Stripmap): **Alpha**
-  - Sentinel-1 GRD SM/IW/EW: **technology preview**
-- read uncompressed and compressed SAFE products locally or on a network via *fsspec*
+- creates [Xarray](https://xarray.pydata.org) `Dataset`'s that map the data lazily and efficiently
+  in terms of both memory usage and disk / network access - *alpha*
+- reads SAR imagery data: GRD images, SLC swaths and SLC bursts - *alpha*
+- reads several metadata elements to ready-to-use `Dataset`'s:
+  satellite orbit and attitude, ground control points, radiometric calibration look up tables,
+  Doppler centroid estimation and more - *alpha*
+- supports the following data products as [distributed by ESA](https://scihub.copernicus.eu/dhus/#/home):
+  - Sentinel-1 Single Look Complex (SLC):
+    - Stripmap (SM) - *alpha*
+    - Interferometric Wide Swath (IW) - *alpha*
+    - Extra Wide Swath (EW) - *alpha*
+    - Wave (WV) - *technology preview*
+  - Sentinel-1 Ground Range Detected (GRD) SM/IW/EW/WV - *technology preview*
+- reads uncompressed and compressed SAFE data products on the local computer or
+  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *technology preview*
+- allows larger-than-memory and distributed processing via [*dask*](https://dask.org) - *alpha*
+
+Overall the software is in the **alpha** phase and the usual caveat apply.
+A few features, identified as *technology preview* above, are not usable yet.
 
 ## Install
 
