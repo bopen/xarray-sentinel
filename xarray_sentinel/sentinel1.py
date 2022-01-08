@@ -9,7 +9,7 @@ import pandas as pd  # type: ignore
 import rioxarray  # type: ignore
 import xarray as xr
 
-from xarray_sentinel import conventions, esa_safe
+from . import conventions, esa_safe
 
 
 def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
@@ -487,24 +487,6 @@ def open_dataset(
     conventions.update_attributes(ds, group=metadata)
 
     return ds
-
-
-class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
-    def open_dataset(  # type: ignore
-        self,
-        filename_or_obj: str,
-        drop_variables: T.Optional[T.Tuple[str]] = None,
-        group: T.Optional[str] = None,
-    ) -> xr.Dataset:
-
-        return open_dataset(filename_or_obj, drop_variables=drop_variables, group=group)
-
-    def guess_can_open(self, filename_or_obj: T.Any) -> bool:
-        try:
-            _, ext = os.path.splitext(filename_or_obj)
-        except TypeError:
-            return False
-        return ext.lower() in {".safe", ".safe/"}
 
 
 METADATA_OPENERS = {
