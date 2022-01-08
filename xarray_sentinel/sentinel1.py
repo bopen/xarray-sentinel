@@ -381,7 +381,7 @@ def find_bursts_index(
     pol_dataset: xr.Dataset,
     azimuth_anx_time: float,
     use_center: bool = False,
-) -> T.Any:
+) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     anx_datetime = pol_dataset.attrs["sat_anx_datetime"]
     anx_datetime = np.datetime64(anx_datetime)
@@ -397,7 +397,7 @@ def find_bursts_index(
             pol_dataset.azimuth_time[::lines_per_burst] - anx_datetime
         )
         distance = abs(azimuth_anx_time_first_line - azimuth_anx_time)
-    return distance.argmin().item()
+    return distance.argmin().item()  # type: ignore
 
 
 def crop_burst_dataset(
