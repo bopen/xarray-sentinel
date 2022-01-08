@@ -74,6 +74,9 @@ def test_open_dataset_root() -> None:
 
     assert isinstance(res, xr.Dataset)
 
+    with pytest.raises(ValueError):
+        xr.open_dataset(None)  # type: ignore
+
 
 @pytest.mark.xfail
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_PRODUCTS)
