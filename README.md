@@ -1,17 +1,17 @@
 # xarray-sentinel
 
 Easily explore and access the SAR data products of the
-[Copernicus Sentinel-1](https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1)
-satellite mission.
+[Copernicus Sentinel-1 satellite mission](https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1)
+in Python.
 
 This Open Source project is sponsored by B-Open - https://www.bopen.eu
 
 ## Features
 
-- creates [Xarray](https://xarray.pydata.org) `Dataset`'s that map the data lazily and efficiently
-  in terms of both memory usage and disk / network access - *alpha*
-- reads SAR imagery data: GRD images, SLC swaths and SLC bursts - *alpha*
-- reads several metadata elements to ready-to-use `Dataset`'s:
+- creates ready-to-use [Xarray](https://xarray.pydata.org) `Dataset`'s that map the data
+  lazily and efficiently in terms of both memory usage and disk / network access - *alpha*
+- reads all SAR imagery data: GRD images, SLC swaths and SLC bursts - *alpha*
+- reads several metadata elements:
   satellite orbit and attitude, ground control points, radiometric calibration look up tables,
   Doppler centroid estimation and more - *alpha*
 - supports the following data products as [distributed by ESA](https://scihub.copernicus.eu/dhus/#/home):
@@ -25,48 +25,42 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu
   on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *technology preview*
 - allows larger-than-memory and distributed processing via [*dask*](https://dask.org) - *alpha*
 
-Overall the software is in the **alpha** phase and the usual caveat apply.
-A few features, identified as *technology preview* above, are not usable yet.
+Overall the software is in the **alpha** phase and the usual caveats apply.
+A few features, identified as *technology preview* above, are not fully usable yet.
 
 ## Install
 
-The easiest way to install *xarray-sentinel* is via *conda*.
+The easiest way to install *xarray-sentinel* is in a *conda* environment.
 You may create a new environment, activate it, install the package and its dependencies
 with the following commands:
 
 ```shell
     conda create -n XARRAY-SENTINEL
     conda activate XARRAY-SENTINEL
-    conda install -c conda-forge rioxarray xarray xmlschema
+    conda install -c conda-forge fsspec rioxarray xarray xmlschema
     pip install xarray-sentinel
 ```
 
-## Sentinel-1 SLC IW
+## Usage
 
-### Data
+The SAR data products of the Copernicus Sentinel-1 satellite mission are distributed in
+the SAFE format, composed of a few raster data files in TIFF and several metadata files in XML.
+The aim of *xarray-sentinel* is to provide a developer-friendly Python interface to all data and metadata
+as Xarray `Dataset`'s to enable easy processing of SAR data into value-added products.
 
-Currently, xarray-sentinel provides access as Xarray datasets to the following data:
+Due to the inherent complexity and redundancy of the SAFE format *xarray-sentinel*
+maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
+but it may also contain *subgroups*, that are listed in the `"subgroups"` attribute.
 
-- full image
-- individual swaths
-- individual SLC bursts
-- gcp
-- orbit
-- attitude
-- calibration
-- dc_estimate
-- azimuth_fm_rate
-
-using `azimuth_time` and `slant_range_time` dimensions when it make sense.
-
-## Examples:
-
-### Open the root dataset
+For example let's explore the Sentinel-1 SLC IW product in the local folder
+`./S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE`.
+First we can open the SAR data product by passing the `engine="sentinel-1"` to `xr.open_dataset`
+and we can access the root group of the product, also known as `/`:
 
 ```python-repl
->>> from xarray_sentinel import sentinel1
->>> product_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
->>> sentinel1.open_dataset(product_path)
+>>> import xarray as xr
+>>> slc_iw_path = "./S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+>>> xr.open_dataset(slc_iw_path, engine="sentinel-1")
 <xarray.Dataset>
 Dimensions:  ()
 Data variables:
@@ -88,10 +82,46 @@ Attributes: ...
 
 ```
 
-The attribute `subgroups` shows the available groups to be loaded. The keyword `group`
-shall be used to select the dataset to be loaded.
+The root `Dataset` does not contain any data variable, but only attributes that provides general information
+on the product and a description of the tree structure of the data.
+The attribute `group` contain the name of the current group and the `subgroups` attribute shows
+the names of all available groups below this one.
 
-The groups present in a typical SLC SAFE package are:
+In order to open the other groups we need to add the keyword `group` to `xr.open_dataset`, so
+read the measurement of the VH polarization of first IW swath we will use `group="IW1/VH"`:
+
+```python-repl
+>>> xr.open_dataset(slc_iw_path, group="IW1/VH", engine="sentinel-1")
+<xarray.Dataset>
+Dimensions:           (pixel: 21632, line: 13509)
+Coordinates:
+  * pixel             (pixel) int64 0 1 2 ... 21629 21630 21631
+  * line              (line) int64 0 1 2 ... 13506 13507 13508
+    slant_range_time  (pixel) float64 ...
+    azimuth_time      (line) datetime64[ns] ...
+Data variables:
+    measurement       (line, pixel) complex64 ...
+Attributes: ...
+    azimuth_steering_rate:      1.590368784
+    sar:center_frequency:       5.40500045433435
+    number_of_bursts:           9
+    lines_per_burst:            1501
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    ...                         ...
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VH
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+
+```
+
+
+
+
+For example, the groups present in a typical Sentinel-1 SLC IW product are:
 
 ```
 /
@@ -120,12 +150,32 @@ The groups present in a typical SLC SAFE package are:
 
 ```
 
+## Sentinel-1 SLC IW
+
+### Data
+
+Currently, xarray-sentinel provides access as Xarray datasets to the following data:
+
+- full image
+- individual swaths
+- individual SLC bursts
+- gcp
+- orbit
+- attitude
+- calibration
+- dc_estimate
+- azimuth_fm_rate
+
+using `azimuth_time` and `slant_range_time` dimensions when it make sense.
+
+## Examples:
+
 ### Open the gcp dataset
 
 To load the gcp relative to the VV polarisation of first swath use the key `group="IW1/VV/gcp"`:
 
 ```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/VV/gcp")
+>>> xr.open_dataset(slc_iw_path, group="IW1/VV/gcp", engine="sentinel-1")
 <xarray.Dataset>
 Dimensions:           (azimuth_time: 10, slant_range_time: 21)
 Coordinates:
@@ -259,38 +309,6 @@ Attributes: ...
 
 ### Open a single swath / polarisation dataset
 
-Finally the measurement data is found in a swath / polarisation groups accessed for
-example as `group="IW1/VV"` for the VV polarisation of the first IW swath:
-
-```python-repl
->>> swath_polarisation_ds = sentinel1.open_dataset(product_path, group="IW1/VV")
->>> swath_polarisation_ds
-<xarray.Dataset>
-Dimensions:           (pixel: 21632, line: 13509)
-Coordinates:
-  * pixel             (pixel) int64 0 1 2 ... 21629 21630 21631
-  * line              (line) int64 0 1 2 ... 13506 13507 13508
-    slant_range_time  (pixel) float64 0.005343 0.005343 ... 0.005679 0.005679
-    azimuth_time      (line) datetime64[ns] 2021-04-01T05:26:24.209990 ...
-Data variables:
-    measurement       (line, pixel) complex64 ...
-Attributes: ...
-    azimuth_steering_rate:      1.590368784
-    sar:center_frequency:       5.40500045433435
-    number_of_bursts:           9
-    lines_per_burst:            1501
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
-    ...                         ...
-    sar:product_type:           SLC
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VV
-    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
-
-```
-
 ### Crop single SLC burst dataset
 
 A single burst can be cropped out of the swath data. *xarray_sentinel* offer an helper function
@@ -347,14 +365,14 @@ testing, bug reports and contributions are highly welcomed and appreciated:
 
 https://github.com/bopen/xarray-sentinel
 
-Lead developer:
+Lead developers:
 
-- [Aureliana Barghini](https://github.com/aurghs) - [B-Open](https://www.bopen.eu/)
+- [Aureliana Barghini](https://github.com/aurghs) - [B-Open](https://www.bopen.eu)
+- [Alessandro Amici](https://github.com/alexamici) - [B-Open](https://www.bopen.eu)
 
 Main contributors:
 
-- [Alessandro Amici](https://github.com/alexamici) - [B-Open](https://www.bopen.eu/)
-- [Corrado Avolio](https://github.com/corrado9999) - [e-GEOS](https://www.e-geos.it/)
+- [Corrado Avolio](https://github.com/corrado9999) - [e-GEOS](https://www.e-geos.it)
 
 See also the list of [contributors](https://github.com/bopen/xarray-sentinel/contributors) who participated in this project.
 
