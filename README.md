@@ -280,7 +280,8 @@ Note that the helper function also performs additional changes like swapping the
 to the physical coordinates and adding burst attributes.
 
 As a quick way to access burst data you can add the `burst_index` to the group specification on
-open. The burst groups are not listed in the `subgroup` attribute because they are not structural.
+open, for example `group="IW1/VH/8"`.
+The burst groups are not listed in the `subgroup` attribute because they are not structural.
 
 ```python-repl
 >>> xr.open_dataset(slc_iw1, group="IW1/VH/8", engine="sentinel-1")
