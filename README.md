@@ -53,6 +53,9 @@ Due to the inherent complexity and redundancy of the SAFE format *xarray-sentine
 maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
 but it may also contain *subgroups*, that are listed in the `"subgroups"` attribute.
 
+
+### Open the root dataset
+
 For example let's explore the Sentinel-1 SLC Stripmap product in the local folder
 `./S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE`.
 First we can open the SAR data product by passing the `engine="sentinel-1"` to `xr.open_dataset`
@@ -88,8 +91,12 @@ on the product and a description of the tree structure of the data.
 The attribute `group` contain the name of the current group and the `subgroups` attribute shows
 the names of all available groups below this one.
 
+
+### Open the measurements datasets
+
 In order to open the other groups we need to add the keyword `group` to `xr.open_dataset`, so
-read the measurement of the VH polarization of first IW swath we will use `group="S3/VH"`:
+read the measurement we need to select the mean mode and the polarization.
+In this example the data contains the S3 beam mode and we select the VH polarization with `group="S3/VH"`:
 
 ```python-repl
 >>> xr.open_dataset(slc_iw_path, group="S3/VH", engine="sentinel-1")
@@ -119,7 +126,15 @@ Attributes: ...
 
 ```
 
-For example, the groups present in a typical Sentinel-1 SLC Stripmap product are:
+The `measurement` variable contains the measurement data as `complex64` and it has dimensions 
+`("slant_range_time", "azimuth_time")`. The `"azimuth_time"` is a time coordinates that contain
+the zero-Dopper UTC time associated with the line and `slant_range_time` is a `np.float64`
+coordinate that contain the two-way range time associated with the pixel.
+
+
+### Open the metadata datasets
+
+The groups present in a typical Sentinel-1 SLC Stripmap product are:
 
 ```
 /
