@@ -372,7 +372,50 @@ def open_pol_dataset(
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
 
-def crop_burst_dataset(pol_dataset: xr.Dataset, burst_index: int) -> xr.Dataset:
+def find_bursts_index(
+    pol_dataset: xr.Dataset,
+    azimuth_anx_time: float,
+    use_center: bool = False,
+) -> int:
+    lines_per_burst = pol_dataset.attrs["lines_per_burst"]
+    sat_anx_datetime = pol_dataset.attrs["sat:anx_datetime"]
+    sat_anx_datetime = np.datetime64(sat_anx_datetime)
+    azimuth_anx_time = pd.Timedelta(azimuth_anx_time, unit="s")
+    if use_center:
+        azimuth_anx_time_center = (
+            pol_dataset.azimuth_time[lines_per_burst // 2 :: lines_per_burst]
+            - sat_anx_datetime
+        )
+        distance = abs(azimuth_anx_time_center - azimuth_anx_time)
+    else:
+        azimuth_anx_time_first_line = (
+            pol_dataset.azimuth_time[::lines_per_burst] - sat_anx_datetime
+        )
+        distance = abs(azimuth_anx_time_first_line - azimuth_anx_time)
+    return distance.argmin().item()  # type: ignore
+
+
+def crop_burst_dataset(
+    pol_dataset: xr.Dataset,
+    burst_index: T.Optional[int] = None,
+    azimuth_anx_time: T.Optional[float] = None,
+    use_center: bool = False,
+) -> xr.Dataset:
+    if (burst_index is not None) and (azimuth_anx_time is not None):
+        raise ValueError(
+            "only one keyword between 'index' and 'azimuth_anx_time' must be defined"
+        )
+
+    if burst_index is None:
+        if azimuth_anx_time is not None:
+            burst_index = find_bursts_index(
+                pol_dataset, azimuth_anx_time, use_center=use_center
+            )
+        else:
+            raise ValueError(
+                "one keyword between 'index' and 'azimuth_anx_time' must be defined"
+            )
+
     if burst_index < 0 or burst_index >= pol_dataset.attrs["number_of_bursts"]:
         raise IndexError(f"{burst_index=} out of bounds")
 
@@ -382,6 +425,13 @@ def crop_burst_dataset(pol_dataset: xr.Dataset, burst_index: int) -> xr.Dataset:
             lines_per_burst * burst_index, lines_per_burst * (burst_index + 1) - 1
         )
     )
+
+    sat_anx_datetime = pol_dataset.attrs["sat:anx_datetime"]
+    sat_anx_datetime = np.datetime64(sat_anx_datetime)
+    burst_azimuth_anx_times = ds.azimuth_time - sat_anx_datetime
+    ds.attrs["azimuth_anx_time"] = (
+        burst_azimuth_anx_times / np.timedelta64(1, "s")
+    ).item(0)
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
     ds.attrs["burst_index"] = burst_index
 
@@ -473,8 +523,6 @@ def open_dataset(
                 ancillary_data_paths[subswath][pol]["s1Level1ProductSchema"],
                 chunks=chunks,
             )
-            if burst_index is not None:
-                ds = crop_burst_dataset(ds, burst_index=burst_index)
         else:
             subswath, pol, metadata = group.split("/", 2)
             with fs.open(groups[group]) as file:
@@ -484,6 +532,10 @@ def open_dataset(
     if len(subgroups):
         product_attrs["subgroups"] = subgroups
     ds.attrs.update(product_attrs)  # type: ignore
+
+    if group.count("/") == 1 and burst_index is not None:
+        ds = crop_burst_dataset(ds, burst_index=burst_index)
+
     conventions.update_attributes(ds, group=metadata)
 
     return ds
