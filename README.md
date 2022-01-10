@@ -53,7 +53,7 @@ Due to the inherent complexity and redundancy of the SAFE format *xarray-sentine
 maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
 but it may also contain *subgroups*, that are listed in the `subgroups` attribute.
 
-### Open the root dataset
+### The root dataset
 
 For example let's explore the Sentinel-1 SLC Stripmap product in the local folder
 `./S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE`.
@@ -90,7 +90,7 @@ on the product and a description of the tree structure of the data.
 The attribute `group` contains the name of the current group and the `subgroups` attribute shows
 the names of all available groups below this one.
 
-### Open the measurements datasets
+### Measurements datasets
 
 To open the other groups we need to add the keyword `group` to `xr.open_dataset`.
 So we can read the measurement by selecting the desired beam mode and the polarization,
@@ -131,7 +131,7 @@ associated with the image line
 and `slant_range_time` is an `np.float64` coordinate that contains the two-way range time interval
 in seconds associated with the image pixel.
 
-### Open the metadata datasets
+### Metadata datasets
 
 The measurement group contains several subgroups with metadata associated with the image, at the moment
 *xarray-sentinel* supports the following metadata datasets:
@@ -203,9 +203,9 @@ The groups present in a typical Sentinel-1 SLC Stripmap product are:
 
 ## Advanced usage
 
-Products representing the TOPS acquisition modes, IW and EW, are more complex because they contain
-several beam modes in the same SAFE package, but also because the measurement array is a collage
-of sub-images called *bursts*.
+The IW and EW products, that use the Terrain Observation with Progressive Scan (TOPS) acquisition mode,
+are more complex because they contain several beam modes in the same SAFE package,
+but also because the measurement array is a collage of sub-images called *bursts*.
 
 *xarray-sentinel* provides a helper function that crops a burst out of a measurement dataset for you.
 
