@@ -210,28 +210,28 @@ def test_open_dataset() -> None:
         "IW1/VV/calibration",
     }
 
-    res = sentinel1.open_dataset(SLC_IW)
+    res = sentinel1.open_sentinel1_dataset(SLC_IW)
 
     assert isinstance(res, xr.Dataset)
     assert len(res.data_vars) == 0
     assert set(res.attrs["subgroups"]) >= expected_groups
 
-    res = sentinel1.open_dataset(SLC_IW, group="IW1")
+    res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1")
 
     assert isinstance(res, xr.Dataset)
     assert len(res.data_vars) == 0
 
-    res = sentinel1.open_dataset(SLC_IW, group="IW1/VV/orbit")
+    res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/orbit")
 
     assert isinstance(res, xr.Dataset)
     assert res.dims == {"axis": 3, "azimuth_time": 17}
 
     with pytest.raises(ValueError):
-        sentinel1.open_dataset(SLC_IW, group="IW1/VV/non-existent")
+        sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/non-existent")
 
 
 def test_open_dataset_virtual_groups() -> None:
-    res = sentinel1.open_dataset(SLC_IW, group="IW1/VV/0")
+    res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/0")
 
     assert isinstance(res, xr.Dataset)
     assert len(res.data_vars) == 1
@@ -239,7 +239,7 @@ def test_open_dataset_virtual_groups() -> None:
 
 
 def test_open_dataset_chunks() -> None:
-    res = sentinel1.open_dataset(SLC_IW, group="IW1/VV", chunks=1000)
+    res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV", chunks=1000)
 
     assert isinstance(res, xr.Dataset)
     assert len(res.dims) == 2
@@ -249,7 +249,7 @@ def test_open_dataset_chunks() -> None:
 
 
 def test_crop_burst_dataset() -> None:
-    swath_polarisation_ds = sentinel1.open_dataset(SLC_IW, group="IW1/VH")
+    swath_polarisation_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
 
     res = sentinel1.crop_burst_dataset(swath_polarisation_ds, 8)
 

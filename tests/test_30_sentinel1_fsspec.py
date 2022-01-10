@@ -64,12 +64,12 @@ def test_open_dataset_zip() -> None:
         "IW1/VV/calibration",
     }
 
-    res = sentinel1.open_dataset(zip_urlpath)
+    res = sentinel1.open_sentinel1_dataset(zip_urlpath)
 
     assert isinstance(res, xr.Dataset)
     assert set(res.attrs["subgroups"]) >= expected_groups
 
-    res = sentinel1.open_dataset(zip_urlpath, group="IW1/VV/orbit")
+    res = sentinel1.open_sentinel1_dataset(zip_urlpath, group="IW1/VV/orbit")
 
     assert isinstance(res, xr.Dataset)
     assert res.dims == {"axis": 3, "azimuth_time": 17}

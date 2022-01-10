@@ -20,6 +20,6 @@ except ImportError:  # pragma: no cover
     # Local copy or not installed with setuptools
     __version__ = "999"
 
-from .sentinel1 import crop_burst_dataset
+from .sentinel1 import crop_burst_dataset, open_sentinel1_dataset
 
-__all__ = ["__version__", "crop_burst_dataset"]
+__all__ = ["__version__", "crop_burst_dataset", "open_sentinel1_dataset"]

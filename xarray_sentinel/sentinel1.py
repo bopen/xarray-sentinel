@@ -471,7 +471,7 @@ def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
     return group, burst_index
 
 
-def open_dataset(
+def open_sentinel1_dataset(
     product_urlpath: esa_safe.PathType,
     *,
     drop_variables: T.Optional[T.Tuple[str]] = None,
