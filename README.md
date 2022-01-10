@@ -284,12 +284,12 @@ open, for example `group="IW1/VH/8"`.
 The burst groups are not listed in the `subgroup` attribute because they are not structural.
 
 ```python-repl
->>> xr.open_dataset(slc_iw1, group="IW1/VH/8", engine="sentinel-1")
+>>> xr.open_dataset(slc_iw_path, group="IW1/VH/8", engine="sentinel-1")
 <xarray.Dataset>
 Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
 Coordinates:
-    pixel             (slant_range_time) int64 0 1 2 3 ... 21629 21630 21631
-    line              (azimuth_time) int64 12008 12009 12010 ... 13507 13508
+    pixel             (slant_range_time) int64 ...
+    line              (azimuth_time) int64 ...
   * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:46.27227...
 Data variables:
@@ -304,13 +304,12 @@ Attributes: (12/22)
     ...                         ...
     group:                      /IW1/VH
     subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-0.1.2.dev189+gf816...
     azimuth_anx_time:           2210.634453
     burst_index:                8
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-0.1.2.dev189+gf816...
 
 ```
-
 
 ## Project badges
 
