@@ -46,7 +46,7 @@ with the following commands:
 The SAR data products of the Copernicus Sentinel-1 satellite mission are distributed in
 the SAFE format, composed of a few raster data files in TIFF and several metadata files in XML.
 The aim of *xarray-sentinel* is to provide a developer-friendly Python interface to all data and
-several metadata elements as Xarray `Dataset`s in order to enable easy processing of SAR data
+several metadata elements as Xarray `Dataset`s to enable easy processing of SAR data
 into value-added products.
 
 Due to the inherent complexity and redundancy of the SAFE format *xarray-sentinel*
@@ -57,8 +57,8 @@ but it may also contain *subgroups*, that are listed in the `subgroups` attribut
 
 For example let's explore the Sentinel-1 SLC Stripmap product in the local folder
 `./S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE`.
-First we can open the SAR data product by passing the `engine="sentinel-1"` to `xr.open_dataset`
-and we can access the root group of the product, also known as `/`:
+First, we can open the SAR data product by passing the `engine="sentinel-1"` option to `xr.open_dataset`
+and access the root group of the product, also known as `/`:
 
 ```python-repl
 >>> import xarray as xr
@@ -85,15 +85,15 @@ Attributes: ...
 
 ```
 
-The root `Dataset` does not contain any data variable, but only attributes that provides general information
+The root `Dataset` does not contain any data variable, but only attributes that provide general information
 on the product and a description of the tree structure of the data.
 The attribute `group` contains the name of the current group and the `subgroups` attribute shows
 the names of all available groups below this one.
 
 ### Open the measurements datasets
 
-In order to open the other groups we need to add the keyword `group` to `xr.open_dataset`.
-So we can read the measurement by selecting the desired bean mode and the polarization,
+To open the other groups we need to add the keyword `group` to `xr.open_dataset`.
+So we can read the measurement by selecting the desired beam mode and the polarization,
 in this example the data contains the S3 beam mode and we select the VH polarization with `group="S3/VH"`:
 
 ```python-repl
@@ -126,13 +126,14 @@ Attributes: ...
 
 The `measurement` variable contains the Single Look Complex measurements as a `complex64`
 and it has dimensions `slant_range_time` and `azimuth_time`.
-The `azimuth_time` is a time coordinates that contains the zero-Dopper UTC time associated with the image line
-and `slant_range_time` is a `np.float64` coordinate that contains the two-ways range time in seconds
-associated with image the pixel.
+The `azimuth_time` is an `np.datetime64` coordinate that contains the UTC zero-Dopper time
+associated with the image line
+and `slant_range_time` is an `np.float64` coordinate that contains the two-way range time interval
+in seconds associated with the image pixel.
 
 ### Open the metadata datasets
 
-The measurement group contains several subgroups with metadata associated to the image, at the moment
+The measurement group contains several subgroups with metadata associated with the image, at the moment
 *xarray-sentinel* supports the following metadata datasets:
 
 - `gcp` from the `<geolocationGridPoint>` tags in the annotation XML
@@ -142,7 +143,7 @@ The measurement group contains several subgroups with metadata associated to the
 - `azimuth_fm_rate` from the `<azimuthFmRate>` tags in the annotation XML
 - `calibration` from the `<calibrationVector>` tags in the calibration XML
 
-For example the image calibration metadata associated with the `S3/VH` image can be read using
+For example, the image calibration metadata associated with the `S3/VH` image can be read using
 `group="S3/VH/calibration"`:
 
 ```python-repl
@@ -175,7 +176,7 @@ Attributes: ...
 
 ```
 
-Note that in this case the dimensions are `line` and `pixel` with coordinates corresponding to
+Note that in this case, the dimensions are `line` and `pixel` with coordinates corresponding to
 the sub-grid of the original image where it is defined the calibration Look Up Table.
 
 The groups present in a typical Sentinel-1 SLC Stripmap product are:
@@ -208,7 +209,7 @@ of sub-images called *bursts*.
 
 *xarray-sentinel* provides a helper function that crops a burst out of a measurement dataset for you.
 
-You need to first open the desired measurement dataset, for example the VH polarisation
+You need to first open the desired measurement dataset, for example, the VH polarisation
 of the first IW swath of the `S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4`
 product in the current folder:
 
@@ -276,11 +277,11 @@ Attributes: (12/22)
 
 ```
 
-Note that the helper function also performs additional changes like swapping the dimenstions
+Note that the helper function also performs additional changes like swapping the dimensions
 to the physical coordinates and adding burst attributes.
 
-As a quick way to access burst data you can add the `burst_index` to the group specification on
-open, for example `group="IW1/VH/8"`.
+As a quick way to access burst data, you can add the `burst_index` to the group specification on
+open, for example, `group="IW1/VH/8"`.
 The burst groups are not listed in the `subgroup` attribute because they are not structural.
 
 ```python-repl
@@ -313,9 +314,10 @@ Attributes: (12/22)
 
 ## Design decisions
 
-- For datasets attributes ww aim at STAC Index and CF-Conventions compliance in this order.
+- For datasets attributes we aim at STAC Index and CF-Conventions compliance in this order.
 - We try to keep all naming as close as possible to the original names,
-  in particular for metadata we use the names of the XML tags, only converting them to snake case.
+  in particular, for metadata we use the names of the XML tags, only converting them
+  from *camelCase* to *snake_case*.
 - We aim at opening available data and metadata even for partial SAFE packages, for example
   *xarray-sentinel* can open a measurement dataset even when the TIFF files of the other
   beam modes / polarization are missing.
