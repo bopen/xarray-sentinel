@@ -328,7 +328,6 @@ def open_pol_dataset(
         freq=pd.to_timedelta(azimuth_time_interval, "s"),
     ).values
     attrs = {
-        "azimuth_steering_rate": product_information["azimuthSteeringRate"],
         "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
     }
 
@@ -337,6 +336,7 @@ def open_pol_dataset(
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
             {
+                "azimuth_steering_rate": product_information["azimuthSteeringRate"],
                 "number_of_bursts": number_of_bursts,
                 "lines_per_burst": lines_per_burst,
             }
