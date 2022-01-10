@@ -15,7 +15,7 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu.
     - Extra Wide Swath (EW) - *alpha*
     - Wave (WV) - *technology preview*
   - Sentinel-1 Ground Range Detected (GRD) SM/IW/EW/WV - *technology preview*
-- creates ready-to-use [Xarray](https://xarray.pydata.org) `Dataset`'s that map the data
+- creates ready-to-use [Xarray](https://xarray.pydata.org) `Dataset`s that map the data
   lazily and efficiently in terms of both memory usage and disk / network access - *alpha*
 - reads all SAR imagery data: GRD images, SLC swaths and SLC bursts - *alpha*
 - reads several metadata elements:
@@ -46,7 +46,7 @@ with the following commands:
 The SAR data products of the Copernicus Sentinel-1 satellite mission are distributed in
 the SAFE format, composed of a few raster data files in TIFF and several metadata files in XML.
 The aim of *xarray-sentinel* is to provide a developer-friendly Python interface to all data and
-several metadata elements as Xarray `Dataset`'s in order to enable easy processing of SAR data
+several metadata elements as Xarray `Dataset`s in order to enable easy processing of SAR data
 into value-added products.
 
 Due to the inherent complexity and redundancy of the SAFE format *xarray-sentinel*
@@ -87,7 +87,7 @@ Attributes: ...
 
 The root `Dataset` does not contain any data variable, but only attributes that provides general information
 on the product and a description of the tree structure of the data.
-The attribute `group` contain the name of the current group and the `subgroups` attribute shows
+The attribute `group` contains the name of the current group and the `subgroups` attribute shows
 the names of all available groups below this one.
 
 ### Open the measurements datasets
@@ -126,13 +126,13 @@ Attributes: ...
 
 The `measurement` variable contains the Single Look Complex measurements as a `complex64`
 and it has dimensions `slant_range_time` and `azimuth_time`.
-The `azimuth_time` is a time coordinates that contain the zero-Dopper UTC time associated with the image line
-and `slant_range_time` is a `np.float64` coordinate that contain the two-ways range time associated with
+The `azimuth_time` is a time coordinates that contains the zero-Dopper UTC time associated with the image line
+and `slant_range_time` is a `np.float64` coordinate that contains the two-ways range time associated with
 image the pixel.
 
 ### Open the metadata datasets
 
-The measurement group contain several subgroups with metadata associated to the image, at the moment
+The measurement group contains several subgroups with metadata associated to the image, at the moment
 *xarray-sentinel* supports the following metadata datasets:
 
 - `gcp` from the `<geolocationGridPoint>` tags in the annotation XML
@@ -203,10 +203,10 @@ The groups present in a typical Sentinel-1 SLC Stripmap product are:
 ## Advanced usage
 
 Products representing the TOPS acquisition modes, IW and EW, are more complex because they contain
-several beam mode in the same SAFE package, but also becasue the measurement array is a collage
+several beam modes in the same SAFE package, but also because the measurement array is a collage
 of sub-images called *bursts*.
 
-*xarray-sentinel* provides a helper function that crops a burst out of a measurement datasets for you.
+*xarray-sentinel* provides a helper function that crops a burst out of a measurement dataset for you.
 
 You need to first open the desired measurement dataset, for example the VH polarisation
 of the first IW swath of the `S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4`
