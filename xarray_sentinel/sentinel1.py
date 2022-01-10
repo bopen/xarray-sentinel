@@ -4,7 +4,6 @@ import warnings
 
 import fsspec  # type: ignore
 import numpy as np
-import numpy.typing as NT
 import pandas as pd  # type: ignore
 import rioxarray  # type: ignore
 import xarray as xr
@@ -64,18 +63,18 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
     sr0 = []
     azimuth_time = []
     slant_range_time = []
-    srgrCoefficients: T.List[NT.NDArray[np.float_]] = []
-    grsrCoefficients: T.List[NT.NDArray[np.float_]] = []
+    srgrCoefficients: T.List[T.List[float]] = []
+    grsrCoefficients: T.List[T.List[float]] = []
     for values in coordinate_conversion["coordinateConversion"]:
         sr0.append(values["sr0"])
         gr0.append(values["gr0"])
         azimuth_time.append(values["azimuthTime"])
         slant_range_time.append(values["slantRangeTime"])
         srgrCoefficients.append(
-            np.fromstring(values["srgrCoefficients"]["$"], dtype=float, sep=" ")
+            [float(v) for v in values["srgrCoefficients"]["$"].split()]
         )
         grsrCoefficients.append(
-            np.fromstring(values["grsrCoefficients"]["$"], dtype=float, sep=" ")
+            [float(v) for v in values["grsrCoefficients"]["$"].split()]
         )
 
     coords = {
@@ -325,7 +324,7 @@ def open_pol_dataset(
     azimuth_time = pd.date_range(
         start=first_azimuth_time,
         periods=number_of_lines,
-        freq=pd.to_timedelta(azimuth_time_interval, "s"),
+        freq=pd.Timedelta(azimuth_time_interval, "s"),
     ).values
     attrs = {
         "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
@@ -346,7 +345,7 @@ def open_pol_dataset(
             azimuth_time_burst = pd.date_range(
                 start=first_azimuth_time_burst,
                 periods=lines_per_burst,
-                freq=pd.to_timedelta(azimuth_time_interval, "s"),
+                freq=pd.Timedelta(azimuth_time_interval, "s"),
             )
             azimuth_time[
                 lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
@@ -448,12 +447,12 @@ def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
 
 def compute_burst_centres(
     gcp: xr.Dataset,
-) -> T.Tuple[NT.NDArray[np.float_], NT.NDArray[np.float_]]:
+) -> T.Tuple[T.List[float], T.List[float]]:
     gcp_rolling = gcp.rolling(azimuth_time=2, min_periods=1)
     gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
     centre = gc_az_win.mean(["az_win", "slant_range_time"])
     centre = centre.isel(azimuth_time=slice(1, None))
-    return centre.latitude.values, centre.longitude.values
+    return centre.latitude.values.tolist(), centre.longitude.values.tolist()
 
 
 def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
