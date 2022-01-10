@@ -51,7 +51,7 @@ into value-added products.
 
 Due to the inherent complexity and redundancy of the SAFE format *xarray-sentinel*
 maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
-but it may also contain *subgroups*, that are listed in the `"subgroups"` attribute.
+but it may also contain *subgroups*, that are listed in the `subgroups` attribute.
 
 ### Open the root dataset
 
@@ -127,8 +127,8 @@ Attributes: ...
 The `measurement` variable contains the Single Look Complex measurements as a `complex64`
 and it has dimensions `slant_range_time` and `azimuth_time`.
 The `azimuth_time` is a time coordinates that contains the zero-Dopper UTC time associated with the image line
-and `slant_range_time` is a `np.float64` coordinate that contains the two-ways range time associated with
-image the pixel.
+and `slant_range_time` is a `np.float64` coordinate that contains the two-ways range time in seconds
+associated with image the pixel.
 
 ### Open the metadata datasets
 
@@ -310,6 +310,23 @@ Attributes: (12/22)
     history:                    created by xarray_sentinel-...
 
 ```
+
+## Design decisions
+
+- For datasets attributes ww aim at STAC Index and CF-Conventions compliance in this order.
+- We try to keep all naming as close as possible to the original names,
+  in particular for metadata we use the names of the XML tags, only converting them to snake case.
+- We aim at opening available data and metadata even for partial SAFE packages, for example
+  *xarray-sentinel* can open a measurement dataset even when the TIFF files of the other
+  beam modes / polarization are missing.
+- Some accuracy considerations
+  - `azimuth_time` can be expressed as `np.datetime64[ns]` because
+    spatial resolution at LEO speed is 10km/s * 1ns ~= 0.001cm
+  - `slant_range_time` on the other hand cannot be expressed as `np.timedelta64[ns]` because
+    spatial resolution at the speed of light is 300_000km/s * 1ns / 2 ~= 15cm,
+    that it is not enough for interferometric applications.
+    `slant_range_time` needs a spatial resolution of 0.001cm at a 1_000km distance
+    so around 1e-9 that is well within 1e-15 resolution of IEEE-754 float64.
 
 ## Project badges
 
