@@ -8,25 +8,25 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu.
 
 ## Features
 
+Overall the software is in the **alpha** phase and the usual caveats apply.
+A few features, identified as *technology preview* below, are not fully usable yet.
+
 - supports the following data products as [distributed by ESA](https://scihub.copernicus.eu/dhus/#/home):
   - Sentinel-1 Single Look Complex (SLC):
-    - Stripmap (SM) - *alpha*
-    - Interferometric Wide Swath (IW) - *alpha*
-    - Extra Wide Swath (EW) - *alpha*
+    - Stripmap (SM)
+    - Interferometric Wide Swath (IW)
+    - Extra Wide Swath (EW)
     - Wave (WV) - *technology preview*
   - Sentinel-1 Ground Range Detected (GRD) SM/IW/EW/WV - *technology preview*
 - creates ready-to-use [Xarray](https://xarray.pydata.org) `Dataset`s that map the data
-  lazily and efficiently in terms of both memory usage and disk / network access - *alpha*
-- reads all SAR imagery data: GRD images, SLC swaths and SLC bursts - *alpha*
+  lazily and efficiently in terms of both memory usage and disk / network access
+- reads all SAR imagery data: GRD images, SLC swaths and SLC bursts
 - reads several metadata elements:
   satellite orbit and attitude, ground control points, radiometric calibration look up tables,
-  Doppler centroid estimation and more - *alpha*
+  Doppler centroid estimation and more
 - reads uncompressed and compressed SAFE data products on the local computer or
   on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *technology preview*
-- allows larger-than-memory and distributed processing via [*dask*](https://dask.org) - *alpha*
-
-Overall the software is in the **alpha** phase and the usual caveats apply.
-A few features, identified as *technology preview* above, are not fully usable yet.
+- allows larger-than-memory and distributed processing via [*dask*](https://dask.org)
 
 ## Install
 
