@@ -1,4 +1,4 @@
-# Copyright 2021, B-Open Solutions srl and the xarray-sentinel authors.
+# Copyright 2021-2022, B-Open Solutions srl and the xarray-sentinel authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

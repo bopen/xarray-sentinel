@@ -4,7 +4,7 @@ Easily explore and access the SAR data products of the
 [Copernicus Sentinel-1 satellite mission](https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1)
 in Python.
 
-This Open Source project is sponsored by B-Open - https://www.bopen.eu
+This Open Source project is sponsored by B-Open - https://www.bopen.eu.
 
 ## Features
 
@@ -92,9 +92,9 @@ the names of all available groups below this one.
 
 ### Open the measurements datasets
 
-In order to open the other groups we need to add the keyword `group` to `xr.open_dataset`, so
-read the measurement we need to select the mean mode and the polarization.
-In this example the data contains the S3 beam mode and we select the VH polarization with `group="S3/VH"`:
+In order to open the other groups we need to add the keyword `group` to `xr.open_dataset`.
+So we can read the measurement by selecting the desired bean mode and the polarization,
+in this example the data contains the S3 beam mode and we select the VH polarization with `group="S3/VH"`:
 
 ```python-repl
 >>> xr.open_dataset(slc_sm_path, group="S3/VH", engine="sentinel-1")
@@ -125,8 +125,8 @@ Attributes: ...
 ```
 
 The `measurement` variable contains the Single Look Complex measurements as a `complex64`
-and it has dimensions `("slant_range_time", "azimuth_time")`.
-The `"azimuth_time"` is a time coordinates that contain the zero-Dopper UTC time associated with the image line
+and it has dimensions `slant_range_time` and `azimuth_time`.
+The `azimuth_time` is a time coordinates that contain the zero-Dopper UTC time associated with the image line
 and `slant_range_time` is a `np.float64` coordinate that contain the two-ways range time associated with
 image the pixel.
 
@@ -175,7 +175,7 @@ Attributes: ...
 
 ```
 
-Note that in this case the dimensions are `("line", "pixel")` with coordinates corresponding to
+Note that in this case the dimensions are `line` and `pixel` with coordinates corresponding to
 the sub-grid of the original image where it is defined the calibration Look Up Table.
 
 The groups present in a typical Sentinel-1 SLC Stripmap product are:
@@ -338,7 +338,7 @@ See also the list of [contributors](https://github.com/bopen/xarray-sentinel/con
 ## License
 
 ```
-Copyright 2021, B-Open Solutions srl and the xarray-sentinel authors.
+Copyright 2021-2022, B-Open Solutions srl and the xarray-sentinel authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
