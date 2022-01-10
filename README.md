@@ -132,8 +132,18 @@ image the pixel.
 
 ### Open the metadata datasets
 
-The measurement group contain several subgroups with metadata associated to the image, for example
-the image calibration metadata associated with the `S3/VH` iamge can be read using `group="S3/VH/calibration"`:
+The measurement group contain several subgroups with metadata associated to the image, at the moment
+*xarray-sentinel* supports the following metadata datasets:
+
+- `gcp` from the `<geolocationGridPoint>` tags in the annotation XML
+- `orbit` from the `<orbit>` tags in the annotation XML
+- `attitude` from the `<attitude>` tags in the annotation XML
+- `cd_estimate` from the `<dcEstimate>` tags in the annotation XML
+- `azimuth_fm_rate` from the `<azimuthFmRate>` tags in the annotation XML
+- `calibration` from the `<calibrationVector>` tags in the calibration XML
+
+For example the image calibration metadata associated with the `S3/VH` image can be read using
+`group="S3/VH/calibration"`:
 
 ```python-repl
 >>> xr.open_dataset(slc_sm_path, group="S3/VH/calibration", engine="sentinel-1")
@@ -190,17 +200,56 @@ The groups present in a typical Sentinel-1 SLC Stripmap product are:
 
 ```
 
-## Sentinel-1 SLC IW
+## Advanced usage
 
-### Open a single swath / polarisation dataset
+Products representing the TOPS acquisition modes, IW and EW, are more complex because they contain
+several beam mode in the same SAFE package, but also becasue the measurement array is a collage
+of sub-images called *bursts*.
 
-### Crop single SLC burst dataset
+*xarray-sentinel* provides a helper function that crops a burst out of a measurement datasets for you.
 
-A single burst can be cropped out of the swath data. *xarray_sentinel* offer an helper function
-that also performs additional changes like swapping the dimenstions:
+You need to first open the desired measurement dataset, for example the VH polarisation
+of the first IW swath of the `S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4`
+product in the current folder:
 
 ```python-repl
->>> sentinel1.crop_burst_dataset(swath_polarisation_ds, burst_index=8)
+>>> slc_iw_path = "./S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+>>> slc_iw1_vh = xr.open_dataset(slc_iw_path, group="IW1/VH", engine="sentinel-1")
+>>> slc_iw1_vh
+<xarray.Dataset>
+Dimensions:           (pixel: 21632, line: 13509)
+Coordinates:
+  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
+  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+    slant_range_time  (pixel) float64 ...
+    azimuth_time      (line) datetime64[ns] ...
+Data variables:
+    measurement       (line, pixel) complex64 ...
+Attributes: (12/20)
+    sar:center_frequency:       5.40500045433435
+    azimuth_steering_rate:      1.590368784
+    number_of_bursts:           9
+    lines_per_burst:            1501
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    ...                         ...
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VH
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+
+```
+
+Note that the measurement data for IW and EW acquisition modes can not be indexed by physical
+coordinates because of the collage nature of the image.
+
+Now the 9th burst out of 9 can be cropped from the swath data using `burst_index=8`, via:
+
+```python-repl
+>>> import xarray_sentinel
+>>> xarray_sentinel.crop_burst_dataset(slc_iw1_vh, burst_index=8)
 <xarray.Dataset>
 Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
 Coordinates:
@@ -210,22 +259,57 @@ Coordinates:
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:46.27227...
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
-Attributes: ...
-    azimuth_steering_rate:      1.590368784
+Attributes: (12/22)
     sar:center_frequency:       5.40500045433435
+    azimuth_steering_rate:      1.590368784
     number_of_bursts:           9
     lines_per_burst:            1501
     constellation:              sentinel-1
     platform:                   sentinel-1b
     ...                         ...
-    group:                      /IW1/VV
+    group:                      /IW1/VH
     subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
     Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+    history:                    created by xarray_sentinel-0.1.2.dev189+gf816...
     azimuth_anx_time:           2210.634453
     burst_index:                8
 
 ```
+
+Note that the helper function also performs additional changes like swapping the dimenstions
+to the physical coordinates and adding burst attributes.
+
+As a quick way to access burst data you can add the `burst_index` to the group specification on
+open. The burst groups are not listed in the `subgroup` attribute because they are not structural.
+
+```python-repl
+>>> xr.open_dataset(slc_iw1, group="IW1/VH/8", engine="sentinel-1")
+<xarray.Dataset>
+Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
+Coordinates:
+    pixel             (slant_range_time) int64 0 1 2 3 ... 21629 21630 21631
+    line              (azimuth_time) int64 12008 12009 12010 ... 13507 13508
+  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
+  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:46.27227...
+Data variables:
+    measurement       (azimuth_time, slant_range_time) complex64 ...
+Attributes: (12/22)
+    sar:center_frequency:       5.40500045433435
+    azimuth_steering_rate:      1.590368784
+    number_of_bursts:           9
+    lines_per_burst:            1501
+    constellation:              sentinel-1
+    platform:                   sentinel-1b
+    ...                         ...
+    group:                      /IW1/VH
+    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-0.1.2.dev189+gf816...
+    azimuth_anx_time:           2210.634453
+    burst_index:                8
+
+```
+
 
 ## Project badges
 
