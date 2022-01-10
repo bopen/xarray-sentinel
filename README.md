@@ -307,7 +307,7 @@ Attributes: (12/22)
     azimuth_anx_time:           2210.634453
     burst_index:                8
     Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-0.1.2.dev189+gf816...
+    history:                    created by xarray_sentinel-...
 
 ```
 
