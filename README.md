@@ -53,7 +53,6 @@ Due to the inherent complexity and redundancy of the SAFE format *xarray-sentine
 maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
 but it may also contain *subgroups*, that are listed in the `"subgroups"` attribute.
 
-
 ### Open the root dataset
 
 For example let's explore the Sentinel-1 SLC Stripmap product in the local folder
@@ -63,8 +62,8 @@ and we can access the root group of the product, also known as `/`:
 
 ```python-repl
 >>> import xarray as xr
->>> slc_iw_path = "./S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
->>> xr.open_dataset(slc_iw_path, engine="sentinel-1")
+>>> slc_sm_path = "./S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
+>>> xr.open_dataset(slc_sm_path, engine="sentinel-1")
 <xarray.Dataset>
 Dimensions:  ()
 Data variables:
@@ -91,7 +90,6 @@ on the product and a description of the tree structure of the data.
 The attribute `group` contain the name of the current group and the `subgroups` attribute shows
 the names of all available groups below this one.
 
-
 ### Open the measurements datasets
 
 In order to open the other groups we need to add the keyword `group` to `xr.open_dataset`, so
@@ -99,7 +97,7 @@ read the measurement we need to select the mean mode and the polarization.
 In this example the data contains the S3 beam mode and we select the VH polarization with `group="S3/VH"`:
 
 ```python-repl
->>> xr.open_dataset(slc_iw_path, group="S3/VH", engine="sentinel-1")
+>>> xr.open_dataset(slc_sm_path, group="S3/VH", engine="sentinel-1")
 <xarray.Dataset>
 Dimensions:           (slant_range_time: 18998, azimuth_time: 36895)
 Coordinates:
@@ -126,13 +124,49 @@ Attributes: ...
 
 ```
 
-The `measurement` variable contains the measurement data as `complex64` and it has dimensions 
-`("slant_range_time", "azimuth_time")`. The `"azimuth_time"` is a time coordinates that contain
-the zero-Dopper UTC time associated with the line and `slant_range_time` is a `np.float64`
-coordinate that contain the two-way range time associated with the pixel.
-
+The `measurement` variable contains the Single Look Complex measurements as a `complex64`
+and it has dimensions `("slant_range_time", "azimuth_time")`.
+The `"azimuth_time"` is a time coordinates that contain the zero-Dopper UTC time associated with the image line
+and `slant_range_time` is a `np.float64` coordinate that contain the two-ways range time associated with
+image the pixel.
 
 ### Open the metadata datasets
+
+The measurement group contain several subgroups with metadata associated to the image, for example
+the image calibration metadata associated with the `S3/VH` iamge can be read using `group="S3/VH/calibration"`:
+
+```python-repl
+>>> xr.open_dataset(slc_sm_path, group="S3/VH/calibration", engine="sentinel-1")
+<xarray.Dataset>
+Dimensions:       (line: 22, pixel: 476)
+Coordinates:
+  * line          (line) int64 0 1925 3850 5775 7700 ... 34649 36574 38499 40424
+  * pixel         (pixel) int64 0 40 80 120 160 ... 18880 18920 18960 18997
+Data variables:
+    azimuth_time  (line) datetime64[ns] ...
+    sigmaNought   (line, pixel) float64 ...
+    betaNought    (line, pixel) float64 ...
+    gamma         (line, pixel) float64 ...
+    dn            (line, pixel) float64 ...
+Attributes: ...
+    constellation:              sentinel-1
+    platform:                   sentinel-1a
+    instrument:                 ['c-sar']
+    sat:orbit_state:            ascending
+    sat:absolute_orbit:         37258
+    sat:relative_orbit:         86
+    ...                         ...
+    xs:instrument_mode_swaths:  ['S3']
+    group:                      /S3/VH/calibration
+    Conventions:                CF-1.8
+    title:                      Calibration coefficients
+    comment:                    The dataset contains calibration information ...
+    history:                    created by xarray_sentinel-...
+
+```
+
+Note that in this case the dimensions are `("line", "pixel")` with coordinates corresponding to
+the sub-grid of the original image where it is defined the calibration Look Up Table.
 
 The groups present in a typical Sentinel-1 SLC Stripmap product are:
 
@@ -157,161 +191,6 @@ The groups present in a typical Sentinel-1 SLC Stripmap product are:
 ```
 
 ## Sentinel-1 SLC IW
-
-### Data
-
-Currently, xarray-sentinel provides access as Xarray datasets to the following data:
-
-- full image
-- individual swaths
-- individual SLC bursts
-- gcp
-- orbit
-- attitude
-- calibration
-- dc_estimate
-- azimuth_fm_rate
-
-using `azimuth_time` and `slant_range_time` dimensions when it make sense.
-
-## Examples:
-
-### Open the gcp dataset
-
-To load the gcp relative to the VV polarisation of first swath use the key `group="IW1/VV/gcp"`:
-
-```python-repl
->>> xr.open_dataset(slc_iw_path, group="IW1/VV/gcp", engine="sentinel-1")
-<xarray.Dataset>
-Dimensions:           (azimuth_time: 10, slant_range_time: 21)
-Coordinates:
-  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:24.20973...
-  * slant_range_time  (slant_range_time) float64 0.005343 0.00536 ... 0.005679
-    line              (azimuth_time) int64 0 1501 3002 ... 10507 12008 13508
-    pixel             (slant_range_time) int64 0 1082 2164 ... 19476 20558 21631
-Data variables:
-    latitude          (azimuth_time, slant_range_time) float64 ...
-    longitude         (azimuth_time, slant_range_time) float64 ...
-    height            (azimuth_time, slant_range_time) float64 ...
-    incidenceAngle    (azimuth_time, slant_range_time) float64 ...
-    elevationAngle    (azimuth_time, slant_range_time) float64 ...
-Attributes: ...
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
-    instrument:                 ['c-sar']
-    sat:orbit_state:            descending
-    sat:absolute_orbit:         26269
-    sat:relative_orbit:         168
-    ...                         ...
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VV/gcp
-    Conventions:                CF-1.8
-    title:                      Geolocation grid
-    comment:                    The dataset contains geolocation grid point e...
-    history:                    created by xarray_sentinel-...
-
-```
-
-### Open the orbit dataset
-
-Similarly for orbit data use `group="IW1/VV/attitude"`:
-
-```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/VV/orbit")
-<xarray.Dataset>
-Dimensions:       (axis: 3, azimuth_time: 17)
-Coordinates:
-  * azimuth_time  (azimuth_time) datetime64[ns] 2021-04-01T05:25:19 ... 2021-...
-  * axis          (axis) int64 0 1 2
-Data variables:
-    position      (axis, azimuth_time) ...
-    velocity      (axis, azimuth_time) ...
-Attributes: ...
-    reference_system:           Earth Fixed
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
-    instrument:                 ['c-sar']
-    sat:orbit_state:            descending
-    sat:absolute_orbit:         26269
-    ...                         ...
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VV/orbit
-    Conventions:                CF-1.8
-    title:                      Orbit information used by the IPF during proc...
-    comment:                    The dataset contains a sets of orbit state ve...
-    history:                    created by xarray_sentinel-...
-
-```
-
-### Attitude and calibration datasets
-
-For attitude data use `group="IW1/VV/attitude"`:
-
-```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/VV/attitude")
-<xarray.Dataset>
-Dimensions:       (azimuth_time: 25)
-Coordinates:
-  * azimuth_time  (azimuth_time) datetime64[ns] 2021-04-01T05:26:24.750001 .....
-Data variables:
-    q0            (azimuth_time) float64 ...
-    q1            (azimuth_time) float64 ...
-    q2            (azimuth_time) float64 ...
-    q3            (azimuth_time) float64 ...
-    wx            (azimuth_time) float64 ...
-    wy            (azimuth_time) float64 ...
-    wz            (azimuth_time) float64 ...
-    pitch         (azimuth_time) float64 ...
-    roll          (azimuth_time) float64 ...
-    yaw           (azimuth_time) float64 ...
-Attributes: ...
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
-    instrument:                 ['c-sar']
-    sat:orbit_state:            descending
-    sat:absolute_orbit:         26269
-    sat:relative_orbit:         168
-    ...                         ...
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VV/attitude
-    Conventions:                CF-1.8
-    title:                      Attitude information used by the IPF during p...
-    comment:                    The dataset contains a sets of attitude data ...
-    history:                    created by xarray_sentinel-...
-
-```
-
-and for calibration data use `group="IW1/VV/calibration"`:
-
-```python-repl
->>> sentinel1.open_dataset(product_path, group="IW1/VV/calibration")
-<xarray.Dataset>
-Dimensions:       (line: 30, pixel: 542)
-Coordinates:
-  * line          (line) int64 -1042 -556 91 577 ... 13042 13688 14175 14661
-  * pixel         (pixel) int64 0 40 80 120 160 ... 21520 21560 21600 21631
-Data variables:
-    azimuth_time  (line) datetime64[ns] ...
-    sigmaNought   (line, pixel) float64 ...
-    betaNought    (line, pixel) float64 ...
-    gamma         (line, pixel) float64 ...
-    dn            (line, pixel) float64 ...
-Attributes: ...
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
-    instrument:                 ['c-sar']
-    sat:orbit_state:            descending
-    sat:absolute_orbit:         26269
-    sat:relative_orbit:         168
-    ...                         ...
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VV/calibration
-    Conventions:                CF-1.8
-    title:                      Calibration coefficients
-    comment:                    The dataset contains calibration information ...
-    history:                    created by xarray_sentinel-...
-
-```
 
 ### Open a single swath / polarisation dataset
 
