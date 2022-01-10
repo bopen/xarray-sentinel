@@ -13,7 +13,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         drop_variables: T.Optional[T.Tuple[str]] = None,
         group: T.Optional[str] = None,
     ) -> xr.Dataset:
-        ds = sentinel1.open_dataset(
+        ds = sentinel1.open_sentinel1_dataset(
             filename_or_obj, drop_variables=drop_variables, group=group
         )
         return ds

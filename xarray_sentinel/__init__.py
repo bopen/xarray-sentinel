@@ -1,4 +1,4 @@
-# Copyright 2021, B-Open Solutions srl and the xarray-sentinel authors.
+# Copyright 2021-2022, B-Open Solutions srl and the xarray-sentinel authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,6 @@ except ImportError:  # pragma: no cover
     # Local copy or not installed with setuptools
     __version__ = "999"
 
-from .sentinel1 import crop_burst_dataset
+from .sentinel1 import crop_burst_dataset, open_sentinel1_dataset
 
-__all__ = ["__version__", "crop_burst_dataset"]
+__all__ = ["__version__", "crop_burst_dataset", "open_sentinel1_dataset"]

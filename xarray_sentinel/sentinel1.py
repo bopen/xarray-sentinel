@@ -328,7 +328,6 @@ def open_pol_dataset(
         freq=pd.to_timedelta(azimuth_time_interval, "s"),
     ).values
     attrs = {
-        "azimuth_steering_rate": product_information["azimuthSteeringRate"],
         "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
     }
 
@@ -337,6 +336,7 @@ def open_pol_dataset(
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
             {
+                "azimuth_steering_rate": product_information["azimuthSteeringRate"],
                 "number_of_bursts": number_of_bursts,
                 "lines_per_burst": lines_per_burst,
             }
@@ -471,7 +471,7 @@ def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
     return group, burst_index
 
 
-def open_dataset(
+def open_sentinel1_dataset(
     product_urlpath: esa_safe.PathType,
     *,
     drop_variables: T.Optional[T.Tuple[str]] = None,
