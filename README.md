@@ -322,7 +322,10 @@ Attributes: (12/22)
     was different between beam modes.
   - Data and metadata are converted to the closest available data-type in *Python* / *numpy*.
     The most significant conversion is from `CInt16` to `np.complex64` for the SLC measurements
-    that doubles the space requirements for the data. See the choices for the coordinates below.
+    that doubles the space requirements for the data.
+    Warning: *xarray-sentinel* converts UTC times to `np.datetime64` and makes no attempt to support
+    *leap seconds*, acquisitions containing leap seconds may crash or silently return corrupted data.
+    See the rationale for choices of the coordinates data-types below.
   - We try to keep all naming as close as possible to the original names,
     in particular, for metadata we use the names of the XML tags, only converting them
     from *camelCase* to *snake_case*. Except for the high-level attributes, see below.
@@ -335,7 +338,7 @@ Attributes: (12/22)
   beam modes / polarization are missing.
 - Accuracy considerations and rationale for the data-types of the coordinates
   - `azimuth_time` can be expressed as `np.datetime64[ns]` because
-    spatial resolution at LEO speed is 10km/s * 1ns ~= 0.001cm
+    spatial resolution at LEO speed is 10km/s * 1ns ~= 0.001cm.
   - `slant_range_time` on the other hand cannot be expressed as `np.timedelta64[ns]` because
     spatial resolution at the speed of light is 300_000km/s * 1ns / 2 ~= 15cm,
     that it is not enough for interferometric applications.
