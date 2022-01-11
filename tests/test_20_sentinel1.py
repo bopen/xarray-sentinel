@@ -1,6 +1,5 @@
 import pathlib
 
-import fsspec  # type: ignore
 import numpy as np
 import pytest
 import xarray as xr
@@ -50,24 +49,6 @@ GRD_IW_VV_annotation = (
     / "annotation"
     / "s1b-iw-grd-vv-20210401t052623-20210401t052648-026269-032297-001.xml"
 )
-
-
-def test_get_fs_path() -> None:
-    fs, path = sentinel1.get_fs_path(SLC_IW)
-
-    assert isinstance(fs, fsspec.AbstractFileSystem)
-    assert path == str(SLC_IW)
-
-    fs2, path2 = sentinel1.get_fs_path(path, fs=fs)
-
-    assert fs2 is fs
-    assert path2 is path
-
-    with pytest.raises(ValueError):
-        sentinel1.get_fs_path("dummy*")
-
-    with pytest.raises(ValueError):
-        sentinel1.get_fs_path("*")
 
 
 def test_open_calibration_dataset() -> None:

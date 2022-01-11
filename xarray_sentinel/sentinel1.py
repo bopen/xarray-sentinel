@@ -2,10 +2,9 @@ import os
 import typing as T
 import warnings
 
-import fsspec  # type: ignore
+import fsspec
 import numpy as np
-import pandas as pd  # type: ignore
-import rioxarray  # type: ignore
+import pandas as pd
 import xarray as xr
 
 from . import conventions, esa_safe
@@ -359,7 +358,7 @@ def open_pol_dataset(
             except ModuleNotFoundError:
                 pass
 
-    arr = rioxarray.open_rasterio(measurement, chunks=chunks)
+    arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(
