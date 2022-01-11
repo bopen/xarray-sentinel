@@ -73,7 +73,8 @@ VARIABLE_ATTRIBUTES = {
     "sigmaNought": {"units": "dB", "long_name": "sigma nought calibration LUT"},
     "betaNought": {"units": "dB", "long_name": "beta nought calibration LUT"},
     "gamma": {"units": "dB", "long_name": "gamma calibration LUT"},
-    "dn": {"units": "dB", "long_name": "original digital number calibration LUT"},
+    "dn": {"units": "1", "long_name": "original digital number calibration LUT"},
+    "measurement": {"units": "1", "long_name": "digital number"},
 }
 
 
