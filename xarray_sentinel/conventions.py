@@ -47,7 +47,7 @@ GROUP_ATTRIBUTES = {
 VARIABLE_ATTRIBUTES = {
     "line": {"units": "1", "long_name": "product line number"},
     "pixel": {"units": "1", "long_name": "product pixel number"},
-    "azimuth_time": {"long_name": "zero Doppler azimuth time", "standard_name": "time"},
+    "azimuth_time": {"long_name": "zero-Doppler azimuth time", "standard_name": "time"},
     # NOTE: `slant_range_time` is not expressed as `np.timedelta64[ns]` in order to keep enough
     #   accuracy for interferometric processing, i.e. c * 1ns / 2 ~= 15cm.
     "slant_range_time": {"units": "s", "long_name": "slant range time / two-way delay"},
