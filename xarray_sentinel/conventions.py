@@ -70,9 +70,9 @@ VARIABLE_ATTRIBUTES = {
     "wz": {"units": "° s-1", "long_name": "Z component of angular velocity vector"},
     "position": {"units": "m", "long_name": "ECEF position"},
     "velocity": {"units": "m s-1", "long_name": "ECEF velocity"},
-    "sigmaNought": {"units": "dB", "long_name": "sigma nought calibration LUT"},
-    "betaNought": {"units": "dB", "long_name": "beta nought calibration LUT"},
-    "gamma": {"units": "dB", "long_name": "gamma calibration LUT"},
+    "sigmaNought": {"units": "m m-1", "long_name": "sigma nought calibration LUT"},
+    "betaNought": {"units": "m m-1", "long_name": "beta nought calibration LUT"},
+    "gamma": {"units": "m m-1", "long_name": "gamma calibration LUT"},
     "dn": {"units": "1", "long_name": "original digital number calibration LUT"},
     "measurement": {"units": "1", "long_name": "digital number"},
 }
