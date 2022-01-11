@@ -323,7 +323,7 @@ Attributes: (12/22)
   - Data and metadata are converted to the closest available data-type in *Python* / *numpy*.
     The most significant conversion is from `CInt16` to `np.complex64` for the SLC measurements
     that doubles the space requirements for the data.
-    Warning: *xarray-sentinel* converts UTC times to `np.datetime64` and makes no attempt to support
+    Also, *xarray-sentinel* converts UTC times to `np.datetime64` and makes no attempt to support
     *leap seconds*, acquisitions containing leap seconds may crash or silently return corrupted data.
     See the rationale for choices of the coordinates data-types below.
   - We try to keep all naming as close as possible to the original names,
