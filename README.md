@@ -318,9 +318,9 @@ Attributes: (12/22)
   the content of the SAFE data package, with as little interpretation as possible.
   - The tree-like structure follows the structure of the SAFE package even when information,
     like orbit and attitude, is expected to be identical for different beam modes.
-    In fact, we obeserved at least a case where the number of orbital state vectors reported
+    We observed at least a case where the number of orbital state vectors reported
     was different between beam modes.
-  - Data and metadata are converted to the closer available data-type in *Python* / *numpy*.
+  - Data and metadata are converted to the closest available data-type in *Python* / *numpy*.
     The most significant conversion is from `CInt16` to `np.complex64` for the SLC measurements
     that doubles the space requirements for the data. See the choices for the coordinates below.
   - We try to keep all naming as close as possible to the original names,
@@ -328,9 +328,9 @@ Attributes: (12/22)
     from *camelCase* to *snake_case*. Except for the high-level attributes, see below.
 - Whenever possible *xarray-sentinel* indexes the data with physical coordinates
   `azimuth_time` and `slant_range_time`, but keeps image `line` and `pixel` as auxiliary coordinates.
-- As an exception to the metadata naming rule above for high-level attributes we aim at
+- As an exception to the metadata naming rule above for high-level attributes, we aim at
   STAC Index and CF-Conventions compliance (in this order).
-- We aim at opening available data and metadata even for partial SAFE packages, for example
+- We aim at opening available data and metadata even for partial SAFE packages, for example,
   *xarray-sentinel* can open a measurement dataset for a beam mode even when the TIFF files of other
   beam modes / polarization are missing.
 - Accuracy considerations and rationale for the data-types of the coordinates
