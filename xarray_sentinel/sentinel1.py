@@ -351,7 +351,13 @@ def open_pol_dataset(
                 lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
             ] = azimuth_time_burst
         if chunks is None:
-            chunks = {"y": lines_per_burst}
+            # chunk at burst boundaries if dask is present
+            try:
+                import dask  # noqa
+
+                chunks = {"y": lines_per_burst}
+            except ModuleNotFoundError:
+                pass
 
     arr = rioxarray.open_rasterio(measurement, chunks=chunks)
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
