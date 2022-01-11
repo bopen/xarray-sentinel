@@ -406,7 +406,7 @@ def crop_burst_dataset(
 ) -> xr.Dataset:
     if (burst_index is not None) and (azimuth_anx_time is not None):
         raise ValueError(
-            "only one keyword between 'index' and 'azimuth_anx_time' must be defined"
+            "only one keyword between 'burst_index' and 'azimuth_anx_time' must be defined"
         )
 
     if burst_index is None:
@@ -416,11 +416,11 @@ def crop_burst_dataset(
             )
         else:
             raise ValueError(
-                "one keyword between 'index' and 'azimuth_anx_time' must be defined"
+                "one keyword between 'burst_index' and 'azimuth_anx_time' must be defined"
             )
 
     if burst_index < 0 or burst_index >= pol_dataset.attrs["number_of_bursts"]:
-        raise IndexError(f"{burst_index=} out of bounds")
+        raise IndexError(f"burst_index={burst_index} out of bounds")
 
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     ds = pol_dataset.sel(
