@@ -126,7 +126,7 @@ Attributes: ...
 
 The `measurement` variable contains the Single Look Complex measurements as a `complex64`
 and it has dimensions `slant_range_time` and `azimuth_time`.
-The `azimuth_time` is an `np.datetime64` coordinate that contains the UTC zero-Dopper time
+The `azimuth_time` is an `np.datetime64` coordinate that contains the UTC zero-Doppler time
 associated with the image line
 and `slant_range_time` is an `np.float64` coordinate that contains the two-way range time interval
 in seconds associated with the image pixel.
