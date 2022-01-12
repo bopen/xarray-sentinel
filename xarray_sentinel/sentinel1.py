@@ -440,6 +440,39 @@ def crop_burst_dataset(
     return ds
 
 
+def calibrated_amplitude(
+    digital_number: xr.DataArray, calibration_lut: xr.DataArray
+) -> xr.DataArray:
+    calibration = calibration_lut.interp(
+        line=digital_number.line, pixel=digital_number.pixel
+    )
+    amplitude = digital_number / calibration
+    lut_name = calibration_lut.attrs["long_name"].partition("calibration LUT")[0]
+    amplitude.attrs["long_name"] = f"amplitude for {lut_name}"
+    amplitude.attrs["units"] = calibration.attrs["units"]
+    return amplitude
+
+
+def calibrated_intensity(
+    digital_number: xr.DataArray,
+    calibration_lut: xr.DataArray,
+    as_db: bool = True,
+    min_db: T.Optional[float] = -40.0,
+) -> xr.DataArray:
+    amplitude = calibrated_amplitude(digital_number, calibration_lut)
+    intensity = abs(amplitude) ** 2
+    if as_db:
+        intensity = 10.0 * np.log10(intensity)
+        if min_db is not None:
+            intensity = np.maximum(intensity, min_db)
+        intensity.attrs["units"] = "dB"
+    else:
+        intensity.attrs["units"] = "m2 m-2"
+    lut_name = amplitude.attrs["long_name"].partition("amplitude for ")[2]
+    intensity.attrs["long_name"] = lut_name
+    return intensity
+
+
 def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
     lat = int(round(lat * 10))
     lon = int(round(lon * 10))
