@@ -56,10 +56,11 @@ def parse_tag(
     xml_path: PathOrFileType,
     query: str,
     schema_type: str = "annotation",
+    validation: str = "skip",
 ) -> T.Dict[str, T.Any]:
     schema = cached_sentinel1_schemas(schema_type)
     xml_tree = ElementTree.parse(xml_path)
-    tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_tree, query)  # type: ignore
+    tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_tree, query, validation=validation)  # type: ignore
     assert isinstance(tag_dict, dict)
     return tag_dict
 
@@ -68,10 +69,11 @@ def parse_tag_list(
     xml_path: PathOrFileType,
     query: str,
     schema_type: str = "annotation",
+    validation: str = "skip",
 ) -> T.List[T.Dict[str, T.Any]]:
     schema = cached_sentinel1_schemas(schema_type)
     xml_tree = ElementTree.parse(xml_path)
-    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_tree, query)  # type: ignore
+    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_tree, query, validation=validation)  # type: ignore
     assert isinstance(tag_list, list)
     return tag_list
 
