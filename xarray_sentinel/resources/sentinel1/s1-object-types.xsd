@@ -842,6 +842,30 @@ inline int XmlConvert( XRW_Convert_Op    op,
 			<xsd:enumeration value="Coarse"/>
 		</xsd:restriction>
 	</xsd:simpleType>
+	<xsd:simpleType name="RFIMitigationPerformedType">
+		<xsd:annotation>
+			<xsd:appinfo>CONVERT_FUNC_DEC: SKIP</xsd:appinfo>
+			<xsd:appinfo>CONVERT_FUNC_DEF: SKIP</xsd:appinfo>
+			<xsd:documentation>Enumeration of RFI mitigation policies.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="string">
+			<xsd:enumeration value="Never"/>
+			<xsd:enumeration value="Always"/>
+			<xsd:enumeration value="BasedOnNoiseMeas"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="RFIMitigationDomainType">
+		<xsd:annotation>
+			<xsd:appinfo>CONVERT_FUNC_DEC: SKIP</xsd:appinfo>
+			<xsd:appinfo>CONVERT_FUNC_DEF: SKIP</xsd:appinfo>
+			<xsd:documentation>Enumeration of RFI mitigation domains.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="string">
+			<xsd:enumeration value="Time"/>
+			<xsd:enumeration value="Frequency"/>
+			<xsd:enumeration value="TimeAndFrequency"/>
+		</xsd:restriction>
+	</xsd:simpleType>
 	<!--
     ========================================================================
     = Primative type definitions
