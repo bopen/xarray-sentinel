@@ -230,9 +230,28 @@ def test_open_dataset_chunks() -> None:
 
 
 def test_crop_burst_dataset() -> None:
-    swath_polarisation_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
 
-    res = sentinel1.crop_burst_dataset(swath_polarisation_ds, 8)
+    res1 = sentinel1.crop_burst_dataset(swath_ds, 8)
 
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
-    assert res.dims["azimuth_time"] == swath_polarisation_ds.attrs["lines_per_burst"]
+    assert set(res1.dims) == {"azimuth_time", "slant_range_time"}
+    assert res1.dims["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
+
+    res2 = sentinel1.crop_burst_dataset(swath_ds, azimuth_anx_time=2210)
+
+    assert res2.equals(res1)
+
+    res3 = sentinel1.crop_burst_dataset(
+        swath_ds, azimuth_anx_time=2213, use_center=True
+    )
+
+    assert res3.equals(res1)
+
+    with pytest.raises(TypeError):
+        sentinel1.crop_burst_dataset(swath_ds)
+
+    with pytest.raises(TypeError):
+        sentinel1.crop_burst_dataset(swath_ds, burst_index=8, azimuth_anx_time=2213)
+
+    with pytest.raises(IndexError):
+        sentinel1.crop_burst_dataset(swath_ds, burst_index=-1)

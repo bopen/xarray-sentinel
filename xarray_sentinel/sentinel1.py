@@ -405,7 +405,7 @@ def crop_burst_dataset(
     use_center: bool = False,
 ) -> xr.Dataset:
     if (burst_index is not None) and (azimuth_anx_time is not None):
-        raise ValueError(
+        raise TypeError(
             "only one keyword between 'burst_index' and 'azimuth_anx_time' must be defined"
         )
 
@@ -415,7 +415,7 @@ def crop_burst_dataset(
                 pol_dataset, azimuth_anx_time, use_center=use_center
             )
         else:
-            raise ValueError(
+            raise TypeError(
                 "one keyword between 'burst_index' and 'azimuth_anx_time' must be defined"
             )
 
