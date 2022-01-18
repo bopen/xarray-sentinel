@@ -344,6 +344,12 @@ Attributes: (12/22)
     that it is not enough for interferometric applications.
     `slant_range_time` needs a spatial resolution of 0.001cm at a 1_000km distance
     so around 1e-9 that is well within 1e-15 resolution of IEEE-754 float64.
+- This is a list of reference documents:
+  - Sentinel-1 document library - https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library
+  - Sentinel-1 Product Specification v3.9 07 May 2021 S1-RS-MDA-52-7441-3-9 documenting IPF 3.40 - https://sentinel.esa.int/documents/247904/1877131/S1-RS-MDA-52-7441-3-9-2_Sentinel-1ProductSpecification.pdf
+  - Sentinel-1 Product Specification v3.7 27 February 2020 S1-RS-MDA-52-7441 documenting IPF 3.30 - https://sentinel.esa.int/documents/247904/1877131/Sentinel-1-Product-Specification
+  - Radiometric Calibration of S-1 Level-1 Products Generated
+  by the S-1 IPF v1.0 21/05/2015 ESA-EOPG-CSCOP-TN-0002 - https://sentinel.esa.int/documents/247904/685163/S1-Radiometric-Calibration-V1.0.pdf
 
 ## Project badges
 

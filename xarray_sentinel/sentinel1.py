@@ -1,3 +1,13 @@
+"""Map Sentinel-1 data products to xarray.
+
+References:
+  - Sentinel-1 document library: https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library
+  - Sentinel-1 Product Specification v3.9 07 May 2021 S1-RS-MDA-52-7441-3-9 documenting IPF 3.40
+    https://sentinel.esa.int/documents/247904/1877131/S1-RS-MDA-52-7441-3-9-2_Sentinel-1ProductSpecification.pdf
+  - Sentinel-1 Product Specification v3.7 27 February 2020 S1-RS-MDA-52-7441 documenting IPF 3.30
+    https://sentinel.esa.int/documents/247904/1877131/Sentinel-1-Product-Specification
+"""
+
 import os
 import typing as T
 import warnings
