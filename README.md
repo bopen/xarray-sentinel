@@ -26,7 +26,8 @@ A few features, identified as *technology preview* below, are not fully usable y
   Doppler centroid estimation and more
 - reads uncompressed and compressed SAFE data products on the local computer or
   on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *technology preview*
-- allows larger-than-memory and distributed processing via [*dask*](https://dask.org)
+- supports larger-than-memory and distributed data access via [*dask*](https://dask.org) and
+  [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
 
 ## Install
 
