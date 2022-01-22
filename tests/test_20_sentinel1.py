@@ -72,6 +72,13 @@ def test_open_noise_range_dataset() -> None:
     assert set(res.coords) == {"line", "pixel"}
 
 
+def test_open_noise_azimuth_dataset() -> None:
+    res = sentinel1.open_noise_azimuth_dataset(SLC_IW1_VV_noise)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"line"}
+
+
 def test_open_coordinateConversion_dataset() -> None:
     res = sentinel1.open_coordinateConversion_dataset(GRD_IW_VV_annotation)
 

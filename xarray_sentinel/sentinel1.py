@@ -93,16 +93,16 @@ def open_noise_range_dataset(noise: esa_safe.PathType) -> xr.Dataset:
 
 
 def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
-    noise_vectors = esa_safe.parse_tag_list(noise, ".//noiseAzimuthVector", "noise")
+    noise_vector = esa_safe.parse_tag(noise, ".//noiseAzimuthVector", "noise")
 
     coords = {}
     data_vars = {}
-    for vector in noise_vectors:
-        line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")  # type: ignore
-        noiseAzimuthLut = np.fromstring(vector["noiseAzimuthLut"]["$"], dtype=float, sep=" ")  # type: ignore
+    if noise_vector:
+        line = np.fromstring(noise_vector["line"]["$"], dtype=int, sep=" ")  # type: ignore
+        noiseAzimuthLut = np.fromstring(noise_vector["noiseAzimuthLut"]["$"], dtype=float, sep=" ")  # type: ignore
 
         data_vars = {
-            "noiseAzimuthLut": (("line"), noiseAzimuthLut),
+            "noiseAzimuthLut": ("line", noiseAzimuthLut),
         }
         coords = {"line": line}
 
