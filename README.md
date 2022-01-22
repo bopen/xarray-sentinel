@@ -105,17 +105,17 @@ Dimensions:           (slant_range_time: 18998, azimuth_time: 36895)
 Coordinates:
     pixel             (slant_range_time) int64 ...
     line              (azimuth_time) int64 ...
-  * slant_range_time  (slant_range_time) float64 ...
   * azimuth_time      (azimuth_time) datetime64[ns] ...
+  * slant_range_time  (slant_range_time) float64 ...
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
 Attributes: ...
     sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  3.55338
+    sar:pixel_spacing_range:    2.246363
+    azimuth_time_interval:      0.0005194923129469381
+    slant_range_time_interval:  1.498612395219899e-08
     constellation:              sentinel-1
-    platform:                   sentinel-1a
-    instrument:                 ['c-sar']
-    sat:orbit_state:            ascending
-    sat:absolute_orbit:         37258
     ...                         ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['S3']
@@ -233,17 +233,17 @@ Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
   * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
   * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
-    slant_range_time  (pixel) float64 ...
     azimuth_time      (line) datetime64[ns] ...
+    slant_range_time  (pixel) float64 ...
 Data variables:
     measurement       (line, pixel) complex64 ...
-Attributes: (12/20)
+Attributes: ...
     sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  13.94053
+    sar:pixel_spacing_range:    2.329562
+    azimuth_time_interval:      0.002055556299999998
+    slant_range_time_interval:  1.554116558005821e-08
     azimuth_steering_rate:      1.590368784
-    number_of_bursts:           9
-    lines_per_burst:            1501
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
     ...                         ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
@@ -267,17 +267,17 @@ Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
 Coordinates:
     pixel             (slant_range_time) int64 0 1 2 3 ... 21629 21630 21631
     line              (azimuth_time) int64 12008 12009 12010 ... 13507 13508
-  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:46.27227...
+  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
-Attributes: (12/22)
+Attributes: ...
     sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  13.94053
+    sar:pixel_spacing_range:    2.329562
+    azimuth_time_interval:      0.002055556299999998
+    slant_range_time_interval:  1.554116558005821e-08
     azimuth_steering_rate:      1.590368784
-    number_of_bursts:           9
-    lines_per_burst:            1501
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
     ...                         ...
     group:                      /IW1/VH
     subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
@@ -302,17 +302,17 @@ Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
 Coordinates:
     pixel             (slant_range_time) int64 ...
     line              (azimuth_time) int64 ...
-  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:46.27227...
+  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
-Attributes: (12/22)
+Attributes: ...
     sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  13.94053
+    sar:pixel_spacing_range:    2.329562
+    azimuth_time_interval:      0.002055556299999998
+    slant_range_time_interval:  1.554116558005821e-08
     azimuth_steering_rate:      1.590368784
-    number_of_bursts:           9
-    lines_per_burst:            1501
-    constellation:              sentinel-1
-    platform:                   sentinel-1b
     ...                         ...
     group:                      /IW1/VH
     subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
@@ -335,8 +335,8 @@ dask.array<maximum, shape=(2048, 2048), dtype=float32, chunksize=(2048, 2048), c
 Coordinates:
     pixel             (slant_range_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
     line              (azimuth_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
-  * slant_range_time  (slant_range_time) float64 0.005273 0.005273 ... 0.005303
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T15:28:55.11150...
+  * slant_range_time  (slant_range_time) float64 0.005273 0.005273 ... 0.005303
 Attributes:
     units:      dB
     long_name:  gamma 
@@ -382,6 +382,7 @@ Attributes:
   - Sentinel-1 Product Specification v3.7 27 February 2020 S1-RS-MDA-52-7441 documenting IPF 3.30 -
     https://sentinel.esa.int/documents/247904/1877131/Sentinel-1-Product-Specification
   - Radiometric Calibration of S-1 Level-1 Products Generated by the S-1 IPF v1.0 21/05/2015 ESA-EOPG-CSCOP-TN-0002 -
+    https://sentinel.esa.int/documents/247904/685163/S1-Radiometric-Calibration-V1.0.pdf
     https://sentinel.esa.int/documents/247904/685163/S1-Radiometric-Calibration-V1.0.pdf
 
 ## Project badges
