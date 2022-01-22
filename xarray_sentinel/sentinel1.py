@@ -93,18 +93,24 @@ def open_noise_range_dataset(noise: esa_safe.PathType) -> xr.Dataset:
 
 
 def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
-    noise_vector = esa_safe.parse_tag(noise, ".//noiseAzimuthVector", "noise")
+    noise_vectors = esa_safe.parse_tag_list(noise, ".//noiseAzimuthVector", "noise")
 
-    coords = {}
+    first_range_sample = []
+    line_list = []
+    noiseAzimuthLut_list = []
+    for vector in noise_vectors:
+        first_range_sample.append(vector["firstRangeSample"])
+        line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")  # type: ignore
+        line_list.append(line)
+        noiseAzimuthLut = np.fromstring(vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" ")  # type: ignore
+        noiseAzimuthLut_list.append(noiseAzimuthLut)
+
+    # BROKEN: GRDs have line and noiseAzimuthLut of different size, we take the first one
     data_vars = {}
-    if noise_vector:
-        line = np.fromstring(noise_vector["line"]["$"], dtype=int, sep=" ")  # type: ignore
-        noiseAzimuthLut = np.fromstring(noise_vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" ")  # type: ignore
-
-        data_vars = {
-            "noiseAzimuthLut": ("line", noiseAzimuthLut),
-        }
-        coords = {"line": line}
+    coords = {}
+    if first_range_sample:
+        data_vars["noiseAzimuthLut"] = ("line", noiseAzimuthLut_list[0])
+        coords["line"] = line_list[0]
 
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
