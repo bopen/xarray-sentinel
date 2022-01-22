@@ -19,6 +19,8 @@ import xarray as xr
 
 from . import conventions, esa_safe
 
+SPEED_OF_LIGHT = 299_792_458  # m / s
+
 
 def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
     calibration_vectors = esa_safe.parse_tag_list(
@@ -149,8 +151,8 @@ def open_coordinate_conversion_dataset(
         data_vars["gr0"] = ("azimuth_time", gr0)
         data_vars["sr0"] = ("azimuth_time", sr0)
         data_vars["slant_range_time"] = ("azimuth_time", slant_range_time)
-        data_vars["srgr_coefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
-        data_vars["grsr_coefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
+        data_vars["srgrCoefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
+        data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
 
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
@@ -575,6 +577,23 @@ def calibrate_intensity(
     except KeyError:
         pass
     return intensity
+
+
+def assign_slant_range_time_coord(
+    measurement: xr.Dataset, coordinate_conversion: xr.Dataset
+) -> xr.Dataset:
+    x = measurement.ground_range - coordinate_conversion.gr0
+    slant_range = (
+        coordinate_conversion.grsrCoefficients * x ** coordinate_conversion.degree
+    ).sum(dim="degree")
+    slant_range_coord = slant_range.interp(
+        azimuth_time=measurement.azimuth_time, ground_range=measurement.ground_range
+    ).data
+    slant_range_time = 2 / SPEED_OF_LIGHT * slant_range_coord
+    measurement = measurement.assign_coords(
+        slant_range_time=(("azimuth_time", "ground_range"), slant_range_time)
+    )  # type: ignore
+    return measurement
 
 
 def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
