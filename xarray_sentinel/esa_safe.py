@@ -21,6 +21,7 @@ SENTINEL1_SCHEMAS = {
     "manifest": os.path.join(SENTINEL1_FOLDER, "my-xfdu.xsd"),
     "annotation": os.path.join(SENTINEL1_FOLDER, "s1-level-1-product.xsd"),
     "calibration": os.path.join(SENTINEL1_FOLDER, "s1-level-1-calibration.xsd"),
+    "noise": os.path.join(SENTINEL1_FOLDER, "s1-level-1-noise.xsd"),
 }
 
 SENTINEL2_NAMESPACES = {
