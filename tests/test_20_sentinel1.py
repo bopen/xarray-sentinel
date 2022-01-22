@@ -65,8 +65,8 @@ def test_open_calibration_dataset() -> None:
     assert set(res.coords) == {"line", "pixel"}
 
 
-def test_open_noise_dataset() -> None:
-    res = sentinel1.open_noise_dataset(SLC_IW1_VV_noise)
+def test_open_noise_range_dataset() -> None:
+    res = sentinel1.open_noise_range_dataset(SLC_IW1_VV_noise)
 
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"line", "pixel"}
@@ -164,7 +164,8 @@ def test_find_avalable_groups() -> None:
         "IW1/VV/calibration",
         "IW1/VV/dc_estimate",
         "IW1/VV/azimuth_fm_rate",
-        "IW1/VV/noise",
+        "IW1/VV/noise_range",
+        "IW1/VV/noise_azimuth",
     }
 
     groups = sentinel1.find_avalable_groups(ancillary_data_paths, product_attrs)
@@ -206,7 +207,8 @@ def test_open_dataset() -> None:
         "IW1/VV/attitude",
         "IW1/VV/orbit",
         "IW1/VV/calibration",
-        "IW1/VV/noise",
+        "IW1/VV/noise_range",
+        "IW1/VV/noise_azimuth",
     }
 
     res = sentinel1.open_sentinel1_dataset(SLC_IW)
