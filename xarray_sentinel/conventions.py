@@ -51,6 +51,7 @@ VARIABLE_ATTRIBUTES = {
     # NOTE: `slant_range_time` is not expressed as `np.timedelta64[ns]` in order to keep enough
     #   accuracy for interferometric processing, i.e. c * 1ns / 2 ~= 15cm.
     "slant_range_time": {"units": "s", "long_name": "slant range time / two-way delay"},
+    "ground_range": {"units": "m", "long_name": "ground range"},
     "axis": {"units": "1", "long_name": "coordinate index"},
     "degree": {"units": "1", "long_name": "polynomial degree"},
     "latitude": {"units": "degrees_north", "long_name": "geodetic latitude"},
@@ -74,6 +75,27 @@ VARIABLE_ATTRIBUTES = {
     "betaNought": {"units": "m m-1", "long_name": "beta nought calibration LUT"},
     "gamma": {"units": "m m-1", "long_name": "gamma calibration LUT"},
     "dn": {"units": "1", "long_name": "original digital number calibration LUT"},
+    "noiseRangeLut": {"units": "1", "long_name": "range thermal noise correction LUT"},
+    "noiseAzimithLut": {
+        "units": "1",
+        "long_name": "azimuth thermal noise correction LUT",
+    },
+    "gr0": {
+        "units": "m",
+        "long_name": "ground range origin for slant range calculation",
+    },
+    "grsrCoefficients": {
+        "units": "1",
+        "long_name": "polynomial to convert from ground range to slant range",
+    },
+    "sr0": {
+        "units": "m",
+        "long_name": "slant range origin for ground range calculation",
+    },
+    "srgrCoefficients": {
+        "units": "1",
+        "long_name": "polynomial to convert from slant range to ground range",
+    },
     "measurement": {"units": "1", "long_name": "digital number"},
 }
 
