@@ -7,3 +7,4 @@ dependencies:
   - matplotlib
   - mamba
   - notebook
+  - sentinelsat

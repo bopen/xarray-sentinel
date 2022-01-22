@@ -63,6 +63,52 @@ def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
+def open_noise_range_dataset(noise: esa_safe.PathType) -> xr.Dataset:
+    noise_vectors = esa_safe.parse_tag_list(noise, ".//noiseRangeVector", "noise")
+
+    azimuth_time_list = []
+    pixel_list = []
+    line_list = []
+    noiseRangeLut_list = []
+    for vector in noise_vectors:
+        azimuth_time_list.append(vector["azimuthTime"])
+        line_list.append(vector["line"])
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")  # type: ignore
+        pixel_list.append(pixel)
+        noiseRangeLut = np.fromstring(vector["noiseRangeLut"]["$"], dtype=float, sep=" ")  # type: ignore
+        noiseRangeLut_list.append(noiseRangeLut)
+
+    pixel = np.array(pixel_list)
+    if not np.allclose(pixel, pixel[0]):
+        raise ValueError(
+            "Unable to organise noise vectors in a regular line-pixel grid"
+        )
+    data_vars = {
+        "azimuth_time": ("line", [np.datetime64(dt) for dt in azimuth_time_list]),
+        "noiseRangeLut": (("line", "pixel"), noiseRangeLut_list),
+    }
+    coords = {"line": line_list, "pixel": pixel_list[0]}
+
+    return xr.Dataset(data_vars=data_vars, coords=coords)
+
+
+def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
+    noise_vector = esa_safe.parse_tag(noise, ".//noiseAzimuthVector", "noise")
+
+    coords = {}
+    data_vars = {}
+    if noise_vector:
+        line = np.fromstring(noise_vector["line"]["$"], dtype=int, sep=" ")  # type: ignore
+        noiseAzimuthLut = np.fromstring(noise_vector["noiseAzimuthLut"]["$"], dtype=float, sep=" ")  # type: ignore
+
+        data_vars = {
+            "noiseAzimuthLut": ("line", noiseAzimuthLut),
+        }
+        coords = {"line": line}
+
+    return xr.Dataset(data_vars=data_vars, coords=coords)
+
+
 def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
     coordinate_conversion = esa_safe.parse_tag(
         annotation_path, ".//coordinateConversionList"
@@ -304,6 +350,18 @@ def find_avalable_groups(
                 continue
             groups[f"{subswath_id}/{pol_id}/calibration"] = pol_data_paths[
                 "s1Level1CalibrationSchema"
+            ]
+
+            try:
+                with fs.open(pol_data_paths["s1Level1NoiseSchema"]):
+                    pass
+            except FileNotFoundError:
+                continue
+            groups[f"{subswath_id}/{pol_id}/noise_range"] = pol_data_paths[
+                "s1Level1NoiseSchema"
+            ]
+            groups[f"{subswath_id}/{pol_id}/noise_azimuth"] = pol_data_paths[
+                "s1Level1NoiseSchema"
             ]
 
     return groups
@@ -560,4 +618,6 @@ METADATA_OPENERS = {
     "dc_estimate": open_dc_estimate_dataset,
     "azimuth_fm_rate": open_azimuth_fm_rate_dataset,
     "calibration": open_calibration_dataset,
+    "noise_range": open_noise_range_dataset,
+    "noise_azimuth": open_noise_azimuth_dataset,
 }
