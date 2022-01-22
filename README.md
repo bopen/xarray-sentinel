@@ -98,7 +98,8 @@ So we can read the measurement by selecting the desired beam mode and the polari
 in this example the data contains the S3 beam mode and we select the VH polarization with `group="S3/VH"`:
 
 ```python-repl
->>> xr.open_dataset(slc_sm_path, group="S3/VH", engine="sentinel-1")
+>>> slc_s3_vh = xr.open_dataset(slc_sm_path, group="S3/VH", engine="sentinel-1", chunks=2048)
+>>> slc_s3_vh
 <xarray.Dataset>
 Dimensions:           (slant_range_time: 18998, azimuth_time: 36895)
 Coordinates:
@@ -150,7 +151,8 @@ For example, the image calibration metadata associated with the `S3/VH` image ca
 `group="S3/VH/calibration"`:
 
 ```python-repl
->>> xr.open_dataset(slc_sm_path, group="S3/VH/calibration", engine="sentinel-1")
+>>> slc_s3_vh_calibration = xr.open_dataset(slc_sm_path, group="S3/VH/calibration", engine="sentinel-1")
+>>> slc_s3_vh_calibration
 <xarray.Dataset>
 Dimensions:       (line: 22, pixel: 476)
 Coordinates:
@@ -158,10 +160,10 @@ Coordinates:
   * pixel         (pixel) int64 0 40 80 120 160 ... 18880 18920 18960 18997
 Data variables:
     azimuth_time  (line) datetime64[ns] ...
-    sigmaNought   (line, pixel) float64 ...
-    betaNought    (line, pixel) float64 ...
-    gamma         (line, pixel) float64 ...
-    dn            (line, pixel) float64 ...
+    sigmaNought   (line, pixel) float32 ...
+    betaNought    (line, pixel) float32 ...
+    gamma         (line, pixel) float32 ...
+    dn            (line, pixel) float32 ...
 Attributes: ...
     constellation:              sentinel-1
     platform:                   sentinel-1a
@@ -209,6 +211,8 @@ The groups present in a typical Sentinel-1 SLC Stripmap product are:
 ```
 
 ## Advanced usage
+
+### TOPS burst datasets
 
 The IW and EW products, that use the Terrain Observation with Progressive Scan (TOPS) acquisition mode,
 are more complex because they contain several beam modes in the same SAFE package,
@@ -316,6 +320,26 @@ Attributes: (12/22)
     burst_index:                8
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
+
+```
+
+### Calibration
+
+*xarray-sentinel* provides helper functions to calibrate the data using the calibration metadata.
+You can compute the gamma intensity for part of the Stripmap image above with:
+
+```python-repl
+>>> xarray_sentinel.calibrate_intensity(slc_s3_vh.measurement[:2048, :2048], slc_s3_vh_calibration.gamma)
+<xarray.DataArray (azimuth_time: 2048, slant_range_time: 2048)>
+dask.array<maximum, shape=(2048, 2048), dtype=float32, chunksize=(2048, 2048), chunktype=numpy.ndarray>
+Coordinates:
+    pixel             (slant_range_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
+    line              (azimuth_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
+  * slant_range_time  (slant_range_time) float64 0.005273 0.005273 ... 0.005303
+  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T15:28:55.11150...
+Attributes:
+    units:      dB
+    long_name:  gamma 
 
 ```
 
