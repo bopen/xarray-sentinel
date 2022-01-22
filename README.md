@@ -202,8 +202,8 @@ The groups present in a typical Sentinel-1 SLC Stripmap product are:
       ├─ attitude
       ├─ dc_estimate
       ├─ azimuth_fm_rate
-   │  ├─ calibration
-   │  ├─ noise_range
+      ├─ calibration
+      ├─ noise_range
       └─ noise_azimuth
 
 ```
