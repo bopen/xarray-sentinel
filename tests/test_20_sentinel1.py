@@ -25,6 +25,13 @@ SLC_IW1_VV_calibration = (
     / "calibration"
     / "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
 )
+SLC_IW1_VV_noise = (
+    DATA_FOLDER
+    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    / "annotation"
+    / "calibration"
+    / "noise-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+)
 SLC_IW1_VV_measurement = (
     DATA_FOLDER
     / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
@@ -56,6 +63,20 @@ def test_open_calibration_dataset() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"line", "pixel"}
+
+
+def test_open_noise_range_dataset() -> None:
+    res = sentinel1.open_noise_range_dataset(SLC_IW1_VV_noise)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"line", "pixel"}
+
+
+def test_open_noise_azimuth_dataset() -> None:
+    res = sentinel1.open_noise_azimuth_dataset(SLC_IW1_VV_noise)
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.coords) == {"line"}
 
 
 def test_open_coordinateConversion_dataset() -> None:
@@ -135,6 +156,8 @@ def test_find_avalable_groups() -> None:
                 + "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
                 "s1Level1CalibrationSchema": f"{SLC_IW}/annotation/calibration/"
                 + "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
+                "s1Level1NoiseSchema": f"{SLC_IW}/annotation/calibration/"
+                + "noise-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
             },
         },
     }
@@ -148,6 +171,8 @@ def test_find_avalable_groups() -> None:
         "IW1/VV/calibration",
         "IW1/VV/dc_estimate",
         "IW1/VV/azimuth_fm_rate",
+        "IW1/VV/noise_range",
+        "IW1/VV/noise_azimuth",
     }
 
     groups = sentinel1.find_avalable_groups(ancillary_data_paths, product_attrs)
@@ -189,6 +214,8 @@ def test_open_dataset() -> None:
         "IW1/VV/attitude",
         "IW1/VV/orbit",
         "IW1/VV/calibration",
+        "IW1/VV/noise_range",
+        "IW1/VV/noise_azimuth",
     }
 
     res = sentinel1.open_sentinel1_dataset(SLC_IW)
@@ -230,9 +257,28 @@ def test_open_dataset_chunks() -> None:
 
 
 def test_crop_burst_dataset() -> None:
-    swath_polarisation_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
 
-    res = sentinel1.crop_burst_dataset(swath_polarisation_ds, 8)
+    res1 = sentinel1.crop_burst_dataset(swath_ds, 8)
 
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
-    assert res.dims["azimuth_time"] == swath_polarisation_ds.attrs["lines_per_burst"]
+    assert set(res1.dims) == {"azimuth_time", "slant_range_time"}
+    assert res1.dims["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
+
+    res2 = sentinel1.crop_burst_dataset(swath_ds, azimuth_anx_time=2210)
+
+    assert res2.equals(res1)
+
+    res3 = sentinel1.crop_burst_dataset(
+        swath_ds, azimuth_anx_time=2213, use_center=True
+    )
+
+    assert res3.equals(res1)
+
+    with pytest.raises(TypeError):
+        sentinel1.crop_burst_dataset(swath_ds)
+
+    with pytest.raises(TypeError):
+        sentinel1.crop_burst_dataset(swath_ds, burst_index=8, azimuth_anx_time=2213)
+
+    with pytest.raises(IndexError):
+        sentinel1.crop_burst_dataset(swath_ds, burst_index=-1)

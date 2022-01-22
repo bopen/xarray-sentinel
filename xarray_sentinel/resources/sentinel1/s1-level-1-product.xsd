@@ -440,6 +440,65 @@
       </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
+  <xsd:complexType name="burstIdType">
+    <xsd:annotation>
+      <xsd:appinfo>CONVERT_TYPE_DEC: struct SPF_AdsProduct_BurstIdType
+{
+   // --- ATTRIBUTES
+
+   /// Absolute orbit number
+   SPF_ObjectTypes_UnsignedLong absolute;
+
+   // --- ELEMENTS
+   /// Relative orbit number.
+   SPF_ObjectTypes_UnsignedInt relative;
+   
+};
+      </xsd:appinfo>
+      <xsd:appinfo>CONVERT_FUNC_DEF:
+/*
+ * XmlConvert function for the SPF_AdsProduct_BurstIdType structure.
+ */
+int XmlConvert( XRW_Convert_Op    op,
+                XRW_Convert_Tree* xmlTreeDescriptor,
+                const char*       xmlPath,
+                SPF_AdsProduct_BurstIdType&amp; value )
+{
+   TRACE_ENTRY();
+   
+   char xmlFieldPath[XRW_Convert_MaxStringLength + 1];
+   
+   if ( XRW_Convert( op, xmlTreeDescriptor, xmlPath, value.relative )
+        != UTL_Const_success )
+   {
+      SCAF_PRINT( ERROR_TOKEN, "Failed to convert " &lt;&lt; xmlPath );
+      TRACE_ABORT();
+      return UTL_Const_failure;
+   }   
+   
+   sprintf( xmlFieldPath,
+            "%s%s",
+            xmlPath,
+            "/@absolute" );
+   if ( XRW_Convert( op, xmlTreeDescriptor, xmlFieldPath, value.absolute )
+        != UTL_Const_success )
+   {
+      SCAF_PRINT( ERROR_TOKEN, "Failed to convert " &lt;&lt; xmlFieldPath );
+      return UTL_Const_failure;
+   }
+   
+   TRACE_EXIT();
+   return UTL_Const_success;
+}
+      </xsd:appinfo>
+      <xsd:documentation>Burst identification number relative to the current mission cycle. The absolute burst ID since the start of the mission is annotated as an attribute.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:unsignedInt">
+        <xsd:attribute name="absolute" type="unsignedLong" use="required"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
   <xsd:complexType name="burstType">
     <xsd:annotation>
       <xsd:documentation>Annotation record for a burst table entry.</xsd:documentation>
@@ -473,6 +532,11 @@
       <xsd:element name="lastValidSample" type="intArray">
         <xsd:annotation>
           <xsd:documentation>An array of integers indicating the offset of the last valid image sample within each range line. This array contains count attribute integers, equal to the numberOfLines (i.e. one value per range line within the burst), separated by spaces. If a range line does not contain any valid image samples, the integer is set to -1.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="burstId" type="burstIdType">
+        <xsd:annotation>
+          <xsd:documentation>Burst identification number relative to the current mission cycle.</xsd:documentation>
         </xsd:annotation>
       </xsd:element>
     </xsd:sequence>
@@ -1840,6 +1904,16 @@ pixels for a detected product, are both within specified range from expected std
       <xsd:element name="thermalNoiseCorrectionPerformed" type="bool">
         <xsd:annotation>
           <xsd:documentation>False if thermal noise correction has not been performed, true if thermal noise correction has been performed.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="rfiMitigationPerformed" type="RFIMitigationPerformedType">
+        <xsd:annotation>
+          <xsd:documentation>When to perform the RFI mitigation step: "Always", "Never", "BasedOnNoiseMeas".</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="rfiMitigationDomain" type="RFIMitigationDomainType">
+        <xsd:annotation>
+          <xsd:documentation>In what domain the RFI mitigation step should be performed: "Time", "Frequency", "TimeAndFrequency".</xsd:documentation>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="chirpSource" type="chirpSourceType">

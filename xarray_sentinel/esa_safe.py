@@ -21,6 +21,7 @@ SENTINEL1_SCHEMAS = {
     "manifest": os.path.join(SENTINEL1_FOLDER, "my-xfdu.xsd"),
     "annotation": os.path.join(SENTINEL1_FOLDER, "s1-level-1-product.xsd"),
     "calibration": os.path.join(SENTINEL1_FOLDER, "s1-level-1-calibration.xsd"),
+    "noise": os.path.join(SENTINEL1_FOLDER, "s1-level-1-noise.xsd"),
 }
 
 SENTINEL2_NAMESPACES = {
@@ -56,11 +57,12 @@ def parse_tag(
     xml_path: PathOrFileType,
     query: str,
     schema_type: str = "annotation",
+    validation: str = "skip",
 ) -> T.Dict[str, T.Any]:
     schema = cached_sentinel1_schemas(schema_type)
     xml_tree = ElementTree.parse(xml_path)
-    tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_tree, query)  # type: ignore
-    assert isinstance(tag_dict, dict)
+    tag_dict: T.Dict[str, T.Any] = schema.to_dict(xml_tree, query, validation=validation) or {}  # type: ignore
+    assert isinstance(tag_dict, dict), f"{type(tag_dict)} is not dict"
     return tag_dict
 
 
@@ -68,11 +70,12 @@ def parse_tag_list(
     xml_path: PathOrFileType,
     query: str,
     schema_type: str = "annotation",
+    validation: str = "skip",
 ) -> T.List[T.Dict[str, T.Any]]:
     schema = cached_sentinel1_schemas(schema_type)
     xml_tree = ElementTree.parse(xml_path)
-    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_tree, query)  # type: ignore
-    assert isinstance(tag_list, list)
+    tag_list: T.List[T.Dict[str, T.Any]] = schema.to_dict(xml_tree, query, validation=validation) or []  # type: ignore
+    assert isinstance(tag_list, list), f"{type(tag_list)} is not list"
     return tag_list
 
 

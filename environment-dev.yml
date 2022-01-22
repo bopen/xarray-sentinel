@@ -1,8 +1,10 @@
 channels:
   - conda-forge
 dependencies:
+  - build
   - gcsfs
   - ipytree
   - matplotlib
   - mamba
   - notebook
+  - sentinelsat
