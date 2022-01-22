@@ -37,13 +37,13 @@ def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
         line_list.append(vector["line"])
         pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")  # type: ignore
         pixel_list.append(pixel)
-        sigmaNought = np.fromstring(vector["sigmaNought"]["$"], dtype=float, sep=" ")  # type: ignore
+        sigmaNought = np.fromstring(vector["sigmaNought"]["$"], dtype=np.float32, sep=" ")  # type: ignore
         sigmaNought_list.append(sigmaNought)
-        betaNought = np.fromstring(vector["betaNought"]["$"], dtype=float, sep=" ")  # type: ignore
+        betaNought = np.fromstring(vector["betaNought"]["$"], dtype=np.float32, sep=" ")  # type: ignore
         betaNought_list.append(betaNought)
-        gamma = np.fromstring(vector["gamma"]["$"], dtype=float, sep=" ")  # type: ignore
+        gamma = np.fromstring(vector["gamma"]["$"], dtype=np.float32, sep=" ")  # type: ignore
         gamma_list.append(gamma)
-        dn = np.fromstring(vector["dn"]["$"], dtype=float, sep=" ")  # type: ignore
+        dn = np.fromstring(vector["dn"]["$"], dtype=np.float32, sep=" ")  # type: ignore
         dn_list.append(dn)
 
     pixel = np.array(pixel_list)
@@ -75,7 +75,7 @@ def open_noise_range_dataset(noise: esa_safe.PathType) -> xr.Dataset:
         line_list.append(vector["line"])
         pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")  # type: ignore
         pixel_list.append(pixel)
-        noiseRangeLut = np.fromstring(vector["noiseRangeLut"]["$"], dtype=float, sep=" ")  # type: ignore
+        noiseRangeLut = np.fromstring(vector["noiseRangeLut"]["$"], dtype=np.float32, sep=" ")  # type: ignore
         noiseRangeLut_list.append(noiseRangeLut)
 
     pixel = np.array(pixel_list)
@@ -99,7 +99,7 @@ def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
     data_vars = {}
     if noise_vector:
         line = np.fromstring(noise_vector["line"]["$"], dtype=int, sep=" ")  # type: ignore
-        noiseAzimuthLut = np.fromstring(noise_vector["noiseAzimuthLut"]["$"], dtype=float, sep=" ")  # type: ignore
+        noiseAzimuthLut = np.fromstring(noise_vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" ")  # type: ignore
 
         data_vars = {
             "noiseAzimuthLut": ("line", noiseAzimuthLut),
@@ -508,26 +508,30 @@ def crop_burst_dataset(
     return ds
 
 
-def calibrated_amplitude(
+def calibrate_amplitude(
     digital_number: xr.DataArray, calibration_lut: xr.DataArray
 ) -> xr.DataArray:
     calibration = calibration_lut.interp(
-        line=digital_number.line, pixel=digital_number.pixel
-    )
+        line=digital_number.line,
+        pixel=digital_number.pixel,
+    ).astype(np.float32)
     amplitude = digital_number / calibration
-    lut_name = calibration_lut.attrs["long_name"].partition("calibration LUT")[0]
-    amplitude.attrs["long_name"] = f"amplitude for {lut_name}"
-    amplitude.attrs["units"] = calibration.attrs["units"]
+    try:
+        lut_name = calibration_lut.attrs["long_name"].partition("calibration LUT")[0]
+        amplitude.attrs["long_name"] = f"amplitude for {lut_name}"
+        amplitude.attrs["units"] = calibration.attrs["units"]
+    except KeyError:
+        pass
     return amplitude
 
 
-def calibrated_intensity(
+def calibrate_intensity(
     digital_number: xr.DataArray,
     calibration_lut: xr.DataArray,
     as_db: bool = True,
     min_db: T.Optional[float] = -40.0,
 ) -> xr.DataArray:
-    amplitude = calibrated_amplitude(digital_number, calibration_lut)
+    amplitude = calibrate_amplitude(digital_number, calibration_lut)
     intensity = abs(amplitude) ** 2
     if as_db:
         intensity = 10.0 * np.log10(intensity)
@@ -536,8 +540,11 @@ def calibrated_intensity(
         intensity.attrs["units"] = "dB"
     else:
         intensity.attrs["units"] = "m2 m-2"
-    lut_name = amplitude.attrs["long_name"].partition("amplitude for ")[2]
-    intensity.attrs["long_name"] = lut_name
+    try:
+        lut_name = amplitude.attrs["long_name"].partition("amplitude for ")[2]
+        intensity.attrs["long_name"] = lut_name
+    except KeyError:
+        pass
     return intensity
 
 
