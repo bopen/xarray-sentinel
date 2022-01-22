@@ -24,7 +24,7 @@ COMMON_ATTRIBUTES = {
 }
 
 
-SENTINEL1_PRODUCTS = [
+SENTINEL1_SLC_PRODUCTS = [
     (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE",
@@ -37,15 +37,19 @@ SENTINEL1_PRODUCTS = [
     ),
     (
         DATA_FOLDER
-        / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE",
-        "IW/VV",
-    ),
-    (
-        DATA_FOLDER
         / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE",
         "S3/VV",
     ),
 ]
+
+SENTINEL1_GRD_PRODUCTS = [
+    (
+        DATA_FOLDER
+        / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE",
+        "IW/VV",
+    ),
+]
+SENTINEL1_PRODUCTS = SENTINEL1_SLC_PRODUCTS + SENTINEL1_GRD_PRODUCTS
 
 
 def test_open_dataset_root() -> None:
@@ -79,8 +83,8 @@ def test_open_dataset_root() -> None:
 
 
 @pytest.mark.xfail
-@pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_PRODUCTS)
-def test_open_dataset_polarisation(
+@pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_SLC_PRODUCTS)
+def test_open_dataset_polarisation_slc(
     product_path: esa_safe.PathType,
     swath_pol: str,
 ) -> None:
@@ -92,6 +96,22 @@ def test_open_dataset_polarisation(
         "slant_range_time",
     }
     assert set(res.coords) == {"azimuth_time", "slant_range_time", "line", "pixel"}
+
+
+@pytest.mark.xfail
+@pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_GRD_PRODUCTS)
+def test_open_dataset_polarisation_grd(
+    product_path: esa_safe.PathType,
+    swath_pol: str,
+) -> None:
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=swath_pol)  # type: ignore
+
+    assert isinstance(res, xr.Dataset)
+    assert set(res.dims) == {"line", "pixel"} or set(res.dims) == {
+        "azimuth_time",
+        "ground_range",
+    }
+    assert set(res.coords) == {"azimuth_time", "ground_range", "line", "pixel"}
 
 
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_PRODUCTS)
