@@ -387,26 +387,27 @@ def open_pol_dataset(
 
     number_of_samples = image_information["numberOfSamples"]
     first_slant_range_time = image_information["slantRangeTime"]
-    slant_range_sampling = 1 / product_information["rangeSamplingRate"]
-    slant_range_time = np.linspace(
-        first_slant_range_time,
-        first_slant_range_time + slant_range_sampling * (number_of_samples - 1),
-        number_of_samples,
-    )
+    slant_range_time_interval = 1 / product_information["rangeSamplingRate"]
 
     number_of_lines = image_information["numberOfLines"]
     first_azimuth_time = image_information["productFirstLineUtcTime"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
+    number_of_bursts = swath_timing["burstList"]["@count"]
+    range_pixel_spaxing = image_information["rangePixelSpacing"]
+
+    attrs = {
+        "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
+        "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
+        "sar:pixel_spacing_range": range_pixel_spaxing,
+        "azimuth_time_interval": azimuth_time_interval,
+        "slant_range_time_interval": slant_range_time_interval,
+    }
+
     azimuth_time = pd.date_range(
         start=first_azimuth_time,
         periods=number_of_lines,
         freq=pd.Timedelta(azimuth_time_interval, "s"),
     ).values
-    attrs = {
-        "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
-    }
-
-    number_of_bursts = swath_timing["burstList"]["@count"]
     if number_of_bursts:
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
@@ -435,19 +436,38 @@ def open_pol_dataset(
             except ModuleNotFoundError:
                 pass
 
+    coords = {
+        "pixel": np.arange(0, number_of_samples, dtype=int),
+        "line": np.arange(0, number_of_lines, dtype=int),
+        "azimuth_time": ("line", azimuth_time),
+    }
+
+    if product_information["projection"] == "Slant Range":
+        slant_range_time = np.linspace(
+            first_slant_range_time,
+            first_slant_range_time
+            + slant_range_time_interval * (number_of_samples - 1),
+            number_of_samples,
+        )
+        coords["slant_range_time"] = ("pixel", slant_range_time)
+    elif product_information["projection"] == "Ground Range":
+        ground_range = np.linspace(
+            0,
+            range_pixel_spaxing * (number_of_samples - 1),
+            number_of_samples,
+        )
+        coords["ground_range"] = ("pixel", ground_range)
+    else:
+        raise ValueError(f"unknown projection {product_information['projection']}")
+
     arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
-    arr = arr.assign_coords(
-        {
-            "pixel": np.arange(0, arr["pixel"].size, dtype=int),
-            "line": np.arange(0, arr["line"].size, dtype=int),
-            "slant_range_time": ("pixel", slant_range_time),
-            "azimuth_time": ("line", azimuth_time),
-        }
-    )
+    arr = arr.assign_coords(coords)
 
-    if number_of_bursts == 0:
+    if product_information["projection"] == "Ground Range":
+        arr = arr.swap_dims({"line": "azimuth_time", "pixel": "ground_range"})
+    elif number_of_bursts == 0:
         arr = arr.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
