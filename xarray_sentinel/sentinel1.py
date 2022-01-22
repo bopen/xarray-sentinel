@@ -115,9 +115,11 @@ def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
-def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
-    coordinate_conversion = esa_safe.parse_tag(
-        annotation_path, ".//coordinateConversionList"
+def open_coordinate_conversion_dataset(
+    annotation_path: esa_safe.PathType,
+) -> xr.Dataset:
+    coordinate_conversion = esa_safe.parse_tag_list(
+        annotation_path, ".//coordinateConversionList/coordinateConversion"
     )
 
     gr0 = []
@@ -126,7 +128,7 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
     slant_range_time = []
     srgrCoefficients: T.List[T.List[float]] = []
     grsrCoefficients: T.List[T.List[float]] = []
-    for values in coordinate_conversion["coordinateConversion"]:
+    for values in coordinate_conversion:
         sr0.append(values["sr0"])
         gr0.append(values["gr0"])
         azimuth_time.append(values["azimuthTime"])
@@ -138,18 +140,18 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
             [float(v) for v in values["grsrCoefficients"]["$"].split()]
         )
 
-    coords = {
-        "azimuth_time": [np.datetime64(dt) for dt in azimuth_time],
-        "degree": list(range(len(srgrCoefficients[0]))),
-    }
+    coords: T.Dict[str, T.Any] = {}
+    data_vars: T.Dict[str, T.Any] = {}
+    if srgrCoefficients:
+        coords["azimuth_time"] = [np.datetime64(dt) for dt in azimuth_time]
+        coords["degree"] = list(range(len(srgrCoefficients[0])))
 
-    data_vars = {
-        "gr0": ("azimuth_time", gr0),
-        "sr0": ("azimuth_time", sr0),
-        "slant_range_time": ("azimuth_time", slant_range_time),
-        "srgr_coefficients": (("azimuth_time", "degree"), srgrCoefficients),
-        "grsr_coefficients": (("azimuth_time", "degree"), grsrCoefficients),
-    }
+        data_vars["gr0"] = ("azimuth_time", gr0)
+        data_vars["sr0"] = ("azimuth_time", sr0)
+        data_vars["slant_range_time"] = ("azimuth_time", slant_range_time)
+        data_vars["srgr_coefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
+        data_vars["grsr_coefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
+
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
@@ -344,6 +346,7 @@ def find_avalable_groups(
                 "attitude",
                 "dc_estimate",
                 "azimuth_fm_rate",
+                "coordinate_conversion",
             ]:
                 groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
                     "s1Level1ProductSchema"
@@ -663,6 +666,7 @@ METADATA_OPENERS = {
     "attitude": open_attitude_dataset,
     "dc_estimate": open_dc_estimate_dataset,
     "azimuth_fm_rate": open_azimuth_fm_rate_dataset,
+    "coordinate_conversion": open_coordinate_conversion_dataset,
     "calibration": open_calibration_dataset,
     "noise_range": open_noise_range_dataset,
     "noise_azimuth": open_noise_azimuth_dataset,
