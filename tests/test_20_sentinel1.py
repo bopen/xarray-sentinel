@@ -282,3 +282,29 @@ def test_crop_burst_dataset() -> None:
 
     with pytest.raises(IndexError):
         sentinel1.crop_burst_dataset(swath_ds, burst_index=-1)
+
+
+def test_calibrate_amplitude() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+    burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
+    calibration_ds = sentinel1.open_calibration_dataset(SLC_IW1_VV_calibration)
+
+    res = sentinel1.calibrate_amplitude(
+        burst_ds.measurement, calibration_ds["betaNought"]
+    )
+
+    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert np.issubdtype(res.dtype, np.complex64)
+
+
+def test_calibrate_intensity() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+    burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
+    calibration_ds = sentinel1.open_calibration_dataset(SLC_IW1_VV_calibration)
+
+    res = sentinel1.calibrate_intensity(
+        burst_ds.measurement, calibration_ds["betaNought"]
+    )
+
+    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert np.issubdtype(res.dtype, np.float32)
