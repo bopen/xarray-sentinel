@@ -79,8 +79,8 @@ def test_open_noise_azimuth_dataset() -> None:
     assert set(res.coords) == {"line"}
 
 
-def test_open_coordinateConversion_dataset() -> None:
-    res = sentinel1.open_coordinateConversion_dataset(GRD_IW_VV_annotation)
+def test_open_coordinate_conversion_dataset() -> None:
+    res = sentinel1.open_coordinate_conversion_dataset(GRD_IW_VV_annotation)
 
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"azimuth_time", "degree"}
@@ -129,7 +129,6 @@ def test_open_pol_dataset_iw() -> None:
     assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
 
-@pytest.mark.xfail
 def test_open_pol_dataset_sm() -> None:
     res = sentinel1.open_pol_dataset(SLC_S3_VV_measurement, SLC_S3_VV_annotation)
 
@@ -168,9 +167,10 @@ def test_find_avalable_groups() -> None:
         "IW1/VV/attitude",
         "IW1/VV/gcp",
         "IW1/VV/orbit",
-        "IW1/VV/calibration",
         "IW1/VV/dc_estimate",
         "IW1/VV/azimuth_fm_rate",
+        "IW1/VV/coordinate_conversion",
+        "IW1/VV/calibration",
         "IW1/VV/noise_range",
         "IW1/VV/noise_azimuth",
     }

@@ -19,6 +19,8 @@ import xarray as xr
 
 from . import conventions, esa_safe
 
+SPEED_OF_LIGHT = 299_792_458  # m / s
+
 
 def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
     calibration_vectors = esa_safe.parse_tag_list(
@@ -115,9 +117,11 @@ def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
-def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.Dataset:
-    coordinate_conversion = esa_safe.parse_tag(
-        annotation_path, ".//coordinateConversionList"
+def open_coordinate_conversion_dataset(
+    annotation_path: esa_safe.PathType,
+) -> xr.Dataset:
+    coordinate_conversion = esa_safe.parse_tag_list(
+        annotation_path, ".//coordinateConversionList/coordinateConversion"
     )
 
     gr0 = []
@@ -126,7 +130,7 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
     slant_range_time = []
     srgrCoefficients: T.List[T.List[float]] = []
     grsrCoefficients: T.List[T.List[float]] = []
-    for values in coordinate_conversion["coordinateConversion"]:
+    for values in coordinate_conversion:
         sr0.append(values["sr0"])
         gr0.append(values["gr0"])
         azimuth_time.append(values["azimuthTime"])
@@ -138,18 +142,18 @@ def open_coordinateConversion_dataset(annotation_path: esa_safe.PathType) -> xr.
             [float(v) for v in values["grsrCoefficients"]["$"].split()]
         )
 
-    coords = {
-        "azimuth_time": [np.datetime64(dt) for dt in azimuth_time],
-        "degree": list(range(len(srgrCoefficients[0]))),
-    }
+    coords: T.Dict[str, T.Any] = {}
+    data_vars: T.Dict[str, T.Any] = {}
+    if srgrCoefficients:
+        coords["azimuth_time"] = [np.datetime64(dt) for dt in azimuth_time]
+        coords["degree"] = list(range(len(srgrCoefficients[0])))
 
-    data_vars = {
-        "gr0": ("azimuth_time", gr0),
-        "sr0": ("azimuth_time", sr0),
-        "slant_range_time": ("azimuth_time", slant_range_time),
-        "srgr_coefficients": (("azimuth_time", "degree"), srgrCoefficients),
-        "grsr_coefficients": (("azimuth_time", "degree"), grsrCoefficients),
-    }
+        data_vars["gr0"] = ("azimuth_time", gr0)
+        data_vars["sr0"] = ("azimuth_time", sr0)
+        data_vars["slant_range_time"] = ("azimuth_time", slant_range_time)
+        data_vars["srgrCoefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
+        data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
+
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
@@ -344,6 +348,7 @@ def find_avalable_groups(
                 "attitude",
                 "dc_estimate",
                 "azimuth_fm_rate",
+                "coordinate_conversion",
             ]:
                 groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
                     "s1Level1ProductSchema"
@@ -384,26 +389,27 @@ def open_pol_dataset(
 
     number_of_samples = image_information["numberOfSamples"]
     first_slant_range_time = image_information["slantRangeTime"]
-    slant_range_sampling = 1 / product_information["rangeSamplingRate"]
-    slant_range_time = np.linspace(
-        first_slant_range_time,
-        first_slant_range_time + slant_range_sampling * (number_of_samples - 1),
-        number_of_samples,
-    )
+    slant_range_time_interval = 1 / product_information["rangeSamplingRate"]
 
     number_of_lines = image_information["numberOfLines"]
     first_azimuth_time = image_information["productFirstLineUtcTime"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
+    number_of_bursts = swath_timing["burstList"]["@count"]
+    range_pixel_spaxing = image_information["rangePixelSpacing"]
+
+    attrs = {
+        "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
+        "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
+        "sar:pixel_spacing_range": range_pixel_spaxing,
+        "azimuth_time_interval": azimuth_time_interval,
+        "slant_range_time_interval": slant_range_time_interval,
+    }
+
     azimuth_time = pd.date_range(
         start=first_azimuth_time,
         periods=number_of_lines,
         freq=pd.Timedelta(azimuth_time_interval, "s"),
     ).values
-    attrs = {
-        "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
-    }
-
-    number_of_bursts = swath_timing["burstList"]["@count"]
     if number_of_bursts:
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
@@ -432,19 +438,38 @@ def open_pol_dataset(
             except ModuleNotFoundError:
                 pass
 
+    coords = {
+        "pixel": np.arange(0, number_of_samples, dtype=int),
+        "line": np.arange(0, number_of_lines, dtype=int),
+        "azimuth_time": ("line", azimuth_time),
+    }
+
+    if product_information["projection"] == "Slant Range":
+        slant_range_time = np.linspace(
+            first_slant_range_time,
+            first_slant_range_time
+            + slant_range_time_interval * (number_of_samples - 1),
+            number_of_samples,
+        )
+        coords["slant_range_time"] = ("pixel", slant_range_time)
+    elif product_information["projection"] == "Ground Range":
+        ground_range = np.linspace(
+            0,
+            range_pixel_spaxing * (number_of_samples - 1),
+            number_of_samples,
+        )
+        coords["ground_range"] = ("pixel", ground_range)
+    else:
+        raise ValueError(f"unknown projection {product_information['projection']}")
+
     arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
-    arr = arr.assign_coords(
-        {
-            "pixel": np.arange(0, arr["pixel"].size, dtype=int),
-            "line": np.arange(0, arr["line"].size, dtype=int),
-            "slant_range_time": ("pixel", slant_range_time),
-            "azimuth_time": ("line", azimuth_time),
-        }
-    )
+    arr = arr.assign_coords(coords)
 
-    if number_of_bursts == 0:
+    if product_information["projection"] == "Ground Range":
+        arr = arr.swap_dims({"line": "azimuth_time", "pixel": "ground_range"})
+    elif number_of_bursts == 0:
         arr = arr.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
@@ -552,6 +577,23 @@ def calibrate_intensity(
     except KeyError:
         pass
     return intensity
+
+
+def assign_slant_range_time_coord(
+    measurement: xr.Dataset, coordinate_conversion: xr.Dataset
+) -> xr.Dataset:
+    x = measurement.ground_range - coordinate_conversion.gr0
+    slant_range = (
+        coordinate_conversion.grsrCoefficients * x ** coordinate_conversion.degree
+    ).sum(dim="degree")
+    slant_range_coord = slant_range.interp(
+        azimuth_time=measurement.azimuth_time, ground_range=measurement.ground_range
+    ).data
+    slant_range_time = 2 / SPEED_OF_LIGHT * slant_range_coord
+    measurement = measurement.assign_coords(
+        slant_range_time=(("azimuth_time", "ground_range"), slant_range_time)
+    )  # type: ignore
+    return measurement
 
 
 def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
@@ -663,6 +705,7 @@ METADATA_OPENERS = {
     "attitude": open_attitude_dataset,
     "dc_estimate": open_dc_estimate_dataset,
     "azimuth_fm_rate": open_azimuth_fm_rate_dataset,
+    "coordinate_conversion": open_coordinate_conversion_dataset,
     "calibration": open_calibration_dataset,
     "noise_range": open_noise_range_dataset,
     "noise_azimuth": open_noise_azimuth_dataset,
