@@ -184,7 +184,7 @@ Attributes: ...
 Note that in this case, the dimensions are `line` and `pixel` with coordinates corresponding to
 the sub-grid of the original image where it is defined the calibration Look Up Table.
 
-The groups present in a typical Sentinel-1 SLC Stripmap product are:
+The groups present in a typical Sentinel-1 Stripmap product are:
 
 ```
 /
@@ -195,6 +195,7 @@ The groups present in a typical Sentinel-1 SLC Stripmap product are:
    │  ├─ attitude
    │  ├─ dc_estimate
    │  ├─ azimuth_fm_rate
+   │  ├─ coordinate_conversion
    │  ├─ calibration
    │  ├─ noise_range
    │  └─ noise_azimuth
@@ -204,6 +205,7 @@ The groups present in a typical Sentinel-1 SLC Stripmap product are:
       ├─ attitude
       ├─ dc_estimate
       ├─ azimuth_fm_rate
+   │  ├─ coordinate_conversion
       ├─ calibration
       ├─ noise_range
       └─ noise_azimuth
