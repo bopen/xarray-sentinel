@@ -17,7 +17,7 @@ A few features, identified as *technology preview* below, are not fully usable y
     - Interferometric Wide Swath (IW)
     - Extra Wide Swath (EW)
     - Wave (WV) - *technology preview*
-  - Sentinel-1 Ground Range Detected (GRD) SM/IW/EW/WV - *technology preview*
+  - Sentinel-1 Ground Range Detected (GRD) SM/IW/EW/WV
 - creates ready-to-use [Xarray](https://xarray.pydata.org) `Dataset`s that map the data
   lazily and efficiently in terms of both memory usage and disk / network access
 - reads all SAR imagery data: GRD images, SLC swaths and SLC bursts
