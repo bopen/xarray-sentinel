@@ -138,14 +138,18 @@ in seconds associated with the image pixel.
 The measurement group contains several subgroups with metadata associated with the image, at the moment
 *xarray-sentinel* supports the following metadata datasets:
 
-- `gcp` from the `<geolocationGridPoint>` tags in the annotation XML
-- `orbit` from the `<orbit>` tags in the annotation XML
-- `attitude` from the `<attitude>` tags in the annotation XML
-- `cd_estimate` from the `<dcEstimate>` tags in the annotation XML
-- `azimuth_fm_rate` from the `<azimuthFmRate>` tags in the annotation XML
-- `calibration` from the `<calibrationVector>` tags in the calibration XML
-- `noise_range` from the `<noiseRangeVector>` tags in the noise XML
-- `noise_azimuth` from the `<noiseAzimuthVector>` tags in the noise XML
+- product XML file
+  - `orbit` from the `<orbit>` tags
+  - `attitude` from the `<attitude>` tags
+  - `azimuth_fm_rate` from the `<azimuthFmRate>` tags
+  - `dc_estimate` from the `<dcEstimate>` tags
+  - `gcp` from the `<geolocationGridPoint>` tags
+  - `coordinate_conversion` from the `<coordinateConversion>` tags
+- calibration XML file
+  - `calibration` from the `<calibrationVector>` tags
+- noise XML file
+  - `noise_range` from the `<noiseRangeVector>` tags
+  - `noise_azimuth` from the `<noiseAzimuthVector>` tags
 
 For example, the image calibration metadata associated with the `S3/VH` image can be read using
 `group="S3/VH/calibration"`:
