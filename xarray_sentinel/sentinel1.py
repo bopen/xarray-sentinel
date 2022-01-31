@@ -415,13 +415,18 @@ def find_avalable_groups(
 
 
 def open_pol_dataset(
+    fs: fsspec.AbstractFileSystem,
     measurement: esa_safe.PathType,
     annotation: esa_safe.PathOrFileType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
-    image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
-    product_information = esa_safe.parse_tag(annotation, ".//productInformation")
-    swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
+
+    with fs.open(annotation) as file:
+        product_information = esa_safe.parse_tag(file, ".//productInformation")
+        file.seek(0)
+        image_information = esa_safe.parse_tag(file, ".//imageInformation")
+        file.seek(0)
+        swath_timing = esa_safe.parse_tag(file, ".//swathTiming")
 
     number_of_samples = image_information["numberOfSamples"]
     first_slant_range_time = image_information["slantRangeTime"]
@@ -498,7 +503,8 @@ def open_pol_dataset(
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
-    arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
+    file = fs.open(measurement)
+    arr = xr.open_dataarray(file, engine="rasterio", chunks=chunks)  # type: ignore
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(coords)
@@ -673,6 +679,9 @@ def open_sentinel1_dataset(
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
+    if drop_variables is not None:
+        warnings.warn("'drop_variables' is currently ignored")
+
     fs, manifest_path = get_fs_path(product_urlpath, fs)
 
     if fs.isdir(manifest_path):
@@ -683,8 +692,6 @@ def open_sentinel1_dataset(
 
     base_path = os.path.dirname(manifest_path)
     ancillary_data_paths = get_ancillary_data_paths(base_path, product_files)
-    if drop_variables is not None:
-        warnings.warn("'drop_variables' is currently ignored")
 
     groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs=fs)
 
@@ -711,6 +718,7 @@ def open_sentinel1_dataset(
         elif group.count("/") == 1:
             subswath, pol = group.split("/", 1)
             ds = open_pol_dataset(
+                fs,
                 ancillary_data_paths[subswath][pol]["s1Level1MeasurementSchema"],
                 ancillary_data_paths[subswath][pol]["s1Level1ProductSchema"],
                 chunks=chunks,
