@@ -65,27 +65,6 @@ def parse_tag_as_list(
     return tag_list
 
 
-def parse_azimuth_fm_rate(
-    annotation_path: PathOrFileType,
-) -> T.List[T.Dict[str, T.Any]]:
-    azimuth_fm_rate = []
-    for afmr in parse_tag_as_list(annotation_path, ".//azimuthFmRate"):
-        poly = [float(c) for c in afmr["azimuthFmRatePolynomial"]["$"].split()]
-        afmr["azimuthFmRatePolynomial"] = poly
-        azimuth_fm_rate.append(afmr)
-    return azimuth_fm_rate
-
-
-def parse_dc_estimate(annotation_path: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
-    dc_estimate = []
-    for de in parse_tag_as_list(annotation_path, ".//dcEstimate"):
-        poly = [float(c) for c in de["dataDcPolynomial"]["$"].split()]
-        de["dataDcPolynomial"] = poly
-        de.pop("fineDceList")  # drop large unused data
-        dc_estimate.append(de)
-    return dc_estimate
-
-
 def findtext(
     tree: ElementTree.ElementTree,
     query: str,
