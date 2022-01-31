@@ -58,6 +58,67 @@ GRD_IW_VV_annotation = (
 )
 
 
+def test_get_fs_path() -> None:
+    fs, path = sentinel1.get_fs_path(str(SLC_IW))
+
+    assert path == str(SLC_IW.absolute())
+
+    fs, path = sentinel1.get_fs_path(SLC_IW, fs)
+
+    assert path == str(SLC_IW)
+
+    with pytest.raises(ValueError):
+        sentinel1.get_fs_path("non-existent-path/*")
+
+    with pytest.raises(ValueError):
+        sentinel1.get_fs_path(DATA_FOLDER / "*")
+
+
+def test_get_ancillary_data() -> None:
+    base_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+
+    product_files = {
+        "./annotation/s1b-iw1-slc-vh-xx-xx-xx-xx-xx.xml": "s1Level1ProductSchema",
+        "./annotation/calibration/noise-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1NoiseSchema",
+        "./annotation/calibration/calibration-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
+        "./annotation/s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1ProductSchema",
+        "./annotation/calibration/noise-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1NoiseSchema",
+        "./annotation/calibration/calibration-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
+        "./measurement/s1b-iw1-slc-vh-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
+        "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
+    }
+
+    ancillary_data_paths = sentinel1.get_ancillary_data_paths(base_path, product_files)
+
+    expected = {"IW1"}
+    assert set(ancillary_data_paths) == expected
+
+    expected = {"VV", "VH"}
+    assert set(ancillary_data_paths["IW1"]) == expected
+
+    expected = {
+        "s1Level1ProductSchema",
+        "s1Level1CalibrationSchema",
+        "s1Level1NoiseSchema",
+        "s1Level1MeasurementSchema",
+    }
+    assert set(ancillary_data_paths["IW1"]["VV"]) == expected
+
+    assert isinstance(ancillary_data_paths["IW1"]["VV"]["s1Level1ProductSchema"], str)
+
+
+def test_normalise_group() -> None:
+    assert sentinel1.normalise_group(None) == ("", None)
+    assert sentinel1.normalise_group("/") == ("", None)
+    assert sentinel1.normalise_group("IW1") == ("IW1", None)
+    assert sentinel1.normalise_group("/IW1") == ("IW1", None)
+    assert sentinel1.normalise_group("/IW1/VH/0") == ("IW1/VH", 0)
+    assert sentinel1.normalise_group("/IW1/VH/orbit") == ("IW1/VH/orbit", None)
+
+
 def test_open_calibration_dataset() -> None:
     res = sentinel1.open_calibration_dataset(SLC_IW1_VV_calibration)
 
@@ -196,51 +257,6 @@ def test_compute_burst_centres() -> None:
     lat, lon = sentinel1.compute_burst_centres(gcp)
     assert np.allclose(lat, [0.5, 1.5, 2.5, 3.5])
     assert np.allclose(lon, [5, 15, 25, 35])
-
-
-def test_normalise_group() -> None:
-    assert sentinel1.normalise_group(None) == ("", None)
-    assert sentinel1.normalise_group("/") == ("", None)
-    assert sentinel1.normalise_group("IW1") == ("IW1", None)
-    assert sentinel1.normalise_group("/IW1") == ("IW1", None)
-    assert sentinel1.normalise_group("/IW1/VH/0") == ("IW1/VH", 0)
-    assert sentinel1.normalise_group("/IW1/VH/orbit") == ("IW1/VH/orbit", None)
-
-
-def test_get_ancillary_data() -> None:
-    base_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-    )
-
-    product_files = {
-        "./annotation/s1b-iw1-slc-vh-xx-xx-xx-xx-xx.xml": "s1Level1ProductSchema",
-        "./annotation/calibration/noise-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1NoiseSchema",
-        "./annotation/calibration/calibration-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
-        "./annotation/s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1ProductSchema",
-        "./annotation/calibration/noise-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1NoiseSchema",
-        "./annotation/calibration/calibration-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
-        "./measurement/s1b-iw1-slc-vh-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
-        "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
-    }
-
-    ancillary_data_paths = sentinel1.get_ancillary_data_paths(base_path, product_files)
-
-    expected = {"IW1"}
-    assert set(ancillary_data_paths) == expected
-
-    expected = {"VV", "VH"}
-    assert set(ancillary_data_paths["IW1"]) == expected
-
-    expected = {
-        "s1Level1ProductSchema",
-        "s1Level1CalibrationSchema",
-        "s1Level1NoiseSchema",
-        "s1Level1MeasurementSchema",
-    }
-    assert set(ancillary_data_paths["IW1"]["VV"]) == expected
-
-    assert isinstance(ancillary_data_paths["IW1"]["VV"]["s1Level1ProductSchema"], str)
 
 
 def test_open_dataset() -> None:

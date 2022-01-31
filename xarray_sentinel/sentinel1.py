@@ -22,6 +22,53 @@ from . import conventions, esa_safe
 SPEED_OF_LIGHT = 299_792_458  # m / s
 
 
+def get_fs_path(
+    urlpath_or_path: esa_safe.PathType, fs: T.Optional[fsspec.AbstractFileSystem] = None
+) -> T.Tuple[fsspec.AbstractFileSystem, str]:
+    if fs is None:
+        fs, _, paths = fsspec.get_fs_token_paths(urlpath_or_path)
+        if len(paths) == 0:
+            raise ValueError(f"file or object not found {urlpath_or_path!r}")
+        elif len(paths) > 1:
+            raise ValueError(f"multiple files or objects found {urlpath_or_path!r}")
+        path = paths[0]
+    else:
+        path = str(urlpath_or_path)
+    return fs, path
+
+
+def get_ancillary_data_paths(
+    base_path: esa_safe.PathType,
+    product_files: T.Dict[str, str],
+) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
+    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
+    for filename, filetype in product_files.items():
+        # HACK: no easy way to normalise the path component of a urlpath
+        file_path = os.path.join(base_path, os.path.normpath(filename))
+        name = os.path.basename(filename)
+        try:
+            subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
+        except ValueError:
+            continue
+        swath_dict = ancillary_data_paths.setdefault(subswath.upper(), {})
+        pol_dict = swath_dict.setdefault(pol.upper(), {})
+        pol_dict[filetype] = file_path
+    return ancillary_data_paths
+
+
+def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
+    if group is None:
+        group = ""
+    if group.startswith("/"):
+        group = group[1:]
+    burst_index = None
+    parent_group, _, last_name = group.rpartition("/")
+    if parent_group.count("/") == 1 and last_name.isnumeric():
+        burst_index = int(last_name)
+        group = parent_group
+    return group, burst_index
+
+
 def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
     calibration_vectors = esa_safe.parse_tag_as_list(
         calibration, ".//calibrationVector", "calibration"
@@ -155,40 +202,6 @@ def open_coordinate_conversion_dataset(
         data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
 
     return xr.Dataset(data_vars=data_vars, coords=coords)
-
-
-def get_fs_path(
-    urlpath_or_path: esa_safe.PathType, fs: T.Optional[fsspec.AbstractFileSystem] = None
-) -> T.Tuple[fsspec.AbstractFileSystem, str]:
-    if fs is None:
-        fs, _, paths = fsspec.get_fs_token_paths(urlpath_or_path)
-        if len(paths) == 0:
-            raise ValueError(f"file or object not found {urlpath_or_path!r}")
-        elif len(paths) > 1:
-            raise ValueError(f"multiple files or objects found {urlpath_or_path!r}")
-        path = paths[0]
-    else:
-        path = urlpath_or_path
-    return fs, path
-
-
-def get_ancillary_data_paths(
-    base_path: esa_safe.PathType,
-    product_files: T.Dict[str, str],
-) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
-    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
-    for filename, filetype in product_files.items():
-        # HACK: no easy way to normalise the path component of a urlpath
-        file_path = os.path.join(base_path, os.path.normpath(filename))
-        name = os.path.basename(filename)
-        try:
-            subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
-        except ValueError:
-            continue
-        swath_dict = ancillary_data_paths.setdefault(subswath.upper(), {})
-        pol_dict = swath_dict.setdefault(pol.upper(), {})
-        pol_dict[filetype] = file_path
-    return ancillary_data_paths
 
 
 def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
@@ -403,7 +416,7 @@ def find_avalable_groups(
 
 def open_pol_dataset(
     measurement: esa_safe.PathType,
-    annotation: esa_safe.PathType,
+    annotation: esa_safe.PathOrFileType,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
 ) -> xr.Dataset:
     image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
@@ -639,17 +652,17 @@ def compute_burst_centres(
     return centre.latitude.values.tolist(), centre.longitude.values.tolist()
 
 
-def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
-    if group is None:
-        group = ""
-    if group.startswith("/"):
-        group = group[1:]
-    burst_index = None
-    parent_group, _, last_name = group.rpartition("/")
-    if parent_group.count("/") == 1 and last_name.isnumeric():
-        burst_index = int(last_name)
-        group = parent_group
-    return group, burst_index
+METADATA_OPENERS = {
+    "orbit": open_orbit_dataset,
+    "attitude": open_attitude_dataset,
+    "azimuth_fm_rate": open_azimuth_fm_rate_dataset,
+    "dc_estimate": open_dc_estimate_dataset,
+    "gcp": open_gcp_dataset,
+    "coordinate_conversion": open_coordinate_conversion_dataset,
+    "calibration": open_calibration_dataset,
+    "noise_range": open_noise_range_dataset,
+    "noise_azimuth": open_noise_azimuth_dataset,
+}
 
 
 def open_sentinel1_dataset(
@@ -660,25 +673,23 @@ def open_sentinel1_dataset(
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
-    group, burst_index = normalise_group(group)
-    absgroup = f"/{group}"
-
     fs, manifest_path = get_fs_path(product_urlpath, fs)
 
     if fs.isdir(manifest_path):
         manifest_path = os.path.join(manifest_path, "manifest.safe")
 
-    base_path = os.path.dirname(manifest_path)
-
     with fs.open(manifest_path) as file:
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
 
+    base_path = os.path.dirname(manifest_path)
     ancillary_data_paths = get_ancillary_data_paths(base_path, product_files)
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
 
     groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs=fs)
 
+    group, burst_index = normalise_group(group)
+    absgroup = f"/{group}"
     if group != "" and group not in groups:
         raise ValueError(
             f"Invalid group {group!r}, please select one of the following groups:"
@@ -720,16 +731,3 @@ def open_sentinel1_dataset(
     conventions.update_attributes(ds, group=metadata)
 
     return ds
-
-
-METADATA_OPENERS = {
-    "orbit": open_orbit_dataset,
-    "attitude": open_attitude_dataset,
-    "azimuth_fm_rate": open_azimuth_fm_rate_dataset,
-    "dc_estimate": open_dc_estimate_dataset,
-    "gcp": open_gcp_dataset,
-    "coordinate_conversion": open_coordinate_conversion_dataset,
-    "calibration": open_calibration_dataset,
-    "noise_range": open_noise_range_dataset,
-    "noise_azimuth": open_noise_azimuth_dataset,
-}
