@@ -126,7 +126,7 @@ def test_parse_tag() -> None:
     assert set(res) == expected
 
 
-def test_parse_tag_list() -> None:
+def test_parse_tag_as_list() -> None:
     expected = {
         "azimuthTime",
         "firstValidSample",
@@ -136,10 +136,22 @@ def test_parse_tag_list() -> None:
         "azimuthAnxTime",
     }
 
-    res = esa_safe.parse_tag_list(ANNOTATION_PATH, ".//burst")
+    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, ".//burst")
 
     assert isinstance(res, list)
     assert set(res[0]) == expected
+
+    # XPath to a single element
+    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, ".//burst[1]")
+
+    assert isinstance(res, list)
+    assert set(res[0]) == expected
+
+    # XPath to a non existent element
+    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, ".//dummy")
+
+    assert isinstance(res, list)
+    assert res == []
 
 
 def test_parse_azimuth_fm_rate() -> None:
@@ -178,39 +190,3 @@ def test_parse_manifest_sentinel1(
     res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest_path)
 
     assert res_attrs == expected
-
-
-def test_get_ancillary_data() -> None:
-    base_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-    )
-
-    product_files = {
-        "./annotation/s1b-iw1-slc-vh-xx-xx-xx-xx-xx.xml": "s1Level1ProductSchema",
-        "./annotation/calibration/noise-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1NoiseSchema",
-        "./annotation/calibration/calibration-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
-        "./annotation/s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1ProductSchema",
-        "./annotation/calibration/noise-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1NoiseSchema",
-        "./annotation/calibration/calibration-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
-        "./measurement/s1b-iw1-slc-vh-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
-        "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
-    }
-
-    ancillary_data_paths = esa_safe.get_ancillary_data_paths(base_path, product_files)
-
-    expected = {"IW1"}
-    assert set(ancillary_data_paths) == expected
-
-    expected = {"VV", "VH"}
-    assert set(ancillary_data_paths["IW1"]) == expected
-
-    expected = {
-        "s1Level1ProductSchema",
-        "s1Level1CalibrationSchema",
-        "s1Level1NoiseSchema",
-        "s1Level1MeasurementSchema",
-    }
-    assert set(ancillary_data_paths["IW1"]["VV"]) == expected
-
-    assert isinstance(ancillary_data_paths["IW1"]["VV"]["s1Level1ProductSchema"], str)

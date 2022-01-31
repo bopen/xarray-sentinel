@@ -29,25 +29,6 @@ SENTINEL2_NAMESPACES = {
 }
 
 
-def get_ancillary_data_paths(
-    base_path: PathType,
-    product_files: T.Dict[str, str],
-) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
-    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
-    for filename, filetype in product_files.items():
-        # HACK: no easy way to normalise the path component of a urlpath
-        file_path = os.path.join(base_path, os.path.normpath(filename))
-        name = os.path.basename(filename)
-        try:
-            subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
-        except ValueError:
-            continue
-        swath_dict = ancillary_data_paths.setdefault(subswath.upper(), {})
-        pol_dict = swath_dict.setdefault(pol.upper(), {})
-        pol_dict[filetype] = file_path
-    return ancillary_data_paths
-
-
 @functools.lru_cache
 def cached_sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
     return xmlschema.XMLSchema(SENTINEL1_SCHEMAS[schema_type])
@@ -66,7 +47,7 @@ def parse_tag(
     return tag_dict
 
 
-def parse_tag_list(
+def parse_tag_as_list(
     xml_path: PathOrFileType,
     query: str,
     schema_type: str = "annotation",
@@ -88,7 +69,7 @@ def parse_azimuth_fm_rate(
     annotation_path: PathOrFileType,
 ) -> T.List[T.Dict[str, T.Any]]:
     azimuth_fm_rate = []
-    for afmr in parse_tag_list(annotation_path, ".//azimuthFmRate"):
+    for afmr in parse_tag_as_list(annotation_path, ".//azimuthFmRate"):
         poly = [float(c) for c in afmr["azimuthFmRatePolynomial"]["$"].split()]
         afmr["azimuthFmRatePolynomial"] = poly
         azimuth_fm_rate.append(afmr)
@@ -97,7 +78,7 @@ def parse_azimuth_fm_rate(
 
 def parse_dc_estimate(annotation_path: PathOrFileType) -> T.List[T.Dict[str, T.Any]]:
     dc_estimate = []
-    for de in parse_tag_list(annotation_path, ".//dcEstimate"):
+    for de in parse_tag_as_list(annotation_path, ".//dcEstimate"):
         poly = [float(c) for c in de["dataDcPolynomial"]["$"].split()]
         de["dataDcPolynomial"] = poly
         de.pop("fineDceList")  # drop large unused data
