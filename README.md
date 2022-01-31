@@ -80,7 +80,7 @@ Attributes: ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['S3']
     group:                      /
-    subgroups:                  ['S3', 'S3/VH', 'S3/VH/gcp', 'S3/VH/orbit', '...
+    subgroups:                  ['S3', 'S3/VH', 'S3/VH/orbit', 'S3/VH/attitud...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
@@ -120,7 +120,7 @@ Attributes: ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['S3']
     group:                      /S3/VH
-    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
+    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
@@ -194,22 +194,22 @@ The groups present in a typical Sentinel-1 Stripmap product are:
 /
 └─ S3
    ├─ VH
-   │  ├─ gcp
    │  ├─ orbit
    │  ├─ attitude
-   │  ├─ dc_estimate
    │  ├─ azimuth_fm_rate
+   │  ├─ dc_estimate
+   │  ├─ gcp
    │  ├─ coordinate_conversion
    │  ├─ calibration
    │  ├─ noise_range
    │  └─ noise_azimuth
    └─ VV
-      ├─ gcp
       ├─ orbit
       ├─ attitude
-      ├─ dc_estimate
       ├─ azimuth_fm_rate
-   │  ├─ coordinate_conversion
+      ├─ dc_estimate
+      ├─ gcp
+      ├─ coordinate_conversion
       ├─ calibration
       ├─ noise_range
       └─ noise_azimuth
@@ -254,7 +254,7 @@ Attributes: ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VH
-    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
+    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
 
@@ -286,7 +286,7 @@ Attributes: ...
     azimuth_steering_rate:      1.590368784
     ...                         ...
     group:                      /IW1/VH
-    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
+    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
     azimuth_anx_time:           2210.634453
@@ -321,7 +321,7 @@ Attributes: ...
     azimuth_steering_rate:      1.590368784
     ...                         ...
     group:                      /IW1/VH
-    subgroups:                  ['gcp', 'orbit', 'attitude', 'dc_estimate', '...
+    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
     azimuth_anx_time:           2210.634453
     burst_index:                8
     Conventions:                CF-1.8

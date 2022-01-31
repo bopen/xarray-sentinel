@@ -23,7 +23,7 @@ SPEED_OF_LIGHT = 299_792_458  # m / s
 
 
 def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
-    calibration_vectors = esa_safe.parse_tag_list(
+    calibration_vectors = esa_safe.parse_tag_as_list(
         calibration, ".//calibrationVector", "calibration"
     )
 
@@ -66,7 +66,7 @@ def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
 
 
 def open_noise_range_dataset(noise: esa_safe.PathType) -> xr.Dataset:
-    noise_vectors = esa_safe.parse_tag_list(noise, ".//noiseRangeVector", "noise")
+    noise_vectors = esa_safe.parse_tag_as_list(noise, ".//noiseRangeVector", "noise")
 
     azimuth_time_list = []
     pixel_list = []
@@ -95,7 +95,7 @@ def open_noise_range_dataset(noise: esa_safe.PathType) -> xr.Dataset:
 
 
 def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
-    noise_vectors = esa_safe.parse_tag_list(noise, ".//noiseAzimuthVector", "noise")
+    noise_vectors = esa_safe.parse_tag_as_list(noise, ".//noiseAzimuthVector", "noise")
 
     first_range_sample = []
     line_list = []
@@ -120,7 +120,7 @@ def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
 def open_coordinate_conversion_dataset(
     annotation_path: esa_safe.PathType,
 ) -> xr.Dataset:
-    coordinate_conversion = esa_safe.parse_tag_list(
+    coordinate_conversion = esa_safe.parse_tag_as_list(
         annotation_path, ".//coordinateConversionList/coordinateConversion"
     )
 
@@ -172,8 +172,27 @@ def get_fs_path(
     return fs, path
 
 
+def get_ancillary_data_paths(
+    base_path: esa_safe.PathType,
+    product_files: T.Dict[str, str],
+) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
+    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
+    for filename, filetype in product_files.items():
+        # HACK: no easy way to normalise the path component of a urlpath
+        file_path = os.path.join(base_path, os.path.normpath(filename))
+        name = os.path.basename(filename)
+        try:
+            subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
+        except ValueError:
+            continue
+        swath_dict = ancillary_data_paths.setdefault(subswath.upper(), {})
+        pol_dict = swath_dict.setdefault(pol.upper(), {})
+        pol_dict[filetype] = file_path
+    return ancillary_data_paths
+
+
 def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    geolocation_grid_points = esa_safe.parse_tag_list(
+    geolocation_grid_points = esa_safe.parse_tag_as_list(
         annotation, ".//geolocationGridPoint"
     )
 
@@ -218,7 +237,7 @@ def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    attitudes = esa_safe.parse_tag_list(annotation, ".//attitude")
+    attitudes = esa_safe.parse_tag_as_list(annotation, ".//attitude")
 
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     azimuth_time: T.List[T.Any] = []
@@ -237,7 +256,7 @@ def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    orbits = esa_safe.parse_tag_list(annotation, ".//orbit")
+    orbits = esa_safe.parse_tag_as_list(annotation, ".//orbit")
 
     reference_system = orbits[0]["frame"]
     variables = ["position", "velocity"]
@@ -277,7 +296,7 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    dc_estimates = esa_safe.parse_dc_estimate(annotation)
+    dc_estimates = esa_safe.parse_tag_as_list(annotation, ".//dcEstimate")
 
     azimuth_time = []
     t0 = []
@@ -285,7 +304,9 @@ def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     for dc_estimate in dc_estimates:
         azimuth_time.append(dc_estimate["azimuthTime"])
         t0.append(dc_estimate["t0"])
-        data_dc_poly.append(dc_estimate["dataDcPolynomial"])
+        data_dc_poly.append(
+            [float(c) for c in dc_estimate["dataDcPolynomial"]["$"].split()]
+        )
 
     ds = xr.Dataset(
         data_vars={
@@ -301,7 +322,7 @@ def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
 
 def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
-    azimuth_fm_rates = esa_safe.parse_azimuth_fm_rate(annotation)
+    azimuth_fm_rates = esa_safe.parse_tag_as_list(annotation, ".//azimuthFmRate")
 
     azimuth_time = []
     t0 = []
@@ -309,7 +330,9 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
     for azimuth_fm_rate in azimuth_fm_rates:
         azimuth_time.append(azimuth_fm_rate["azimuthTime"])
         t0.append(azimuth_fm_rate["t0"])
-        azimuth_fm_rate_poly.append(azimuth_fm_rate["azimuthFmRatePolynomial"])
+        azimuth_fm_rate_poly.append(
+            [float(c) for c in azimuth_fm_rate["azimuthFmRatePolynomial"]["$"].split()]
+        )
 
     ds = xr.Dataset(
         data_vars={
@@ -343,11 +366,11 @@ def find_avalable_groups(
             groups[subswath_id] = ""
             groups[f"{subswath_id}/{pol_id}"] = pol_data_paths["s1Level1ProductSchema"]
             for metadata_group in [
-                "gcp",
                 "orbit",
                 "attitude",
-                "dc_estimate",
                 "azimuth_fm_rate",
+                "dc_estimate",
+                "gcp",
                 "coordinate_conversion",
             ]:
                 groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
@@ -650,7 +673,7 @@ def open_sentinel1_dataset(
     with fs.open(manifest_path) as file:
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
 
-    ancillary_data_paths = esa_safe.get_ancillary_data_paths(base_path, product_files)
+    ancillary_data_paths = get_ancillary_data_paths(base_path, product_files)
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
 
@@ -700,11 +723,11 @@ def open_sentinel1_dataset(
 
 
 METADATA_OPENERS = {
-    "gcp": open_gcp_dataset,
     "orbit": open_orbit_dataset,
     "attitude": open_attitude_dataset,
-    "dc_estimate": open_dc_estimate_dataset,
     "azimuth_fm_rate": open_azimuth_fm_rate_dataset,
+    "dc_estimate": open_dc_estimate_dataset,
+    "gcp": open_gcp_dataset,
     "coordinate_conversion": open_coordinate_conversion_dataset,
     "calibration": open_calibration_dataset,
     "noise_range": open_noise_range_dataset,
