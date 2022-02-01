@@ -1,6 +1,7 @@
 ENVIRONMENT := XARRAY-SENTINEL
 COV_REPORT := html
 CONDA := conda
+CONDAOPTS := -n $(ENVIRONMENT)
 
 default: fix-code-style unit-test code-quality
 
@@ -29,10 +30,11 @@ code-style:
 # deploy
 
 conda-env-create:
-	$(CONDA) env create -n $(ENVIRONMENT) -f environment-ci.yml
+	$(CONDA) env create $(CONDAOPTS) -f environment-ci.yml
 
 conda-env-update:
-	$(CONDA) env update -n $(ENVIRONMENT) -f environment-ci.yml
+	$(CONDA) env update $(CONDAOPTS) -f environment-ci.yml
+	pip install git+https://github.com/rasterio/rasterio  # need rasterio >= 1.3a3 for fsspec support
 
 conda-env-update-all: conda-env-update
-	$(CONDA) env update -n $(ENVIRONMENT) -f environment-dev.yml
+	$(CONDA) env update $(CONDAOPTS) -f environment-dev.yml
