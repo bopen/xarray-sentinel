@@ -81,14 +81,54 @@ def test_get_ancillary_data() -> None:
     )
 
     product_files = {
-        "./annotation/s1b-iw1-slc-vh-xx-xx-xx-xx-xx.xml": "s1Level1ProductSchema",
-        "./annotation/calibration/noise-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1NoiseSchema",
-        "./annotation/calibration/calibration-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
-        "./annotation/s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1ProductSchema",
-        "./annotation/calibration/noise-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1NoiseSchema",
-        "./annotation/calibration/calibration-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
-        "./measurement/s1b-iw1-slc-vh-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
-        "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
+        "./annotation/s1b-iw1-slc-vh-xx-xx-xx-xx-xx.xml": (
+            "s1Level1ProductSchema",
+            "IW1",
+            "VH",
+            "",
+        ),
+        "./annotation/calibration/noise-s1b-iw1-slc-vh-x-x-x-x-x.xml": (
+            "s1Level1NoiseSchema",
+            "IW1",
+            "VH",
+            "",
+        ),
+        "./annotation/calibration/calibration-s1b-iw1-slc-vh-x-x-x-x-x.xml": (
+            "s1Level1CalibrationSchema",
+            "IW1",
+            "VH",
+            "",
+        ),
+        "./annotation/s1b-iw1-slc-vv-x-x-x-x-x.xml": (
+            "s1Level1ProductSchema",
+            "IW1",
+            "VV",
+            "",
+        ),
+        "./annotation/calibration/noise-s1b-iw1-slc-vv-x-x-x-x-x.xml": (
+            "s1Level1NoiseSchema",
+            "IW1",
+            "VV",
+            "",
+        ),
+        "./annotation/calibration/calibration-s1b-iw1-slc-vv-x-x-x-x-x.xml": (
+            "s1Level1CalibrationSchema",
+            "IW1",
+            "VV",
+            "",
+        ),
+        "./measurement/s1b-iw1-slc-vh-x-x-x-x-x.tiff": (
+            "s1Level1MeasurementSchema",
+            "IW1",
+            "VH",
+            "",
+        ),
+        "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": (
+            "s1Level1MeasurementSchema",
+            "IW1",
+            "VV",
+            "",
+        ),
     }
 
     ancillary_data_paths = sentinel1.get_ancillary_data_paths(base_path, product_files)

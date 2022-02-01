@@ -37,21 +37,24 @@ def get_fs_path(
     return fs, path
 
 
+def make_all_groups(product_attrs: T.Dict[str, T.Any], product_files: T.Dict[str, str]):
+    groups = {}
+    for swath in product_attrs["xs:instrument_mode_swaths"]:
+        groups[swath] = []
+        for polarization in product_attrs["sar:polarizations"]:
+            groups[f"{swath}/{polarization}"] = []
+
+
 def get_ancillary_data_paths(
     base_path: esa_safe.PathType,
-    product_files: T.Dict[str, str],
+    product_files: T.Dict[str, T.Tuple[str, str, str, str]],
 ) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
     ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
-    for filename, filetype in product_files.items():
+    for filename, (filetype, subswath, pol, _) in product_files.items():
         # HACK: no easy way to normalise the path component of a urlpath
         file_path = os.path.join(base_path, os.path.normpath(filename))
-        name = os.path.basename(filename)
-        try:
-            subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
-        except ValueError:
-            continue
-        swath_dict = ancillary_data_paths.setdefault(subswath.upper(), {})
-        pol_dict = swath_dict.setdefault(pol.upper(), {})
+        swath_dict = ancillary_data_paths.setdefault(subswath, {})
+        pol_dict = swath_dict.setdefault(pol, {})
         pol_dict[filetype] = file_path
     return ancillary_data_paths
 
@@ -683,16 +686,14 @@ def open_sentinel1_dataset(
         warnings.warn("'drop_variables' is currently ignored")
 
     fs, manifest_path = get_fs_path(product_urlpath, fs)
-
     if fs.isdir(manifest_path):
         manifest_path = os.path.join(manifest_path, "manifest.safe")
+    product_path = os.path.dirname(manifest_path)
 
     with fs.open(manifest_path) as file:
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
 
-    base_path = os.path.dirname(manifest_path)
-    ancillary_data_paths = get_ancillary_data_paths(base_path, product_files)
-
+    ancillary_data_paths = get_ancillary_data_paths(product_path, product_files)
     groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs=fs)
 
     group, burst_index = normalise_group(group)
