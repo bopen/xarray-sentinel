@@ -663,21 +663,19 @@ def open_sentinel1_dataset(
 
     metadata = ""
 
+    ds = xr.Dataset()
     if group == "":
-        ds = xr.Dataset()
         subgroups = list(groups)
     else:
         subgroups = [
             g[len(group) + 1 :] for g in groups if g.startswith(group) and g != group
         ]
 
-        if "/" not in group:
-            ds = xr.Dataset()
-        elif group.count("/") == 1:
+        if group.count("/") == 1:
             measurement = fs.open(groups[group][0])
             with fs.open(groups[group][1]) as annotation:
                 ds = open_pol_dataset(measurement, annotation, chunks=chunks)
-        else:
+        elif group.count("/") == 2:
             subswath, pol, metadata = group.split("/", 2)
             with fs.open(groups[group][0]) as file:
                 ds = METADATA_OPENERS[metadata](file)
