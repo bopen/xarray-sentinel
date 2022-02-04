@@ -43,7 +43,7 @@ def parse_tag(
 ) -> T.Dict[str, T.Any]:
     schema = cached_sentinel1_schemas(schema_type)
     if hasattr(xml_path, "seek"):
-        xml_path.seek(0)
+        xml_path.seek(0)  # type: ignore
     xml_tree = ElementTree.parse(xml_path)
     tag_dict: T.Dict[str, T.Any] = schema.decode(xml_tree, query, validation=validation)  # type: ignore
     assert isinstance(tag_dict, dict), f"{type(tag_dict)} is not dict"

@@ -23,10 +23,16 @@ SPEED_OF_LIGHT = 299_792_458  # m / s
 
 
 def get_fs_path(
-    urlpath_or_path: esa_safe.PathType, fs: T.Optional[fsspec.AbstractFileSystem] = None
+    urlpath_or_path: esa_safe.PathType,
+    fs: T.Optional[fsspec.AbstractFileSystem] = None,
+    storage_options: T.Optional[T.Dict[str, T.Any]] = None,
 ) -> T.Tuple[fsspec.AbstractFileSystem, str]:
+    if fs is not None and storage_options is not None:
+        raise TypeError("only one of 'fs' and 'storage_options' can be not None")
     if fs is None:
-        fs, _, paths = fsspec.get_fs_token_paths(urlpath_or_path)
+        fs, _, paths = fsspec.get_fs_token_paths(
+            urlpath_or_path, storage_options=storage_options
+        )
         if len(paths) == 0:
             raise ValueError(f"file or object not found {urlpath_or_path!r}")
         elif len(paths) > 1:
@@ -347,16 +353,15 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
 def find_available_groups(
     product_files: T.Dict[str, T.Tuple[str, str, str, str]],
     product_path: str,
+    check_files_exist: bool = False,
     fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
 ) -> T.Dict[str, T.List[str]]:
     groups: T.Dict[str, T.List[str]] = {}
     for path, (type, subswath, pol, _) in product_files.items():
-        try:
-            abspath = os.path.join(product_path, os.path.normpath(path))
-            with fs.open(abspath):
-                pass
-        except FileNotFoundError:
-            continue
+        abspath = os.path.join(product_path, os.path.normpath(path))
+        if check_files_exist:
+            if not fs.exists(abspath):
+                continue
         if type == "s1Level1ProductSchema":
             groups[subswath] = [""]
             groups[f"{subswath}/{pol}"] = [abspath]
@@ -639,11 +644,13 @@ def open_sentinel1_dataset(
     group: T.Optional[str] = None,
     chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
+    storage_options: T.Optional[T.Dict[str, T.Any]] = None,
+    check_files_exist: bool = False,
 ) -> xr.Dataset:
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
 
-    fs, manifest_path = get_fs_path(product_urlpath, fs)
+    fs, manifest_path = get_fs_path(product_urlpath, fs, storage_options)
     if fs.isdir(manifest_path):
         manifest_path = os.path.join(manifest_path, "manifest.safe")
     product_path = os.path.dirname(manifest_path)
@@ -651,7 +658,9 @@ def open_sentinel1_dataset(
     with fs.open(manifest_path) as file:
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
 
-    groups = find_available_groups(product_files, product_path, fs=fs)
+    groups = find_available_groups(
+        product_files, product_path, check_files_exist=check_files_exist, fs=fs
+    )
 
     group, burst_index = normalise_group(group)
     absgroup = f"/{group}"
