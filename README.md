@@ -11,11 +11,11 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu.
 Overall the software is in the **alpha** phase and the usual caveats apply.
 
 - supports the following data products as [distributed by ESA](https://scihub.copernicus.eu/dhus/#/home):
-  - Sentinel-1 Single Look Complex (SLC):
+  - Sentinel-1 Ground Range Detected (GRD):
     - Stripmap (SM)
     - Interferometric Wide Swath (IW)
     - Extra Wide Swath (EW)
-  - Sentinel-1 Ground Range Detected (GRD) SM/IW/EW/WV
+  - Sentinel-1 Single Look Complex (SLC) SM/IW/EW
 - creates ready-to-use [Xarray](https://xarray.pydata.org) `Dataset`s that map the data
   lazily and efficiently in terms of both memory usage and disk / network access
 - reads all SAR imagery data: GRD images, SLC swaths and SLC bursts
@@ -23,8 +23,8 @@ Overall the software is in the **alpha** phase and the usual caveats apply.
   satellite orbit and attitude, ground control points, radiometric calibration look up tables,
   Doppler centroid estimation and more
 - reads uncompressed and compressed SAFE data products on the local computer or
-  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *dependes on rasterio>=1.3a3*
-- supports larger-than-memory and distributed data access via [*dask*](https://dask.org) and
+  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - **dependes on rasterio>=1.3a3**
+- supports larger-than-memory and distributed data access via [*Dask*](https://dask.org) and
   [*rioxarray*](https://corteva.github.io/rioxarray) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
 
@@ -523,6 +523,14 @@ Main contributors:
 - [Corrado Avolio](https://github.com/corrado9999) - [e-GEOS](https://www.e-geos.it)
 
 See also the list of [contributors](https://github.com/bopen/xarray-sentinel/contributors) who participated in this project.
+
+## Sponsoring
+
+[B-Open](https://bopen.eu) commits to maintain the project long term and we are happy to accept sponsorships to develop new features.
+
+We wish to express our gratitude to the project sponsors:
+
+- [Microsoft](https://microsoft.com) has contributed to adding GRD products and *fsspec* access
 
 ## License
 
