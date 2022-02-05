@@ -414,13 +414,16 @@ def open_pol_dataset(
         "slant_range_time_interval": slant_range_time_interval,
     }
     chunks = {}
+    swap_dims = {}
 
     azimuth_time = pd.date_range(
         start=first_azimuth_time,
         periods=number_of_lines,
         freq=pd.Timedelta(azimuth_time_interval, "s"),
     ).values
-    if number_of_bursts:
+    if number_of_bursts == 0:
+        swap_dims = {"line": "azimuth_time", "pixel": "slant_range_time"}
+    else:
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
             {
@@ -469,6 +472,7 @@ def open_pol_dataset(
             number_of_samples,
         )
         coords["ground_range"] = ("pixel", ground_range)
+        swap_dims = {"line": "azimuth_time", "pixel": "ground_range"}
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
@@ -481,11 +485,7 @@ def open_pol_dataset(
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(coords)
-
-    if product_information["projection"] == "Ground Range":
-        arr = arr.swap_dims({"line": "azimuth_time", "pixel": "ground_range"})
-    elif number_of_bursts == 0:
-        arr = arr.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
+    arr = arr.swap_dims(swap_dims)
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
@@ -644,6 +644,18 @@ METADATA_OPENERS = {
 }
 
 
+def do_override_product_files(
+    template: str, product_files: T.Dict[str, T.Tuple[str, str, str, str]]
+) -> T.Dict[str, T.Tuple[str, str, str, str]]:
+    overridden_product_files = {}
+    for path, (type, swath, polarization, date) in product_files.items():
+        ext = os.path.splitext(path)[1]
+        dirname = os.path.dirname(path)
+        overridden_path = template.format(**locals())
+        overridden_product_files[overridden_path] = (type, swath, polarization, date)
+    return overridden_product_files
+
+
 def open_sentinel1_dataset(
     product_urlpath: esa_safe.PathType,
     *,
@@ -652,6 +664,7 @@ def open_sentinel1_dataset(
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
     storage_options: T.Optional[T.Dict[str, T.Any]] = None,
     check_files_exist: bool = False,
+    override_product_files: T.Optional[str] = None,
 ) -> xr.Dataset:
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
@@ -663,6 +676,9 @@ def open_sentinel1_dataset(
 
     with fs.open(manifest_path) as file:
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
+
+    if override_product_files:
+        product_files = do_override_product_files(override_product_files, product_files)
 
     groups = find_available_groups(
         product_files, product_path, check_files_exist=check_files_exist, fs=fs
