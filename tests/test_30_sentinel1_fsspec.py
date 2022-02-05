@@ -69,7 +69,7 @@ def test_get_fs_path() -> None:
         sentinel1.get_fs_path("*")
 
 
-def test_open_dataset_zip() -> None:
+def test_open_dataset_zip_metadata() -> None:
     zip_path = (
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
@@ -93,6 +93,15 @@ def test_open_dataset_zip() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert res.dims == {"axis": 3, "azimuth_time": 17}
+
+
+@pytest.mark.xfail
+def test_open_dataset_zip_data() -> None:
+    zip_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
+    )
+    zip_urlpath = f"zip://*/manifest.safe::{zip_path}"
 
     res = sentinel1.open_sentinel1_dataset(zip_urlpath, group="IW1/VV/0")
 
