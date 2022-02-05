@@ -9,14 +9,12 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu.
 ## Features
 
 Overall the software is in the **alpha** phase and the usual caveats apply.
-A few features, identified as *technology preview* below, are not fully usable yet.
 
 - supports the following data products as [distributed by ESA](https://scihub.copernicus.eu/dhus/#/home):
   - Sentinel-1 Single Look Complex (SLC):
     - Stripmap (SM)
     - Interferometric Wide Swath (IW)
     - Extra Wide Swath (EW)
-    - Wave (WV) - *technology preview*
   - Sentinel-1 Ground Range Detected (GRD) SM/IW/EW/WV
 - creates ready-to-use [Xarray](https://xarray.pydata.org) `Dataset`s that map the data
   lazily and efficiently in terms of both memory usage and disk / network access
@@ -25,7 +23,7 @@ A few features, identified as *technology preview* below, are not fully usable y
   satellite orbit and attitude, ground control points, radiometric calibration look up tables,
   Doppler centroid estimation and more
 - reads uncompressed and compressed SAFE data products on the local computer or
-  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *technology preview*
+  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *dependes on rasterio>=1.3a3*
 - supports larger-than-memory and distributed data access via [*dask*](https://dask.org) and
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
 
@@ -63,7 +61,7 @@ and access the root group of the product, also known as `/`:
 
 ```python-repl
 >>> import xarray as xr
->>> slc_sm_path = "./S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
+>>> slc_sm_path = "tests/data/S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
 >>> xr.open_dataset(slc_sm_path, engine="sentinel-1")
 <xarray.Dataset>
 Dimensions:  ()
@@ -231,7 +229,7 @@ of the first IW swath of the `S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_0
 product in the current folder:
 
 ```python-repl
->>> slc_iw_path = "./S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+>>> slc_iw_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
 >>> slc_iw1_vh = xr.open_dataset(slc_iw_path, group="IW1/VH", engine="sentinel-1")
 >>> slc_iw1_vh
 <xarray.Dataset>
@@ -347,6 +345,94 @@ Attributes:
     units:      dB
     long_name:  gamma 
 
+```
+
+### Advanced data access via fsspec
+
+**You need the unreleased rasterio>=1.3a3 for fsspec to work on measurement data**
+
+You can test the following after:
+`pip install -U --pre --no-deps --no-binary rasterio rasterio>=1.3a3`.
+
+*xarray-sentinel* can read data from a variety of data stores including local file systems,
+network file systems, cloud object stores and compressed file formats, like Zip.
+This is done by passing *fsspec* compatible URLs to `xr.open_dataset` and optionally
+the `storage_options` keyword argument.
+
+For exmaple you can open a product directly from a Zip file with:
+
+```python-repl
+>>> slc_iw_zip_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
+>>> xr.open_dataset(f"zip://*/manifest.safe::{slc_iw_zip_path}", group="IW1/VH", engine="sentinel-1")
+<xarray.Dataset>
+Dimensions:           (pixel: 21632, line: 13509)
+Coordinates:
+  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
+  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+    azimuth_time      (line) datetime64[ns] ...
+    slant_range_time  (pixel) float64 ...
+Data variables:
+    measurement       (line, pixel) complex64 ...
+Attributes: ...
+    sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  13.94053
+    sar:pixel_spacing_range:    2.329562
+    azimuth_time_interval:      0.002055556299999998
+    slant_range_time_interval:  1.554116558005821e-08
+    azimuth_steering_rate:      1.590368784
+    ...                         ...
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VH
+    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+
+```
+
+As an exmaple of remote access you can open a product directly from a GitHub repo with:
+
+```python-repl
+>>> xr.open_dataset(f"github://bopen:xarray-sentinel@/{slc_iw_path}", group="IW1/VH", engine="sentinel-1")
+<xarray.Dataset>
+Dimensions:           (pixel: 21632, line: 13509)
+Coordinates:
+  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
+  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+    azimuth_time      (line) datetime64[ns] ...
+    slant_range_time  (pixel) float64 ...
+Data variables:
+    measurement       (line, pixel) complex64 ...
+Attributes: ...
+    sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  13.94053
+    sar:pixel_spacing_range:    2.329562
+    azimuth_time_interval:      0.002055556299999998
+    slant_range_time_interval:  1.554116558005821e-08
+    azimuth_steering_rate:      1.590368784
+    ...                         ...
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VH
+    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+
+```
+
+*fsspec* is very powerful and supports caching and chaining, for example you can open a
+zip file off a private Google Storage bucket and cache the file locally with:
+
+```python-repl
+xr.open_dataset(
+    "zip://*/manifest.zip::simplecache::gcs://bucket/afile.zip",
+    engine="sentinel-1",
+    storage_options={
+        "simplecache": {"cache_storage": "/stored/zip/files"},
+        "gcs": {'project': 'my-project'},
+    },
+)
+...
 ```
 
 ## Design decisions

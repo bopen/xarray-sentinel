@@ -10,4 +10,4 @@ dependencies:
   - notebook
   - sentinelsat
   - pip:
-    - --no-binary rasterio rasterio>=1.3a3  # for fsspec support
+    - -U --pre --no-deps --no-binary rasterio rasterio>=1.3a3  # for fsspec support
