@@ -1,6 +1,5 @@
 channels:
   - conda-forge
-  - conda-forge/label/rasterio_dev
 dependencies:
   - black = 21.12b0
   - dask
@@ -16,7 +15,6 @@ dependencies:
   - pip
   - pytest
   - pytest-cov
-  - rasterio >= 1.3a3
   - rioxarray
   - types-setuptools
   - xarray >= 0.20.2
