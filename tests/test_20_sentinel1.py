@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from xarray_sentinel import sentinel1
+from xarray_sentinel import esa_safe, sentinel1
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
@@ -13,40 +13,38 @@ SLC_IW = (
     / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
 )
 SLC_IW1_VV_annotation = (
-    DATA_FOLDER
-    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    SLC_IW
     / "annotation"
     / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
 )
 SLC_IW1_VV_calibration = (
-    DATA_FOLDER
-    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    SLC_IW
     / "annotation"
     / "calibration"
     / "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
 )
 SLC_IW1_VV_noise = (
-    DATA_FOLDER
-    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    SLC_IW
     / "annotation"
     / "calibration"
     / "noise-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
 )
 SLC_IW1_VV_measurement = (
-    DATA_FOLDER
-    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    SLC_IW
     / "measurement"
     / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.tiff"
 )
-SLC_S3_VV_annotation = (
+SLC_S3 = (
     DATA_FOLDER
     / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
+)
+SLC_S3_VV_annotation = (
+    SLC_S3
     / "annotation"
     / "s1a-s3-slc-vv-20210401t152855-20210401t152914-037258-04638e-002.xml"
 )
 SLC_S3_VV_measurement = (
-    DATA_FOLDER
-    / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
+    SLC_S3
     / "measurement"
     / "s1a-s3-slc-vv-20210401t152855-20210401t152914-037258-04638e-002.tiff"
 )
@@ -72,42 +70,6 @@ def test_get_fs_path() -> None:
 
     with pytest.raises(ValueError):
         sentinel1.get_fs_path(DATA_FOLDER / "*")
-
-
-def test_get_ancillary_data() -> None:
-    base_path = (
-        DATA_FOLDER
-        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
-    )
-
-    product_files = {
-        "./annotation/s1b-iw1-slc-vh-xx-xx-xx-xx-xx.xml": "s1Level1ProductSchema",
-        "./annotation/calibration/noise-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1NoiseSchema",
-        "./annotation/calibration/calibration-s1b-iw1-slc-vh-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
-        "./annotation/s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1ProductSchema",
-        "./annotation/calibration/noise-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1NoiseSchema",
-        "./annotation/calibration/calibration-s1b-iw1-slc-vv-x-x-x-x-x.xml": "s1Level1CalibrationSchema",
-        "./measurement/s1b-iw1-slc-vh-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
-        "./measurement/s1b-iw1-slc-vv-x-x-x-x-x.tiff": "s1Level1MeasurementSchema",
-    }
-
-    ancillary_data_paths = sentinel1.get_ancillary_data_paths(base_path, product_files)
-
-    expected = {"IW1"}
-    assert set(ancillary_data_paths) == expected
-
-    expected = {"VV", "VH"}
-    assert set(ancillary_data_paths["IW1"]) == expected
-
-    expected = {
-        "s1Level1ProductSchema",
-        "s1Level1CalibrationSchema",
-        "s1Level1NoiseSchema",
-        "s1Level1MeasurementSchema",
-    }
-    assert set(ancillary_data_paths["IW1"]["VV"]) == expected
-
-    assert isinstance(ancillary_data_paths["IW1"]["VV"]["s1Level1ProductSchema"], str)
 
 
 def test_normalise_group() -> None:
@@ -210,35 +172,40 @@ def test_build_burst_id() -> None:
 
 
 def test_find_avalable_groups() -> None:
-    ancillary_data_paths = {
-        "IW1": {
-            "VV": {
-                "s1Level1ProductSchema": f"{SLC_IW}/annotation/"
-                + "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
-                "s1Level1CalibrationSchema": f"{SLC_IW}/annotation/calibration/"
-                + "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
-                "s1Level1NoiseSchema": f"{SLC_IW}/annotation/calibration/"
-                + "noise-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml",
-            },
-        },
-    }
-    product_attrs = {"sat:relative_orbit": 168}
+    _, product_files = esa_safe.parse_manifest_sentinel1(SLC_S3 / "manifest.safe")
     expected_groups = {
-        "IW1",
-        "IW1/VV",
-        "IW1/VV/attitude",
-        "IW1/VV/gcp",
-        "IW1/VV/orbit",
-        "IW1/VV/dc_estimate",
-        "IW1/VV/azimuth_fm_rate",
-        "IW1/VV/coordinate_conversion",
-        "IW1/VV/calibration",
-        "IW1/VV/noise_range",
-        "IW1/VV/noise_azimuth",
+        "S3",
+        "S3/VV",
+        "S3/VV/attitude",
+        "S3/VV/gcp",
+        "S3/VV/orbit",
+        "S3/VV/dc_estimate",
+        "S3/VV/azimuth_fm_rate",
+        "S3/VV/coordinate_conversion",
+        "S3/VV/calibration",
+        "S3/VV/noise_range",
+        "S3/VV/noise_azimuth",
+        "S3",
+        "S3/VH",
+        "S3/VH/attitude",
+        "S3/VH/gcp",
+        "S3/VH/orbit",
+        "S3/VH/dc_estimate",
+        "S3/VH/azimuth_fm_rate",
+        "S3/VH/coordinate_conversion",
+        "S3/VH/calibration",
+        "S3/VH/noise_range",
+        "S3/VH/noise_azimuth",
     }
 
-    groups = sentinel1.find_avalable_groups(ancillary_data_paths, product_attrs)
-    assert set(groups) == expected_groups
+    res = sentinel1.find_available_groups(product_files, str(SLC_IW))
+
+    assert set(res) == expected_groups
+
+    res = sentinel1.find_available_groups(
+        product_files, str(SLC_IW), check_files_exist=True
+    )
+    assert res == {}
 
 
 def test_compute_burst_centres() -> None:
@@ -300,12 +267,11 @@ def test_open_dataset_virtual_groups() -> None:
 
 
 def test_open_dataset_chunks() -> None:
-    res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV", chunks=1000)
+    res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV")
 
     assert isinstance(res, xr.Dataset)
     assert len(res.dims) == 2
-    assert np.allclose(res.measurement.chunks[0][:-1], 1000)
-    assert np.allclose(res.measurement.chunks[1][:-1], 1000)
+    assert res.measurement.chunks[0][0] == res.attrs["lines_per_burst"]
     assert not np.all(np.isnan(res.measurement))
 
 

@@ -1,5 +1,6 @@
 import functools
 import os
+import re
 import typing as T
 from xml.etree import ElementTree
 
@@ -41,6 +42,8 @@ def parse_tag(
     validation: str = "skip",
 ) -> T.Dict[str, T.Any]:
     schema = cached_sentinel1_schemas(schema_type)
+    if hasattr(xml_path, "seek"):
+        xml_path.seek(0)  # type: ignore
     xml_tree = ElementTree.parse(xml_path)
     tag_dict: T.Dict[str, T.Any] = schema.decode(xml_tree, query, validation=validation)  # type: ignore
     assert isinstance(tag_dict, dict), f"{type(tag_dict)} is not dict"
@@ -90,10 +93,19 @@ def findall(
     return values
 
 
+def parse_annotation_filename(name: str) -> T.Tuple[str, str, str]:
+    match = re.match(
+        r"[a-z-]*s1[ab]-([^-]*)-[^-]*-([^-]*)-([\dt]*)-", os.path.basename(name)
+    )
+    if match is None:
+        raise ValueError(f"cannot parse name {name!r}")
+    return tuple(match.groups())  # type: ignore
+
+
 @functools.lru_cache
 def parse_manifest_sentinel1(
     manifest_path: PathOrFileType,
-) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, str]]:
+) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, T.Tuple[str, str, str, str]]]:
     # We use ElementTree because we didn't find a XSD definition for the manifest
     manifest = ElementTree.parse(manifest_path)
 
@@ -141,7 +153,13 @@ def parse_manifest_sentinel1(
         location_tag = file_tag.find(".//fileLocation")
         if location_tag is not None:
             file_href = location_tag.attrib["href"]
+            try:
+                swath, polarization, start = parse_annotation_filename(
+                    os.path.basename(file_href)
+                )
+            except ValueError:
+                continue
             file_type = file_tag.attrib["repID"]
-            files[file_href] = file_type
+            files[file_href] = (file_type, swath, polarization, start)
 
     return attributes, files

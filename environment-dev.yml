@@ -1,6 +1,7 @@
 channels:
   - conda-forge
 dependencies:
+  - adlfs
   - build
   - gcsfs
   - ipytree
@@ -8,3 +9,5 @@ dependencies:
   - mamba
   - notebook
   - sentinelsat
+  - pip:
+    - --no-binary rasterio rasterio>=1.3a3  # for fsspec support

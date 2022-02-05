@@ -23,10 +23,16 @@ SPEED_OF_LIGHT = 299_792_458  # m / s
 
 
 def get_fs_path(
-    urlpath_or_path: esa_safe.PathType, fs: T.Optional[fsspec.AbstractFileSystem] = None
+    urlpath_or_path: esa_safe.PathType,
+    fs: T.Optional[fsspec.AbstractFileSystem] = None,
+    storage_options: T.Optional[T.Dict[str, T.Any]] = None,
 ) -> T.Tuple[fsspec.AbstractFileSystem, str]:
+    if fs is not None and storage_options is not None:
+        raise TypeError("only one of 'fs' and 'storage_options' can be not None")
     if fs is None:
-        fs, _, paths = fsspec.get_fs_token_paths(urlpath_or_path)
+        fs, _, paths = fsspec.get_fs_token_paths(
+            urlpath_or_path, storage_options=storage_options
+        )
         if len(paths) == 0:
             raise ValueError(f"file or object not found {urlpath_or_path!r}")
         elif len(paths) > 1:
@@ -35,25 +41,6 @@ def get_fs_path(
     else:
         path = str(urlpath_or_path)
     return fs, path
-
-
-def get_ancillary_data_paths(
-    base_path: esa_safe.PathType,
-    product_files: T.Dict[str, str],
-) -> T.Dict[str, T.Dict[str, T.Dict[str, str]]]:
-    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]] = {}
-    for filename, filetype in product_files.items():
-        # HACK: no easy way to normalise the path component of a urlpath
-        file_path = os.path.join(base_path, os.path.normpath(filename))
-        name = os.path.basename(filename)
-        try:
-            subswath, _, pol = os.path.basename(name).rsplit("-", 8)[1:4]
-        except ValueError:
-            continue
-        swath_dict = ancillary_data_paths.setdefault(subswath.upper(), {})
-        pol_dict = swath_dict.setdefault(pol.upper(), {})
-        pol_dict[filetype] = file_path
-    return ancillary_data_paths
 
 
 def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
@@ -363,21 +350,22 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
     return ds
 
 
-def find_avalable_groups(
-    ancillary_data_paths: T.Dict[str, T.Dict[str, T.Dict[str, str]]],
-    product_attrs: T.Dict[str, T.Any],
+def find_available_groups(
+    product_files: T.Dict[str, T.Tuple[str, str, str, str]],
+    product_path: str,
+    check_files_exist: bool = False,
     fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
-) -> T.Dict[str, str]:
-    groups: T.Dict[str, str] = {}
-    for subswath_id, subswath_data_path in ancillary_data_paths.items():
-        for pol_id, pol_data_paths in subswath_data_path.items():
-            try:
-                with fs.open(pol_data_paths["s1Level1ProductSchema"]):
-                    pass
-            except FileNotFoundError:
+) -> T.Dict[str, T.List[str]]:
+    groups: T.Dict[str, T.List[str]] = {}
+    for path, (type, swath, polarization, _) in product_files.items():
+        swath_pol_group = f"{swath}/{polarization}".upper()
+        abspath = os.path.join(product_path, os.path.normpath(path))
+        if check_files_exist:
+            if not fs.exists(abspath):
                 continue
-            groups[subswath_id] = ""
-            groups[f"{subswath_id}/{pol_id}"] = pol_data_paths["s1Level1ProductSchema"]
+        if type == "s1Level1ProductSchema":
+            groups[swath.upper()] = [""]
+            groups[swath_pol_group] = [abspath] + groups.get(swath_pol_group, [])
             for metadata_group in [
                 "orbit",
                 "attitude",
@@ -386,41 +374,26 @@ def find_avalable_groups(
                 "gcp",
                 "coordinate_conversion",
             ]:
-                groups[f"{subswath_id}/{pol_id}/{metadata_group}"] = pol_data_paths[
-                    "s1Level1ProductSchema"
-                ]
-
-            try:
-                with fs.open(pol_data_paths["s1Level1CalibrationSchema"]):
-                    pass
-            except FileNotFoundError:
-                continue
-            groups[f"{subswath_id}/{pol_id}/calibration"] = pol_data_paths[
-                "s1Level1CalibrationSchema"
-            ]
-
-            try:
-                with fs.open(pol_data_paths["s1Level1NoiseSchema"]):
-                    pass
-            except FileNotFoundError:
-                continue
-            groups[f"{subswath_id}/{pol_id}/noise_range"] = pol_data_paths[
-                "s1Level1NoiseSchema"
-            ]
-            groups[f"{subswath_id}/{pol_id}/noise_azimuth"] = pol_data_paths[
-                "s1Level1NoiseSchema"
-            ]
+                groups[f"{swath_pol_group}/{metadata_group}"] = [abspath]
+        elif type == "s1Level1CalibrationSchema":
+            groups[f"{swath_pol_group}/calibration"] = [abspath]
+        elif type == "s1Level1NoiseSchema":
+            groups[f"{swath_pol_group}/noise_range"] = [abspath]
+            groups[f"{swath_pol_group}/noise_azimuth"] = [abspath]
+        elif type == "s1Level1MeasurementSchema":
+            groups[swath_pol_group] = [abspath] + groups.get(swath_pol_group, [])
 
     return groups
 
 
 def open_pol_dataset(
-    measurement: esa_safe.PathType,
+    measurement: esa_safe.PathOrFileType,
     annotation: esa_safe.PathOrFileType,
-    chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
+    fs: T.Optional[fsspec.AbstractFileSystem] = None,
 ) -> xr.Dataset:
-    image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
+
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
+    image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
     swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
 
     number_of_samples = image_information["numberOfSamples"]
@@ -440,13 +413,17 @@ def open_pol_dataset(
         "azimuth_time_interval": azimuth_time_interval,
         "slant_range_time_interval": slant_range_time_interval,
     }
+    chunks = {}
+    swap_dims = {}
 
     azimuth_time = pd.date_range(
         start=first_azimuth_time,
         periods=number_of_lines,
         freq=pd.Timedelta(azimuth_time_interval, "s"),
     ).values
-    if number_of_bursts:
+    if number_of_bursts == 0:
+        swap_dims = {"line": "azimuth_time", "pixel": "slant_range_time"}
+    else:
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
             {
@@ -465,14 +442,14 @@ def open_pol_dataset(
             azimuth_time[
                 lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
             ] = azimuth_time_burst
-        if chunks is None:
-            # chunk at burst boundaries if dask is present
-            try:
-                import dask  # noqa
 
-                chunks = {"y": lines_per_burst}
-            except ModuleNotFoundError:
-                pass
+        # chunk at burst boundaries if dask is present
+        try:
+            import dask  # noqa
+
+            chunks["y"] = lines_per_burst
+        except ModuleNotFoundError:
+            pass
 
     coords = {
         "pixel": np.arange(0, number_of_samples, dtype=int),
@@ -495,18 +472,20 @@ def open_pol_dataset(
             number_of_samples,
         )
         coords["ground_range"] = ("pixel", ground_range)
+        swap_dims = {"line": "azimuth_time", "pixel": "ground_range"}
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
-    arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
+    # temporary ugly work-around to get fsspec support with rasterio >= 1.3a3
+    try:
+        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
+    except AttributeError:
+        arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
+
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(coords)
-
-    if product_information["projection"] == "Ground Range":
-        arr = arr.swap_dims({"line": "azimuth_time", "pixel": "ground_range"})
-    elif number_of_bursts == 0:
-        arr = arr.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
+    arr = arr.swap_dims(swap_dims)
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
@@ -665,28 +644,45 @@ METADATA_OPENERS = {
 }
 
 
+def do_override_product_files(
+    template: str, product_files: T.Dict[str, T.Tuple[str, str, str, str]]
+) -> T.Dict[str, T.Tuple[str, str, str, str]]:
+    overridden_product_files = {}
+    for path, (type, swath, polarization, date) in product_files.items():
+        ext = os.path.splitext(path)[1]
+        dirname = os.path.dirname(path)
+        overridden_path = template.format(**locals())
+        overridden_product_files[overridden_path] = (type, swath, polarization, date)
+    return overridden_product_files
+
+
 def open_sentinel1_dataset(
     product_urlpath: esa_safe.PathType,
     *,
     drop_variables: T.Optional[T.Tuple[str]] = None,
     group: T.Optional[str] = None,
-    chunks: T.Optional[T.Union[int, T.Dict[str, int]]] = None,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
+    storage_options: T.Optional[T.Dict[str, T.Any]] = None,
+    check_files_exist: bool = False,
+    override_product_files: T.Optional[str] = None,
 ) -> xr.Dataset:
-    fs, manifest_path = get_fs_path(product_urlpath, fs)
+    if drop_variables is not None:
+        warnings.warn("'drop_variables' is currently ignored")
 
+    fs, manifest_path = get_fs_path(product_urlpath, fs, storage_options)
     if fs.isdir(manifest_path):
         manifest_path = os.path.join(manifest_path, "manifest.safe")
+    product_path = os.path.dirname(manifest_path)
 
     with fs.open(manifest_path) as file:
         product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
 
-    base_path = os.path.dirname(manifest_path)
-    ancillary_data_paths = get_ancillary_data_paths(base_path, product_files)
-    if drop_variables is not None:
-        warnings.warn("'drop_variables' is currently ignored")
+    if override_product_files:
+        product_files = do_override_product_files(override_product_files, product_files)
 
-    groups = find_avalable_groups(ancillary_data_paths, product_attrs, fs=fs)
+    groups = find_available_groups(
+        product_files, product_path, check_files_exist=check_files_exist, fs=fs
+    )
 
     group, burst_index = normalise_group(group)
     absgroup = f"/{group}"
@@ -698,26 +694,20 @@ def open_sentinel1_dataset(
 
     metadata = ""
 
+    ds = xr.Dataset()
     if group == "":
-        ds = xr.Dataset()
         subgroups = list(groups)
     else:
         subgroups = [
             g[len(group) + 1 :] for g in groups if g.startswith(group) and g != group
         ]
 
-        if "/" not in group:
-            ds = xr.Dataset()
-        elif group.count("/") == 1:
-            subswath, pol = group.split("/", 1)
-            ds = open_pol_dataset(
-                ancillary_data_paths[subswath][pol]["s1Level1MeasurementSchema"],
-                ancillary_data_paths[subswath][pol]["s1Level1ProductSchema"],
-                chunks=chunks,
-            )
-        else:
-            subswath, pol, metadata = group.split("/", 2)
-            with fs.open(groups[group]) as file:
+        if group.count("/") == 1:
+            with fs.open(groups[group][1]) as annotation:
+                ds = open_pol_dataset(groups[group][0], annotation, fs=fs)
+        elif group.count("/") == 2:
+            _, _, metadata = group.split("/", 2)
+            with fs.open(groups[group][0]) as file:
                 ds = METADATA_OPENERS[metadata](file)
 
     product_attrs["group"] = absgroup

@@ -154,6 +154,17 @@ def test_parse_tag_as_list() -> None:
     assert res == []
 
 
+def test_parse_annotation_filename() -> None:
+    res = esa_safe.parse_annotation_filename(
+        "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+    )
+
+    assert res == ("iw1", "vv", "20210401t052624")
+
+    with pytest.raises(ValueError):
+        esa_safe.parse_annotation_filename("")
+
+
 @pytest.mark.parametrize("product_id,expected", SENTINEL1_ATTRIBUTES.items())
 def test_parse_manifest_sentinel1(
     product_id: str, expected: T.Dict[str, T.Any]
