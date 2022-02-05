@@ -364,7 +364,7 @@ For exmaple you can open a product directly from a Zip file with:
 
 ```python-repl
 >>> slc_iw_zip_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
->>> xr.open_dataset(f"zip://*/manifest.safe::{slc_iw_zip_path}", group="IW1/VH", engine="sentinel-1")
+>>> xr.open_dataset(f"zip://*/manifest.safe::{slc_iw_zip_path}", group="IW1/VH", engine="sentinel-1")  # doctest: +SKIP
 <xarray.Dataset>
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
