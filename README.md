@@ -25,7 +25,7 @@ Overall the software is in the **alpha** phase and the usual caveats apply.
 - reads uncompressed and compressed SAFE data products on the local computer or
   on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *dependes on rasterio>=1.3a3*
 - supports larger-than-memory and distributed data access via [*dask*](https://dask.org) and
-  [*rioxarray*](https://corteva.github.io/rioxarray) / 
+  [*rioxarray*](https://corteva.github.io/rioxarray) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
 
 ## Install
@@ -394,7 +394,7 @@ Attributes: ...
 As an exmaple of remote access you can open a product directly from a GitHub repo with:
 
 ```python-repl
->>> xr.open_dataset(f"github://bopen:xarray-sentinel@/{slc_iw_path}", group="IW1/VH", engine="sentinel-1")
+>>> xr.open_dataset(f"github://bopen:xarray-sentinel@/{slc_iw_path}", group="IW1/VH", engine="sentinel-1")  # doctest: +SKIP
 <xarray.Dataset>
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
@@ -432,7 +432,7 @@ zip file off a GitHub repo and cache the file locally with:
 ...     storage_options={
 ...         "simplecache": {"cache_storage": "/tmp/zipfiles/"},
 ...     },
-... )
+... )  # doctest: +SKIP
 <xarray.Dataset>
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
