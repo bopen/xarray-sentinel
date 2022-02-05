@@ -34,7 +34,6 @@ conda-env-create:
 
 conda-env-update:
 	$(CONDA) env update $(CONDAFLAGS) -f environment-ci.yml
-	pip install git+https://github.com/rasterio/rasterio  # need rasterio >= 1.3a3 for fsspec support
 
 conda-env-update-all: conda-env-update
 	$(CONDA) env update $(CONDAFLAGS) -f environment-dev.yml
