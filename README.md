@@ -25,6 +25,7 @@ Overall the software is in the **alpha** phase and the usual caveats apply.
 - reads uncompressed and compressed SAFE data products on the local computer or
   on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - *dependes on rasterio>=1.3a3*
 - supports larger-than-memory and distributed data access via [*dask*](https://dask.org) and
+  [*rioxarray*](https://corteva.github.io/rioxarray) / 
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
 
 ## Install
@@ -421,18 +422,41 @@ Attributes: ...
 ```
 
 *fsspec* is very powerful and supports caching and chaining, for example you can open a
-zip file off a private Google Storage bucket and cache the file locally with:
+zip file off a GitHub repo and cache the file locally with:
 
 ```python-repl
-xr.open_dataset(
-    "zip://*/manifest.zip::simplecache::gcs://bucket/afile.zip",
-    engine="sentinel-1",
-    storage_options={
-        "simplecache": {"cache_storage": "/stored/zip/files"},
-        "gcs": {'project': 'my-project'},
-    },
-)
-...
+>>> xr.open_dataset(
+...     f"zip://*/manifest.safe::simplecache::github://bopen:xarray-sentinel@/{slc_iw_zip_path}",
+...     engine="sentinel-1",
+...     group="IW1/VH",
+...     storage_options={
+...         "simplecache": {"cache_storage": "/tmp/zipfiles/"},
+...     },
+... )
+<xarray.Dataset>
+Dimensions:           (pixel: 21632, line: 13509)
+Coordinates:
+  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
+  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+    azimuth_time      (line) datetime64[ns] ...
+    slant_range_time  (pixel) float64 ...
+Data variables:
+    measurement       (line, pixel) complex64 ...
+Attributes: ...
+    sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  13.94053
+    sar:pixel_spacing_range:    2.329562
+    azimuth_time_interval:      0.002055556299999998
+    slant_range_time_interval:  1.554116558005821e-08
+    azimuth_steering_rate:      1.590368784
+    ...                         ...
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
+    group:                      /IW1/VH
+    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+
 ```
 
 ## Design decisions
