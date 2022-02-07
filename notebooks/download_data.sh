@@ -12,7 +12,7 @@ sentinelsat --path data -d --include-pattern "*vv*" \
   --name S1B_S6_GRDH_1SDV_20211216T115438_20211216T115501_030050_03968A_0F8A
 
 ## GRD zipped to test fsspec
-sentinelsat --path data -d --include-pattern \
+sentinelsat --path data -d \
   --name S1B_S6_GRDH_1SDV_20211216T115438_20211216T115501_030050_03968A_0F8A
 
 
