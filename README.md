@@ -23,7 +23,7 @@ Overall the software is in the **alpha** phase and the usual caveats apply.
   satellite orbit and attitude, ground control points, radiometric calibration look up tables,
   Doppler centroid estimation and more
 - reads uncompressed and compressed SAFE data products on the local computer or
-  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - **dependes on rasterio>=1.3a3**
+  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - **depends on rasterio>=1.3a3**
 - supports larger-than-memory and distributed data access via [*Dask*](https://dask.org) and
   [*rioxarray*](https://corteva.github.io/rioxarray) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
@@ -87,14 +87,14 @@ Attributes: ...
 
 The root `Dataset` does not contain any data variable, but only attributes that provide general information
 on the product and a description of the tree structure of the data.
-The attribute `group` contains the name of the current group and the `subgroups` attribute shows
+The `group` attribute contains the name of the current group and the `subgroups` attribute shows
 the names of all available groups below this one.
 
 ### Measurements datasets
 
 To open the other groups we need to add the keyword `group` to `xr.open_dataset`.
-So we can read the measurement by selecting the desired beam mode and the polarization,
-in this example the data contains the S3 beam mode and we select the VH polarization with `group="S3/VH"`:
+The measurement can then be read by selecting the desired beam mode and polarization.
+In this example, the data contains the S3 beam mode and the VH polarization with `group="S3/VH"` is selected:
 
 ```python-repl
 >>> slc_s3_vh = xr.open_dataset(slc_sm_path, group="S3/VH", engine="sentinel-1", chunks=2048)
@@ -126,7 +126,7 @@ Attributes: ...
 ```
 
 The `measurement` variable contains the Single Look Complex measurements as a `complex64`
-and it has dimensions `slant_range_time` and `azimuth_time`.
+and has dimensions `slant_range_time` and `azimuth_time`.
 The `azimuth_time` is an `np.datetime64` coordinate that contains the UTC zero-Doppler time
 associated with the image line
 and `slant_range_time` is an `np.float64` coordinate that contains the two-way range time interval
@@ -134,7 +134,7 @@ in seconds associated with the image pixel.
 
 ### Metadata datasets
 
-The measurement group contains several subgroups with metadata associated with the image, at the moment
+The measurement group contains several subgroups with metadata associated with the image. Currently,
 *xarray-sentinel* supports the following metadata datasets:
 
 - product XML file
@@ -185,7 +185,7 @@ Attributes: ...
 ```
 
 Note that in this case, the dimensions are `line` and `pixel` with coordinates corresponding to
-the sub-grid of the original image where it is defined the calibration Look Up Table.
+the sub-grid of the original image where the calibration Look Up Table is defined.
 
 The groups present in a typical Sentinel-1 Stripmap product are:
 
@@ -227,7 +227,7 @@ but also because the measurement array is a collage of sub-images called *bursts
 
 You need to first open the desired measurement dataset, for example, the VH polarisation
 of the first IW swath of the `S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4`
-product in the current folder:
+product, in the current folder:
 
 ```python-repl
 >>> slc_iw_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
@@ -293,7 +293,7 @@ Attributes: ...
 
 ```
 
-Note that the helper function also performs additional changes like swapping the dimensions
+Note that the helper function also performs additional changes, such as swapping the dimensions
 to the physical coordinates and adding burst attributes.
 
 As a quick way to access burst data, you can add the `burst_index` to the group specification on
@@ -352,7 +352,7 @@ Attributes:
 
 **You need the unreleased rasterio>=1.3a3 for fsspec to work on measurement data**
 
-You can test the following after:
+You can test with the following:
 `pip install -U --pre --no-deps --no-binary rasterio rasterio>=1.3a3`.
 
 *xarray-sentinel* can read data from a variety of data stores including local file systems,
@@ -360,7 +360,7 @@ network file systems, cloud object stores and compressed file formats, like Zip.
 This is done by passing *fsspec* compatible URLs to `xr.open_dataset` and optionally
 the `storage_options` keyword argument.
 
-For exmaple you can open a product directly from a Zip file with:
+For example you can open a product directly from a zip file with:
 
 ```python-repl
 >>> slc_iw_zip_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
@@ -391,7 +391,7 @@ Attributes: ...
 
 ```
 
-As an exmaple of remote access you can open a product directly from a GitHub repo with:
+As an example of remote access, you can open a product directly from a GitHub repo with:
 
 ```python-repl
 >>> xr.open_dataset(f"github://bopen:xarray-sentinel@/{slc_iw_path}", group="IW1/VH", engine="sentinel-1")  # doctest: +SKIP
@@ -461,7 +461,7 @@ Attributes: ...
 
 ## Design decisions
 
-- The main design choice for *xarray-sentinel* is for it to be as much as possible a pure map of
+- The main design choice for *xarray-sentinel* is for it to be as much as viable a pure map of
   the content of the SAFE data package, with as little interpretation as possible.
   - The tree-like structure follows the structure of the SAFE package even when information,
     like orbit and attitude, is expected to be identical for different beam modes.
@@ -469,28 +469,29 @@ Attributes: ...
     was different between beam modes.
   - Data and metadata are converted to the closest available data-type in *Python* / *numpy*.
     The most significant conversion is from `CInt16` to `np.complex64` for the SLC measurements
-    that doubles the space requirements for the data.
+    that double the space requirements for the data.
     Also, *xarray-sentinel* converts UTC times to `np.datetime64` and makes no attempt to support
     *leap seconds*, acquisitions containing leap seconds may crash or silently return corrupted data.
     See the rationale for choices of the coordinates data-types below.
   - We try to keep all naming as close as possible to the original names,
-    in particular, for metadata we use the names of the XML tags, only converting them
-    from *camelCase* to *snake_case*. Except for the high-level attributes, see below.
+    except for high-level attributes (see below).
+    In particular, for metadata we use the names of the XML tags, only converting them
+    from *camelCase* to *snake_case*.
 - Whenever possible *xarray-sentinel* indexes the data with physical coordinates
   `azimuth_time` and `slant_range_time`, but keeps image `line` and `pixel` as auxiliary coordinates.
 - As an exception to the metadata naming rule above for high-level attributes, we aim at
   STAC Index and CF-Conventions compliance (in this order).
 - We aim at opening available data and metadata even for partial SAFE packages, for example,
   *xarray-sentinel* can open a measurement dataset for a beam mode even when the TIFF files of other
-  beam modes / polarization are missing.
-- Accuracy considerations and rationale for the data-types of the coordinates
-  - `azimuth_time` can be expressed as `np.datetime64[ns]` because
+  beam modes / polarizations are missing.
+- Accuracy considerations and rationale for coordinates data-types:
+  - `azimuth_time` can be expressed as `np.datetime64[ns]` since
     spatial resolution at LEO speed is 10km/s * 1ns ~= 0.001cm.
-  - `slant_range_time` on the other hand cannot be expressed as `np.timedelta64[ns]` because
+  - `slant_range_time` on the other hand cannot be expressed as `np.timedelta64[ns]` as
     spatial resolution at the speed of light is 300_000km/s * 1ns / 2 ~= 15cm,
-    that it is not enough for interferometric applications.
-    `slant_range_time` needs a spatial resolution of 0.001cm at a 1_000km distance
-    so around 1e-9 that is well within 1e-15 resolution of IEEE-754 float64.
+    i.e. not enough for interferometric applications.
+    `slant_range_time` needs a spatial resolution of 0.001cm at a 1_000km distance,
+    i.e. around 1e-9, well within the 1e-15 resolution of IEEE-754 float64.
 - This is a list of reference documents:
   - Sentinel-1 document library - https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library
   - Sentinel-1 Product Specification v3.9 07 May 2021 S1-RS-MDA-52-7441-3-9 documenting IPF 3.40 -
@@ -508,8 +509,8 @@ Attributes: ...
 
 ## Contributing
 
-The main repository is hosted on GitHub,
-testing, bug reports and contributions are highly welcomed and appreciated:
+The main repository is hosted on GitHub.
+Testing, bug reports and contributions are highly welcomed and appreciated:
 
 https://github.com/bopen/xarray-sentinel
 
@@ -530,7 +531,7 @@ See also the list of [contributors](https://github.com/bopen/xarray-sentinel/con
 
 We wish to express our gratitude to the project sponsors:
 
-- [Microsoft](https://microsoft.com) has contributed to adding GRD products and *fsspec* access
+- [Microsoft](https://microsoft.com) has contributed to adding GRD products and *fsspec* access.
 
 ## License
 
