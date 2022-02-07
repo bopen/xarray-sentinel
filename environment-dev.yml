@@ -8,7 +8,5 @@ dependencies:
   - matplotlib
   - mamba
   - notebook
-  - pip
   - sentinelsat
-  - pip:
-    - --pre --no-binary rasterio rasterio==1.3a3  # for fsspec support
+
