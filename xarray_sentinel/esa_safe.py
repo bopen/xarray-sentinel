@@ -23,6 +23,7 @@ SENTINEL1_SCHEMAS = {
     "annotation": os.path.join(SENTINEL1_FOLDER, "s1-level-1-product.xsd"),
     "calibration": os.path.join(SENTINEL1_FOLDER, "s1-level-1-calibration.xsd"),
     "noise": os.path.join(SENTINEL1_FOLDER, "s1-level-1-noise.xsd"),
+    "aux_orbit": os.path.join(SENTINEL1_FOLDER, "my-schema_orb.xsd"),
 }
 
 SENTINEL2_NAMESPACES = {

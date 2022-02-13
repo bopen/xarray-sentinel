@@ -1,0 +1,132 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Earth_Explorer_File">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Earth_Explorer_Header">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Fixed_Header">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="File_Name"/>
+                    <xs:element type="xs:string" name="File_Description"/>
+                    <xs:element type="xs:string" name="Notes"/>
+                    <xs:element type="xs:string" name="Mission"/>
+                    <xs:element type="xs:string" name="File_Class"/>
+                    <xs:element type="xs:string" name="File_Type"/>
+                    <xs:element name="Validity_Period">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="Validity_Start"/>
+                          <xs:element type="xs:string" name="Validity_Stop"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element type="xs:byte" name="File_Version"/>
+                    <xs:element name="Source">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="System"/>
+                          <xs:element type="xs:string" name="Creator"/>
+                          <xs:element type="xs:string" name="Creator_Version"/>
+                          <xs:element type="xs:string" name="Creation_Date"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Variable_Header">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="Ref_Frame"/>
+                    <xs:element type="xs:string" name="Time_Reference"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Data_Block">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="List_of_OSVs">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OSV" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="TAI"/>
+                          <xs:element type="xs:string" name="UTC"/>
+                          <xs:element type="xs:string" name="UT1"/>
+                          <xs:element type="xs:short" name="Absolute_Orbit"/>
+                          <xs:element name="X">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:float">
+                                  <xs:attribute type="xs:string" name="unit" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Y">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:float">
+                                  <xs:attribute type="xs:string" name="unit" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Z">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:float">
+                                  <xs:attribute type="xs:string" name="unit" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="VX">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:float">
+                                  <xs:attribute type="xs:string" name="unit" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="VY">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:float">
+                                  <xs:attribute type="xs:string" name="unit" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="VZ">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:float">
+                                  <xs:attribute type="xs:string" name="unit" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element type="xs:string" name="Quality"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:short" name="count"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="type"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
