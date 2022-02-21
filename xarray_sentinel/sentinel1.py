@@ -501,7 +501,7 @@ def find_bursts_index(
     use_center: bool = False,
 ) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
-    anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"])
+    anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"].replace("Z", ""))
     azimuth_anx_time = pd.Timedelta(azimuth_anx_time, unit="s")
     if use_center:
         azimuth_anx_time_center = (
@@ -548,7 +548,7 @@ def crop_burst_dataset(
         )
     )
 
-    anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"])
+    anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"].replace("Z", ""))
     burst_azimuth_anx_times = ds.azimuth_time - anx_datetime
     ds.attrs["azimuth_anx_time"] = (
         burst_azimuth_anx_times / np.timedelta64(1, "s")
