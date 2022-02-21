@@ -8,6 +8,7 @@ References:
     https://sentinel.esa.int/documents/247904/1877131/Sentinel-1-Product-Specification
 """
 
+import contextlib
 import os
 import typing as T
 import warnings
@@ -477,10 +478,14 @@ def open_pol_dataset(
         raise ValueError(f"unknown projection {product_information['projection']}")
 
     # temporary ugly work-around to get fsspec support with rasterio >= 1.3a3
-    try:
-        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
-    except AttributeError:
-        arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
+    #   the try block uses fsspec if rasterio >= 1.3a3 is installed
+    #   the except block falls back to standard file based rasterio
+    #   the with is needed to avoid polluting stderr when the try block fails
+    with contextlib.redirect_stderr(open("/dev/null", "w")):
+        try:
+            arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
+        except AttributeError:
+            arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
 
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
