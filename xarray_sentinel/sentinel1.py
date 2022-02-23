@@ -406,6 +406,7 @@ def open_pol_dataset(
     azimuth_time_interval = image_information["azimuthTimeInterval"]
     number_of_bursts = swath_timing["burstList"]["@count"]
     range_pixel_spaxing = image_information["rangePixelSpacing"]
+    anx_datetime = image_information["ascendingNodeTime"]
 
     attrs = {
         "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
@@ -413,6 +414,7 @@ def open_pol_dataset(
         "sar:pixel_spacing_range": range_pixel_spaxing,
         "azimuth_time_interval": azimuth_time_interval,
         "slant_range_time_interval": slant_range_time_interval,
+        "sat:anx_datetime": anx_datetime + "Z",
     }
     chunks = {}
     swap_dims = {}
@@ -491,6 +493,7 @@ def open_pol_dataset(
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(coords)
     arr = arr.swap_dims(swap_dims)
+    arr.attrs.update(attrs)
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
