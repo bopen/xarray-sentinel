@@ -556,8 +556,8 @@ def crop_burst_dataset(
     anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"].replace("Z", ""))
     burst_azimuth_anx_times = ds.azimuth_time - anx_datetime
     ds.attrs["azimuth_anx_time"] = (
-        burst_azimuth_anx_times / np.timedelta64(1, "s")
-    ).item(0)
+        burst_azimuth_anx_times.values[0] / np.timedelta64(1, "s")
+    )
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
     ds.attrs["burst_index"] = burst_index
 
