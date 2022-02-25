@@ -416,7 +416,7 @@ def open_pol_dataset(
         "slant_range_time_interval": slant_range_time_interval,
         "sat:anx_datetime": anx_datetime + "Z",
     }
-    chunks = {}
+    encoding = {}
     swap_dims = {}
 
     azimuth_time = pd.date_range(
@@ -450,7 +450,7 @@ def open_pol_dataset(
         try:
             import dask  # noqa
 
-            chunks["y"] = lines_per_burst
+            encoding["preferred_chunks"] = {"line": lines_per_burst}
         except ModuleNotFoundError:
             pass
 
@@ -485,15 +485,17 @@ def open_pol_dataset(
     #   the with is needed to avoid polluting stderr when the try block fails
     with contextlib.redirect_stderr(open("/dev/null", "w")):
         try:
-            arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
+            arr = xr.open_dataarray(fs.open(measurement), engine="rasterio")  # type: ignore
         except AttributeError:
-            arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
+            arr = xr.open_dataarray(measurement, engine="rasterio")  # type: ignore
 
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(coords)
     arr = arr.swap_dims(swap_dims)
+
     arr.attrs.update(attrs)
+    arr.encoding.update(encoding)
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
