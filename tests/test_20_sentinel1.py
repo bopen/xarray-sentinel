@@ -266,15 +266,6 @@ def test_open_dataset_virtual_groups() -> None:
     assert res.attrs["burst_index"] == 0
 
 
-def test_open_dataset_chunks() -> None:
-    res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV")
-
-    assert isinstance(res, xr.Dataset)
-    assert len(res.dims) == 2
-    assert res.measurement.chunks[0][0] == res.attrs["lines_per_burst"]
-    assert not np.all(np.isnan(res.measurement))
-
-
 def test_crop_burst_dataset() -> None:
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
 
