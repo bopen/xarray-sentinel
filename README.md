@@ -353,7 +353,7 @@ Attributes:
 **You need the unreleased rasterio>=1.3a3 for fsspec to work on measurement data**
 
 You can test with the following:
-`pip install -U --pre --no-deps --no-binary rasterio rasterio>=1.3a3`.
+`pip install -U --pre --no-deps --no-binary rasterio "rasterio>=1.3a3"`.
 
 *xarray-sentinel* can read data from a variety of data stores including local file systems,
 network file systems, cloud object stores and compressed file formats, like Zip.
