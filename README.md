@@ -336,15 +336,21 @@ You can compute the gamma intensity for part of the Stripmap image above with:
 ```python-repl
 >>> xarray_sentinel.calibrate_intensity(slc_s3_vh.measurement[:2048, :2048], slc_s3_vh_calibration.gamma)
 <xarray.DataArray (azimuth_time: 2048, slant_range_time: 2048)>
-dask.array<maximum, shape=(2048, 2048), dtype=float32, chunksize=(2048, 2048), chunktype=numpy.ndarray>
+dask.array<pow, shape=(2048, 2048), dtype=float32, chunksize=(2048, 2048), chunktype=numpy.ndarray>
 Coordinates:
     pixel             (slant_range_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
     line              (azimuth_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T15:28:55.11150...
   * slant_range_time  (slant_range_time) float64 0.005273 0.005273 ... 0.005303
 Attributes:
-    units:      dB
-    long_name:  gamma 
+    sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  3.55338
+    sar:pixel_spacing_range:    2.246363
+    azimuth_time_interval:      0.0005194923129469381
+    slant_range_time_interval:  1.498612395219899e-08
+    sat:anx_datetime:           2021-04-01T13:53:42.874198Z
+    units:                      m2 m-2
+    long_name:                  gamma 
 
 ```
 
