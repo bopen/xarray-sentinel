@@ -21,6 +21,7 @@ import xarray as xr
 from . import conventions, esa_safe
 
 SPEED_OF_LIGHT = 299_792_458  # m / s
+ONE_SECOND = np.timedelta64(1, "s")
 
 
 def get_fs_path(
@@ -555,9 +556,7 @@ def crop_burst_dataset(
 
     anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"].replace("Z", ""))
     burst_azimuth_anx_times = ds.azimuth_time - anx_datetime
-    ds.attrs["azimuth_anx_time"] = (
-        burst_azimuth_anx_times.values[0] / np.timedelta64(1, "s")
-    )
+    ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_times.values[0] / ONE_SECOND
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
     ds.attrs["burst_index"] = burst_index
 
@@ -605,6 +604,18 @@ def calibrate_intensity(
     except KeyError:
         pass
     return intensity
+
+
+def slant_range_time_to_ground_range(
+    azimuth_time: xr.DataArray,
+    slant_range_time: xr.DataArray,
+    coordinate_conversion: xr.DataArray,
+) -> xr.DataArray:
+    slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
+    cc = coordinate_conversion.interp(azimuth_time=azimuth_time)
+    x = slant_range - cc.sr0
+    ground_range = (cc.srgrCoefficients * x ** cc.degree).sum("degree")
+    return ground_range  # type: ignore
 
 
 def assign_slant_range_time_coord(
