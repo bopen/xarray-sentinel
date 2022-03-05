@@ -572,6 +572,7 @@ def calibrate_amplitude(
         pixel=digital_number.pixel,
     ).astype(np.float32)
     amplitude = digital_number / calibration
+    amplitude.attrs.update(digital_number.attrs)
     try:
         lut_name = calibration_lut.attrs["long_name"].partition("calibration LUT")[0]
         amplitude.attrs["long_name"] = f"amplitude for {lut_name}"
@@ -584,7 +585,7 @@ def calibrate_amplitude(
 def calibrate_intensity(
     digital_number: xr.DataArray,
     calibration_lut: xr.DataArray,
-    as_db: bool = True,
+    as_db: bool = False,
     min_db: T.Optional[float] = -40.0,
 ) -> xr.DataArray:
     amplitude = calibrate_amplitude(digital_number, calibration_lut)
@@ -593,8 +594,10 @@ def calibrate_intensity(
         intensity = 10.0 * np.log10(intensity)
         if min_db is not None:
             intensity = np.maximum(intensity, min_db)
+        intensity.attrs.update(amplitude.attrs)
         intensity.attrs["units"] = "dB"
     else:
+        intensity.attrs.update(amplitude.attrs)
         intensity.attrs["units"] = "m2 m-2"
     try:
         lut_name = amplitude.attrs["long_name"].partition("amplitude for ")[2]
