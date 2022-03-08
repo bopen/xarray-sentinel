@@ -27,6 +27,9 @@ Overall the software is in the **alpha** phase and the usual caveats apply.
 - supports larger-than-memory and distributed data access via [*Dask*](https://dask.org) and
   [*rioxarray*](https://corteva.github.io/rioxarray) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
+- provides a few helpers for simple operations involving metadata like
+  applying the radiometric calibration polynomials and
+  converting slant to ground range
 
 ## Install
 
