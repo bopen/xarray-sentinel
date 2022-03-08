@@ -28,8 +28,9 @@ Overall the software is in the **alpha** phase and the usual caveats apply.
   [*rioxarray*](https://corteva.github.io/rioxarray) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
 - provides a few helpers for simple operations involving metadata like
-  applying the radiometric calibration polynomials and
-  converting slant to ground range
+  croppping individual bursts out of IW SLC swaths
+  applying radiometric calibration polynomials and
+  converting slant to ground range for GRD products
 
 ## Install
 
