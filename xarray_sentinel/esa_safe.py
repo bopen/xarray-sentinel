@@ -94,9 +94,9 @@ def findall(
     return values
 
 
-def parse_annotation_filename(name: str) -> T.Tuple[str, str, str]:
+def parse_annotation_filename(name: str) -> T.Tuple[str, str, str, str]:
     match = re.match(
-        r"[a-z-]*s1[ab]-([^-]*)-[^-]*-([^-]*)-([\dt]*)-", os.path.basename(name)
+        r"([a-z-]*)s1[ab]-([^-]*)-[^-]*-([^-]*)-([\dt]*)-", os.path.basename(name)
     )
     if match is None:
         raise ValueError(f"cannot parse name {name!r}")
@@ -106,7 +106,7 @@ def parse_annotation_filename(name: str) -> T.Tuple[str, str, str]:
 @functools.lru_cache
 def parse_manifest_sentinel1(
     manifest_path: PathOrFileType,
-) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, T.Tuple[str, str, str, str]]]:
+) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, T.Tuple[str, str, str, str, str]]]:
     # We use ElementTree because we didn't find a XSD definition for the manifest
     manifest = ElementTree.parse(manifest_path)
 
@@ -155,12 +155,10 @@ def parse_manifest_sentinel1(
         if location_tag is not None:
             file_href = location_tag.attrib["href"]
             try:
-                swath, polarization, start = parse_annotation_filename(
-                    os.path.basename(file_href)
-                )
+                description = parse_annotation_filename(os.path.basename(file_href))
             except ValueError:
                 continue
             file_type = file_tag.attrib["repID"]
-            files[file_href] = (file_type, swath, polarization, start)
+            files[file_href] = (file_type,) + description
 
     return attributes, files

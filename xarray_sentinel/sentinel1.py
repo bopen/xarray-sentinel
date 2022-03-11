@@ -353,13 +353,13 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
 
 
 def find_available_groups(
-    product_files: T.Dict[str, T.Tuple[str, str, str, str]],
+    product_files: T.Dict[str, T.Tuple[str, str, str, str, str]],
     product_path: str,
     check_files_exist: bool = False,
     fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
 ) -> T.Dict[str, T.List[str]]:
     groups: T.Dict[str, T.List[str]] = {}
-    for path, (type, swath, polarization, _) in product_files.items():
+    for path, (type, _, swath, polarization, _) in product_files.items():
         swath_pol_group = f"{swath}/{polarization}".upper()
         abspath = os.path.join(product_path, os.path.normpath(path))
         if check_files_exist:
@@ -419,6 +419,7 @@ def open_pol_dataset(
     }
     encoding = {}
     swap_dims = {}
+    chunks: T.Union[None, T.Dict[str, int]] = None
 
     azimuth_time = pd.date_range(
         start=first_azimuth_time,
@@ -452,6 +453,7 @@ def open_pol_dataset(
             import dask  # noqa
 
             encoding["preferred_chunks"] = {"line": lines_per_burst}
+            chunks = {}
         except ModuleNotFoundError:
             pass
 
@@ -486,7 +488,7 @@ def open_pol_dataset(
     #   the with is needed to avoid polluting stderr when the try block fails
     with contextlib.redirect_stderr(open("/dev/null", "w")):
         try:
-            arr = xr.open_dataarray(fs.open(measurement), engine="rasterio")  # type: ignore
+            arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
         except AttributeError:
             arr = xr.open_dataarray(measurement, engine="rasterio")  # type: ignore
 
@@ -669,14 +671,15 @@ METADATA_OPENERS = {
 
 
 def do_override_product_files(
-    template: str, product_files: T.Dict[str, T.Tuple[str, str, str, str]]
-) -> T.Dict[str, T.Tuple[str, str, str, str]]:
+    template: str, product_files: T.Dict[str, T.Tuple[str, str, str, str, str]]
+) -> T.Dict[str, T.Tuple[str, str, str, str, str]]:
     overridden_product_files = {}
-    for path, (type, swath, polarization, date) in product_files.items():
+    for path, description in product_files.items():
+        type, prefix, swath, polarization, date = description
         ext = os.path.splitext(path)[1]
         dirname = os.path.dirname(path)
         overridden_path = template.format(**locals())
-        overridden_product_files[overridden_path] = (type, swath, polarization, date)
+        overridden_product_files[overridden_path] = description
     return overridden_product_files
 
 
