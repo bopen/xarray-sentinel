@@ -118,7 +118,7 @@ Attributes: ...
     sar:pixel_spacing_range:    2.246363
     azimuth_time_interval:      0.0005194923129469381
     slant_range_time_interval:  1.498612395219899e-08
-    sat:anx_datetime:           2021-04-01T13:53:42.874198Z
+    incidence_angle_mid_swath:  32.03479766845703
     ...                         ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['S3']
@@ -252,7 +252,7 @@ Attributes: ...
     sar:pixel_spacing_range:    2.329562
     azimuth_time_interval:      0.002055556299999998
     slant_range_time_interval:  1.554116558005821e-08
-    sat:anx_datetime:           2021-04-01T04:49:55.637823Z
+    incidence_angle_mid_swath:  33.87494380774521
     ...                         ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
@@ -286,7 +286,7 @@ Attributes: ...
     sar:pixel_spacing_range:    2.329562
     azimuth_time_interval:      0.002055556299999998
     slant_range_time_interval:  1.554116558005821e-08
-    sat:anx_datetime:           2021-04-01T04:49:55.637823Z
+    incidence_angle_mid_swath:  33.87494380774521
     ...                         ...
     group:                      /IW1/VH
     subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
@@ -321,7 +321,7 @@ Attributes: ...
     sar:pixel_spacing_range:    2.329562
     azimuth_time_interval:      0.002055556299999998
     slant_range_time_interval:  1.554116558005821e-08
-    sat:anx_datetime:           2021-04-01T04:49:55.637823Z
+    incidence_angle_mid_swath:  33.87494380774521
     ...                         ...
     group:                      /IW1/VH
     subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
@@ -352,6 +352,7 @@ Attributes:
     sar:pixel_spacing_range:    2.246363
     azimuth_time_interval:      0.0005194923129469381
     slant_range_time_interval:  1.498612395219899e-08
+    incidence_angle_mid_swath:  32.03479766845703
     sat:anx_datetime:           2021-04-01T13:53:42.874198Z
     units:                      m2 m-2
     long_name:                  gamma 
@@ -420,7 +421,7 @@ Attributes: ...
     sar:pixel_spacing_range:    2.329562
     azimuth_time_interval:      0.002055556299999998
     slant_range_time_interval:  1.554116558005821e-08
-    azimuth_steering_rate:      1.590368784
+    incidence_angle_mid_swath:  33.87494380774521
     ...                         ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']

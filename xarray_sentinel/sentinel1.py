@@ -397,6 +397,7 @@ def open_pol_dataset(
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
     image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
     swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
+    incidence_angle_mid_swath = image_information["incidenceAngleMidSwath"]
 
     number_of_samples = image_information["numberOfSamples"]
     first_slant_range_time = image_information["slantRangeTime"]
@@ -415,6 +416,7 @@ def open_pol_dataset(
         "sar:pixel_spacing_range": range_pixel_spaxing,
         "azimuth_time_interval": azimuth_time_interval,
         "slant_range_time_interval": slant_range_time_interval,
+        "incidence_angle_mid_swath": incidence_angle_mid_swath,
         "sat:anx_datetime": anx_datetime + "Z",
     }
     encoding = {}
