@@ -22,4 +22,4 @@ dependencies:
   - xmlschema
   - zarr
   - pip:
-    - mdformat-gfm
+      - mdformat-gfm
