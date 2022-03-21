@@ -8,13 +8,16 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu.
 
 ## Features
 
+*xarray-sentinel* is a Python library and [*Xarray*](https://xarray.pydata.org) backend
+with the following functionalities:
+
 - supports the following data products as [distributed by ESA](https://scihub.copernicus.eu/dhus/#/home):
   - Sentinel-1 Ground Range Detected (GRD):
     - Stripmap (SM)
     - Interferometric Wide Swath (IW)
     - Extra Wide Swath (EW)
   - Sentinel-1 Single Look Complex (SLC) SM/IW/EW
-- creates ready-to-use [Xarray](https://xarray.pydata.org) `Dataset`s that map the data
+- creates ready-to-use *Xarray* `Dataset`s that map the data
   lazily and efficiently in terms of both memory usage and disk / network access
 - reads all SAR imagery data: GRD images, SLC swaths and SLC bursts
 - reads several metadata elements:
@@ -543,7 +546,7 @@ See also the list of [contributors](https://github.com/bopen/xarray-sentinel/con
 
 We wish to express our gratitude to the project sponsors:
 
-- [Microsoft](https://microsoft.com) has contributed to adding GRD products and *fsspec* access.
+- [Microsoft](https://microsoft.com) has sponsored the support for *GRD* products and *fsspec* data access.
 
 ## License
 
