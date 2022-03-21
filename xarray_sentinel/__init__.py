@@ -25,6 +25,7 @@ from .sentinel1 import (
     calibrate_amplitude,
     calibrate_intensity,
     crop_burst_dataset,
+    mosaic_slc_iw,
     open_sentinel1_dataset,
     slant_range_time_to_ground_range,
 )
@@ -35,6 +36,7 @@ __all__ = [
     "calibrate_amplitude",
     "calibrate_intensity",
     "crop_burst_dataset",
+    "mosaic_slc_iw",
     "open_sentinel1_dataset",
     "slant_range_time_to_ground_range",
 ]

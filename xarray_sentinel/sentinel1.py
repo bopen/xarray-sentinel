@@ -567,6 +567,14 @@ def crop_burst_dataset(
     return ds
 
 
+def mosaic_slc_iw(slc_iw_image: xr.Dataset, crop: int = 90) -> xr.Dataset:
+    bursts = []
+    for i in range(slc_iw_image.attrs["number_of_bursts"]):
+        burst = crop_burst_dataset(slc_iw_image, burst_index=i)
+        bursts.append(burst.isel(azimuth_time=slice(crop, -crop)))
+    return xr.concat(bursts, dim="azimuth_time")
+
+
 def calibrate_amplitude(
     digital_number: xr.DataArray, calibration_lut: xr.DataArray
 ) -> xr.DataArray:
