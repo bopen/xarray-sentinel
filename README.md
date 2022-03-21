@@ -8,8 +8,6 @@ This Open Source project is sponsored by B-Open - https://www.bopen.eu.
 
 ## Features
 
-Overall the software is in the **alpha** phase and the usual caveats apply.
-
 - supports the following data products as [distributed by ESA](https://scihub.copernicus.eu/dhus/#/home):
   - Sentinel-1 Ground Range Detected (GRD):
     - Stripmap (SM)
@@ -31,6 +29,8 @@ Overall the software is in the **alpha** phase and the usual caveats apply.
   croppping individual bursts out of IW SLC swaths
   applying radiometric calibration polynomials and
   converting slant to ground range for GRD products
+
+Overall the software is in the **alpha** phase and the usual caveats apply.
 
 ## Install
 
