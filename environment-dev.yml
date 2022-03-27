@@ -3,10 +3,10 @@ channels:
 dependencies:
   - adlfs
   - build
+  - cfchecker
   - gcsfs
   - ipytree
   - matplotlib
   - mamba
   - notebook
   - sentinelsat
-
