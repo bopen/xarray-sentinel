@@ -747,6 +747,9 @@ def open_sentinel1_dataset(
             with fs.open(groups[group][0]) as file:
                 ds = METADATA_OPENERS[metadata](file)
 
+    for data_var in ds.data_vars:
+        ds.data_vars[data_var].attrs.update(product_attrs)
+
     product_attrs["group"] = absgroup
     if len(subgroups):
         product_attrs["subgroups"] = subgroups

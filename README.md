@@ -357,6 +357,17 @@ Attributes:
     slant_range_time_interval:  1.498612395219899e-08
     incidence_angle_mid_swath:  32.03479766845703
     sat:anx_datetime:           2021-04-01T13:53:42.874198Z
+    constellation:              sentinel-1
+    platform:                   sentinel-1a
+    instrument:                 ['c-sar']
+    sat:orbit_state:            ascending
+    sat:absolute_orbit:         37258
+    sat:relative_orbit:         86
+    sar:frequency_band:         C
+    sar:instrument_mode:        SM
+    sar:polarizations:          ['VV', 'VH']
+    sar:product_type:           SLC
+    xs:instrument_mode_swaths:  ['S3']
     units:                      m2 m-2
     long_name:                  gamma 
 
