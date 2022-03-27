@@ -76,7 +76,7 @@ VARIABLE_ATTRIBUTES = {
     "gamma": {"units": "m m-1", "long_name": "gamma calibration LUT"},
     "dn": {"units": "1", "long_name": "original digital number calibration LUT"},
     "noiseRangeLut": {"units": "1", "long_name": "range thermal noise correction LUT"},
-    "noiseAzimithLut": {
+    "noiseAzimuthLut": {
         "units": "1",
         "long_name": "azimuth thermal noise correction LUT",
     },
@@ -95,6 +95,18 @@ VARIABLE_ATTRIBUTES = {
     "srgrCoefficients": {
         "units": "1",
         "long_name": "polynomial to convert from slant range to ground range",
+    },
+    "t0": {
+        "units": "s",
+        "long_name": "Two-way slant range time origin",
+    },
+    "data_dc_polynomial": {
+        "units": "1",
+        "long_name": "Coppler centroid estimated from data",
+    },
+    "azimuth_fm_rate_polynomial": {
+        "units": "1",
+        "long_name": "Azimuth FM rate coefficient array",
     },
     "measurement": {"units": "1", "long_name": "digital number"},
 }
