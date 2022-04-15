@@ -431,6 +431,11 @@ def open_pol_dataset(
     if number_of_bursts == 0:
         swap_dims = {"line": "azimuth_time", "pixel": "slant_range_time"}
     else:
+        if "burstId" in swath_timing["burstList"]["burst"][0]:
+            bursts_ids = []
+            for burst in swath_timing["burstList"]["burst"]:
+                bursts_ids.append(burst["burstId"]["$"])
+            attrs.update({"bursts_ids": bursts_ids})
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
             {
@@ -532,10 +537,16 @@ def crop_burst_dataset(
     burst_index: T.Optional[int] = None,
     azimuth_anx_time: T.Optional[float] = None,
     use_center: bool = False,
+    burst_id: T.Optional[int] = None,
 ) -> xr.Dataset:
-    if (burst_index is not None) and (azimuth_anx_time is not None):
+    burst_definitions = (
+        (burst_index is not None)
+        + (azimuth_anx_time is not None)
+        + (burst_id is not None)
+    )
+    if burst_definitions > 1:
         raise TypeError(
-            "only one keyword between 'burst_index' and 'azimuth_anx_time' must be defined"
+            "only one keyword between 'burst_index' and 'azimuth_anx_time' and 'burst_id' must be defined"
         )
 
     if burst_index is None:
@@ -543,6 +554,16 @@ def crop_burst_dataset(
             burst_index = find_bursts_index(
                 pol_dataset, azimuth_anx_time, use_center=use_center
             )
+        elif burst_id is not None:
+            bursts_ids = pol_dataset.attrs.get("bursts_ids")
+            if bursts_ids is None:
+                raise KeyError("'bursts_ids' not found in product attributes")
+            try:
+                burst_index = bursts_ids.index(burst_id)
+            except ValueError:
+                raise ValueError(
+                    f"'burst_id' {burst_id} not found in product 'bursts_ids' list: {bursts_ids}"
+                )
         else:
             raise TypeError(
                 "one keyword between 'burst_index' and 'azimuth_anx_time' must be defined"
