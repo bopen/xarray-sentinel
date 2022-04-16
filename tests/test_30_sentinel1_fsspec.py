@@ -55,7 +55,7 @@ def test_get_fs_path() -> None:
     fs, path = sentinel1.get_fs_path(SLC_IW)
 
     assert isinstance(fs, fsspec.AbstractFileSystem)
-    assert path == str(SLC_IW)
+    assert path == str(SLC_IW / "manifest.safe")
 
     fs2, path2 = sentinel1.get_fs_path(path, fs=fs)
 

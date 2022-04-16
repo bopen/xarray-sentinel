@@ -59,11 +59,11 @@ GRD_IW_VV_annotation = (
 def test_get_fs_path() -> None:
     fs, path = sentinel1.get_fs_path(str(SLC_IW))
 
-    assert path == str(SLC_IW.absolute())
+    assert path == str((SLC_IW / "manifest.safe").absolute())
 
     fs, path = sentinel1.get_fs_path(SLC_IW, fs)
 
-    assert path == str(SLC_IW)
+    assert path == str((SLC_IW / "manifest.safe"))
 
     with pytest.raises(ValueError):
         sentinel1.get_fs_path("non-existent-path/*")
@@ -226,7 +226,7 @@ def test_compute_burst_centres() -> None:
     assert np.allclose(lon, [5, 15, 25, 35])
 
 
-def test_open_dataset() -> None:
+def test_open_sentinel1_dataset() -> None:
     expected_groups = {
         "IW1",
         "IW1/VV",

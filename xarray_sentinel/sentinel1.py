@@ -31,6 +31,7 @@ def get_fs_path(
 ) -> T.Tuple[fsspec.AbstractFileSystem, str]:
     if fs is not None and storage_options is not None:
         raise TypeError("only one of 'fs' and 'storage_options' can be not None")
+
     if fs is None:
         fs, _, paths = fsspec.get_fs_token_paths(
             urlpath_or_path, storage_options=storage_options
@@ -42,6 +43,10 @@ def get_fs_path(
         path = paths[0]
     else:
         path = str(urlpath_or_path)
+
+    if fs.isdir(path):
+        path = os.path.join(path, "manifest.safe")
+
     return fs, path
 
 
@@ -707,8 +712,6 @@ def open_sentinel1_dataset(
         warnings.warn("'drop_variables' is currently ignored")
 
     fs, manifest_path = get_fs_path(product_urlpath, fs, storage_options)
-    if fs.isdir(manifest_path):
-        manifest_path = os.path.join(manifest_path, "manifest.safe")
     product_path = os.path.dirname(manifest_path)
 
     with fs.open(manifest_path) as file:
