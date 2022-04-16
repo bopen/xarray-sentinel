@@ -1,9 +1,9 @@
 import pathlib
 import typing as T
 
-from cfchecker import cfchecks
 import pytest
 import xarray as xr
+from cfchecker import cfchecks
 
 pytest.importorskip("netCDF4")
 
@@ -61,16 +61,14 @@ def test_cfcheck(tmpdir: T.Any) -> None:
     groups = [""]
     while groups:
         group = groups.pop()
-        print(group)
         try:
             ds = xr.open_dataset(product_path, engine="sentinel-1", group=group)
             groups.extend(f"{group}/{g}" for g in ds.attrs.get("subgroups", []))
-        except:
-            pass
+        except FileNotFoundError:
+            continue
         nc_path = tmpdir.join(group.replace("/", "-") + ".nc")
         ds.to_netcdf(nc_path)
 
         totals = cfcheck(str(nc_path))
 
         assert totals["FATAL"] + totals["ERROR"] + totals["WARN"] == 0
-    
