@@ -416,7 +416,7 @@ def open_pol_dataset(
     anx_datetime = image_information["ascendingNodeTime"]
 
     attrs = {
-        "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
+        "sar:center_frequency": product_information["radarFrequency"] / 10**9,
         "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
         "sar:pixel_spacing_range": range_pixel_spaxing,
         "azimuth_time_interval": azimuth_time_interval,
@@ -631,7 +631,7 @@ def slant_range_time_to_ground_range(
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
     cc = coordinate_conversion.interp(azimuth_time=azimuth_time)
     x = slant_range - cc.sr0
-    ground_range = (cc.srgrCoefficients * x ** cc.degree).sum("degree")
+    ground_range = (cc.srgrCoefficients * x**cc.degree).sum("degree")
     return ground_range  # type: ignore
 
 
@@ -640,7 +640,7 @@ def assign_slant_range_time_coord(
 ) -> xr.Dataset:
     x = measurement.ground_range - coordinate_conversion.gr0
     slant_range = (
-        coordinate_conversion.grsrCoefficients * x ** coordinate_conversion.degree
+        coordinate_conversion.grsrCoefficients * x**coordinate_conversion.degree
     ).sum(dim="degree")
     slant_range_coord = slant_range.interp(
         azimuth_time=measurement.azimuth_time, ground_range=measurement.ground_range
