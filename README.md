@@ -33,19 +33,17 @@ with the following functionalities:
   applying radiometric calibration polynomials and
   converting slant to ground range for GRD products
 
-Overall the software is in the **alpha** phase and the usual caveats apply.
+Overall, the software is in the **alpha** phase and the usual caveats apply.
 
 ## Install
 
 The easiest way to install *xarray-sentinel* is in a *conda* environment.
-You may create a new environment, activate it, install the package and its dependencies
-with the following commands:
+The following commands create a new environment, activate it, install the package and its dependencies:
 
 ```shell
     conda create -n XARRAY-SENTINEL
     conda activate XARRAY-SENTINEL
-    conda install -c conda-forge fsspec rioxarray xarray xmlschema
-    pip install xarray-sentinel
+    conda install -c conda-forge xarray-sentinel
 ```
 
 ## Usage
