@@ -43,7 +43,7 @@ The following commands create a new environment, activate it, install the packag
 ```shell
     conda create -n XARRAY-SENTINEL
     conda activate XARRAY-SENTINEL
-    conda install -c conda-forge xarray-sentinel
+    conda install -c conda-forge dask xarray-sentinel
 ```
 
 ## Usage
