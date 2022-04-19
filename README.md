@@ -235,29 +235,29 @@ of the first IW swath of the `S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_0
 product, in the current folder:
 
 ```python-repl
->>> slc_iw_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
->>> slc_iw1_vh = xr.open_dataset(slc_iw_path, group="IW1/VH", engine="sentinel-1")
->>> slc_iw1_vh
+>>> slc_iw_path = "tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
+>>> slc_iw1_hh = xr.open_dataset(slc_iw_path, group="IW1/HH", engine="sentinel-1")
+>>> slc_iw1_hh
 <xarray.Dataset>
-Dimensions:           (pixel: 21632, line: 13509)
+Dimensions:           (pixel: 21169, line: 13500)
 Coordinates:
-  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
-  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
-    azimuth_time      (line) datetime64[ns] ...
-    slant_range_time  (pixel) float64 ...
+  * pixel             (pixel) int64 0 1 2 3 4 ... 21164 21165 21166 21167 21168
+  * line              (line) int64 0 1 2 3 4 5 ... 13495 13496 13497 13498 13499
+    azimuth_time      (line) datetime64[ns] 2022-04-14T10:22:11.755622 ... 20...
+    slant_range_time  (pixel) float64 0.005348 0.005349 ... 0.005677 0.005677
 Data variables:
     measurement       (line, pixel) complex64 ...
-Attributes: ...
+Attributes: (12/26)
     sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.94053
+    sar:pixel_spacing_azimuth:  13.9283
     sar:pixel_spacing_range:    2.329562
     azimuth_time_interval:      0.002055556299999998
     slant_range_time_interval:  1.554116558005821e-08
-    incidence_angle_mid_swath:  33.87494380774521
+    incidence_angle_mid_swath:  33.63858785673874
     ...                         ...
     sar:product_type:           SLC
     xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VH
+    group:                      /IW1/HH
     subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
@@ -271,30 +271,61 @@ Now the 9th burst out of 9 can be cropped from the swath data using `burst_index
 
 ```python-repl
 >>> import xarray_sentinel
->>> xarray_sentinel.crop_burst_dataset(slc_iw1_vh, burst_index=8)
+>>> xarray_sentinel.crop_burst_dataset(slc_iw1_hh, burst_index=8)
 <xarray.Dataset>
-Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
+Dimensions:           (slant_range_time: 21169, azimuth_time: 1500)
 Coordinates:
-    pixel             (slant_range_time) int64 0 1 2 3 ... 21629 21630 21631
-    line              (azimuth_time) int64 12008 12009 12010 ... 13507 13508
-  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:46.27227...
-  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
+    pixel             (slant_range_time) int64 0 1 2 3 ... 21166 21167 21168
+    line              (azimuth_time) int64 12000 12001 12002 ... 13498 13499
+  * azimuth_time      (azimuth_time) datetime64[ns] 2022-04-14T10:22:33.80763...
+  * slant_range_time  (slant_range_time) float64 0.005348 0.005349 ... 0.005677
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
-Attributes: ...
+Attributes: (12/27)
     sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.94053
+    sar:pixel_spacing_azimuth:  13.9283
     sar:pixel_spacing_range:    2.329562
     azimuth_time_interval:      0.002055556299999998
     slant_range_time_interval:  1.554116558005821e-08
-    incidence_angle_mid_swath:  33.87494380774521
+    incidence_angle_mid_swath:  33.63858785673874
     ...                         ...
-    group:                      /IW1/VH
-    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
+    group:                      /IW1/HH
     Conventions:                CF-1.8
     history:                    created by xarray_sentinel-...
-    azimuth_anx_time:           2210.634453
+    azimuth_anx_time:           2136.774327
     burst_index:                8
+    burst_id:                   365923
+
+```
+
+For products processed with processor versions 3.40 or higher, it is also possible to select the burst
+to be cropped using the `burst_id` key:
+
+```python-repl
+>>> xarray_sentinel.crop_burst_dataset(slc_iw1_hh, burst_id=365923)
+<xarray.Dataset>
+Dimensions:           (slant_range_time: 21169, azimuth_time: 1500)
+Coordinates:
+    pixel             (slant_range_time) int64 0 1 2 3 ... 21166 21167 21168
+    line              (azimuth_time) int64 12000 12001 12002 ... 13498 13499
+  * azimuth_time      (azimuth_time) datetime64[ns] 2022-04-14T10:22:33.80763...
+  * slant_range_time  (slant_range_time) float64 0.005348 0.005349 ... 0.005677
+Data variables:
+    measurement       (azimuth_time, slant_range_time) complex64 ...
+Attributes: (12/27)
+    sar:center_frequency:       5.40500045433435
+    sar:pixel_spacing_azimuth:  13.9283
+    sar:pixel_spacing_range:    2.329562
+    azimuth_time_interval:      0.002055556299999998
+    slant_range_time_interval:  1.554116558005821e-08
+    incidence_angle_mid_swath:  33.63858785673874
+    ...                         ...
+    group:                      /IW1/HH
+    Conventions:                CF-1.8
+    history:                    created by xarray_sentinel-...
+    azimuth_anx_time:           2136.774327
+    burst_index:                8
+    burst_id:                   365923
 
 ```
 
