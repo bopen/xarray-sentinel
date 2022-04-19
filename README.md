@@ -235,16 +235,16 @@ of the first IW swath of the `S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_0
 product, in the current folder:
 
 ```python-repl
->>> slc_iw_path = "tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
->>> slc_iw1_hh = xr.open_dataset(slc_iw_path, group="IW1/HH", engine="sentinel-1")
+>>> slc_iw_v340_path = "tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
+>>> slc_iw1_hh = xr.open_dataset(slc_iw_v340_path, group="IW1/HH", engine="sentinel-1")
 >>> slc_iw1_hh
 <xarray.Dataset>
 Dimensions:           (pixel: 21169, line: 13500)
 Coordinates:
   * pixel             (pixel) int64 0 1 2 3 4 ... 21164 21165 21166 21167 21168
   * line              (line) int64 0 1 2 3 4 5 ... 13495 13496 13497 13498 13499
-    azimuth_time      (line) datetime64[ns] 2022-04-14T10:22:11.755622 ... 20...
-    slant_range_time  (pixel) float64 0.005348 0.005349 ... 0.005677 0.005677
+    azimuth_time      (line) datetime64[ns] ...
+    slant_range_time  (pixel) float64 ...
 Data variables:
     measurement       (line, pixel) complex64 ...
 Attributes: (12/26)
@@ -337,7 +337,8 @@ open, for example, `group="IW1/VH/8"`.
 The burst groups are not listed in the `subgroup` attribute because they are not structural.
 
 ```python-repl
->>> xr.open_dataset(slc_iw_path, group="IW1/VH/8", engine="sentinel-1")
+>>> slc_iw_v330_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+>>> xr.open_dataset(slc_iw_v330_path, group="IW1/VH/8", engine="sentinel-1")
 <xarray.Dataset>
 Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
 Coordinates:
@@ -355,8 +356,8 @@ Attributes: ...
     slant_range_time_interval:  1.554116558005821e-08
     incidence_angle_mid_swath:  33.87494380774521
     ...                         ...
+    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
     group:                      /IW1/VH
-    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
     azimuth_anx_time:           2210.634453
     burst_index:                8
     Conventions:                CF-1.8
