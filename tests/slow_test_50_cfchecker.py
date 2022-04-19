@@ -1,9 +1,9 @@
 import pathlib
 import typing as T
 
-from cfchecker import cfchecks
 import pytest
 import xarray as xr
+from cfchecker import cfchecks
 
 pytest.importorskip("netCDF4")
 
@@ -73,4 +73,3 @@ def test_cfcheck(tmpdir: T.Any) -> None:
         totals = cfcheck(str(nc_path))
 
         assert totals["FATAL"] + totals["ERROR"] + totals["WARN"] == 0
-    
