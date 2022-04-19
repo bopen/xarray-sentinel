@@ -8,6 +8,11 @@ from xarray_sentinel import esa_safe, sentinel1
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
+SLC_IW_V340 = (
+    DATA_FOLDER
+    / "S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
+)
+
 SLC_IW = (
     DATA_FOLDER
     / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
@@ -267,7 +272,7 @@ def test_open_dataset_virtual_groups() -> None:
 
 
 def test_crop_burst_dataset() -> None:
-    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW_V340, group="IW1/HH")
 
     res1 = sentinel1.crop_burst_dataset(swath_ds, 8)
 
@@ -284,14 +289,32 @@ def test_crop_burst_dataset() -> None:
 
     assert res3.equals(res1)
 
+    res4 = sentinel1.crop_burst_dataset(swath_ds, burst_id=365923)
+
+    assert res4.equals(res1)
+
     with pytest.raises(TypeError):
         sentinel1.crop_burst_dataset(swath_ds)
 
     with pytest.raises(TypeError):
         sentinel1.crop_burst_dataset(swath_ds, burst_index=8, azimuth_anx_time=2213)
 
+    with pytest.raises(TypeError):
+        sentinel1.crop_burst_dataset(swath_ds, burst_index=8, burst_id=365923)
+
+    with pytest.raises(TypeError):
+        sentinel1.crop_burst_dataset(swath_ds, azimuth_anx_time=2213, burst_id=365923)
+
     with pytest.raises(IndexError):
         sentinel1.crop_burst_dataset(swath_ds, burst_index=-1)
+
+    with pytest.raises(KeyError):
+        sentinel1.crop_burst_dataset(swath_ds, burst_id=1)
+
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+
+    with pytest.raises(TypeError):
+        sentinel1.crop_burst_dataset(swath_ds, burst_id=1)
 
 
 def test_calibrate_amplitude() -> None:
