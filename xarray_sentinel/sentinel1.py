@@ -562,12 +562,15 @@ def crop_burst_dataset(
         elif burst_id is not None:
             bursts_ids = pol_dataset.attrs.get("bursts_ids")
             if bursts_ids is None:
-                raise KeyError("'bursts_ids' not found in product attributes")
+                raise TypeError(
+                    "'bursts_ids' list can't be found in product attributes, "
+                    "probably Sentinel-1 IPF processor version is older than 3.40"
+                )
             try:
                 burst_index = bursts_ids.index(burst_id)
             except ValueError:
-                raise ValueError(
-                    f"'burst_id' {burst_id} not found in product 'bursts_ids' list: {bursts_ids}"
+                raise KeyError(
+                    f"'burst_id' {burst_id} not found in product 'bursts_ids': {bursts_ids}"
                 )
         else:
             raise TypeError(
@@ -589,7 +592,10 @@ def crop_burst_dataset(
     ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_times.values[0] / ONE_SECOND
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
     ds.attrs["burst_index"] = burst_index
-
+    if "bursts_ids" in ds.attrs:
+        ds.attrs["burst_id"] = ds.attrs["bursts_ids"][burst_index]
+        _ = ds.attrs.pop("bursts_ids")
+    _ = ds.attrs.pop("subgroups", None)
     return ds
 
 

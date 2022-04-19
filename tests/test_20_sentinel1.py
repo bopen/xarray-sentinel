@@ -308,12 +308,12 @@ def test_crop_burst_dataset() -> None:
     with pytest.raises(IndexError):
         sentinel1.crop_burst_dataset(swath_ds, burst_index=-1)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         sentinel1.crop_burst_dataset(swath_ds, burst_id=1)
 
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
 
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         sentinel1.crop_burst_dataset(swath_ds, burst_id=1)
 
 
