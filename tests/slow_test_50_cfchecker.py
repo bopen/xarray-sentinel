@@ -10,7 +10,7 @@ pytest.importorskip("netCDF4")
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
 
-def cfcheck(path: str):
+def cfcheck(path: str) -> T.Dict[str, int]:
     (
         badc,
         coards,
@@ -47,7 +47,7 @@ def cfcheck(path: str):
         except cfchecks.FatalCheckerError:
             print("Checking of file %s aborted due to error" % file)
 
-    totals = inst.get_total_counts()
+    totals: T.Dict[str, int] = inst.get_total_counts()
 
     return totals
 
@@ -61,12 +61,11 @@ def test_cfcheck(tmpdir: T.Any) -> None:
     groups = [""]
     while groups:
         group = groups.pop()
-        print(group)
         try:
-            ds = xr.open_dataset(product_path, engine="sentinel-1", group=group)
+            ds = xr.open_dataset(product_path, engine="sentinel-1", group=group)  # type: ignore
             groups.extend(f"{group}/{g}" for g in ds.attrs.get("subgroups", []))
-        except:
-            pass
+        except FileNotFoundError:
+            continue
         nc_path = tmpdir.join(group.replace("/", "-") + ".nc")
         ds.to_netcdf(nc_path)
 

@@ -31,6 +31,7 @@ def get_fs_path(
 ) -> T.Tuple[fsspec.AbstractFileSystem, str]:
     if fs is not None and storage_options is not None:
         raise TypeError("only one of 'fs' and 'storage_options' can be not None")
+
     if fs is None:
         fs, _, paths = fsspec.get_fs_token_paths(
             urlpath_or_path, storage_options=storage_options
@@ -42,6 +43,10 @@ def get_fs_path(
         path = paths[0]
     else:
         path = str(urlpath_or_path)
+
+    if fs.isdir(path):
+        path = os.path.join(path, "manifest.safe")
+
     return fs, path
 
 
@@ -411,7 +416,7 @@ def open_pol_dataset(
     anx_datetime = image_information["ascendingNodeTime"]
 
     attrs = {
-        "sar:center_frequency": product_information["radarFrequency"] / 10 ** 9,
+        "sar:center_frequency": product_information["radarFrequency"] / 10**9,
         "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
         "sar:pixel_spacing_range": range_pixel_spaxing,
         "azimuth_time_interval": azimuth_time_interval,
@@ -647,7 +652,7 @@ def slant_range_time_to_ground_range(
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
     cc = coordinate_conversion.interp(azimuth_time=azimuth_time)
     x = slant_range - cc.sr0
-    ground_range = (cc.srgrCoefficients * x ** cc.degree).sum("degree")
+    ground_range = (cc.srgrCoefficients * x**cc.degree).sum("degree")
     return ground_range  # type: ignore
 
 
@@ -656,7 +661,7 @@ def assign_slant_range_time_coord(
 ) -> xr.Dataset:
     x = measurement.ground_range - coordinate_conversion.gr0
     slant_range = (
-        coordinate_conversion.grsrCoefficients * x ** coordinate_conversion.degree
+        coordinate_conversion.grsrCoefficients * x**coordinate_conversion.degree
     ).sum(dim="degree")
     slant_range_coord = slant_range.interp(
         azimuth_time=measurement.azimuth_time, ground_range=measurement.ground_range
@@ -728,8 +733,6 @@ def open_sentinel1_dataset(
         warnings.warn("'drop_variables' is currently ignored")
 
     fs, manifest_path = get_fs_path(product_urlpath, fs, storage_options)
-    if fs.isdir(manifest_path):
-        manifest_path = os.path.join(manifest_path, "manifest.safe")
     product_path = os.path.dirname(manifest_path)
 
     with fs.open(manifest_path) as file:
