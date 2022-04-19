@@ -202,7 +202,7 @@ def test_burst_id_attribute() -> None:
         / "S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
     )
 
-    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/HH")
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/HH")  # type: ignore
     assert "bursts_ids" in res.attrs
     assert len(res.attrs["bursts_ids"]) == res.attrs["number_of_bursts"]
 
@@ -210,7 +210,7 @@ def test_burst_id_attribute() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")  # type: ignore
     assert "bursts_ids" not in res.attrs
 
 

@@ -402,34 +402,30 @@ def open_pol_dataset(
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
     image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
     swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
-    incidence_angle_mid_swath = image_information["incidenceAngleMidSwath"]
 
     number_of_samples = image_information["numberOfSamples"]
-    first_slant_range_time = image_information["slantRangeTime"]
     slant_range_time_interval = 1 / product_information["rangeSamplingRate"]
 
     number_of_lines = image_information["numberOfLines"]
-    first_azimuth_time = image_information["productFirstLineUtcTime"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
     number_of_bursts = swath_timing["burstList"]["@count"]
-    range_pixel_spaxing = image_information["rangePixelSpacing"]
-    anx_datetime = image_information["ascendingNodeTime"]
+    range_pixel_spacing = image_information["rangePixelSpacing"]
 
     attrs = {
         "sar:center_frequency": product_information["radarFrequency"] / 10**9,
         "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
-        "sar:pixel_spacing_range": range_pixel_spaxing,
+        "sar:pixel_spacing_range": range_pixel_spacing,
         "azimuth_time_interval": azimuth_time_interval,
         "slant_range_time_interval": slant_range_time_interval,
-        "incidence_angle_mid_swath": incidence_angle_mid_swath,
-        "sat:anx_datetime": anx_datetime + "Z",
+        "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
+        "sat:anx_datetime": image_information["ascendingNodeTime"] + "Z",
     }
     encoding = {}
     swap_dims = {}
     chunks: T.Union[None, T.Dict[str, int]] = None
 
     azimuth_time = pd.date_range(
-        start=first_azimuth_time,
+        start=image_information["productFirstLineUtcTime"],
         periods=number_of_lines,
         freq=pd.Timedelta(azimuth_time_interval, "s"),
     ).values
@@ -440,7 +436,7 @@ def open_pol_dataset(
             bursts_ids = []
             for burst in swath_timing["burstList"]["burst"]:
                 bursts_ids.append(burst["burstId"]["$"])
-            attrs.update({"bursts_ids": bursts_ids})
+            attrs["bursts_ids"] = bursts_ids
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
             {
@@ -477,8 +473,8 @@ def open_pol_dataset(
 
     if product_information["projection"] == "Slant Range":
         slant_range_time = np.linspace(
-            first_slant_range_time,
-            first_slant_range_time
+            image_information["slantRangeTime"],
+            image_information["slantRangeTime"]
             + slant_range_time_interval * (number_of_samples - 1),
             number_of_samples,
         )
@@ -486,7 +482,7 @@ def open_pol_dataset(
     elif product_information["projection"] == "Ground Range":
         ground_range = np.linspace(
             0,
-            range_pixel_spaxing * (number_of_samples - 1),
+            range_pixel_spacing * (number_of_samples - 1),
             number_of_samples,
         )
         coords["ground_range"] = ("pixel", ground_range)
@@ -502,7 +498,7 @@ def open_pol_dataset(
         try:
             arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
         except AttributeError:
-            arr = xr.open_dataarray(measurement, engine="rasterio")  # type: ignore
+            arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
 
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
