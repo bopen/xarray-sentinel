@@ -9,18 +9,16 @@ DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
 
 COMMON_ATTRIBUTES = {
-    "constellation": "sentinel-1",
-    "platform": "sentinel-1b",
-    "instrument": ["c-sar"],
-    "sat:orbit_state": "descending",
-    "sat:absolute_orbit": 26269,
-    "sat:relative_orbit": 168,
-    "sat:anx_datetime": "2021-04-01T04:49:55.637823Z",
-    "sar:frequency_band": "C",
-    "sar:instrument_mode": "IW",
-    "sar:polarizations": ["VV", "VH"],
-    "sar:product_type": "SLC",
-    "xs:instrument_mode_swaths": ["IW1", "IW2", "IW3"],
+    "family_name": "SENTINEL-1",
+    "number": "B",
+    "mode": "IW",
+    "swaths": ["IW1", "IW2", "IW3"],
+    "orbit_number": 26269,
+    "relative_orbit_number": 168,
+    "pass": "DESCENDING",
+    "ascending_node_time": "2021-04-01T04:49:55.637823",
+    "transmitter_receiver_polarisations": ["VV", "VH"],
+    "product_type": "SLC",
 }
 
 
