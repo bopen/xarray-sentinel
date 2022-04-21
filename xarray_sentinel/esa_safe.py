@@ -172,3 +172,23 @@ def parse_manifest_sentinel1(
             files[file_href] = (file_type,) + description
 
     return attributes, files
+
+
+def make_stac_item(attrs: T.Mapping[str, T.Any]) -> T.Dict[str, T.Any]:
+    assert attrs["family_name"] == "SENTINEL-1"
+
+    stac_item = {
+        "constellation": "sentinel-1",
+        "platform": "sentinel-1" + attrs["number"].lower(),
+        "instrument": ["c-sar"],
+        "sat:orbit_state": attrs["pass"].lower(),
+        "sat:absolute_orbit": attrs["orbit_number"],
+        "sat:relative_orbit": attrs["relative_orbit_number"],
+        "sat:anx_datetime": attrs["ascending_node_time"] + "Z",
+        "sar:instrument_mode": attrs["mode"],
+        "sar:frequency_band": "C",
+        "sar:polarizations": attrs["transmitter_receiver_polarisations"],
+        "sar:product_type": attrs["product_type"],
+        "sar:observation_direction": "right",
+    }
+    return stac_item

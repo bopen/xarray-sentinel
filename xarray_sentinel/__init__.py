@@ -20,6 +20,7 @@ except ImportError:  # pragma: no cover
     # Local copy or not installed with setuptools
     __version__ = "999"
 
+from .esa_safe import make_stac_item
 from .sentinel1 import (
     calibrate_amplitude,
     calibrate_intensity,
@@ -34,6 +35,7 @@ __all__ = [
     "calibrate_amplitude",
     "calibrate_intensity",
     "crop_burst_dataset",
+    "make_stac_item",
     "mosaic_slc_iw",
     "open_sentinel1_dataset",
     "slant_range_time_to_ground_range",

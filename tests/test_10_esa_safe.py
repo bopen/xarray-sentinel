@@ -176,3 +176,25 @@ def test_parse_manifest_sentinel1(
     print(res_attrs)
 
     assert res_attrs == expected
+
+
+def test_make_stac_item() -> None:
+    attrs = SENTINEL1_ATTRIBUTES[
+        "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8"
+    ]
+    expected = {
+        "constellation": "sentinel-1",
+        "instrument": ["c-sar"],
+        "platform": "sentinel-1b",
+        "sat:orbit_state": "descending",
+        "sat:absolute_orbit": 26269,
+        "sat:relative_orbit": 168,
+        "sat:anx_datetime": "2021-04-01T04:49:55.637823Z",
+        "sar:instrument_mode": "IW",
+        "sar:frequency_band": "C",
+        "sar:polarizations": ["VV", "VH"],
+        "sar:product_type": "GRD",
+        "sar:observation_direction": "right",
+    }
+
+    assert esa_safe.make_stac_item(attrs) == expected
