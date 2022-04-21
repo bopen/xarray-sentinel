@@ -430,19 +430,19 @@ Coordinates:
 Data variables:
     measurement       (line, pixel) complex64 ...
 Attributes: ...
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.94053
-    sar:pixel_spacing_range:    2.329562
-    azimuth_time_interval:      0.002055556299999998
-    slant_range_time_interval:  1.554116558005821e-08
-    azimuth_steering_rate:      1.590368784
-    ...                         ...
-    sar:product_type:           SLC
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VH
-    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+    family_name:                         SENTINEL-1
+    number:                              B
+    mode:                                IW
+    swaths:                              ['IW1', 'IW2', 'IW3']
+    orbit_number:                        26269
+    relative_orbit_number:               168
+    ...                                  ...
+    number_of_bursts:                    9
+    lines_per_burst:                     1501
+    group:                               /IW1/VH
+    subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
 
 ```
 
@@ -460,19 +460,19 @@ Coordinates:
 Data variables:
     measurement       (line, pixel) complex64 ...
 Attributes: ...
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.94053
-    sar:pixel_spacing_range:    2.329562
-    azimuth_time_interval:      0.002055556299999998
-    slant_range_time_interval:  1.554116558005821e-08
-    incidence_angle_mid_swath:  33.87494380774521
-    ...                         ...
-    sar:product_type:           SLC
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VH
-    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+    family_name:                         SENTINEL-1
+    number:                              B
+    mode:                                IW
+    swaths:                              ['IW1', 'IW2', 'IW3']
+    orbit_number:                        26269
+    relative_orbit_number:               168
+    ...                                  ...
+    number_of_bursts:                    9
+    lines_per_burst:                     1501
+    group:                               /IW1/VH
+    subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
 
 ```
 
@@ -498,19 +498,19 @@ Coordinates:
 Data variables:
     measurement       (line, pixel) complex64 ...
 Attributes: ...
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.94053
-    sar:pixel_spacing_range:    2.329562
-    azimuth_time_interval:      0.002055556299999998
-    slant_range_time_interval:  1.554116558005821e-08
-    azimuth_steering_rate:      1.590368784
-    ...                         ...
-    sar:product_type:           SLC
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VH
-    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+    family_name:                         SENTINEL-1
+    number:                              B
+    mode:                                IW
+    swaths:                              ['IW1', 'IW2', 'IW3']
+    orbit_number:                        26269
+    relative_orbit_number:               168
+    ...                                  ...
+    number_of_bursts:                    9
+    lines_per_burst:                     1501
+    group:                               /IW1/VH
+    subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
 
 ```
 
