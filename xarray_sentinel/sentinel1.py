@@ -63,7 +63,9 @@ def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
     return group, burst_index
 
 
-def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
+def open_calibration_dataset(
+    calibration: esa_safe.PathType, attrs: T.Dict[str, T.Any] = {}
+) -> xr.Dataset:
     calibration_vectors = esa_safe.parse_tag_as_list(
         calibration, ".//calibrationVector", "calibration"
     )
@@ -103,10 +105,12 @@ def open_calibration_dataset(calibration: esa_safe.PathType) -> xr.Dataset:
     }
     coords = {"line": line_list, "pixel": pixel_list[0]}
 
-    return xr.Dataset(data_vars=data_vars, coords=coords)
+    return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
-def open_noise_range_dataset(noise: esa_safe.PathType) -> xr.Dataset:
+def open_noise_range_dataset(
+    noise: esa_safe.PathType, attrs: T.Dict[str, T.Any] = {}
+) -> xr.Dataset:
     noise_vectors = esa_safe.parse_tag_as_list(noise, ".//noiseRangeVector", "noise")
 
     azimuth_time_list = []
@@ -132,10 +136,12 @@ def open_noise_range_dataset(noise: esa_safe.PathType) -> xr.Dataset:
     }
     coords = {"line": line_list, "pixel": pixel_list[0]}
 
-    return xr.Dataset(data_vars=data_vars, coords=coords)
+    return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
-def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
+def open_noise_azimuth_dataset(
+    noise: esa_safe.PathType, attrs: T.Dict[str, T.Any] = {}
+) -> xr.Dataset:
     noise_vectors = esa_safe.parse_tag_as_list(noise, ".//noiseAzimuthVector", "noise")
 
     first_range_sample = []
@@ -155,11 +161,11 @@ def open_noise_azimuth_dataset(noise: esa_safe.PathType) -> xr.Dataset:
         data_vars["noiseAzimuthLut"] = ("line", noiseAzimuthLut_list[0])
         coords["line"] = line_list[0]
 
-    return xr.Dataset(data_vars=data_vars, coords=coords)
+    return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
 def open_coordinate_conversion_dataset(
-    annotation_path: esa_safe.PathType,
+    annotation_path: esa_safe.PathType, attrs: T.Dict[str, T.Any] = {}
 ) -> xr.Dataset:
     coordinate_conversion = esa_safe.parse_tag_as_list(
         annotation_path, ".//coordinateConversionList/coordinateConversion"
@@ -195,10 +201,12 @@ def open_coordinate_conversion_dataset(
         data_vars["srgrCoefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
         data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
 
-    return xr.Dataset(data_vars=data_vars, coords=coords)
+    return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
-def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+def open_gcp_dataset(
+    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_tag_as_list(
         annotation, ".//geolocationGridPoint"
     )
@@ -217,11 +225,11 @@ def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     shape = (len(azimuth_time), len(slant_range_time))
     dims = ("azimuth_time", "slant_range_time")
     data_vars = {
-        "latitude": (dims, np.full(shape, np.nan)),
-        "longitude": (dims, np.full(shape, np.nan)),
-        "height": (dims, np.full(shape, np.nan)),
-        "incidenceAngle": (dims, np.full(shape, np.nan)),
-        "elevationAngle": (dims, np.full(shape, np.nan)),
+        "latitude": (dims, np.full(shape, np.nan), attrs),
+        "longitude": (dims, np.full(shape, np.nan), attrs),
+        "height": (dims, np.full(shape, np.nan), attrs),
+        "incidenceAngle": (dims, np.full(shape, np.nan), attrs),
+        "elevationAngle": (dims, np.full(shape, np.nan), attrs),
     }
     line = sorted(line_set)
     pixel = sorted(pixel_set)
@@ -239,16 +247,20 @@ def open_gcp_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
             "line": ("azimuth_time", line),
             "pixel": ("slant_range_time", pixel),
         },
+        attrs=attrs,
     )
     return ds
 
 
-def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+def open_attitude_dataset(
+    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+) -> xr.Dataset:
     attitudes = esa_safe.parse_tag_as_list(annotation, ".//attitude")
 
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     azimuth_time: T.List[T.Any] = []
-    data_vars: T.Dict[str, T.Any] = {var: ("azimuth_time", []) for var in variables}
+    data_vars: T.Dict[str, T.Any]
+    data_vars = {var: ("azimuth_time", [], attrs) for var in variables}
     for attitude in attitudes:
         azimuth_time.append(attitude["time"])
         for var in variables:
@@ -257,12 +269,15 @@ def open_attitude_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     ds = xr.Dataset(
         data_vars=data_vars,
         coords={"azimuth_time": [np.datetime64(dt) for dt in azimuth_time]},
+        attrs=attrs,
     )
 
     return ds
 
 
-def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+def open_orbit_dataset(
+    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+) -> xr.Dataset:
     orbits = esa_safe.parse_tag_as_list(annotation, ".//orbit")
 
     reference_system = orbits[0]["frame"]
@@ -286,7 +301,7 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
     position = xr.Variable(data=data["position"], dims=("axis", "azimuth_time"))  # type: ignore
     velocity = xr.Variable(data=data["velocity"], dims=("axis", "azimuth_time"))  # type: ignore
 
-    attrs = {}
+    attrs = attrs | {}
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
 
@@ -298,11 +313,15 @@ def open_orbit_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
             "axis": [0, 1, 2],
         },
     )
+    for data_var in ds.data_vars:
+        ds[data_var].attrs = attrs
 
     return ds
 
 
-def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+def open_dc_estimate_dataset(
+    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+) -> xr.Dataset:
     dc_estimates = esa_safe.parse_tag_as_list(annotation, ".//dcEstimate")
 
     azimuth_time = []
@@ -317,18 +336,21 @@ def open_dc_estimate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
 
     ds = xr.Dataset(
         data_vars={
-            "t0": ("azimuth_time", t0),
-            "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly),
+            "t0": ("azimuth_time", t0, attrs),
+            "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly, attrs),
         },
         coords={
             "azimuth_time": [np.datetime64(at) for at in azimuth_time],
             "degree": list(range(len(data_dc_poly[0]))),
         },
+        attrs=attrs,
     )
     return ds
 
 
-def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Dataset:
+def open_azimuth_fm_rate_dataset(
+    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+) -> xr.Dataset:
     azimuth_fm_rates = esa_safe.parse_tag_as_list(annotation, ".//azimuthFmRate")
 
     azimuth_time = []
@@ -343,16 +365,22 @@ def open_azimuth_fm_rate_dataset(annotation: esa_safe.PathOrFileType) -> xr.Data
 
     ds = xr.Dataset(
         data_vars={
-            "t0": ("azimuth_time", t0),
+            "t0": (
+                "azimuth_time",
+                t0,
+                attrs,
+            ),
             "azimuth_fm_rate_polynomial": (
                 ("azimuth_time", "degree"),
                 azimuth_fm_rate_poly,
+                attrs,
             ),
         },
         coords={
             "azimuth_time": [np.datetime64(at) for at in azimuth_time],
             "degree": list(range(len(azimuth_fm_rate_poly[0]))),
         },
+        attrs=attrs,
     )
     return ds
 
@@ -397,6 +425,7 @@ def open_pol_dataset(
     measurement: esa_safe.PathOrFileType,
     annotation: esa_safe.PathOrFileType,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
+    attrs: T.Dict[str, T.Any] = {},
 ) -> xr.Dataset:
 
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
@@ -404,21 +433,21 @@ def open_pol_dataset(
     swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
 
     number_of_samples = image_information["numberOfSamples"]
-    slant_range_time_interval = 1 / product_information["rangeSamplingRate"]
+    range_sampling_rate = product_information["rangeSamplingRate"]
 
     number_of_lines = image_information["numberOfLines"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
     number_of_bursts = swath_timing["burstList"]["@count"]
     range_pixel_spacing = image_information["rangePixelSpacing"]
 
-    attrs = {
-        "sar:center_frequency": product_information["radarFrequency"] / 10**9,
-        "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
-        "sar:pixel_spacing_range": range_pixel_spacing,
+    attrs = attrs | {
+        "radar_frequency": product_information["radarFrequency"] / 10**9,
+        "azimuth_pixel_spacing": image_information["azimuthPixelSpacing"],
+        "range_pixel_spacing": range_pixel_spacing,
         "azimuth_time_interval": azimuth_time_interval,
-        "slant_range_time_interval": slant_range_time_interval,
+        "range_sampling_rate": range_sampling_rate,
         "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
-        "sat:anx_datetime": image_information["ascendingNodeTime"] + "Z",
+        "ascending_node_time": image_information["ascendingNodeTime"],
     }
     encoding = {}
     swap_dims = {}
@@ -468,14 +497,21 @@ def open_pol_dataset(
     coords = {
         "pixel": np.arange(0, number_of_samples, dtype=int),
         "line": np.arange(0, number_of_lines, dtype=int),
-        "azimuth_time": ("line", azimuth_time),
+        # set "units" explicitly as CF conventions don't support "nanoseconds".
+        # See: https://github.com/pydata/xarray/issues/4183#issuecomment-685200043
+        "azimuth_time": (
+            "line",
+            azimuth_time,
+            {},
+            {"units": f"microseconds since {azimuth_time[0]}"},
+        ),
     }
 
     if product_information["projection"] == "Slant Range":
         slant_range_time = np.linspace(
             image_information["slantRangeTime"],
             image_information["slantRangeTime"]
-            + slant_range_time_interval * (number_of_samples - 1),
+            + (number_of_samples - 1) / range_sampling_rate,
             number_of_samples,
         )
         coords["slant_range_time"] = ("pixel", slant_range_time)
@@ -500,6 +536,9 @@ def open_pol_dataset(
         except AttributeError:
             arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
 
+    # clear the encoding as many GeoTIFF details are inconpatible with the CF conventions
+    arr.encoding.clear()
+
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(coords)
@@ -517,7 +556,7 @@ def find_bursts_index(
     use_center: bool = False,
 ) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
-    anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"].replace("Z", ""))
+    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
     azimuth_anx_time = pd.Timedelta(azimuth_anx_time, unit="s")
     if use_center:
         azimuth_anx_time_center = (
@@ -583,7 +622,7 @@ def crop_burst_dataset(
         )
     )
 
-    anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"].replace("Z", ""))
+    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
     burst_azimuth_anx_times = ds.azimuth_time - anx_datetime
     ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_times.values[0] / ONE_SECOND
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
@@ -738,7 +777,7 @@ def open_sentinel1_dataset(
     product_path = os.path.dirname(manifest_path)
 
     with fs.open(manifest_path) as file:
-        product_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
+        common_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)
 
     if override_product_files:
         product_files = do_override_product_files(override_product_files, product_files)
@@ -757,7 +796,7 @@ def open_sentinel1_dataset(
 
     metadata = ""
 
-    ds = xr.Dataset()
+    ds = xr.Dataset(attrs=common_attrs)
     if group == "":
         subgroups = list(groups)
     else:
@@ -767,19 +806,17 @@ def open_sentinel1_dataset(
 
         if group.count("/") == 1:
             with fs.open(groups[group][1]) as annotation:
-                ds = open_pol_dataset(groups[group][0], annotation, fs=fs)
+                ds = open_pol_dataset(
+                    groups[group][0], annotation, fs=fs, attrs=common_attrs
+                )
         elif group.count("/") == 2:
             _, _, metadata = group.split("/", 2)
             with fs.open(groups[group][0]) as file:
-                ds = METADATA_OPENERS[metadata](file)
+                ds = METADATA_OPENERS[metadata](file, attrs=common_attrs)
 
-    for data_var in ds.data_vars:
-        ds.data_vars[data_var].attrs.update(product_attrs)
-
-    product_attrs["group"] = absgroup
+    ds.attrs["group"] = absgroup
     if len(subgroups):
-        product_attrs["subgroups"] = subgroups
-    ds.attrs.update(product_attrs)  # type: ignore
+        ds.attrs["subgroups"] = subgroups
 
     if group.count("/") == 1 and burst_index is not None:
         ds = crop_burst_dataset(ds, burst_index=burst_index)

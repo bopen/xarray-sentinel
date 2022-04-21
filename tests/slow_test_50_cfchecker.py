@@ -52,10 +52,10 @@ def cfcheck(path: str) -> T.Dict[str, int]:
     return totals
 
 
-def test_cfcheck(tmpdir: T.Any) -> None:
+def test_cfcheck_grd(tmpdir: T.Any) -> None:
     product_path = (
         DATA_FOLDER
-        / "S1B_IW_GRDH_1SDV_20211223T051122_20211223T051147_030148_039993_5371.SAFE"
+        / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE"
     )
 
     groups = [""]

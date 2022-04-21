@@ -74,19 +74,19 @@ Dimensions:  ()
 Data variables:
     *empty*
 Attributes: ...
-    constellation:              sentinel-1
-    platform:                   sentinel-1a
-    instrument:                 ['c-sar']
-    sat:orbit_state:            ascending
-    sat:absolute_orbit:         37258
-    sat:relative_orbit:         86
-    ...                         ...
-    sar:product_type:           SLC
-    xs:instrument_mode_swaths:  ['S3']
-    group:                      /
-    subgroups:                  ['S3', 'S3/VH', 'S3/VH/orbit', 'S3/VH/attitud...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+    family_name:                         SENTINEL-1
+    number:                              A
+    mode:                                SM
+    swaths:                              ['S3']
+    orbit_number:                        37258
+    relative_orbit_number:               86
+    ...                                  ...
+    start_time:                          2021-04-01T15:28:55.111501
+    stop_time:                           2021-04-01T15:29:14.277650
+    group:                               /
+    subgroups:                           ['S3', 'S3/VH', 'S3/VH/orbit', 'S3/V...
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
 
 ```
 
@@ -114,19 +114,19 @@ Coordinates:
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
 Attributes: ...
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  3.55338
-    sar:pixel_spacing_range:    2.246363
-    azimuth_time_interval:      0.0005194923129469381
-    slant_range_time_interval:  1.498612395219899e-08
-    incidence_angle_mid_swath:  32.03479766845703
-    ...                         ...
-    sar:product_type:           SLC
-    xs:instrument_mode_swaths:  ['S3']
-    group:                      /S3/VH
-    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+    family_name:                         SENTINEL-1
+    number:                              A
+    mode:                                SM
+    swaths:                              ['S3']
+    orbit_number:                        37258
+    relative_orbit_number:               86
+    ...                                  ...
+    range_sampling_rate:                 66728395.09333333
+    incidence_angle_mid_swath:           32.03479766845703
+    group:                               /S3/VH
+    subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
 
 ```
 
@@ -173,19 +173,19 @@ Data variables:
     gamma         (line, pixel) float32 ...
     dn            (line, pixel) float32 ...
 Attributes: ...
-    constellation:              sentinel-1
-    platform:                   sentinel-1a
-    instrument:                 ['c-sar']
-    sat:orbit_state:            ascending
-    sat:absolute_orbit:         37258
-    sat:relative_orbit:         86
-    ...                         ...
-    xs:instrument_mode_swaths:  ['S3']
-    group:                      /S3/VH/calibration
-    Conventions:                CF-1.8
-    title:                      Calibration coefficients
-    comment:                    The dataset contains calibration information ...
-    history:                    created by xarray_sentinel-...
+    family_name:                         SENTINEL-1
+    number:                              A
+    mode:                                SM
+    swaths:                              ['S3']
+    orbit_number:                        37258
+    relative_orbit_number:               86
+    ...                                  ...
+    stop_time:                           2021-04-01T15:29:14.277650
+    group:                               /S3/VH/calibration
+    Conventions:                         CF-1.8
+    title:                               Calibration coefficients
+    comment:                             The dataset contains calibration inf...
+    history:                             created by xarray_sentinel-...
 
 ```
 
@@ -247,20 +247,20 @@ Coordinates:
     slant_range_time  (pixel) float64 ...
 Data variables:
     measurement       (line, pixel) complex64 ...
-Attributes: (12/26)
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.9283
-    sar:pixel_spacing_range:    2.329562
-    azimuth_time_interval:      0.002055556299999998
-    slant_range_time_interval:  1.554116558005821e-08
-    incidence_angle_mid_swath:  33.63858785673874
-    ...                         ...
-    sar:product_type:           SLC
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/HH
-    subgroups:                  ['orbit', 'attitude', 'azimuth_fm_rate', 'dc_...
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+Attributes: ...
+    family_name:                         SENTINEL-1
+    number:                              A
+    mode:                                IW
+    swaths:                              ['IW1', 'IW2', 'IW3']
+    orbit_number:                        42768
+    relative_orbit_number:               171
+    ...                                  ...
+    number_of_bursts:                    9
+    lines_per_burst:                     1500
+    group:                               /IW1/HH
+    subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
 
 ```
 
@@ -281,20 +281,20 @@ Coordinates:
   * slant_range_time  (slant_range_time) float64 0.005348 0.005349 ... 0.005677
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
-Attributes: (12/27)
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.9283
-    sar:pixel_spacing_range:    2.329562
-    azimuth_time_interval:      0.002055556299999998
-    slant_range_time_interval:  1.554116558005821e-08
-    incidence_angle_mid_swath:  33.63858785673874
+Attributes: ...
+    family_name:                         SENTINEL-1
+    number:                              A
+    mode:                                IW
+    swaths:                              ['IW1', 'IW2', 'IW3']
+    orbit_number:                        42768
+    relative_orbit_number:               171
     ...                         ...
-    group:                      /IW1/HH
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
-    azimuth_anx_time:           2136.774327
-    burst_index:                8
-    burst_id:                   365923
+    group:                               /IW1/HH
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
+    azimuth_anx_time:                    2136.774327
+    burst_index:                         8
+    burst_id:                            365923
 
 ```
 
@@ -312,20 +312,20 @@ Coordinates:
   * slant_range_time  (slant_range_time) float64 0.005348 0.005349 ... 0.005677
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
-Attributes: (12/27)
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.9283
-    sar:pixel_spacing_range:    2.329562
-    azimuth_time_interval:      0.002055556299999998
-    slant_range_time_interval:  1.554116558005821e-08
-    incidence_angle_mid_swath:  33.63858785673874
+Attributes: ...
+    family_name:                         SENTINEL-1
+    number:                              A
+    mode:                                IW
+    swaths:                              ['IW1', 'IW2', 'IW3']
+    orbit_number:                        42768
+    relative_orbit_number:               171
     ...                         ...
-    group:                      /IW1/HH
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
-    azimuth_anx_time:           2136.774327
-    burst_index:                8
-    burst_id:                   365923
+    group:                               /IW1/HH
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
+    azimuth_anx_time:                    2136.774327
+    burst_index:                         8
+    burst_id:                            365923
 
 ```
 
@@ -349,19 +349,19 @@ Coordinates:
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
 Attributes: ...
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  13.94053
-    sar:pixel_spacing_range:    2.329562
-    azimuth_time_interval:      0.002055556299999998
-    slant_range_time_interval:  1.554116558005821e-08
-    incidence_angle_mid_swath:  33.87494380774521
-    ...                         ...
-    xs:instrument_mode_swaths:  ['IW1', 'IW2', 'IW3']
-    group:                      /IW1/VH
-    azimuth_anx_time:           2210.634453
-    burst_index:                8
-    Conventions:                CF-1.8
-    history:                    created by xarray_sentinel-...
+    family_name:                         SENTINEL-1
+    number:                              B
+    mode:                                IW
+    swaths:                              ['IW1', 'IW2', 'IW3']
+    orbit_number:                        26269
+    relative_orbit_number:               168
+    ...                                  ...
+    lines_per_burst:                     1501
+    group:                               /IW1/VH
+    azimuth_anx_time:                    2210.634453
+    burst_index:                         8
+    Conventions:                         CF-1.8
+    history:                             created by xarray_sentinel-...
 
 ```
 
@@ -380,26 +380,26 @@ Coordinates:
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T15:28:55.11150...
   * slant_range_time  (slant_range_time) float64 0.005273 0.005273 ... 0.005303
 Attributes:
-    sar:center_frequency:       5.40500045433435
-    sar:pixel_spacing_azimuth:  3.55338
-    sar:pixel_spacing_range:    2.246363
-    azimuth_time_interval:      0.0005194923129469381
-    slant_range_time_interval:  1.498612395219899e-08
-    incidence_angle_mid_swath:  32.03479766845703
-    sat:anx_datetime:           2021-04-01T13:53:42.874198Z
-    constellation:              sentinel-1
-    platform:                   sentinel-1a
-    instrument:                 ['c-sar']
-    sat:orbit_state:            ascending
-    sat:absolute_orbit:         37258
-    sat:relative_orbit:         86
-    sar:frequency_band:         C
-    sar:instrument_mode:        SM
-    sar:polarizations:          ['VV', 'VH']
-    sar:product_type:           SLC
-    xs:instrument_mode_swaths:  ['S3']
-    units:                      m2 m-2
-    long_name:                  gamma 
+    family_name:                         SENTINEL-1
+    number:                              A
+    mode:                                SM
+    swaths:                              ['S3']
+    orbit_number:                        37258
+    relative_orbit_number:               86
+    pass:                                ASCENDING
+    ascending_node_time:                 2021-04-01T13:53:42.874198
+    transmitter_receiver_polarisations:  ['VV', 'VH']
+    product_type:                        SLC
+    start_time:                          2021-04-01T15:28:55.111501
+    stop_time:                           2021-04-01T15:29:14.277650
+    radar_frequency:                     5.40500045433435
+    azimuth_pixel_spacing:               3.55338
+    range_pixel_spacing:                 2.246363
+    azimuth_time_interval:               0.0005194923129469381
+    range_sampling_rate:                 66728395.09333333
+    incidence_angle_mid_swath:           32.03479766845703
+    units:                               m2 m-2
+    long_name:                           gamma 
 
 ```
 

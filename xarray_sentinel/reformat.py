@@ -17,8 +17,11 @@ def to_group_zarr(
         groups = {g: g for g in root.attrs["subgroups"]}
 
     for group_out, group_in in groups.items():
-        group_ds = xr.open_dataset(product_path, engine="sentinel-1", group=group_in)  # type: ignore
-        group_ds.to_zarr(output_store, mode="a", group=group_out)
+        try:
+            group_ds = xr.open_dataset(product_path, engine="sentinel-1", group=group_in)  # type: ignore
+            group_ds.to_zarr(output_store, mode="a", group=group_out)
+        except FileNotFoundError:
+            pass
 
 
 # Apparently there is no way to save SLC images because "netcdf4" doesn't support complex data
@@ -36,5 +39,8 @@ def to_group_netcdf(
         groups = {g: g for g in root.attrs["subgroups"]}
 
     for group_out, group_in in groups.items():
-        group_ds = xr.open_dataset(product_path, engine="sentinel-1", group=group_in)  # type: ignore
-        group_ds.to_netcdf(output_store, mode="a", group=group_out, engine=engine)
+        try:
+            group_ds = xr.open_dataset(product_path, engine="sentinel-1", group=group_in)  # type: ignore
+            group_ds.to_netcdf(output_store, mode="a", group=group_out, engine=engine)
+        except FileNotFoundError:
+            pass
