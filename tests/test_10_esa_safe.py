@@ -173,8 +173,6 @@ def test_parse_manifest_sentinel1(
 
     res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest_path)
 
-    print(res_attrs)
-
     assert res_attrs == expected
 
 
