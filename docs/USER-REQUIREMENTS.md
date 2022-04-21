@@ -37,13 +37,14 @@ High level requirements:
 # User experience
 
 ```python
->>> ds = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE/manifest.safe")
->>> ds = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE")
+>>> import xarray as xr
+>>> ds = xr.open_dataset("tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE/manifest.safe")
+>>> ds = xr.open_dataset("tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE")
 >>> ds
-... instruction on what to do ...
+<xarray.Dataset>
+...
+>>> ds_iw1_gpc = xr.open_dataset("tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE", group="IW1/VV/gcp")
 
->>> ds_iw1_gpc = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE", group="IW1/gpc")
->>> ds_iw1_gpc = xr.open_dataset("S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE/annotations/s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml", group="gcp")
 ```
 
 Structure:
