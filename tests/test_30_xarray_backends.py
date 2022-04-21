@@ -36,7 +36,7 @@ SENTINEL1_SLC_PRODUCTS = [
     (
         DATA_FOLDER
         / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE",
-        "S3/VV",
+        "S3/VH",
     ),
 ]
 
@@ -80,7 +80,6 @@ def test_open_dataset_root() -> None:
         xr.open_dataset(None)  # type: ignore
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_SLC_PRODUCTS)
 def test_open_dataset_polarisation_slc(
     product_path: esa_safe.PathType,
@@ -96,7 +95,6 @@ def test_open_dataset_polarisation_slc(
     assert set(res.coords) == {"azimuth_time", "slant_range_time", "line", "pixel"}
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_GRD_PRODUCTS)
 def test_open_dataset_polarisation_grd(
     product_path: esa_safe.PathType,
