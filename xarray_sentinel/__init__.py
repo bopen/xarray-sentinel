@@ -21,7 +21,6 @@ except ImportError:  # pragma: no cover
     __version__ = "999"
 
 from .sentinel1 import (
-    assign_slant_range_time_coord,
     calibrate_amplitude,
     calibrate_intensity,
     crop_burst_dataset,
@@ -32,7 +31,6 @@ from .sentinel1 import (
 
 __all__ = [
     "__version__",
-    "assign_slant_range_time_coord",
     "calibrate_amplitude",
     "calibrate_intensity",
     "crop_burst_dataset",

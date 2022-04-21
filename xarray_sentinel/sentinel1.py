@@ -697,23 +697,6 @@ def slant_range_time_to_ground_range(
     return ground_range  # type: ignore
 
 
-def assign_slant_range_time_coord(
-    measurement: xr.Dataset, coordinate_conversion: xr.Dataset
-) -> xr.Dataset:
-    x = measurement.ground_range - coordinate_conversion.gr0
-    slant_range = (
-        coordinate_conversion.grsrCoefficients * x**coordinate_conversion.degree
-    ).sum(dim="degree")
-    slant_range_coord = slant_range.interp(
-        azimuth_time=measurement.azimuth_time, ground_range=measurement.ground_range
-    ).data
-    slant_range_time = 2 / SPEED_OF_LIGHT * slant_range_coord
-    measurement = measurement.assign_coords(
-        slant_range_time=(("azimuth_time", "ground_range"), slant_range_time)
-    )  # type: ignore
-    return measurement
-
-
 def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
     lat = int(round(lat * 10))
     lon = int(round(lon * 10))
