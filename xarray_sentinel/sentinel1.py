@@ -697,26 +697,6 @@ def slant_range_time_to_ground_range(
     return ground_range  # type: ignore
 
 
-def build_burst_id(lat: float, lon: float, relative_orbit: int) -> str:
-    lat = int(round(lat * 10))
-    lon = int(round(lon * 10))
-
-    n_or_s = "N" if lat >= 0 else "S"
-    e_or_w = "E" if lon >= 0 else "W"
-    burst_id = f"R{relative_orbit:03}" f"-{n_or_s}{lat:03}" f"-{e_or_w}{lon:04}"
-    return burst_id
-
-
-def compute_burst_centres(
-    gcp: xr.Dataset,
-) -> T.Tuple[T.List[float], T.List[float]]:
-    gcp_rolling = gcp.rolling(azimuth_time=2, min_periods=1)
-    gc_az_win = gcp_rolling.construct(azimuth_time="az_win")
-    centre = gc_az_win.mean(["az_win", "slant_range_time"])
-    centre = centre.isel(azimuth_time=slice(1, None))
-    return centre.latitude.values.tolist(), centre.longitude.values.tolist()
-
-
 METADATA_OPENERS = {
     "orbit": open_orbit_dataset,
     "attitude": open_attitude_dataset,

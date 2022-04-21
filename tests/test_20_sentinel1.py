@@ -166,16 +166,6 @@ def test_open_pol_dataset_sm() -> None:
     assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
 
-def test_build_burst_id() -> None:
-    lat = 11.8475875
-    lon = 47.16626783
-    relative_orbit = 168
-
-    burst_id = sentinel1.build_burst_id(lat=lat, lon=lon, relative_orbit=relative_orbit)
-
-    assert burst_id == "R168-N118-E0472"
-
-
 def test_find_avalable_groups() -> None:
     _, product_files = esa_safe.parse_manifest_sentinel1(SLC_S3 / "manifest.safe")
     expected_groups = {
@@ -211,24 +201,6 @@ def test_find_avalable_groups() -> None:
         product_files, str(SLC_IW), check_files_exist=True
     )
     assert res == {}
-
-
-def test_compute_burst_centres() -> None:
-    gcp = xr.Dataset(
-        {
-            "latitude": xr.DataArray(
-                np.arange(5).reshape(5, 1), dims=("azimuth_time", "slant_range_time")
-            ),
-            "longitude": xr.DataArray(
-                np.arange(5).reshape(5, 1) * 10,
-                dims=("azimuth_time", "slant_range_time"),
-            ),
-        },
-        attrs={"burst_count": 4},
-    )
-    lat, lon = sentinel1.compute_burst_centres(gcp)
-    assert np.allclose(lat, [0.5, 1.5, 2.5, 3.5])
-    assert np.allclose(lon, [5, 15, 25, 35])
 
 
 def test_open_sentinel1_dataset() -> None:
