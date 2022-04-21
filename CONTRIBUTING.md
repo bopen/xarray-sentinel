@@ -6,7 +6,7 @@ conda create -n XARRAY-SENTINEL -c conda-forge python=3.9 mamba
 conda activate XARRAY-SENTINEL
 make conda-env-update-all CONDA=mamba CONDAFLAGS=
 pip install -e .
-pip install -U --pre --no-binary rasterio rasterio==1.3a3  # for fsspec support
+pip install -U --pre --no-deps --no-binary rasterio "rasterio>=1.3a3"  # for fsspec support
 ```
 
 Download sample data and run the notebooks:
