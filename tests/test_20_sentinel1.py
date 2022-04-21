@@ -43,15 +43,15 @@ SLC_S3 = (
     DATA_FOLDER
     / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
 )
-SLC_S3_VV_annotation = (
+SLC_S3_VH_annotation = (
     SLC_S3
     / "annotation"
-    / "s1a-s3-slc-vv-20210401t152855-20210401t152914-037258-04638e-002.xml"
+    / "s1a-s3-slc-vh-20210401t152855-20210401t152914-037258-04638e-001.xml"
 )
-SLC_S3_VV_measurement = (
+SLC_S3_VH_measurement = (
     SLC_S3
     / "measurement"
-    / "s1a-s3-slc-vv-20210401t152855-20210401t152914-037258-04638e-002.tiff"
+    / "s1a-s3-slc-vh-20210401t152855-20210401t152914-037258-04638e-001.tiff"
 )
 GRD_IW_VV_annotation = (
     DATA_FOLDER
@@ -157,9 +157,8 @@ def test_open_pol_dataset_iw() -> None:
     assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
 
-@pytest.mark.xfail
 def test_open_pol_dataset_sm() -> None:
-    res = sentinel1.open_pol_dataset(SLC_S3_VV_measurement, SLC_S3_VV_annotation)
+    res = sentinel1.open_pol_dataset(SLC_S3_VH_measurement, SLC_S3_VH_annotation)
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"slant_range_time", "azimuth_time"}
