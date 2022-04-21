@@ -404,7 +404,7 @@ def open_pol_dataset(
     swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
 
     number_of_samples = image_information["numberOfSamples"]
-    slant_range_time_interval = 1 / product_information["rangeSamplingRate"]
+    range_sampling_rate = product_information["rangeSamplingRate"]
 
     number_of_lines = image_information["numberOfLines"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
@@ -412,13 +412,13 @@ def open_pol_dataset(
     range_pixel_spacing = image_information["rangePixelSpacing"]
 
     attrs = {
-        "sar:center_frequency": product_information["radarFrequency"] / 10**9,
-        "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
-        "sar:pixel_spacing_range": range_pixel_spacing,
+        "radar_frequency": product_information["radarFrequency"] / 10**9,
+        "azimuth_pixel_spacing": image_information["azimuthPixelSpacing"],
+        "range_pixel_spacing": range_pixel_spacing,
         "azimuth_time_interval": azimuth_time_interval,
-        "slant_range_time_interval": slant_range_time_interval,
+        "range_sampling_rate": range_sampling_rate,
         "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
-        "sat:anx_datetime": image_information["ascendingNodeTime"] + "Z",
+        "ascending_node_time": image_information["ascendingNodeTime"],
     }
     encoding = {}
     swap_dims = {}
@@ -468,14 +468,21 @@ def open_pol_dataset(
     coords = {
         "pixel": np.arange(0, number_of_samples, dtype=int),
         "line": np.arange(0, number_of_lines, dtype=int),
-        "azimuth_time": ("line", azimuth_time),
+        # set "units" explicitly as CF conventions don't support "nanoseconds".
+        # See: https://github.com/pydata/xarray/issues/4183#issuecomment-685200043
+        "azimuth_time": (
+            "line",
+            azimuth_time,
+            {},
+            {"units": f"microseconds since {azimuth_time[0]}"},
+        ),
     }
 
     if product_information["projection"] == "Slant Range":
         slant_range_time = np.linspace(
             image_information["slantRangeTime"],
             image_information["slantRangeTime"]
-            + slant_range_time_interval * (number_of_samples - 1),
+            + (number_of_samples - 1) / range_sampling_rate,
             number_of_samples,
         )
         coords["slant_range_time"] = ("pixel", slant_range_time)
@@ -500,6 +507,9 @@ def open_pol_dataset(
         except AttributeError:
             arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
 
+    # clear the encoding as many GeoTIFF details are inconpatible with the CF conventions
+    arr.encoding.clear()
+
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(coords)
@@ -517,7 +527,7 @@ def find_bursts_index(
     use_center: bool = False,
 ) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
-    anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"].replace("Z", ""))
+    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
     azimuth_anx_time = pd.Timedelta(azimuth_anx_time, unit="s")
     if use_center:
         azimuth_anx_time_center = (
@@ -583,7 +593,7 @@ def crop_burst_dataset(
         )
     )
 
-    anx_datetime = np.datetime64(pol_dataset.attrs["sat:anx_datetime"].replace("Z", ""))
+    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
     burst_azimuth_anx_times = ds.azimuth_time - anx_datetime
     ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_times.values[0] / ONE_SECOND
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
