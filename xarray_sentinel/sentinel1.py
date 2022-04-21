@@ -259,7 +259,8 @@ def open_attitude_dataset(
 
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     azimuth_time: T.List[T.Any] = []
-    data_vars: T.Dict[str, T.Any] = {var: ("azimuth_time", []) for var in variables}
+    data_vars: T.Dict[str, T.Any]
+    data_vars = {var: ("azimuth_time", [], attrs) for var in variables}
     for attitude in attitudes:
         azimuth_time.append(attitude["time"])
         for var in variables:
@@ -312,6 +313,8 @@ def open_orbit_dataset(
             "axis": [0, 1, 2],
         },
     )
+    for data_var in ds.data_vars:
+        ds[data_var].attrs = attrs
 
     return ds
 
@@ -333,8 +336,8 @@ def open_dc_estimate_dataset(
 
     ds = xr.Dataset(
         data_vars={
-            "t0": ("azimuth_time", t0),
-            "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly),
+            "t0": ("azimuth_time", t0, attrs),
+            "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly, attrs),
         },
         coords={
             "azimuth_time": [np.datetime64(at) for at in azimuth_time],
@@ -362,10 +365,15 @@ def open_azimuth_fm_rate_dataset(
 
     ds = xr.Dataset(
         data_vars={
-            "t0": ("azimuth_time", t0),
+            "t0": (
+                "azimuth_time",
+                t0,
+                attrs,
+            ),
             "azimuth_fm_rate_polynomial": (
                 ("azimuth_time", "degree"),
                 azimuth_fm_rate_poly,
+                attrs,
             ),
         },
         coords={
