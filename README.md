@@ -33,7 +33,7 @@ with the following functionalities:
   applying radiometric calibration polynomials and
   converting slant to ground range for GRD products
 
-Overall, the software is in the **alpha** phase and the usual caveats apply.
+Overall, the software is in the **beta** phase and the usual caveats apply.
 
 ## Install
 
@@ -542,14 +542,13 @@ This is the list of the reference documents:
     Also, *xarray-sentinel* converts UTC times to `np.datetime64` and makes no attempt to support
     *leap seconds*, acquisitions containing leap seconds may crash or silently return corrupted data.
     See the rationale for choices of the coordinates data-types below.
-  - We try to keep all naming as close as possible to the original names,
-    except for high-level attributes (see below).
+  - We try to keep all naming as close as possible to the original names.
     In particular, for metadata we use the names of the XML tags, only converting them
     from *camelCase* to *snake_case*.
 - Whenever possible *xarray-sentinel* indexes the data with physical coordinates
   `azimuth_time` and `slant_range_time`, but keeps image `line` and `pixel` as auxiliary coordinates.
-- As an exception to the metadata naming rule above for high-level attributes, we aim at
-  STAC Index and CF-Conventions compliance (in this order).
+- As an exception to the metadata naming rule above we add some attributes to get
+  CF-Conventions compliance.
 - We aim at opening available data and metadata even for partial SAFE packages, for example,
   *xarray-sentinel* can open a measurement dataset for a beam mode even when the TIFF files of other
   beam modes / polarizations are missing.
