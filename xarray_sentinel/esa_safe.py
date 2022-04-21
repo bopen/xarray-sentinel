@@ -70,7 +70,7 @@ def parse_tag_as_list(
 
 
 def findtext(
-    tree: ElementTree.ElementTree,
+    tree: ElementTree.Element,
     query: str,
     namespaces: T.Dict[str, str] = SENTINEL1_NAMESPACES,
 ) -> str:
@@ -81,7 +81,7 @@ def findtext(
 
 
 def findall(
-    tree: ElementTree.ElementTree,
+    tree: ElementTree.Element,
     query: str,
     namespaces: T.Dict[str, str] = SENTINEL1_NAMESPACES,
 ) -> T.List[str]:
@@ -108,7 +108,7 @@ def parse_manifest_sentinel1(
     manifest_path: PathOrFileType,
 ) -> T.Tuple[T.Dict[str, T.Any], T.Dict[str, T.Tuple[str, str, str, str, str]]]:
     # We use ElementTree because we didn't find a XSD definition for the manifest
-    manifest = ElementTree.parse(manifest_path)
+    manifest = ElementTree.parse(manifest_path).getroot()
 
     family_name = findtext(manifest, ".//safe:platform/safe:familyName")
     if family_name != "SENTINEL-1":
