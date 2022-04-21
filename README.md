@@ -1,6 +1,6 @@
 # xarray-sentinel
 
-Easily explore and access the SAR data products of the
+Easily access and explore the SAR data products of the
 [Copernicus Sentinel-1 satellite mission](https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1)
 in Python.
 
