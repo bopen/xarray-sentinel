@@ -70,6 +70,9 @@ def test_get_fs_path() -> None:
 
     assert path == str((SLC_IW / "manifest.safe"))
 
+    with pytest.raises(TypeError):
+        sentinel1.get_fs_path("*", fs=fs, storage_options={})
+
     with pytest.raises(ValueError):
         sentinel1.get_fs_path("non-existent-path/*")
 
@@ -288,14 +291,20 @@ def test_crop_burst_dataset() -> None:
         sentinel1.crop_burst_dataset(swath_ds, burst_id=1)
 
 
+def test_mosaic_slc_iw() -> None:
+    da = sentinel1.open_sentinel1_dataset(SLC_IW_V340, group="IW1/HH")
+
+    res = sentinel1.mosaic_slc_iw(da)
+
+    assert isinstance(res, xr.Dataset)
+
+
 def test_calibrate_amplitude() -> None:
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
     burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
-    calibration_ds = sentinel1.open_calibration_dataset(SLC_IW1_VV_calibration)
+    cal_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH/calibration")
 
-    res = sentinel1.calibrate_amplitude(
-        burst_ds.measurement, calibration_ds["betaNought"]
-    )
+    res = sentinel1.calibrate_amplitude(burst_ds.measurement, cal_ds["betaNought"])
 
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
     assert np.issubdtype(res.dtype, np.complex64)
@@ -304,11 +313,27 @@ def test_calibrate_amplitude() -> None:
 def test_calibrate_intensity() -> None:
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
     burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
-    calibration_ds = sentinel1.open_calibration_dataset(SLC_IW1_VV_calibration)
+    cal_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH/calibration")
+
+    res = sentinel1.calibrate_intensity(burst_ds.measurement, cal_ds["betaNought"])
+
+    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert np.issubdtype(res.dtype, np.float32)
+
+    cal_ds["betaNought"].attrs.pop("long_name")
 
     res = sentinel1.calibrate_intensity(
-        burst_ds.measurement, calibration_ds["betaNought"]
+        burst_ds.measurement, cal_ds["betaNought"], as_db=True
     )
 
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert np.issubdtype(res.dtype, np.float32)
+
+    res = sentinel1.calibrate_intensity(
+        burst_ds.measurement,
+        cal_ds["betaNought"],
+        as_db=True,
+        min_db=None,
+    )
+
     assert np.issubdtype(res.dtype, np.float32)
