@@ -462,10 +462,10 @@ def open_pol_dataset(
         swap_dims = {"line": "azimuth_time", "pixel": "slant_range_time"}
     else:
         if "burstId" in swath_timing["burstList"]["burst"][0]:
-            bursts_ids = []
+            burst_ids = []
             for burst in swath_timing["burstList"]["burst"]:
-                bursts_ids.append(burst["burstId"]["$"])
-            attrs["bursts_ids"] = bursts_ids
+                burst_ids.append(burst["burstId"]["$"])
+            attrs["burst_ids"] = burst_ids
         lines_per_burst = swath_timing["linesPerBurst"]
         attrs.update(
             {
@@ -595,17 +595,17 @@ def crop_burst_dataset(
                 pol_dataset, azimuth_anx_time, use_center=use_center
             )
         elif burst_id is not None:
-            bursts_ids = pol_dataset.attrs.get("bursts_ids")
-            if bursts_ids is None:
+            burst_ids = pol_dataset.attrs.get("burst_ids")
+            if burst_ids is None:
                 raise TypeError(
-                    "'bursts_ids' list can't be found in product attributes, "
+                    "'burst_ids' list can't be found in product attributes, "
                     "probably Sentinel-1 IPF processor version is older than 3.40"
                 )
             try:
-                burst_index = bursts_ids.index(burst_id)
+                burst_index = burst_ids.index(burst_id)
             except ValueError:
                 raise KeyError(
-                    f"'burst_id' {burst_id} not found in product 'bursts_ids': {bursts_ids}"
+                    f"'burst_id' {burst_id} not found in product 'burst_ids': {burst_ids}"
                 )
         else:
             raise TypeError(
@@ -627,9 +627,9 @@ def crop_burst_dataset(
     ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_times.values[0] / ONE_SECOND
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
     ds.attrs["burst_index"] = burst_index
-    if "bursts_ids" in ds.attrs:
-        ds.attrs["burst_id"] = ds.attrs["bursts_ids"][burst_index]
-        _ = ds.attrs.pop("bursts_ids")
+    if "burst_ids" in ds.attrs:
+        ds.attrs["burst_id"] = ds.attrs["burst_ids"][burst_index]
+        _ = ds.attrs.pop("burst_ids")
     _ = ds.attrs.pop("subgroups", None)
     return ds
 
