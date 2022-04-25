@@ -582,9 +582,10 @@ def crop_burst_dataset(
     use_center: bool = False,
     burst_id: T.Optional[int] = None,
 ) -> DataArrayOrDataset:
-    """
-    Returns the measurement dataset cropped to the selected burst.
+    """Return the measurement dataset cropped to the selected burst.
+
     Only one keyword between 'burst_index' and 'azimuth_anx_time' and 'burst_id' must be defined.
+
     :param xr.Dataset pol_dataset: measurement dataset
     :param int burst_index: burst index can take values from 1 to the number of bursts
     :param float azimuth_anx_time: azimuth anx time of first line of the bursts
@@ -659,9 +660,11 @@ def mosaic_slc_iw(
 def calibrate_amplitude(
     digital_number: xr.DataArray, calibration_lut: xr.DataArray
 ) -> xr.DataArray:
-    """Returns the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
+    """Return the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
+
     :param digital_number: digital numbers to be calibrated
     :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
+
     The LUT can be opened using the measurement sub-group `calibration`
     """
     calibration = calibration_lut.interp(
@@ -685,8 +688,8 @@ def calibrate_intensity(
     as_db: bool = False,
     min_db: T.Optional[float] = -40.0,
 ) -> xr.DataArray:
-    """
-    Returns the calibrated intensity. The calibration is done using the calibration LUT in the product metadata.
+    """Return the calibrated intensity. The calibration is done using the calibration LUT in the product metadata.
+
     :param digital_number: digital numbers to be calibrated
     :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
     The LUT can be opened using the measurement sub-group `calibration`.
@@ -717,14 +720,12 @@ def slant_range_time_to_ground_range(
     slant_range_time: xr.DataArray,
     coordinate_conversion: xr.Dataset,
 ) -> xr.DataArray:
-    """
-    Convert the slant range time coordinates to ground range coordinates using the coordinate conversion `sr0`
-    and `srgrCoefficients` product metadata
+    """Convert slant range time to ground range using the coordinate conversion metadata.
+
     :param azimuth_time: azimuth time coordinates
     :param slant_range_time: slant range time
     :param coordinate_conversion: coordinate conversion dataset.
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
-    :return:
     """
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
     cc = coordinate_conversion.interp(azimuth_time=azimuth_time)
