@@ -53,9 +53,12 @@ SLC_S3_VH_measurement = (
     / "measurement"
     / "s1a-s3-slc-vh-20210401t152855-20210401t152914-037258-04638e-001.tiff"
 )
-GRD_IW_VV_annotation = (
+GRD_IW = (
     DATA_FOLDER
     / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE"
+)
+GRD_IW_VV_annotation = (
+    GRD_IW
     / "annotation"
     / "s1b-iw-grd-vv-20210401t052623-20210401t052648-026269-032297-001.xml"
 )
@@ -337,3 +340,17 @@ def test_calibrate_intensity() -> None:
     )
 
     assert np.issubdtype(res.dtype, np.float32)
+
+
+def test_slant_range_time_to_ground_range() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV")
+    swath = swath_ds.measurement[:1000, :1000]
+    cc_ds = sentinel1.open_sentinel1_dataset(
+        GRD_IW, group="IW/VV/coordinate_conversion"
+    )
+
+    res = sentinel1.slant_range_time_to_ground_range(
+        swath.azimuth_time, swath.slant_range_time, cc_ds
+    )
+
+    assert isinstance(res, xr.DataArray)
