@@ -295,11 +295,15 @@ def test_crop_burst_dataset() -> None:
 
 
 def test_mosaic_slc_iw() -> None:
-    da = sentinel1.open_sentinel1_dataset(SLC_IW_V340, group="IW1/HH")
+    ds = sentinel1.open_sentinel1_dataset(SLC_IW_V340, group="IW1/HH")
 
-    res = sentinel1.mosaic_slc_iw(da)
+    res = sentinel1.mosaic_slc_iw(ds)
 
     assert isinstance(res, xr.Dataset)
+
+    res = sentinel1.mosaic_slc_iw(ds.measurement)
+
+    assert isinstance(res, xr.DataArray)
 
 
 def test_calibrate_amplitude() -> None:

@@ -24,6 +24,9 @@ SPEED_OF_LIGHT = 299_792_458  # m / s
 ONE_SECOND = np.timedelta64(1, "s")
 
 
+DataArrayOrDataset = T.TypeVar("DataArrayOrDataset", xr.DataArray, xr.Dataset)
+
+
 def get_fs_path(
     urlpath_or_path: esa_safe.PathType,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
@@ -551,7 +554,7 @@ def open_pol_dataset(
 
 
 def find_bursts_index(
-    pol_dataset: xr.Dataset,
+    pol_dataset: DataArrayOrDataset,
     azimuth_anx_time: float,
     use_center: bool = False,
 ) -> int:
@@ -573,12 +576,12 @@ def find_bursts_index(
 
 
 def crop_burst_dataset(
-    pol_dataset: xr.Dataset,
+    pol_dataset: DataArrayOrDataset,
     burst_index: T.Optional[int] = None,
     azimuth_anx_time: T.Optional[float] = None,
     use_center: bool = False,
     burst_id: T.Optional[int] = None,
-) -> xr.Dataset:
+) -> DataArrayOrDataset:
     burst_definitions = (
         (burst_index is not None)
         + (azimuth_anx_time is not None)
@@ -632,7 +635,9 @@ def crop_burst_dataset(
     return ds
 
 
-def mosaic_slc_iw(slc_iw_image: xr.Dataset, crop: int = 90) -> xr.Dataset:
+def mosaic_slc_iw(
+    slc_iw_image: DataArrayOrDataset, crop: int = 90
+) -> DataArrayOrDataset:
     bursts = []
     for i in range(slc_iw_image.attrs["number_of_bursts"]):
         burst = crop_burst_dataset(slc_iw_image, burst_index=i)
