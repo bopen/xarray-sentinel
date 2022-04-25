@@ -53,9 +53,12 @@ SLC_S3_VH_measurement = (
     / "measurement"
     / "s1a-s3-slc-vh-20210401t152855-20210401t152914-037258-04638e-001.tiff"
 )
-GRD_IW_VV_annotation = (
+GRD_IW = (
     DATA_FOLDER
     / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE"
+)
+GRD_IW_VV_annotation = (
+    GRD_IW
     / "annotation"
     / "s1b-iw-grd-vv-20210401t052623-20210401t052648-026269-032297-001.xml"
 )
@@ -69,6 +72,9 @@ def test_get_fs_path() -> None:
     fs, path = sentinel1.get_fs_path(SLC_IW, fs)
 
     assert path == str((SLC_IW / "manifest.safe"))
+
+    with pytest.raises(TypeError):
+        sentinel1.get_fs_path("*", fs=fs, storage_options={})
 
     with pytest.raises(ValueError):
         sentinel1.get_fs_path("non-existent-path/*")
@@ -288,14 +294,20 @@ def test_crop_burst_dataset() -> None:
         sentinel1.crop_burst_dataset(swath_ds, burst_id=1)
 
 
+def test_mosaic_slc_iw() -> None:
+    da = sentinel1.open_sentinel1_dataset(SLC_IW_V340, group="IW1/HH")
+
+    res = sentinel1.mosaic_slc_iw(da)
+
+    assert isinstance(res, xr.Dataset)
+
+
 def test_calibrate_amplitude() -> None:
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
     burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
-    calibration_ds = sentinel1.open_calibration_dataset(SLC_IW1_VV_calibration)
+    cal_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH/calibration")
 
-    res = sentinel1.calibrate_amplitude(
-        burst_ds.measurement, calibration_ds["betaNought"]
-    )
+    res = sentinel1.calibrate_amplitude(burst_ds.measurement, cal_ds["betaNought"])
 
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
     assert np.issubdtype(res.dtype, np.complex64)
@@ -304,11 +316,50 @@ def test_calibrate_amplitude() -> None:
 def test_calibrate_intensity() -> None:
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
     burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
-    calibration_ds = sentinel1.open_calibration_dataset(SLC_IW1_VV_calibration)
+    cal_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH/calibration")
+
+    res = sentinel1.calibrate_intensity(burst_ds.measurement, cal_ds["betaNought"])
+
+    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert np.issubdtype(res.dtype, np.float32)
+
+    cal_ds["betaNought"].attrs.pop("long_name")
 
     res = sentinel1.calibrate_intensity(
-        burst_ds.measurement, calibration_ds["betaNought"]
+        burst_ds.measurement, cal_ds["betaNought"], as_db=True
     )
 
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
     assert np.issubdtype(res.dtype, np.float32)
+
+    res = sentinel1.calibrate_intensity(
+        burst_ds.measurement,
+        cal_ds["betaNought"],
+        as_db=True,
+        min_db=None,
+    )
+
+    assert np.issubdtype(res.dtype, np.float32)
+
+
+def test_slant_range_time_to_ground_range() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV")
+    swath = swath_ds.measurement[:1000, :1000]
+    cc_ds = sentinel1.open_sentinel1_dataset(
+        GRD_IW, group="IW/VV/coordinate_conversion"
+    )
+
+    res = sentinel1.slant_range_time_to_ground_range(
+        swath.azimuth_time, swath.slant_range_time, cc_ds
+    )
+
+    assert isinstance(res, xr.DataArray)
+
+
+def test_do_override_product_files() -> None:
+    template = "{dirname}/{prefix}{swath}-{polarization}{ext}"
+    _, product_files = esa_safe.parse_manifest_sentinel1(SLC_S3 / "manifest.safe")
+
+    res = sentinel1.do_override_product_files(template, product_files)
+
+    assert "./annotation/s3-vv.xml" in res

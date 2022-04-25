@@ -615,16 +615,14 @@ def crop_burst_dataset(
             try:
                 burst_index = burst_ids.index(burst_id)
             except ValueError:
-                raise KeyError(
-                    f"'burst_id' {burst_id} not found in product 'burst_ids': {burst_ids}"
-                )
+                raise KeyError(f"{burst_id=} not found in product {burst_ids=}")
         else:
             raise TypeError(
                 "one keyword between 'burst_index' and 'azimuth_anx_time' must be defined"
             )
 
     if burst_index < 0 or burst_index >= pol_dataset.attrs["number_of_bursts"]:
-        raise IndexError(f"burst_index={burst_index} out of bounds")
+        raise IndexError(f"{burst_index=} out of bounds")
 
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     ds = pol_dataset.sel(
@@ -712,7 +710,7 @@ def calibrate_intensity(
 def slant_range_time_to_ground_range(
     azimuth_time: xr.DataArray,
     slant_range_time: xr.DataArray,
-    coordinate_conversion: xr.DataArray,
+    coordinate_conversion: xr.Dataset,
 ) -> xr.DataArray:
     """
     Convert the slant range time coordinates to ground range coordinates using the coordinate conversion `sr0`

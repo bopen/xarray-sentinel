@@ -1,5 +1,6 @@
 import pathlib
 import typing as T
+from xml.etree import ElementTree
 
 import pytest
 import xmlschema
@@ -163,6 +164,28 @@ def test_parse_annotation_filename() -> None:
 
     with pytest.raises(ValueError):
         esa_safe.parse_annotation_filename("")
+
+
+def test_findtext() -> None:
+    tree = ElementTree.fromstring("<root><child>text</child></root>")
+
+    res = esa_safe.findtext(tree, ".//child")
+
+    assert res == "text"
+
+    with pytest.raises(ValueError):
+        esa_safe.findtext(tree, ".//dummy")
+
+
+def test_findall() -> None:
+    tree = ElementTree.fromstring("<root><c1>text</c1><c2></c2></root>")
+
+    res = esa_safe.findall(tree, ".//c1")
+
+    assert res == ["text"]
+
+    with pytest.raises(ValueError):
+        esa_safe.findall(tree, ".//c2")
 
 
 @pytest.mark.parametrize("product_id,expected", SENTINEL1_ATTRIBUTES.items())
