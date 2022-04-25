@@ -76,7 +76,7 @@ def findtext(
 ) -> str:
     value = tree.findtext(query, namespaces=namespaces)
     if value is None:
-        raise ValueError(f"query={query} returned None")
+        raise ValueError(f"{query=} returned None")
     return value
 
 
@@ -89,7 +89,7 @@ def findall(
     values: T.List[str] = []
     for tag in tags:
         if tag.text is None:
-            raise ValueError(f"query={query} returned None")
+            raise ValueError(f"{query=} returned None")
         values.append(tag.text)
     return values
 
@@ -112,7 +112,7 @@ def parse_manifest_sentinel1(
 
     family_name = findtext(manifest, ".//safe:platform/safe:familyName")
     if family_name != "SENTINEL-1":
-        raise ValueError(f"familyName={family_name} not supported")
+        raise ValueError(f"{family_name=} not supported")
 
     number = findtext(manifest, ".//safe:platform/safe:number")
     mode = findtext(manifest, ".//s1sarl1:instrumentMode/s1sarl1:mode")
@@ -120,14 +120,14 @@ def parse_manifest_sentinel1(
 
     orbit_number = findall(manifest, ".//safe:orbitNumber")
     if len(orbit_number) != 2 or orbit_number[0] != orbit_number[1]:
-        raise ValueError(f"orbitNumber={orbit_number} not supported")
+        raise ValueError(f"{orbit_number=} not supported")
 
     relative_orbit_number = findall(manifest, ".//safe:relativeOrbitNumber")
     if (
         len(relative_orbit_number) != 2
         or relative_orbit_number[0] != relative_orbit_number[1]
     ):
-        raise ValueError(f"relativeOrbitNumber={relative_orbit_number} not supported")
+        raise ValueError(f"{relative_orbit_number=} not supported")
 
     orbit_pass = findtext(manifest, ".//s1:pass")
     if orbit_pass not in {"ASCENDING", "DESCENDING"}:

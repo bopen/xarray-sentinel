@@ -604,16 +604,14 @@ def crop_burst_dataset(
             try:
                 burst_index = bursts_ids.index(burst_id)
             except ValueError:
-                raise KeyError(
-                    f"'burst_id' {burst_id} not found in product 'bursts_ids': {bursts_ids}"
-                )
+                raise KeyError(f"{burst_id=} not found in product {bursts_ids=}")
         else:
             raise TypeError(
                 "one keyword between 'burst_index' and 'azimuth_anx_time' must be defined"
             )
 
     if burst_index < 0 or burst_index >= pol_dataset.attrs["number_of_bursts"]:
-        raise IndexError(f"burst_index={burst_index} out of bounds")
+        raise IndexError(f"{burst_index=} out of bounds")
 
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     ds = pol_dataset.sel(
@@ -688,7 +686,7 @@ def calibrate_intensity(
 def slant_range_time_to_ground_range(
     azimuth_time: xr.DataArray,
     slant_range_time: xr.DataArray,
-    coordinate_conversion: xr.DataArray,
+    coordinate_conversion: xr.Dataset,
 ) -> xr.DataArray:
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
     cc = coordinate_conversion.interp(azimuth_time=azimuth_time)
