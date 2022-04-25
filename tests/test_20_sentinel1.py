@@ -354,3 +354,12 @@ def test_slant_range_time_to_ground_range() -> None:
     )
 
     assert isinstance(res, xr.DataArray)
+
+
+def test_do_override_product_files() -> None:
+    template = "{dirname}/{prefix}{swath}-{polarization}{ext}"
+    _, product_files = esa_safe.parse_manifest_sentinel1(SLC_S3 / "manifest.safe")
+
+    res = sentinel1.do_override_product_files(template, product_files)
+
+    assert "./annotation/s3-vv.xml" in res
