@@ -1,5 +1,6 @@
-"""CF representation of metadata according to
-Sentinel-1 Product Specification: S1-RS-MDA-52-7441, DI-MPC-PB, MPC-0240, 3/7, 27/02/2020 See:
+"""CF representation of metadata according to Sentinel-1 Product Specification.
+
+See: S1-RS-MDA-52-7441, DI-MPC-PB, MPC-0240, 3/7, 27/02/2020
 https://sentinel.esa.int/documents/247904/1877131/Sentinel-1-Product-Specification
 """
 

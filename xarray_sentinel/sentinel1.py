@@ -24,6 +24,9 @@ SPEED_OF_LIGHT = 299_792_458  # m / s
 ONE_SECOND = np.timedelta64(1, "s")
 
 
+DataArrayOrDataset = T.TypeVar("DataArrayOrDataset", xr.DataArray, xr.Dataset)
+
+
 def get_fs_path(
     urlpath_or_path: esa_safe.PathType,
     fs: T.Optional[fsspec.AbstractFileSystem] = None,
@@ -551,7 +554,7 @@ def open_pol_dataset(
 
 
 def find_bursts_index(
-    pol_dataset: xr.Dataset,
+    pol_dataset: DataArrayOrDataset,
     azimuth_anx_time: float,
     use_center: bool = False,
 ) -> int:
@@ -573,15 +576,16 @@ def find_bursts_index(
 
 
 def crop_burst_dataset(
-    pol_dataset: xr.Dataset,
+    pol_dataset: DataArrayOrDataset,
     burst_index: T.Optional[int] = None,
     azimuth_anx_time: T.Optional[float] = None,
     use_center: bool = False,
     burst_id: T.Optional[int] = None,
-) -> xr.Dataset:
-    """
-    Returns the measurement dataset cropped to the selected burst.
+) -> DataArrayOrDataset:
+    """Return the measurement dataset cropped to the selected burst.
+
     Only one keyword between 'burst_index' and 'azimuth_anx_time' and 'burst_id' must be defined.
+
     :param xr.Dataset pol_dataset: measurement dataset
     :param int burst_index: burst index can take values from 1 to the number of bursts
     :param float azimuth_anx_time: azimuth anx time of first line of the bursts
@@ -643,7 +647,9 @@ def crop_burst_dataset(
     return ds
 
 
-def mosaic_slc_iw(slc_iw_image: xr.Dataset, crop: int = 90) -> xr.Dataset:
+def mosaic_slc_iw(
+    slc_iw_image: DataArrayOrDataset, crop: int = 90
+) -> DataArrayOrDataset:
     bursts = []
     for i in range(slc_iw_image.attrs["number_of_bursts"]):
         burst = crop_burst_dataset(slc_iw_image, burst_index=i)
@@ -654,9 +660,11 @@ def mosaic_slc_iw(slc_iw_image: xr.Dataset, crop: int = 90) -> xr.Dataset:
 def calibrate_amplitude(
     digital_number: xr.DataArray, calibration_lut: xr.DataArray
 ) -> xr.DataArray:
-    """Returns the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
+    """Return the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
+
     :param digital_number: digital numbers to be calibrated
     :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
+
     The LUT can be opened using the measurement sub-group `calibration`
     """
     calibration = calibration_lut.interp(
@@ -680,8 +688,8 @@ def calibrate_intensity(
     as_db: bool = False,
     min_db: T.Optional[float] = -40.0,
 ) -> xr.DataArray:
-    """
-    Returns the calibrated intensity. The calibration is done using the calibration LUT in the product metadata.
+    """Return the calibrated intensity. The calibration is done using the calibration LUT in the product metadata.
+
     :param digital_number: digital numbers to be calibrated
     :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
     The LUT can be opened using the measurement sub-group `calibration`.
@@ -712,14 +720,12 @@ def slant_range_time_to_ground_range(
     slant_range_time: xr.DataArray,
     coordinate_conversion: xr.Dataset,
 ) -> xr.DataArray:
-    """
-    Convert the slant range time coordinates to ground range coordinates using the coordinate conversion `sr0`
-    and `srgrCoefficients` product metadata
+    """Convert slant range time to ground range using the coordinate conversion metadata.
+
     :param azimuth_time: azimuth time coordinates
     :param slant_range_time: slant range time
     :param coordinate_conversion: coordinate conversion dataset.
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
-    :return:
     """
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
     cc = coordinate_conversion.interp(azimuth_time=azimuth_time)
