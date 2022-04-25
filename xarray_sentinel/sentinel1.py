@@ -304,7 +304,7 @@ def open_orbit_dataset(
     position = xr.Variable(data=data["position"], dims=("axis", "azimuth_time"))  # type: ignore
     velocity = xr.Variable(data=data["velocity"], dims=("axis", "azimuth_time"))  # type: ignore
 
-    attrs = attrs | {}
+    attrs = attrs.copy()
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
 
@@ -443,15 +443,18 @@ def open_pol_dataset(
     number_of_bursts = swath_timing["burstList"]["@count"]
     range_pixel_spacing = image_information["rangePixelSpacing"]
 
-    attrs = attrs | {
-        "radar_frequency": product_information["radarFrequency"] / 10**9,
-        "azimuth_pixel_spacing": image_information["azimuthPixelSpacing"],
-        "range_pixel_spacing": range_pixel_spacing,
-        "azimuth_time_interval": azimuth_time_interval,
-        "range_sampling_rate": range_sampling_rate,
-        "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
-        "ascending_node_time": image_information["ascendingNodeTime"],
-    }
+    attrs = attrs.copy()
+    attrs.update(
+        {
+            "radar_frequency": product_information["radarFrequency"] / 10**9,
+            "azimuth_pixel_spacing": image_information["azimuthPixelSpacing"],
+            "range_pixel_spacing": range_pixel_spacing,
+            "azimuth_time_interval": azimuth_time_interval,
+            "range_sampling_rate": range_sampling_rate,
+            "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
+            "ascending_node_time": image_information["ascendingNodeTime"],
+        }
+    )
     encoding = {}
     swap_dims = {}
     chunks: T.Union[None, T.Dict[str, int]] = None
