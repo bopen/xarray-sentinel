@@ -579,6 +579,17 @@ def crop_burst_dataset(
     use_center: bool = False,
     burst_id: T.Optional[int] = None,
 ) -> xr.Dataset:
+    """
+    Returns the measurement dataset cropped to the selected burst.
+    Only one keyword between 'burst_index' and 'azimuth_anx_time' and 'burst_id' must be defined.
+    :param xr.Dataset pol_dataset: measurement dataset
+    :param int burst_index: burst index can take values from 1 to the number of bursts
+    :param float azimuth_anx_time: azimuth anx time of first line of the bursts
+    To use the center instead of the first line, set `use_center=True`
+    :param bool use_center: If `true`, it uses  as reference the azimuth anx time of the burst center instead of the first line
+    :param int burst_id: for product processed with Sentinel-1 IPF version 3.40 or higher,
+    the burst can be selected using the relative burst id.
+    """
     burst_definitions = (
         (burst_index is not None)
         + (azimuth_anx_time is not None)
@@ -645,6 +656,11 @@ def mosaic_slc_iw(slc_iw_image: xr.Dataset, crop: int = 90) -> xr.Dataset:
 def calibrate_amplitude(
     digital_number: xr.DataArray, calibration_lut: xr.DataArray
 ) -> xr.DataArray:
+    """  Returns the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
+    :param digital_number: digital numbers to be calibrated
+    :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
+    The LUT can be opened using the measurement sub-group `calibration`
+    """
     calibration = calibration_lut.interp(
         line=digital_number.line,
         pixel=digital_number.pixel,
@@ -666,6 +682,14 @@ def calibrate_intensity(
     as_db: bool = False,
     min_db: T.Optional[float] = -40.0,
 ) -> xr.DataArray:
+    """
+    Returns the calibrated intensity. The calibration is done using the calibration LUT in the product metadata.
+    :param digital_number: digital numbers to be calibrated
+    :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
+    The LUT can be opened using the measurement sub-group `calibration`.
+    :param as_db: if True, returns the data in db
+    :param min_db: minimal value in db, to avoid infinity values.
+    """
     amplitude = calibrate_amplitude(digital_number, calibration_lut)
     intensity = abs(amplitude) ** 2
     if as_db:
@@ -690,6 +714,15 @@ def slant_range_time_to_ground_range(
     slant_range_time: xr.DataArray,
     coordinate_conversion: xr.DataArray,
 ) -> xr.DataArray:
+    """
+    Convert the slant range time coordinates to ground range coordinates using the coordinate conversion `sr0`
+    and `srgrCoefficients` product metadata
+    :param azimuth_time: azimuth time coordinates
+    :param slant_range_time: slant range time
+    :param coordinate_conversion: coordinate conversion dataset.
+    The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
+    :return:
+    """
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
     cc = coordinate_conversion.interp(azimuth_time=azimuth_time)
     x = slant_range - cc.sr0
