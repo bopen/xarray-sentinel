@@ -58,10 +58,11 @@ Due to the inherent complexity and redundancy of the SAFE format *xarray-sentine
 maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
 but it may also contain *subgroups*, that are listed in the `subgroups` attribute.
 
-The following sections show some example of xarray-sentinel usage. 
-In the `notebooks` folder you 
-can also find notebooks, one for each supported product, that allow you to explore the 
+The following sections show some example of xarray-sentinel usage.
+In the `notebooks` folder you
+can also find notebooks, one for each supported product, that allow you to explore the
 data in more detail using the xarray-sentinel functions.
+
 ### The root dataset
 
 For example let's explore the Sentinel-1 SLC Stripmap product in the local folder
@@ -141,7 +142,7 @@ associated with the image line
 and `slant_range_time` is an `np.float64` coordinate that contains the two-way range time interval
 in seconds associated with the image pixel.
 
-Since Sentinel-1 IPF version 3.40, a unique identifier for bursts has been added to the SLC product metadata. 
+Since Sentinel-1 IPF version 3.40, a unique identifier for bursts has been added to the SLC product metadata.
 For these products, the list of the burst ids is stored the `burst_ids` dataset attribute.
 
 ### Metadata datasets
@@ -304,6 +305,7 @@ Attributes: ...
     burst_id:                            365923
 
 ```
+
 If IPF processor version is 3.40 or higher, it is also possible to select the burst
 to be cropped using the `burst_id` key:
 

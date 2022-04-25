@@ -656,7 +656,7 @@ def mosaic_slc_iw(slc_iw_image: xr.Dataset, crop: int = 90) -> xr.Dataset:
 def calibrate_amplitude(
     digital_number: xr.DataArray, calibration_lut: xr.DataArray
 ) -> xr.DataArray:
-    """  Returns the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
+    """Returns the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
     :param digital_number: digital numbers to be calibrated
     :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
     The LUT can be opened using the measurement sub-group `calibration`
