@@ -58,6 +58,10 @@ Due to the inherent complexity and redundancy of the SAFE format *xarray-sentine
 maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
 but it may also contain *subgroups*, that are listed in the `subgroups` attribute.
 
+The following sections show some example of xarray-sentinel usage. 
+In the `notebooks` folder you 
+can also find notebooks, one for each supported product, that allow you to explore the 
+data in more detail using the xarray-sentinel functions.
 ### The root dataset
 
 For example let's explore the Sentinel-1 SLC Stripmap product in the local folder
@@ -136,6 +140,9 @@ The `azimuth_time` is an `np.datetime64` coordinate that contains the UTC zero-D
 associated with the image line
 and `slant_range_time` is an `np.float64` coordinate that contains the two-way range time interval
 in seconds associated with the image pixel.
+
+Since Sentinel-1 IPF version 3.40, a unique identifier for bursts has been added to the SLC product metadata. 
+For these products, the list of the burst ids is stored the `burst_ids` dataset attribute.
 
 ### Metadata datasets
 
@@ -230,14 +237,14 @@ but also because the measurement array is a collage of sub-images called *bursts
 
 *xarray-sentinel* provides a helper function that crops a burst out of a measurement dataset for you.
 
-You need to first open the desired measurement dataset, for example, the VH polarisation
-of the first IW swath of the `S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4`
+You need to first open the desired measurement dataset, for example, the HH polarisation
+of the first IW swath of the `S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE`
 product, in the current folder:
 
 ```python-repl
 >>> slc_iw_v340_path = "tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
->>> slc_iw1_hh = xr.open_dataset(slc_iw_v340_path, group="IW1/HH", engine="sentinel-1")
->>> slc_iw1_hh
+>>> slc_iw1_v340_hh = xr.open_dataset(slc_iw_v340_path, group="IW1/HH", engine="sentinel-1")
+>>> slc_iw1_v340_hh
 <xarray.Dataset>
 Dimensions:           (pixel: 21169, line: 13500)
 Coordinates:
@@ -271,7 +278,7 @@ Now the 9th burst out of 9 can be cropped from the swath data using `burst_index
 
 ```python-repl
 >>> import xarray_sentinel
->>> xarray_sentinel.crop_burst_dataset(slc_iw1_hh, burst_index=8)
+>>> xarray_sentinel.crop_burst_dataset(slc_iw1_v340_hh, burst_index=8)
 <xarray.Dataset>
 Dimensions:           (slant_range_time: 21169, azimuth_time: 1500)
 Coordinates:
@@ -297,12 +304,11 @@ Attributes: ...
     burst_id:                            365923
 
 ```
-
-For products processed with processor versions 3.40 or higher, it is also possible to select the burst
+If IPF processor version is 3.40 or higher, it is also possible to select the burst
 to be cropped using the `burst_id` key:
 
 ```python-repl
->>> xarray_sentinel.crop_burst_dataset(slc_iw1_hh, burst_id=365923)
+>>> xarray_sentinel.crop_burst_dataset(slc_iw1_v340_hh, burst_id=365923)
 <xarray.Dataset>
 Dimensions:           (slant_range_time: 21169, azimuth_time: 1500)
 Coordinates:
