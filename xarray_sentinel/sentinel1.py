@@ -661,7 +661,7 @@ def mosaic_slc_iw(
 
 
 def calibrate_amplitude(
-    digital_number: xr.DataArray, calibration_lut: xr.DataArray
+    digital_number: xr.DataArray, calibration_lut: xr.DataArray, **kwargs: T.Any,
 ) -> xr.DataArray:
     """Return the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
 
@@ -670,10 +670,14 @@ def calibrate_amplitude(
 
     The LUT can be opened using the measurement sub-group `calibration`
     """
-    calibration = calibration_lut.interp(
-        line=digital_number.line,
-        pixel=digital_number.pixel,
-    ).astype(np.float32)
+    calibration_lut_mean = calibration_lut.mean()
+    if np.allclose(calibration_lut_mean , calibration_lut, **kwargs):
+        calibration = calibration_lut_mean.astype(np.float32)
+    else:
+        calibration = calibration_lut.interp(
+            line=digital_number.line,
+            pixel=digital_number.pixel,
+        ).astype(np.float32)
     amplitude = digital_number / calibration
     amplitude.attrs.update(digital_number.attrs)
     try:
@@ -690,6 +694,7 @@ def calibrate_intensity(
     calibration_lut: xr.DataArray,
     as_db: bool = False,
     min_db: T.Optional[float] = -40.0,
+    **kwargs: T.Any,
 ) -> xr.DataArray:
     """Return the calibrated intensity. The calibration is done using the calibration LUT in the product metadata.
 
@@ -699,7 +704,7 @@ def calibrate_intensity(
     :param as_db: if True, returns the data in db
     :param min_db: minimal value in db, to avoid infinity values.
     """
-    amplitude = calibrate_amplitude(digital_number, calibration_lut)
+    amplitude = calibrate_amplitude(digital_number, calibration_lut, **kwargs)
     intensity = abs(amplitude) ** 2
     if as_db:
         intensity = 10.0 * np.log10(intensity)
