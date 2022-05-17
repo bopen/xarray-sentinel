@@ -756,15 +756,17 @@ def slant_range_time_to_ground_range(
         template=slant_range_time,
     )
     x = slant_range - sr0
+    template = coordinate_conversion.srgrCoefficients.broadcast_like(slant_range_time)
+    template = template.isel(azimuth_time=0).drop_vars("azimuth_time")
+    template = template.chunk(azimuth_time.chunksizes)
+
     srgrCoefficients = xr.map_blocks(
         interp_block,
         azimuth_time,
         kwargs={
             "data": coordinate_conversion.srgrCoefficients,
         },
-        template=slant_range_time.expand_dims(
-            {"degree": coordinate_conversion.degree.size}
-        ),
+        template=template,
     )
     ground_range = (srgrCoefficients * x**srgrCoefficients.degree).sum("degree")
     return ground_range  # type: ignore
