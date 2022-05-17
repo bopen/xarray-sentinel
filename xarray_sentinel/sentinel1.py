@@ -661,7 +661,9 @@ def mosaic_slc_iw(
 
 
 def calibrate_amplitude(
-    digital_number: xr.DataArray, calibration_lut: xr.DataArray, **kwargs: T.Any,
+    digital_number: xr.DataArray,
+    calibration_lut: xr.DataArray,
+    **kwargs: T.Any,
 ) -> xr.DataArray:
     """Return the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
 
@@ -671,13 +673,14 @@ def calibrate_amplitude(
     The LUT can be opened using the measurement sub-group `calibration`
     """
     calibration_lut_mean = calibration_lut.mean()
-    if np.allclose(calibration_lut_mean , calibration_lut, **kwargs):
-        calibration = calibration_lut_mean.astype(np.float32)
+    if np.allclose(calibration_lut_mean, calibration_lut, **kwargs):
+        calibration: xr.DataArray = calibration_lut_mean.astype(np.float32)
     else:
         calibration = calibration_lut.interp(
             line=digital_number.line,
             pixel=digital_number.pixel,
         ).astype(np.float32)
+        calibration = calibration.chunk(digital_number.chunksizes)
     amplitude = digital_number / calibration
     amplitude.attrs.update(digital_number.attrs)
     try:
@@ -723,6 +726,16 @@ def calibrate_intensity(
     return intensity
 
 
+def interp_block(
+    *values: xr.DataArray,
+    data: xr.DataArray = xr.DataArray(),
+    dim_names: T.Sequence[str] = ("azimuth_time",),
+    **kwargs: T.Any,
+) -> xr.DataArray:
+    kwargs.update({name: value for name, value in zip(dim_names, values)})
+    return data.interp(**kwargs).drop_vars(dim_names)
+
+
 def slant_range_time_to_ground_range(
     azimuth_time: xr.DataArray,
     slant_range_time: xr.DataArray,
@@ -736,9 +749,24 @@ def slant_range_time_to_ground_range(
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
     """
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
-    cc = coordinate_conversion.interp(azimuth_time=azimuth_time).drop_vars("azimuth_time")
-    x = slant_range - cc.sr0
-    ground_range = (cc.srgrCoefficients * x**cc.degree).sum("degree")
+    sr0 = xr.map_blocks(
+        interp_block,
+        azimuth_time,
+        kwargs={"data": coordinate_conversion.sr0},
+        template=slant_range_time,
+    )
+    x = slant_range - sr0
+    srgrCoefficients = xr.map_blocks(
+        interp_block,
+        azimuth_time,
+        kwargs={
+            "data": coordinate_conversion.srgrCoefficients,
+        },
+        template=slant_range_time.expand_dims(
+            {"degree": coordinate_conversion.degree.size}
+        ),
+    )
+    ground_range = (srgrCoefficients * x**srgrCoefficients.degree).sum("degree")
     return ground_range  # type: ignore
 
 
