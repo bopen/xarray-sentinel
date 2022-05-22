@@ -209,7 +209,7 @@ def open_coordinate_conversion_dataset(
 
 def is_clockwise(poly: T.List[T.Tuple[float, float]]) -> bool:
     start = np.array(poly[0])  # type: ignore
-    return np.cross(poly[1] - start, poly[2] - start) > 0
+    return np.cross(poly[1] - start, poly[2] - start) < 0
 
 
 def open_gcp_dataset(
@@ -248,20 +248,17 @@ def open_gcp_dataset(
             data_vars[var][1][j, i] = ggp[var]
 
     footprint = []
-    for j, i in [
-        (0, 0),
-        (shape[0] - 1, 0),
-        (shape[0] - 1, shape[1] - 1),
-        (0, shape[1] - 1),
-        (0, 0),
-    ]:
+    for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
         footprint.append(
             (data_vars["latitude"][1][j, i], data_vars["longitude"][1][j, i])
         )
 
     # check that the poly as the correct orientation
-    if not is_clockwise(footprint):
+    if is_clockwise(footprint):
         footprint = footprint[::-1]
+
+    # close the polygon
+    footprint.append(footprint[0])
 
     gcp_attrs = {
         "geospatial_bounds": f"POLYGON(({','.join(str(y) + ' ' + str(x) for y, x in footprint)}))",
@@ -283,6 +280,33 @@ def open_gcp_dataset(
         attrs=gcp_attrs,
     )
     return ds
+
+
+def get_footprint_linestring(
+    azimuth_time: xr.DataArray, slant_range_time: xr.DataArray, gcp: xr.Dataset
+) -> T.List[T.Tuple[float, float]]:
+    footprint = []
+    for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
+        lat = float(
+            gcp["latitude"].interp(
+                azimuth_time=azimuth_time[j], slant_range_time=slant_range_time[i]
+            )
+        )
+        lon = float(
+            gcp["longitude"].interp(
+                azimuth_time=azimuth_time[j], slant_range_time=slant_range_time[i]
+            )
+        )
+        footprint.append((lat, lon))
+
+    # check that the poly as the correct orientation
+    if is_clockwise(footprint):
+        footprint = footprint[::-1]
+
+    # close the polygon
+    footprint.append(footprint[0])
+
+    return footprint
 
 
 def open_attitude_dataset(
