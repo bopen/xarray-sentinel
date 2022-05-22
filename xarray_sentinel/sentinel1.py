@@ -95,7 +95,7 @@ def open_calibration_dataset(
         dn_list.append(dn)
 
     pixel = np.array(pixel_list)
-    if not np.allclose(pixel, pixel[0]):
+    if (pixel - pixel[0]).any():
         raise ValueError(
             "Unable to organise calibration vectors in a regular line-pixel grid"
         )
@@ -129,7 +129,7 @@ def open_noise_range_dataset(
         noiseRangeLut_list.append(noiseRangeLut)
 
     pixel = np.array(pixel_list)
-    if not np.allclose(pixel, pixel[0]):
+    if (pixel - pixel[0]).any():
         raise ValueError(
             "Unable to organise noise vectors in a regular line-pixel grid"
         )
@@ -207,6 +207,11 @@ def open_coordinate_conversion_dataset(
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
+def is_clockwise(poly: T.List[T.Tuple[float, float]]) -> bool:
+    start = np.array(poly[0])  # type: ignore
+    return np.cross(poly[1] - start, poly[2] - start) < 0
+
+
 def open_gcp_dataset(
     annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
 ) -> xr.Dataset:
@@ -242,6 +247,29 @@ def open_gcp_dataset(
             i = pixel.index(ggp["pixel"])
             data_vars[var][1][j, i] = ggp[var]
 
+    footprint = []
+    for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
+        footprint.append(
+            (data_vars["latitude"][1][j, i], data_vars["longitude"][1][j, i])
+        )
+
+    # check that the poly as the correct orientation
+    if is_clockwise(footprint):
+        footprint = footprint[::-1]
+
+    # close the polygon
+    footprint.append(footprint[0])
+
+    wkt = "POLYGON((" + ",".join(f"{x} {y}" for y, x in footprint) + "))"
+    gcp_attrs = {
+        "geospatial_bounds": wkt,
+        "geospatial_lat_min": min(data_vars["latitude"][1].flat),
+        "geospatial_lat_max": max(data_vars["latitude"][1].flat),
+        "geospatial_lon_min": min(data_vars["longitude"][1].flat),
+        "geospatial_lon_max": max(data_vars["longitude"][1].flat),
+    }
+    gcp_attrs.update(attrs)
+
     ds = xr.Dataset(
         data_vars=data_vars,
         coords={
@@ -250,9 +278,39 @@ def open_gcp_dataset(
             "line": ("azimuth_time", line),
             "pixel": ("slant_range_time", pixel),
         },
-        attrs=attrs,
+        attrs=gcp_attrs,
     )
     return ds
+
+
+def get_footprint_linestring(
+    azimuth_time: xr.DataArray, slant_range_time: xr.DataArray, gcp: xr.Dataset
+) -> T.List[T.Tuple[float, float]]:
+    azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
+    slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
+
+    footprint = []
+    for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
+        lat = float(
+            gcp["latitude"].interp(
+                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
+            )
+        )
+        lon = float(
+            gcp["longitude"].interp(
+                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
+            )
+        )
+        footprint.append((lon, lat))
+
+    # check that the poly as the correct orientation
+    if is_clockwise(footprint):
+        footprint = footprint[::-1]
+
+    # close the polygon
+    footprint.append(footprint[0])
+
+    return footprint
 
 
 def open_attitude_dataset(
@@ -770,6 +828,30 @@ def slant_range_time_to_ground_range(
     )
     ground_range = (srgrCoefficients * x**srgrCoefficients.degree).sum("degree")
     return ground_range  # type: ignore
+
+
+def ground_range_to_slant_range_time(
+    azimuth_time: xr.DataArray,
+    ground_range: xr.DataArray,
+    coordinate_conversion: xr.Dataset,
+) -> xr.DataArray:
+    """Convert ground range to slant range time using the coordinate conversion metadata.
+
+    :param azimuth_time: azimuth time coordinates
+    :param ground_range: slant range time
+    :param coordinate_conversion: coordinate conversion dataset.
+    The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
+    """
+    assert (coordinate_conversion.gr0 == 0.0).all()
+
+    x = ground_range
+
+    grsrCoefficients = interp_block(
+        azimuth_time=azimuth_time,
+        data=coordinate_conversion.grsrCoefficients,
+    )
+    slant_range = (grsrCoefficients * x**grsrCoefficients.degree).sum("degree")
+    return 2 / SPEED_OF_LIGHT * slant_range  # type: ignore
 
 
 METADATA_OPENERS = {
