@@ -124,9 +124,9 @@ def test_open_coordinate_conversion_dataset() -> None:
 
 def test_open_gcp_dataset() -> None:
     expected_polygon = (
-        "POLYGON((47.09200435560957 12.42647347821595,"
-        "45.57910451206848 12.04397933341514,45.73265733767158 10.876144717121,"
-        "47.24053130234206 11.26870151724317,47.09200435560957 12.42647347821595))"
+        "POLYGON((12.42647347821595 47.09200435560957,"
+        "12.04397933341514 45.57910451206848,10.876144717121 45.73265733767158,"
+        "11.26870151724317 47.24053130234206,12.42647347821595 47.09200435560957))"
     )
 
     res = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
@@ -141,11 +141,11 @@ def test_open_gcp_dataset() -> None:
 def test_get_footprint_linestring() -> None:
     gcp_ds = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
     expected_linestring = [
-        (47.09200435560957, 12.42647347821595),
-        (45.57910451206848, 12.04397933341514),
-        (45.73265733767158, 10.876144717121),
-        (47.24053130234206, 11.26870151724317),
-        (47.09200435560957, 12.42647347821595),
+        (11.26870151724317, 47.24053130234206),
+        (10.876144717121, 45.73265733767158),
+        (12.04397933341514, 45.57910451206848),
+        (12.42647347821595, 47.09200435560957),
+        (11.26870151724317, 47.24053130234206),
     ]
 
     res = sentinel1.get_footprint_linestring(
@@ -399,6 +399,20 @@ def test_slant_range_time_to_ground_range() -> None:
 
     res = sentinel1.slant_range_time_to_ground_range(
         swath.azimuth_time, swath.slant_range_time, cc_ds
+    )
+
+    assert isinstance(res, xr.DataArray)
+
+
+def test_ground_range_to_slant_range_time() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(GRD_IW, group="IW/VV")
+    swath = swath_ds.measurement[:1000, :1000]
+    cc_ds = sentinel1.open_sentinel1_dataset(
+        GRD_IW, group="IW/VV/coordinate_conversion"
+    )
+
+    res = sentinel1.ground_range_to_slant_range_time(
+        swath.azimuth_time, swath.ground_range, cc_ds
     )
 
     assert isinstance(res, xr.DataArray)

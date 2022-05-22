@@ -260,8 +260,9 @@ def open_gcp_dataset(
     # close the polygon
     footprint.append(footprint[0])
 
+    wkt = "POLYGON((" + ",".join(f"{x} {y}" for y, x in footprint) + "))"
     gcp_attrs = {
-        "geospatial_bounds": f"POLYGON(({','.join(str(y) + ' ' + str(x) for y, x in footprint)}))",
+        "geospatial_bounds": wkt,
         "geospatial_lat_min": min(data_vars["latitude"][1].flat),
         "geospatial_lat_max": max(data_vars["latitude"][1].flat),
         "geospatial_lon_min": min(data_vars["longitude"][1].flat),
@@ -285,19 +286,22 @@ def open_gcp_dataset(
 def get_footprint_linestring(
     azimuth_time: xr.DataArray, slant_range_time: xr.DataArray, gcp: xr.Dataset
 ) -> T.List[T.Tuple[float, float]]:
+    azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
+    slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
+
     footprint = []
     for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
         lat = float(
             gcp["latitude"].interp(
-                azimuth_time=azimuth_time[j], slant_range_time=slant_range_time[i]
+                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
             )
         )
         lon = float(
             gcp["longitude"].interp(
-                azimuth_time=azimuth_time[j], slant_range_time=slant_range_time[i]
+                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
             )
         )
-        footprint.append((lat, lon))
+        footprint.append((lon, lat))
 
     # check that the poly as the correct orientation
     if is_clockwise(footprint):
@@ -824,6 +828,30 @@ def slant_range_time_to_ground_range(
     )
     ground_range = (srgrCoefficients * x**srgrCoefficients.degree).sum("degree")
     return ground_range  # type: ignore
+
+
+def ground_range_to_slant_range_time(
+    azimuth_time: xr.DataArray,
+    ground_range: xr.DataArray,
+    coordinate_conversion: xr.Dataset,
+) -> xr.DataArray:
+    """Convert ground range to slant range time using the coordinate conversion metadata.
+
+    :param azimuth_time: azimuth time coordinates
+    :param ground_range: slant range time
+    :param coordinate_conversion: coordinate conversion dataset.
+    The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
+    """
+    assert (coordinate_conversion.gr0 == 0.0).all()
+
+    x = ground_range
+
+    grsrCoefficients = interp_block(
+        azimuth_time=azimuth_time,
+        data=coordinate_conversion.grsrCoefficients,
+    )
+    slant_range = (grsrCoefficients * x**grsrCoefficients.degree).sum("degree")
+    return 2 / SPEED_OF_LIGHT * slant_range  # type: ignore
 
 
 METADATA_OPENERS = {
