@@ -95,7 +95,7 @@ def open_calibration_dataset(
         dn_list.append(dn)
 
     pixel = np.array(pixel_list)
-    if not np.allclose(pixel, pixel[0]):
+    if (pixel - pixel[0]).any():
         raise ValueError(
             "Unable to organise calibration vectors in a regular line-pixel grid"
         )
@@ -129,7 +129,7 @@ def open_noise_range_dataset(
         noiseRangeLut_list.append(noiseRangeLut)
 
     pixel = np.array(pixel_list)
-    if not np.allclose(pixel, pixel[0]):
+    if (pixel - pixel[0]).any():
         raise ValueError(
             "Unable to organise noise vectors in a regular line-pixel grid"
         )
@@ -207,6 +207,11 @@ def open_coordinate_conversion_dataset(
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
+def is_clockwise(poly: T.List[T.Tuple[float, float]]) -> bool:
+    start = np.array(poly[0])  # type: ignore
+    return np.cross(poly[1] - start, poly[2] - start) > 0
+
+
 def open_gcp_dataset(
     annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
 ) -> xr.Dataset:
@@ -242,6 +247,31 @@ def open_gcp_dataset(
             i = pixel.index(ggp["pixel"])
             data_vars[var][1][j, i] = ggp[var]
 
+    footprint = []
+    for j, i in [
+        (0, 0),
+        (shape[0] - 1, 0),
+        (shape[0] - 1, shape[1] - 1),
+        (0, shape[1] - 1),
+        (0, 0),
+    ]:
+        footprint.append(
+            (data_vars["latitude"][1][j, i], data_vars["longitude"][1][j, i])
+        )
+
+    # check that the poly as the correct orientation
+    if not is_clockwise(footprint):
+        footprint = footprint[::-1]
+
+    gcp_attrs = {
+        "geospatial_bounds": f"POLYGON(({','.join(str(y) + ' ' + str(x) for y, x in footprint)}))",
+        "geospatial_lat_min": min(data_vars["latitude"][1].flat),
+        "geospatial_lat_max": max(data_vars["latitude"][1].flat),
+        "geospatial_lon_min": min(data_vars["longitude"][1].flat),
+        "geospatial_lon_max": max(data_vars["longitude"][1].flat),
+    }
+    gcp_attrs.update(attrs)
+
     ds = xr.Dataset(
         data_vars=data_vars,
         coords={
@@ -250,7 +280,7 @@ def open_gcp_dataset(
             "line": ("azimuth_time", line),
             "pixel": ("slant_range_time", pixel),
         },
-        attrs=attrs,
+        attrs=gcp_attrs,
     )
     return ds
 

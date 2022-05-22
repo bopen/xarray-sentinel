@@ -2,6 +2,7 @@ import pathlib
 
 import numpy as np
 import pytest
+import shapely.wkt
 import xarray as xr
 
 from xarray_sentinel import esa_safe, sentinel1
@@ -125,6 +126,8 @@ def test_open_gcp_dataset() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"line", "pixel", "azimuth_time", "slant_range_time"}
+    assert isinstance(res.attrs["geospatial_bounds"], str)
+    assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).is_valid
 
 
 def test_open_attitude_dataset() -> None:
