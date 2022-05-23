@@ -83,15 +83,17 @@ def open_calibration_dataset(
     for vector in calibration_vectors:
         azimuth_time_list.append(vector["azimuthTime"])
         line_list.append(vector["line"])
-        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")  # type: ignore
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")
         pixel_list.append(pixel)
-        sigmaNought = np.fromstring(vector["sigmaNought"]["$"], dtype=np.float32, sep=" ")  # type: ignore
+        sigmaNought = np.fromstring(
+            vector["sigmaNought"]["$"], dtype=np.float32, sep=" "
+        )
         sigmaNought_list.append(sigmaNought)
-        betaNought = np.fromstring(vector["betaNought"]["$"], dtype=np.float32, sep=" ")  # type: ignore
+        betaNought = np.fromstring(vector["betaNought"]["$"], dtype=np.float32, sep=" ")
         betaNought_list.append(betaNought)
-        gamma = np.fromstring(vector["gamma"]["$"], dtype=np.float32, sep=" ")  # type: ignore
+        gamma = np.fromstring(vector["gamma"]["$"], dtype=np.float32, sep=" ")
         gamma_list.append(gamma)
-        dn = np.fromstring(vector["dn"]["$"], dtype=np.float32, sep=" ")  # type: ignore
+        dn = np.fromstring(vector["dn"]["$"], dtype=np.float32, sep=" ")
         dn_list.append(dn)
 
     pixel = np.array(pixel_list)
@@ -123,9 +125,11 @@ def open_noise_range_dataset(
     for vector in noise_vectors:
         azimuth_time_list.append(vector["azimuthTime"])
         line_list.append(vector["line"])
-        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")  # type: ignore
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")
         pixel_list.append(pixel)
-        noiseRangeLut = np.fromstring(vector["noiseRangeLut"]["$"], dtype=np.float32, sep=" ")  # type: ignore
+        noiseRangeLut = np.fromstring(
+            vector["noiseRangeLut"]["$"], dtype=np.float32, sep=" "
+        )
         noiseRangeLut_list.append(noiseRangeLut)
 
     pixel = np.array(pixel_list)
@@ -152,9 +156,11 @@ def open_noise_azimuth_dataset(
     noiseAzimuthLut_list = []
     for vector in noise_vectors:
         first_range_sample.append(vector["firstRangeSample"])
-        line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")  # type: ignore
+        line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")
         line_list.append(line)
-        noiseAzimuthLut = np.fromstring(vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" ")  # type: ignore
+        noiseAzimuthLut = np.fromstring(
+            vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" "
+        )
         noiseAzimuthLut_list.append(noiseAzimuthLut)
 
     # BROKEN: GRDs have line and noiseAzimuthLut of different size, we take the first one
@@ -208,8 +214,8 @@ def open_coordinate_conversion_dataset(
 
 
 def is_clockwise(poly: T.List[T.Tuple[float, float]]) -> bool:
-    start = np.array(poly[0])  # type: ignore
-    return np.cross(poly[1] - start, poly[2] - start) < 0
+    start = np.array(poly[0])
+    return float(np.cross(poly[1] - start, poly[2] - start)) < 0
 
 
 def open_gcp_dataset(
@@ -768,9 +774,9 @@ def calibrate_intensity(
     amplitude = calibrate_amplitude(digital_number, calibration_lut, **kwargs)
     intensity = abs(amplitude) ** 2
     if as_db:
-        intensity = 10.0 * np.log10(intensity)
+        intensity = 10.0 * np.log10(intensity)  # type: ignore
         if min_db is not None:
-            intensity = np.maximum(intensity, min_db)
+            intensity = np.maximum(intensity, min_db)  # type: ignore
         intensity.attrs.update(amplitude.attrs)
         intensity.attrs["units"] = "dB"
     else:
