@@ -726,16 +726,6 @@ def calibrate_intensity(
     return intensity
 
 
-def interp_block(
-    *values: xr.DataArray,
-    data: xr.DataArray = xr.DataArray(),
-    dim_names: T.Sequence[str] = ("azimuth_time",),
-    **kwargs: T.Any,
-) -> xr.DataArray:
-    kwargs.update({name: value for name, value in zip(dim_names, values)})
-    return data.interp(**kwargs).drop_vars(dim_names)
-
-
 def slant_range_time_to_ground_range(
     azimuth_time: xr.DataArray,
     slant_range_time: xr.DataArray,
@@ -749,25 +739,11 @@ def slant_range_time_to_ground_range(
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
     """
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
-    sr0 = xr.map_blocks(
-        interp_block,
-        azimuth_time,
-        kwargs={"data": coordinate_conversion.sr0},
-        template=slant_range_time,
+    sr0 = coordinate_conversion.sr0.interp(azimuth_time=azimuth_time)
+    srgrCoefficients = coordinate_conversion.srgrCoefficients.interp(
+        azimuth_time=azimuth_time,
     )
     x = slant_range - sr0
-    template = coordinate_conversion.srgrCoefficients.broadcast_like(slant_range_time)
-    template = template.isel(azimuth_time=0).drop_vars("azimuth_time")
-    template = template.chunk(azimuth_time.chunksizes)
-
-    srgrCoefficients = xr.map_blocks(
-        interp_block,
-        azimuth_time,
-        kwargs={
-            "data": coordinate_conversion.srgrCoefficients,
-        },
-        template=template,
-    )
     ground_range = (srgrCoefficients * x**srgrCoefficients.degree).sum("degree")
     return ground_range  # type: ignore
 
