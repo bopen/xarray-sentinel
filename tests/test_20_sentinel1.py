@@ -2,6 +2,8 @@ import pathlib
 
 import numpy as np
 import pytest
+import shapely.geometry
+import shapely.wkt
 import xarray as xr
 
 from xarray_sentinel import esa_safe, sentinel1
@@ -121,10 +123,47 @@ def test_open_coordinate_conversion_dataset() -> None:
 
 
 def test_open_gcp_dataset() -> None:
+    expected_polygon = (
+        "POLYGON((12.42647347821595 47.09200435560957,"
+        "12.04397933341514 45.57910451206848,10.876144717121 45.73265733767158,"
+        "11.26870151724317 47.24053130234206,12.42647347821595 47.09200435560957))"
+    )
+
     res = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
 
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"line", "pixel", "azimuth_time", "slant_range_time"}
+    assert isinstance(res.attrs["geospatial_bounds"], str)
+    assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).is_valid
+    assert res.attrs["geospatial_bounds"] == expected_polygon
+
+
+def test_get_footprint_linestring() -> None:
+    gcp_ds = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
+    expected_linestring = [
+        (11.26870151724317, 47.24053130234206),
+        (10.876144717121, 45.73265733767158),
+        (12.04397933341514, 45.57910451206848),
+        (12.42647347821595, 47.09200435560957),
+        (11.26870151724317, 47.24053130234206),
+    ]
+
+    res = sentinel1.get_footprint_linestring(
+        gcp_ds.azimuth_time, gcp_ds.slant_range_time, gcp_ds
+    )
+
+    polygon = shapely.geometry.Polygon(res)
+    assert polygon.is_valid
+    assert shapely.geometry.polygon.orient(polygon, 1) == polygon
+    assert res == expected_linestring
+
+    res = sentinel1.get_footprint_linestring(
+        gcp_ds.azimuth_time[::-1], gcp_ds.slant_range_time, gcp_ds
+    )
+
+    polygon = shapely.geometry.Polygon(res)
+    assert polygon.is_valid
+    assert shapely.geometry.polygon.orient(polygon, 1) == polygon
 
 
 def test_open_attitude_dataset() -> None:
@@ -316,6 +355,11 @@ def test_calibrate_amplitude() -> None:
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
     assert np.issubdtype(res.dtype, np.complex64)
 
+    res = sentinel1.calibrate_amplitude(burst_ds.measurement, cal_ds["gamma"])
+
+    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert np.issubdtype(res.dtype, np.complex64)
+
 
 def test_calibrate_intensity() -> None:
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
@@ -355,6 +399,20 @@ def test_slant_range_time_to_ground_range() -> None:
 
     res = sentinel1.slant_range_time_to_ground_range(
         swath.azimuth_time, swath.slant_range_time, cc_ds
+    )
+
+    assert isinstance(res, xr.DataArray)
+
+
+def test_ground_range_to_slant_range_time() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(GRD_IW, group="IW/VV")
+    swath = swath_ds.measurement[:1000, :1000]
+    cc_ds = sentinel1.open_sentinel1_dataset(
+        GRD_IW, group="IW/VV/coordinate_conversion"
+    )
+
+    res = sentinel1.ground_range_to_slant_range_time(
+        swath.azimuth_time, swath.ground_range, cc_ds
     )
 
     assert isinstance(res, xr.DataArray)
