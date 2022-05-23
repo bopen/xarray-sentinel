@@ -819,13 +819,10 @@ def ground_range_to_slant_range_time(
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
     """
     assert (coordinate_conversion.gr0 == 0.0).all()
-
-    x = ground_range
-
-    grsrCoefficients = interp_block(
+    grsrCoefficients = coordinate_conversion.grsrCoefficients.interp(
         azimuth_time=azimuth_time,
-        data=coordinate_conversion.grsrCoefficients,
     )
+    x = ground_range
     slant_range = (grsrCoefficients * x**grsrCoefficients.degree).sum("degree")
     return 2 / SPEED_OF_LIGHT * slant_range  # type: ignore
 
