@@ -503,8 +503,10 @@ def open_pol_dataset(
     range_sampling_rate = product_information["rangeSamplingRate"]
 
     number_of_lines = image_information["numberOfLines"]
+    product_first_line_utc_time = image_information["productFirstLineUtcTime"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
     number_of_bursts = swath_timing["burstList"]["@count"]
+    image_slant_range_time = image_information["slantRangeTime"]
     range_pixel_spacing = image_information["rangePixelSpacing"]
 
     attrs = attrs.copy()
@@ -513,7 +515,9 @@ def open_pol_dataset(
             "radar_frequency": product_information["radarFrequency"] / 10**9,
             "azimuth_pixel_spacing": image_information["azimuthPixelSpacing"],
             "range_pixel_spacing": range_pixel_spacing,
+            "product_first_line_utc_time": product_first_line_utc_time,
             "azimuth_time_interval": azimuth_time_interval,
+            "image_slant_range_time": image_slant_range_time,
             "range_sampling_rate": range_sampling_rate,
             "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
             "ascending_node_time": image_information["ascendingNodeTime"],
@@ -524,7 +528,7 @@ def open_pol_dataset(
     chunks: T.Union[None, T.Dict[str, int]] = None
 
     azimuth_time = pd.date_range(
-        start=image_information["productFirstLineUtcTime"],
+        start=product_first_line_utc_time,
         periods=number_of_lines,
         freq=pd.Timedelta(azimuth_time_interval, "s"),
     ).values
@@ -579,9 +583,8 @@ def open_pol_dataset(
 
     if product_information["projection"] == "Slant Range":
         slant_range_time = np.linspace(
-            image_information["slantRangeTime"],
-            image_information["slantRangeTime"]
-            + (number_of_samples - 1) / range_sampling_rate,
+            image_slant_range_time,
+            image_slant_range_time + (number_of_samples - 1) / range_sampling_rate,
             number_of_samples,
         )
         coords["slant_range_time"] = ("pixel", slant_range_time)
