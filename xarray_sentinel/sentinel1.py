@@ -11,7 +11,7 @@ References:
 import contextlib
 import os
 import warnings
-from typing import Any, Dict, List, Optional, Tuple, TypeVar
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 import fsspec
 import numpy as np

@@ -1,5 +1,5 @@
 import pathlib
-import typing as T
+from typing import Any
 
 import pytest
 
@@ -10,7 +10,7 @@ pytest.importorskip("zarr")
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
 
-def test_to_group_zarr(tmpdir: T.Any) -> None:
+def test_to_group_zarr(tmpdir: Any) -> None:
     product_path = (
         DATA_FOLDER
         / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE"

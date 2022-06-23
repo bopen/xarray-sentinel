@@ -1,5 +1,5 @@
 import os
-import typing as T
+from typing import Any, Dict, Optional, Tuple
 
 import xarray as xr
 
@@ -10,10 +10,10 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
     def open_dataset(  # type: ignore
         self,
         filename_or_obj: str,
-        drop_variables: T.Optional[T.Tuple[str]] = None,
-        group: T.Optional[str] = None,
-        storage_options: T.Optional[T.Dict[str, T.Any]] = None,
-        override_product_files: T.Optional[str] = None,
+        drop_variables: Optional[Tuple[str]] = None,
+        group: Optional[str] = None,
+        storage_options: Optional[Dict[str, Any]] = None,
+        override_product_files: Optional[str] = None,
     ) -> xr.Dataset:
         ds = sentinel1.open_sentinel1_dataset(
             filename_or_obj,
@@ -24,7 +24,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         )
         return ds
 
-    def guess_can_open(self, filename_or_obj: T.Any) -> bool:
+    def guess_can_open(self, filename_or_obj: Any) -> bool:
         try:
             _, ext = os.path.splitext(filename_or_obj)
         except TypeError:

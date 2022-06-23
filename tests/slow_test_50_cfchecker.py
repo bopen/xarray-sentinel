@@ -1,5 +1,5 @@
 import pathlib
-import typing as T
+from typing import Any, Dict
 
 import pytest
 import xarray as xr
@@ -10,7 +10,7 @@ pytest.importorskip("netCDF4")
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
 
-def cfcheck(path: str) -> T.Dict[str, int]:
+def cfcheck(path: str) -> Dict[str, int]:
     (
         badc,
         coards,
@@ -47,12 +47,12 @@ def cfcheck(path: str) -> T.Dict[str, int]:
         except cfchecks.FatalCheckerError:
             print("Checking of file %s aborted due to error" % file)
 
-    totals: T.Dict[str, int] = inst.get_total_counts()
+    totals: Dict[str, int] = inst.get_total_counts()
 
     return totals
 
 
-def test_cfcheck_grd(tmpdir: T.Any) -> None:
+def test_cfcheck_grd(tmpdir: Any) -> None:
     product_path = (
         DATA_FOLDER
         / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE"
