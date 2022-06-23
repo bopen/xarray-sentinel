@@ -1,4 +1,4 @@
-import typing as T
+from typing import Any, Dict, Optional
 
 import xarray as xr
 
@@ -7,8 +7,8 @@ from . import esa_safe
 
 def to_group_zarr(
     product_path: esa_safe.PathType,
-    output_store: T.Any,
-    groups: T.Optional[T.Dict[str, str]] = None,
+    output_store: Any,
+    groups: Optional[Dict[str, str]] = None,
 ) -> None:
     root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
     root.to_zarr(output_store, mode="w")
@@ -29,8 +29,8 @@ def to_group_zarr(
 def to_group_netcdf(
     product_path: esa_safe.PathType,
     output_store: str,
-    groups: T.Optional[T.Dict[str, str]] = None,
-    engine: T.Optional[str] = None,
+    groups: Optional[Dict[str, str]] = None,
+    engine: Optional[str] = None,
 ) -> None:
     root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
     root.to_netcdf(output_store, mode="w", engine=engine)

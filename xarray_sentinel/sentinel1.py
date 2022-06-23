@@ -10,8 +10,8 @@ References:
 
 import contextlib
 import os
-import typing as T
 import warnings
+from typing import Any, Dict, List, Optional, Tuple, TypeVar
 
 import fsspec
 import numpy as np
@@ -24,14 +24,14 @@ SPEED_OF_LIGHT = 299_792_458  # m / s
 ONE_SECOND = np.timedelta64(1, "s")
 
 
-DataArrayOrDataset = T.TypeVar("DataArrayOrDataset", xr.DataArray, xr.Dataset)
+DataArrayOrDataset = TypeVar("DataArrayOrDataset", xr.DataArray, xr.Dataset)
 
 
 def get_fs_path(
     urlpath_or_path: esa_safe.PathType,
-    fs: T.Optional[fsspec.AbstractFileSystem] = None,
-    storage_options: T.Optional[T.Dict[str, T.Any]] = None,
-) -> T.Tuple[fsspec.AbstractFileSystem, str]:
+    fs: Optional[fsspec.AbstractFileSystem] = None,
+    storage_options: Optional[Dict[str, Any]] = None,
+) -> Tuple[fsspec.AbstractFileSystem, str]:
     if fs is not None and storage_options is not None:
         raise TypeError("only one of 'fs' and 'storage_options' can be not None")
 
@@ -53,7 +53,7 @@ def get_fs_path(
     return fs, path
 
 
-def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
+def normalise_group(group: Optional[str]) -> Tuple[str, Optional[int]]:
     if group is None:
         group = ""
     if group.startswith("/"):
@@ -67,7 +67,7 @@ def normalise_group(group: T.Optional[str]) -> T.Tuple[str, T.Optional[int]]:
 
 
 def open_calibration_dataset(
-    calibration: esa_safe.PathType, attrs: T.Dict[str, T.Any] = {}
+    calibration: esa_safe.PathType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     calibration_vectors = esa_safe.parse_tag_as_list(
         calibration, ".//calibrationVector", "calibration"
@@ -114,7 +114,7 @@ def open_calibration_dataset(
 
 
 def open_noise_range_dataset(
-    noise: esa_safe.PathType, attrs: T.Dict[str, T.Any] = {}
+    noise: esa_safe.PathType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     noise_vectors = esa_safe.parse_tag_as_list(noise, ".//noiseRangeVector", "noise")
 
@@ -147,7 +147,7 @@ def open_noise_range_dataset(
 
 
 def open_noise_azimuth_dataset(
-    noise: esa_safe.PathType, attrs: T.Dict[str, T.Any] = {}
+    noise: esa_safe.PathType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     noise_vectors = esa_safe.parse_tag_as_list(noise, ".//noiseAzimuthVector", "noise")
 
@@ -174,7 +174,7 @@ def open_noise_azimuth_dataset(
 
 
 def open_coordinate_conversion_dataset(
-    annotation_path: esa_safe.PathType, attrs: T.Dict[str, T.Any] = {}
+    annotation_path: esa_safe.PathType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     coordinate_conversion = esa_safe.parse_tag_as_list(
         annotation_path, ".//coordinateConversionList/coordinateConversion"
@@ -184,8 +184,8 @@ def open_coordinate_conversion_dataset(
     sr0 = []
     azimuth_time = []
     slant_range_time = []
-    srgrCoefficients: T.List[T.List[float]] = []
-    grsrCoefficients: T.List[T.List[float]] = []
+    srgrCoefficients: List[List[float]] = []
+    grsrCoefficients: List[List[float]] = []
     for values in coordinate_conversion:
         sr0.append(values["sr0"])
         gr0.append(values["gr0"])
@@ -198,8 +198,8 @@ def open_coordinate_conversion_dataset(
             [float(v) for v in values["grsrCoefficients"]["$"].split()]
         )
 
-    coords: T.Dict[str, T.Any] = {}
-    data_vars: T.Dict[str, T.Any] = {}
+    coords: Dict[str, Any] = {}
+    data_vars: Dict[str, Any] = {}
     if srgrCoefficients:
         coords["azimuth_time"] = [np.datetime64(dt) for dt in azimuth_time]
         coords["degree"] = list(range(len(srgrCoefficients[0])))
@@ -213,13 +213,13 @@ def open_coordinate_conversion_dataset(
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
-def is_clockwise(poly: T.List[T.Tuple[float, float]]) -> bool:
+def is_clockwise(poly: List[Tuple[float, float]]) -> bool:
     start = np.array(poly[0])
     return float(np.cross(poly[1] - start, poly[2] - start)) < 0
 
 
 def open_gcp_dataset(
-    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+    annotation: esa_safe.PathOrFileType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_tag_as_list(
         annotation, ".//geolocationGridPoint"
@@ -291,7 +291,7 @@ def open_gcp_dataset(
 
 def get_footprint_linestring(
     azimuth_time: xr.DataArray, slant_range_time: xr.DataArray, gcp: xr.Dataset
-) -> T.List[T.Tuple[float, float]]:
+) -> List[Tuple[float, float]]:
     azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
     slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
 
@@ -320,13 +320,13 @@ def get_footprint_linestring(
 
 
 def open_attitude_dataset(
-    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+    annotation: esa_safe.PathOrFileType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     attitudes = esa_safe.parse_tag_as_list(annotation, ".//attitude")
 
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
-    azimuth_time: T.List[T.Any] = []
-    data_vars: T.Dict[str, T.Any]
+    azimuth_time: List[Any] = []
+    data_vars: Dict[str, Any]
     data_vars = {var: ("azimuth_time", [], attrs) for var in variables}
     for attitude in attitudes:
         azimuth_time.append(attitude["time"])
@@ -343,14 +343,14 @@ def open_attitude_dataset(
 
 
 def open_orbit_dataset(
-    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+    annotation: esa_safe.PathOrFileType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     orbits = esa_safe.parse_tag_as_list(annotation, ".//orbit")
 
     reference_system = orbits[0]["frame"]
     variables = ["position", "velocity"]
-    data: T.Dict[str, T.List[T.Any]] = {var: [[], [], []] for var in variables}
-    azimuth_time: T.List[T.Any] = []
+    data: Dict[str, List[Any]] = {var: [[], [], []] for var in variables}
+    azimuth_time: List[Any] = []
     for orbit in orbits:
         azimuth_time.append(orbit["time"])
         data["position"][0].append(orbit["position"]["x"])
@@ -387,7 +387,7 @@ def open_orbit_dataset(
 
 
 def open_dc_estimate_dataset(
-    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+    annotation: esa_safe.PathOrFileType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     dc_estimates = esa_safe.parse_tag_as_list(annotation, ".//dcEstimate")
 
@@ -416,7 +416,7 @@ def open_dc_estimate_dataset(
 
 
 def open_azimuth_fm_rate_dataset(
-    annotation: esa_safe.PathOrFileType, attrs: T.Dict[str, T.Any] = {}
+    annotation: esa_safe.PathOrFileType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
     azimuth_fm_rates = esa_safe.parse_tag_as_list(annotation, ".//azimuthFmRate")
 
@@ -453,12 +453,12 @@ def open_azimuth_fm_rate_dataset(
 
 
 def find_available_groups(
-    product_files: T.Dict[str, T.Tuple[str, str, str, str, str]],
+    product_files: Dict[str, Tuple[str, str, str, str, str]],
     product_path: str,
     check_files_exist: bool = False,
     fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
-) -> T.Dict[str, T.List[str]]:
-    groups: T.Dict[str, T.List[str]] = {}
+) -> Dict[str, List[str]]:
+    groups: Dict[str, List[str]] = {}
     for path, (type, _, swath, polarization, _) in product_files.items():
         swath_pol_group = f"{swath}/{polarization}".upper()
         abspath = os.path.join(product_path, os.path.normpath(path))
@@ -491,8 +491,8 @@ def find_available_groups(
 def open_pol_dataset(
     measurement: esa_safe.PathOrFileType,
     annotation: esa_safe.PathOrFileType,
-    fs: T.Optional[fsspec.AbstractFileSystem] = None,
-    attrs: T.Dict[str, T.Any] = {},
+    fs: Optional[fsspec.AbstractFileSystem] = None,
+    attrs: Dict[str, Any] = {},
 ) -> xr.Dataset:
 
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
@@ -525,7 +525,7 @@ def open_pol_dataset(
     )
     encoding = {}
     swap_dims = {}
-    chunks: T.Union[None, T.Dict[str, int]] = None
+    chunks: Union[None, Dict[str, int]] = None
 
     azimuth_time = pd.date_range(
         start=product_first_line_utc_time,
@@ -647,10 +647,10 @@ def find_bursts_index(
 
 def crop_burst_dataset(
     pol_dataset: DataArrayOrDataset,
-    burst_index: T.Optional[int] = None,
-    azimuth_anx_time: T.Optional[float] = None,
+    burst_index: Optional[int] = None,
+    azimuth_anx_time: Optional[float] = None,
     use_center: bool = False,
-    burst_id: T.Optional[int] = None,
+    burst_id: Optional[int] = None,
 ) -> DataArrayOrDataset:
     """Return the measurement dataset cropped to the selected burst.
 
@@ -730,7 +730,7 @@ def mosaic_slc_iw(
 def calibrate_amplitude(
     digital_number: xr.DataArray,
     calibration_lut: xr.DataArray,
-    **kwargs: T.Any,
+    **kwargs: Any,
 ) -> xr.DataArray:
     """Return the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
 
@@ -763,8 +763,8 @@ def calibrate_intensity(
     digital_number: xr.DataArray,
     calibration_lut: xr.DataArray,
     as_db: bool = False,
-    min_db: T.Optional[float] = -40.0,
-    **kwargs: T.Any,
+    min_db: Optional[float] = -40.0,
+    **kwargs: Any,
 ) -> xr.DataArray:
     """Return the calibrated intensity. The calibration is done using the calibration LUT in the product metadata.
 
@@ -850,8 +850,8 @@ METADATA_OPENERS = {
 
 
 def do_override_product_files(
-    template: str, product_files: T.Dict[str, T.Tuple[str, str, str, str, str]]
-) -> T.Dict[str, T.Tuple[str, str, str, str, str]]:
+    template: str, product_files: Dict[str, Tuple[str, str, str, str, str]]
+) -> Dict[str, Tuple[str, str, str, str, str]]:
     overridden_product_files = {}
     for path, description in product_files.items():
         type, prefix, swath, polarization, date = description
@@ -865,12 +865,12 @@ def do_override_product_files(
 def open_sentinel1_dataset(
     product_urlpath: esa_safe.PathType,
     *,
-    drop_variables: T.Optional[T.Tuple[str]] = None,
-    group: T.Optional[str] = None,
-    fs: T.Optional[fsspec.AbstractFileSystem] = None,
-    storage_options: T.Optional[T.Dict[str, T.Any]] = None,
+    drop_variables: Optional[Tuple[str]] = None,
+    group: Optional[str] = None,
+    fs: Optional[fsspec.AbstractFileSystem] = None,
+    storage_options: Optional[Dict[str, Any]] = None,
     check_files_exist: bool = False,
-    override_product_files: T.Optional[str] = None,
+    override_product_files: Optional[str] = None,
 ) -> xr.Dataset:
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
