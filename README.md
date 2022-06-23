@@ -404,6 +404,7 @@ Attributes:
     azimuth_pixel_spacing:               3.55338
     range_pixel_spacing:                 2.246363
     azimuth_time_interval:               0.0005194923129469381
+    image_slant_range_time:              0.005272617843915159
     range_sampling_rate:                 66728395.09333333
     incidence_angle_mid_swath:           32.03479766845703
     units:                               m2 m-2

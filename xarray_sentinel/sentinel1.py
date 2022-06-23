@@ -503,7 +503,6 @@ def open_pol_dataset(
     range_sampling_rate = product_information["rangeSamplingRate"]
 
     number_of_lines = image_information["numberOfLines"]
-    product_first_line_utc_time = image_information["productFirstLineUtcTime"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
     number_of_bursts = swath_timing["burstList"]["@count"]
     image_slant_range_time = image_information["slantRangeTime"]
@@ -515,7 +514,6 @@ def open_pol_dataset(
             "radar_frequency": product_information["radarFrequency"] / 10**9,
             "azimuth_pixel_spacing": image_information["azimuthPixelSpacing"],
             "range_pixel_spacing": range_pixel_spacing,
-            "product_first_line_utc_time": product_first_line_utc_time,
             "azimuth_time_interval": azimuth_time_interval,
             "image_slant_range_time": image_slant_range_time,
             "range_sampling_rate": range_sampling_rate,
@@ -528,7 +526,7 @@ def open_pol_dataset(
     chunks: Union[None, Dict[str, int]] = None
 
     azimuth_time = pd.date_range(
-        start=product_first_line_utc_time,
+        start=image_information["productFirstLineUtcTime"],
         periods=number_of_lines,
         freq=pd.Timedelta(azimuth_time_interval, "s"),
     ).values
