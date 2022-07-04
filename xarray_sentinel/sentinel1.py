@@ -601,11 +601,10 @@ def open_pol_dataset(
     #   the try block uses fsspec if rasterio >= 1.3a3 is installed
     #   the except block falls back to standard file based rasterio
     #   the with is needed to avoid polluting stderr when the try block fails
-    with contextlib.redirect_stderr(open("/dev/null", "w")):
-        try:
-            arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
-        except AttributeError:
-            arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
+    if fs is None or isinstance(fs, fsspec.implementations.local.LocalFileSystem):
+        arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
+    else:
+        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
 
     # clear the encoding as many GeoTIFF details are inconpatible with the CF conventions
     arr.encoding.clear()
