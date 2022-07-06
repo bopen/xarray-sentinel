@@ -33,7 +33,7 @@ def to_group_netcdf(
     product_path: esa_safe.PathType,
     output_store: str,
     groups: Optional[Dict[str, str]] = None,
-    engine: str | None = None,
+    engine: Optional[str] = None,
 ) -> None:
     root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
     root.to_netcdf(output_store, mode="w", engine=engine)
