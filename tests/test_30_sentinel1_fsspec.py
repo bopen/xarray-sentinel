@@ -95,7 +95,6 @@ def test_open_dataset_zip_metadata() -> None:
     assert res.dims == {"axis": 3, "azimuth_time": 17}
 
 
-@pytest.mark.xfail
 def test_open_dataset_zip_data() -> None:
     zip_path = (
         DATA_FOLDER
