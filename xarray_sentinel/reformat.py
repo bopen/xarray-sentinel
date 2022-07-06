@@ -11,7 +11,7 @@ def to_group_zarr(
     output_store: Any,
     groups: Optional[Dict[str, str]] = None,
 ) -> None:
-    root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
+    root = xr.open_dataset(product_path, engine="sentinel-1")
     root.to_zarr(output_store, mode="w")
 
     if groups is None:
@@ -19,7 +19,9 @@ def to_group_zarr(
 
     for group_out, group_in in groups.items():
         try:
-            group_ds = xr.open_dataset(product_path, engine="sentinel-1", group=group_in)  # type: ignore
+            group_ds = xr.open_dataset(
+                product_path, engine="sentinel-1", group=group_in
+            )
             group_ds.to_zarr(output_store, mode="a", group=group_out)
         except (FileNotFoundError, rasterio.RasterioIOError):
             pass
@@ -31,9 +33,9 @@ def to_group_netcdf(
     product_path: esa_safe.PathType,
     output_store: str,
     groups: Optional[Dict[str, str]] = None,
-    engine: Optional[str] = None,
+    engine: xr.backends.api.T_NetcdfEngine | None = None,
 ) -> None:
-    root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
+    root = xr.open_dataset(product_path, engine="sentinel-1")
     root.to_netcdf(output_store, mode="w", engine=engine)
 
     if groups is None:
@@ -41,7 +43,9 @@ def to_group_netcdf(
 
     for group_out, group_in in groups.items():
         try:
-            group_ds = xr.open_dataset(product_path, engine="sentinel-1", group=group_in)  # type: ignore
+            group_ds = xr.open_dataset(
+                product_path, engine="sentinel-1", group=group_in
+            )
             group_ds.to_netcdf(output_store, mode="a", group=group_out, engine=engine)
         except (FileNotFoundError, rasterio.RasterioIOError):
             pass
