@@ -603,7 +603,7 @@ def open_pol_dataset(
     if fs is None or isinstance(fs, fsspec.implementations.local.LocalFileSystem):
         arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
     else:
-        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)
+        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
 
     # clear the encoding as many GeoTIFF details are inconpatible with the CF conventions
     arr.encoding.clear()
@@ -614,7 +614,7 @@ def open_pol_dataset(
     arr = arr.swap_dims(swap_dims)
 
     arr.attrs.update(attrs)
-    arr.encoding.update(encoding)  # type: ignore
+    arr.encoding.update(encoding)
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 

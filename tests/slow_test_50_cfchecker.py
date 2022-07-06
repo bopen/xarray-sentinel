@@ -62,7 +62,7 @@ def test_cfcheck_grd(tmpdir: Any) -> None:
     while groups:
         group = groups.pop()
         try:
-            ds = xr.open_dataset(product_path, engine="sentinel-1", group=group)
+            ds = xr.open_dataset(product_path, engine="sentinel-1", group=group)  # type: ignore
             groups.extend(f"{group}/{g}" for g in ds.attrs.get("subgroups", []))
         except FileNotFoundError:
             continue

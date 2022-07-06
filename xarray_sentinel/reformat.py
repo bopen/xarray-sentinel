@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Dict, Optional
 
 import rasterio
@@ -13,7 +11,7 @@ def to_group_zarr(
     output_store: Any,
     groups: Optional[Dict[str, str]] = None,
 ) -> None:
-    root = xr.open_dataset(product_path, engine="sentinel-1")
+    root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
     root.to_zarr(output_store, mode="w")
 
     if groups is None:
@@ -23,7 +21,7 @@ def to_group_zarr(
         try:
             group_ds = xr.open_dataset(
                 product_path, engine="sentinel-1", group=group_in
-            )
+            )  # type: ignore
             group_ds.to_zarr(output_store, mode="a", group=group_out)
         except (FileNotFoundError, rasterio.RasterioIOError):
             pass
@@ -35,9 +33,9 @@ def to_group_netcdf(
     product_path: esa_safe.PathType,
     output_store: str,
     groups: Optional[Dict[str, str]] = None,
-    engine: xr.backends.api.T_NetcdfEngine | None = None,
+    engine: str | None = None,
 ) -> None:
-    root = xr.open_dataset(product_path, engine="sentinel-1")
+    root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
     root.to_netcdf(output_store, mode="w", engine=engine)
 
     if groups is None:
@@ -47,7 +45,7 @@ def to_group_netcdf(
         try:
             group_ds = xr.open_dataset(
                 product_path, engine="sentinel-1", group=group_in
-            )
+            )  # type: ignore
             group_ds.to_netcdf(output_store, mode="a", group=group_out, engine=engine)
         except (FileNotFoundError, rasterio.RasterioIOError):
             pass
