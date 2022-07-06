@@ -8,7 +8,6 @@ References:
     https://sentinel.esa.int/documents/247904/1877131/Sentinel-1-Product-Specification
 """
 
-import contextlib
 import os
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
