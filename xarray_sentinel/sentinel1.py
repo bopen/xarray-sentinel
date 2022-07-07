@@ -1,7 +1,8 @@
 """Map Sentinel-1 data products to xarray.
 
 References:
-  - Sentinel-1 document library: https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library
+  - Sentinel-1 document library:
+    https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library
   - Sentinel-1 Product Specification v3.9 07 May 2021 S1-RS-MDA-52-7441-3-9 documenting IPF 3.40
     https://sentinel.esa.int/documents/247904/1877131/S1-RS-MDA-52-7441-3-9-2_Sentinel-1ProductSpecification.pdf
   - Sentinel-1 Product Specification v3.7 27 February 2020 S1-RS-MDA-52-7441 documenting IPF 3.30
@@ -503,7 +504,7 @@ def open_rasterio_dataarray(
             raise
     else:
         arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
-    return arr
+    return arr  # type: ignore
 
 
 def open_pol_dataset(
@@ -622,11 +623,11 @@ def open_pol_dataset(
 
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
-    arr = arr.assign_coords(coords)
+    arr = arr.assign_coords(coords)  # type: ignore
     arr = arr.swap_dims(swap_dims)
 
     arr.attrs.update(attrs)
-    arr.encoding.update(encoding)
+    arr.encoding.update(encoding)  # type: ignore
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
@@ -668,7 +669,8 @@ def crop_burst_dataset(
     :param int burst_index: burst index can take values from 1 to the number of bursts
     :param float azimuth_anx_time: azimuth anx time of first line of the bursts
     To use the center instead of the first line, set `use_center=True`
-    :param bool use_center: If `true`, it uses  as reference the azimuth anx time of the burst center instead of the first line
+    :param bool use_center: If `True`, it uses the azimuth anx time as a reference for
+    the burst center instead of the first line
     :param int burst_id: for product processed with Sentinel-1 IPF version 3.40 or higher,
     the burst can be selected using the relative burst id.
     """
