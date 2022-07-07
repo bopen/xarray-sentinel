@@ -254,29 +254,6 @@ def open_gcp_dataset(
             i = pixel.index(ggp["pixel"])
             data_vars[var][1][j, i] = ggp[var]
 
-    footprint = []
-    for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
-        footprint.append(
-            (data_vars["latitude"][1][j, i], data_vars["longitude"][1][j, i])
-        )
-
-    # check that the poly has the correct orientation
-    if is_clockwise(footprint):
-        footprint = footprint[::-1]
-
-    # close the polygon
-    footprint.append(footprint[0])
-
-    wkt = "POLYGON((" + ",".join(f"{x} {y}" for y, x in footprint) + "))"
-    gcp_attrs = {
-        "geospatial_bounds": wkt,
-        "geospatial_lat_min": min(data_vars["latitude"][1].flat),
-        "geospatial_lat_max": max(data_vars["latitude"][1].flat),
-        "geospatial_lon_min": min(data_vars["longitude"][1].flat),
-        "geospatial_lon_max": max(data_vars["longitude"][1].flat),
-    }
-    gcp_attrs.update(attrs)
-
     ds = xr.Dataset(
         data_vars=data_vars,
         coords={
@@ -285,8 +262,21 @@ def open_gcp_dataset(
             "line": ("azimuth_time", line),
             "pixel": ("slant_range_time", pixel),
         },
-        attrs=gcp_attrs,
+        attrs=attrs,
     )
+
+    footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, ds)
+
+    wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
+    geospatial_attrs = {
+        "geospatial_bounds": wkt,
+        "geospatial_lat_min": min(lat for _, lat in footprint),
+        "geospatial_lat_max": max(lat for _, lat in footprint),
+        "geospatial_lon_min": min(lon for lon, _ in footprint),
+        "geospatial_lon_max": max(lon for lon, _ in footprint),
+    }
+    ds.attrs.update(geospatial_attrs)  # type: ignore
+
     return ds
 
 

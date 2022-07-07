@@ -123,10 +123,17 @@ def test_open_coordinate_conversion_dataset() -> None:
 
 
 def test_open_gcp_dataset() -> None:
-    expected_polygon = (
-        "POLYGON((12.42647347821595 47.09200435560957,"
-        "12.04397933341514 45.57910451206848,10.876144717121 45.73265733767158,"
-        "11.26870151724317 47.24053130234206,12.42647347821595 47.09200435560957))"
+    expected_polygon_text = (
+        "POLYGON((11.26870151724317 47.24053130234206,10.876144717121 45.73265733767158,"
+        "12.04397933341514 45.57910451206848,12.42647347821595 47.09200435560957,"
+        "11.26870151724317 47.24053130234206))"
+    )
+    expected_polygon = shapely.wkt.loads(expected_polygon_text)
+    expected_bbox = (
+        10.876144717121,
+        45.57910451206848,
+        12.42647347821595,
+        47.24053130234206,
     )
 
     res = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
@@ -135,7 +142,15 @@ def test_open_gcp_dataset() -> None:
     assert set(res.coords) == {"line", "pixel", "azimuth_time", "slant_range_time"}
     assert isinstance(res.attrs["geospatial_bounds"], str)
     assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).is_valid
-    assert res.attrs["geospatial_bounds"] == expected_polygon
+    assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).equals(expected_polygon)
+    assert res.attrs["geospatial_bounds"] == expected_polygon_text
+    bbox = (
+        res.attrs["geospatial_lon_min"],
+        res.attrs["geospatial_lat_min"],
+        res.attrs["geospatial_lon_max"],
+        res.attrs["geospatial_lat_max"],
+    )
+    assert np.allclose(bbox, expected_bbox)
 
 
 def test_get_footprint_linestring() -> None:
