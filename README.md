@@ -408,7 +408,7 @@ Attributes:
     range_sampling_rate:                 66728395.09333333
     incidence_angle_mid_swath:           32.03479766845703
     units:                               m2 m-2
-    long_name:                           gamma 
+    long_name:                           gamma
 
 ```
 
