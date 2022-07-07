@@ -2,6 +2,7 @@ import pathlib
 
 import fsspec
 import pytest
+import rasterio
 import xarray as xr
 
 from xarray_sentinel import sentinel1
@@ -95,6 +96,9 @@ def test_open_dataset_zip_metadata() -> None:
     assert res.dims == {"axis": 3, "azimuth_time": 17}
 
 
+@pytest.mark.xfail(
+    rasterio.__version__ < "1.3.0", reason="full fsspec support needs rasterio > 1.3.0"
+)
 def test_open_dataset_zip_data() -> None:
     zip_path = (
         DATA_FOLDER
