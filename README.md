@@ -43,7 +43,7 @@ The following commands create a new environment, activate it, install the packag
 ```shell
     conda create -n XARRAY-SENTINEL
     conda activate XARRAY-SENTINEL
-    conda install -c conda-forge dask xarray-sentinel
+    conda install -c conda-forge dask "rasterio=>1.3.0" xarray-sentinel
 ```
 
 ## Usage
@@ -414,10 +414,7 @@ Attributes:
 
 ### Advanced data access via fsspec
 
-**You need the unreleased rasterio>=1.3a3 for fsspec to work on measurement data**
-
-You can test with the following:
-`pip install -U --pre --no-deps --no-binary rasterio "rasterio>=1.3a3"`.
+**You need the unreleased rasterio >= 1.3.0 for fsspec to work on measurement data**
 
 *xarray-sentinel* can read data from a variety of data stores including local file systems,
 network file systems, cloud object stores and compressed file formats, like Zip.
