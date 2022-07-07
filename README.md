@@ -29,7 +29,7 @@ with the following functionalities:
   [*rioxarray*](https://corteva.github.io/rioxarray) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
 - provides a few helpers for simple operations involving metadata like
-  croppping individual bursts out of IW SLC swaths
+  cropping individual bursts out of IW SLC swaths
   applying radiometric calibration polynomials and
   converting slant to ground range for GRD products
 
