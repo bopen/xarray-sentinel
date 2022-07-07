@@ -52,6 +52,8 @@ jobs:
     - name: Run doc tests
       run: |
         make doc-test
+    - name: Upload code coverage to Codecov
+      uses: codecov/codecov-action@v3.1.0
 
   type-check:
     needs: [unit-tests]
@@ -112,6 +114,8 @@ jobs:
     - name: Run tests
       run: |
         make test
+    - name: Upload code coverage to Codecov
+      uses: codecov/codecov-action@v3.1.0
 
   distribution:
     runs-on: ubuntu-latest

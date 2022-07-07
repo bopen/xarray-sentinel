@@ -7,13 +7,13 @@ dependencies:
 - mypy
 - netcdf4
 - nomkl
-- numpy >= 1.22.0
+- numpy == 1.22.0
 - pytest
 - pytest-cov
-- rasterio >= 1.3.0
+- rasterio == 1.2.4
 - rioxarray
 - shapely
 - types-setuptools
-- xarray >= 2022.3.0
+- xarray >= 0.22.2
 - xmlschema
 - zarr
