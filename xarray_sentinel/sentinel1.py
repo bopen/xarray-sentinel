@@ -258,7 +258,7 @@ def open_gcp_dataset(
             (data_vars["latitude"][1][j, i], data_vars["longitude"][1][j, i])
         )
 
-    # check that the poly as the correct orientation
+    # check that the poly has the correct orientation
     if is_clockwise(footprint):
         footprint = footprint[::-1]
 
