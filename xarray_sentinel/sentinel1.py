@@ -10,11 +10,12 @@ References:
 
 import os
 import warnings
-from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, TypeVar
 
 import fsspec
 import numpy as np
 import pandas as pd
+import rasterio
 import xarray as xr
 
 from . import conventions, esa_safe
@@ -487,6 +488,24 @@ def find_available_groups(
     return groups
 
 
+def open_rasterio_dataarray(
+    measurement: esa_safe.PathOrFileType,
+    fs: Optional[fsspec.AbstractFileSystem],
+    chunks: Optional[Dict[str, int]],
+) -> xr.DataArray:
+    # fsspec needs rasterio >= 1.3.0, but we allow earlier rasterio versions for local files
+    if fs is None or isinstance(fs, fsspec.implementations.local.LocalFileSystem):
+        try:
+            arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
+        except rasterio.RasterioIOError as ex:
+            if "No such file" in str(ex):
+                raise FileNotFoundError(str(ex))
+            raise
+    else:
+        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
+    return arr
+
+
 def open_pol_dataset(
     measurement: esa_safe.PathOrFileType,
     annotation: esa_safe.PathOrFileType,
@@ -522,7 +541,7 @@ def open_pol_dataset(
     )
     encoding = {}
     swap_dims = {}
-    chunks: Union[None, Dict[str, int]] = None
+    chunks: Optional[Dict[str, int]] = None
 
     azimuth_time = pd.date_range(
         start=image_information["productFirstLineUtcTime"],
@@ -596,14 +615,7 @@ def open_pol_dataset(
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
-    # temporary ugly work-around to get fsspec support with rasterio >= 1.3a3
-    #   the try block uses fsspec if rasterio >= 1.3a3 is installed
-    #   the except block falls back to standard file based rasterio
-    #   the with is needed to avoid polluting stderr when the try block fails
-    if fs is None or isinstance(fs, fsspec.implementations.local.LocalFileSystem):
-        arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)  # type: ignore
-    else:
-        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
+    arr = open_rasterio_dataarray(measurement, fs, chunks)
 
     # clear the encoding as many GeoTIFF details are inconpatible with the CF conventions
     arr.encoding.clear()

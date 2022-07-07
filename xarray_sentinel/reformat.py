@@ -1,6 +1,5 @@
 from typing import Any, Dict, Optional
 
-import rasterio
 import xarray as xr
 
 from . import esa_safe
@@ -23,7 +22,7 @@ def to_group_zarr(
                 product_path, engine="sentinel-1", group=group_in
             )  # type: ignore
             group_ds.to_zarr(output_store, mode="a", group=group_out)
-        except (FileNotFoundError, rasterio.RasterioIOError):
+        except FileNotFoundError:
             pass
 
 
@@ -47,5 +46,5 @@ def to_group_netcdf(
                 product_path, engine="sentinel-1", group=group_in
             )  # type: ignore
             group_ds.to_netcdf(output_store, mode="a", group=group_out, engine=engine)
-        except (FileNotFoundError, rasterio.RasterioIOError):
+        except FileNotFoundError:
             pass
