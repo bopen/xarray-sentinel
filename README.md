@@ -24,7 +24,7 @@ with the following functionalities:
   satellite orbit and attitude, ground control points, radiometric calibration look up tables,
   Doppler centroid estimation and more
 - reads uncompressed and compressed SAFE data products on the local computer or
-  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - **depends on rasterio>=1.3a3**
+  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io) - **depends on rasterio >= 1.3.0**
 - supports larger-than-memory and distributed data access via [*Dask*](https://dask.org) and
   [*rioxarray*](https://corteva.github.io/rioxarray) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
