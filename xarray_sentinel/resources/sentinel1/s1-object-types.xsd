@@ -4,7 +4,7 @@
 	<!--
     ========================================================================
     = Common product type definitions
-    ======================================================================== 
+    ========================================================================
     -->
 	<xsd:simpleType name="absOrbitNumberType">
 		<xsd:annotation>
@@ -19,7 +19,7 @@
 	</xsd:simpleType>
 	<xsd:complexType name="adsHeaderType">
 		<xsd:annotation>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 /*
  * XmlConvert function for the SPF_ObjectTypes_AdsHeaderType structure.
  */
@@ -85,7 +85,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    sprintf( xmlFieldPath,
             "%s%s",
             xmlPath,
@@ -165,7 +165,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
 </xsd:appinfo>
@@ -732,7 +732,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
 	<xsd:simpleType name="timeType">
 		<xsd:annotation>
 			<xsd:appinfo>CONVERT_TYPE_DEC: typedef UTL_DateTime SPF_ObjectTypes_TimeType;</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -751,11 +751,11 @@ inline int XmlConvert( XRW_Convert_Op    op,
          {
             return UTL_Const_failure;
          }
-         
-         if( XRW_Convert_String( op, 
+
+         if( XRW_Convert_String( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
-                                 time, 
+                                 time,
                                  UTL_DateTime_MaxDateTimeSize )
              != UTL_Const_success )
          {
@@ -765,16 +765,16 @@ inline int XmlConvert( XRW_Convert_Op    op,
       }
       case XRW_Convert_OpFromXml:
       {
-         if( XRW_Convert_String( op, 
+         if( XRW_Convert_String( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
-                                 time, 
+                                 time,
                                  UTL_DateTime_MaxDateTimeSize )
              != UTL_Const_success )
          {
             return UTL_Const_failure;
          }
-         
+
          if ( UTL_DateTime_Sscan( time,
                                   UTL_DateTime_InputFormat_CYMDTHMScu,
                                   &amp;value )
@@ -869,7 +869,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
 	<!--
     ========================================================================
     = Primative type definitions
-    ======================================================================== 
+    ========================================================================
     -->
 	<xsd:simpleType name="bool">
 		<xsd:annotation>
@@ -1105,7 +1105,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
 	</xsd:complexType>
 	<xsd:complexType name="complex">
 		<xsd:annotation>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1143,7 +1143,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
 </xsd:appinfo>
@@ -1170,7 +1170,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    unsigned long count;
    SPF_ObjectTypes_Uint64 values[SPF_ObjectTypes_MaxGroupedArrayLength];
 };</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1200,7 +1200,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    if ( XRW_Convert_GroupedArray( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
@@ -1210,7 +1210,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
 </xsd:appinfo>
@@ -1231,7 +1231,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    unsigned long count;
    int values[SPF_ObjectTypes_MaxGroupedArrayLength];
 };</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1261,7 +1261,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    if( XRW_Convert_GroupedArray( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
@@ -1271,7 +1271,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
 </xsd:appinfo>
@@ -1292,7 +1292,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    unsigned long count;
    float values[SPF_ObjectTypes_MaxGroupedArrayLength];
 };</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1322,7 +1322,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    if( XRW_Convert_GroupedArray( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
@@ -1332,7 +1332,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
 </xsd:appinfo>
@@ -1353,7 +1353,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    unsigned long count;
    double values[SPF_ObjectTypes_MaxGroupedArrayLength];
 };</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1383,7 +1383,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    if( XRW_Convert_GroupedArray( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
@@ -1393,7 +1393,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
          </xsd:appinfo>
@@ -1415,7 +1415,7 @@ struct SPF_ObjectTypes_FloatCoefficientArray
    unsigned long count;
    float values[SPF_ObjectTypes_MaxCoeffArrayLength];
 };</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1445,7 +1445,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    if( XRW_Convert_GroupedArray( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
@@ -1455,7 +1455,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
 </xsd:appinfo>
@@ -1476,7 +1476,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    unsigned long count;
    double values[SPF_ObjectTypes_MaxCoeffArrayLength];
 };</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1506,7 +1506,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    if( XRW_Convert_GroupedArray( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
@@ -1516,7 +1516,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
          </xsd:appinfo>
@@ -1537,7 +1537,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    unsigned long count;
    PTL_FComplex values[SPF_ObjectTypes_MaxGroupedArrayLength];
 };</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1553,7 +1553,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
          return UTL_Const_failure;
       }
    }
-   
+
    char xmlFieldPath[XRW_Convert_MaxStringLength + 1];
    sprintf( xmlFieldPath,
             "%s%s",
@@ -1567,7 +1567,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    if( XRW_Convert_GroupedArrayComplex( op,
                                         xmlTreeDescriptor,
                                         xmlPath,
@@ -1577,7 +1577,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
 </xsd:appinfo>
@@ -1599,7 +1599,7 @@ struct SPF_ObjectTypes_FloatPatternArray
    unsigned long count;
    float values[SPF_ObjectTypes_MaxPatternArrayLength];
 };</xsd:appinfo>
-			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT 
+			<xsd:appinfo>CONVERT_FUNC_DEC: INSERT
 inline int XmlConvert( XRW_Convert_Op    op,
                        XRW_Convert_Tree* xmlTreeDescriptor,
                        const char*       xmlPath,
@@ -1629,7 +1629,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    if( XRW_Convert_GroupedArray( op,
                                  xmlTreeDescriptor,
                                  xmlPath,
@@ -1639,7 +1639,7 @@ inline int XmlConvert( XRW_Convert_Op    op,
    {
       return UTL_Const_failure;
    }
-   
+
    return UTL_Const_success;
 }
 </xsd:appinfo>

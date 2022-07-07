@@ -6,13 +6,6 @@ requires = [
     "setuptools_scm_git_archive",
 ]
 
-[tool.setuptools_scm]
-write_to = "xarray_sentinel/version.py"
-write_to_template = '''
-# don't change, don't track in version control
-__version__ = "{version}"
-'''
-
 [tool.coverage.run]
 branch = true
 omit = ["setup.py"]
@@ -22,3 +15,10 @@ profile = "black"
 
 [tool.pytest.ini_options]
 addopts = "--doctest-glob='*.md'"
+
+[tool.setuptools_scm]
+write_to = "xarray_sentinel/version.py"
+write_to_template = '''
+# don't change, don't track in version control
+__version__ = "{version}"
+'''

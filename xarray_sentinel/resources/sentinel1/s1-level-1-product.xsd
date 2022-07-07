@@ -452,7 +452,7 @@
    // --- ELEMENTS
    /// Relative orbit number.
    SPF_ObjectTypes_UnsignedInt relative;
-   
+
 };
       </xsd:appinfo>
       <xsd:appinfo>CONVERT_FUNC_DEF:
@@ -465,17 +465,17 @@ int XmlConvert( XRW_Convert_Op    op,
                 SPF_AdsProduct_BurstIdType&amp; value )
 {
    TRACE_ENTRY();
-   
+
    char xmlFieldPath[XRW_Convert_MaxStringLength + 1];
-   
+
    if ( XRW_Convert( op, xmlTreeDescriptor, xmlPath, value.relative )
         != UTL_Const_success )
    {
       SCAF_PRINT( ERROR_TOKEN, "Failed to convert " &lt;&lt; xmlPath );
       TRACE_ABORT();
       return UTL_Const_failure;
-   }   
-   
+   }
+
    sprintf( xmlFieldPath,
             "%s%s",
             xmlPath,
@@ -486,7 +486,7 @@ int XmlConvert( XRW_Convert_Op    op,
       SCAF_PRINT( ERROR_TOKEN, "Failed to convert " &lt;&lt; xmlFieldPath );
       return UTL_Const_failure;
    }
-   
+
    TRACE_EXIT();
    return UTL_Const_success;
 }
