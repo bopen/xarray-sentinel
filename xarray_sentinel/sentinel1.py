@@ -762,7 +762,7 @@ def calibrate_amplitude(
     amplitude.attrs.update(digital_number.attrs)
     try:
         lut_name = calibration_lut.attrs["long_name"].partition("calibration LUT")[0]
-        amplitude.attrs["long_name"] = f"amplitude for {lut_name}"
+        amplitude.attrs["long_name"] = f"amplitude for {lut_name}".strip()
         amplitude.attrs["units"] = calibration.attrs["units"]
     except KeyError:
         pass
