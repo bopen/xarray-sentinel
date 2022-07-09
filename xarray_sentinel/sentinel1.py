@@ -532,6 +532,7 @@ def open_pol_dataset(
     annotation: esa_safe.PathOrFileType,
     fs: Optional[fsspec.AbstractFileSystem] = None,
     attrs: Dict[str, Any] = {},
+    geospatial_attrs: bool = False,
 ) -> xr.Dataset:
 
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
@@ -649,6 +650,10 @@ def open_pol_dataset(
     arr = arr.rename({"y": "line", "x": "pixel"})
     arr = arr.assign_coords(coords)  # type: ignore
     arr = arr.swap_dims(swap_dims)
+
+    if geospatial_attrs:
+        gcp = open_gcp_dataset(annotation)
+        attrs.update(gcp.attrs)  # type: ignore
 
     arr.attrs.update(attrs)
     arr.encoding.update(encoding)  # type: ignore
@@ -915,6 +920,7 @@ def open_sentinel1_dataset(
     storage_options: Optional[Dict[str, Any]] = None,
     check_files_exist: bool = False,
     override_product_files: Optional[str] = None,
+    geospatial_attrs: bool = False,
 ) -> xr.Dataset:
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
@@ -953,7 +959,11 @@ def open_sentinel1_dataset(
         if group.count("/") == 1:
             with fs.open(groups[group][1]) as annotation:
                 ds = open_pol_dataset(
-                    groups[group][0], annotation, fs=fs, attrs=common_attrs
+                    groups[group][0],
+                    annotation,
+                    fs=fs,
+                    attrs=common_attrs,
+                    geospatial_attrs=geospatial_attrs,
                 )
         elif group.count("/") == 2:
             _, _, metadata = group.split("/", 2)
