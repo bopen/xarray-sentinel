@@ -12,7 +12,7 @@ test:
 	python -m pytest -vv --cov=. --cov-report=$(COV_REPORT)
 
 doc-test:
-	python -m pytest -vv README.md
+	python -m pytest -vv --doctest-glob='*.md' README.md
 
 type-check:
 	python -m mypy --strict .
