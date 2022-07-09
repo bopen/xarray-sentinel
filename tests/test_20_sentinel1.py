@@ -226,9 +226,10 @@ def test_open_pol_dataset_iw() -> None:
         "10.876144717121 45.73265733767158,12.04397933341514 45.57910451206848,"
         "12.42647347821595 47.09200435560957,11.26870151724317 47.24053130234206))"
     )
+    gcp_ds = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
 
     res = sentinel1.open_pol_dataset(
-        SLC_IW1_VV_measurement, SLC_IW1_VV_annotation, geospatial_attrs=True
+        SLC_IW1_VV_measurement, SLC_IW1_VV_annotation, gcp=gcp_ds
     )
 
     assert res.attrs["geospatial_bounds"] == expected_geospatial_bounds
