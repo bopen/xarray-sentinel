@@ -282,7 +282,11 @@ def open_gcp_dataset(
 
 
 def get_footprint_linestring(
-    azimuth_time: xr.DataArray, slant_range_time: xr.DataArray, gcp: xr.Dataset
+    azimuth_time: xr.DataArray,
+    slant_range_time: xr.DataArray,
+    gcp: xr.Dataset,
+    method: str = "linear",
+    kwargs: Dict[str, Any] = {"fill_value": "extrapolate"},
 ) -> List[Tuple[float, float]]:
     azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
     slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
@@ -291,12 +295,18 @@ def get_footprint_linestring(
     for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
         lat = float(
             gcp["latitude"].interp(
-                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
+                azimuth_time=azimuth_time_mm[j],
+                slant_range_time=slant_range_time_mm[i],
+                method=method,
+                kwargs=kwargs,
             )
         )
         lon = float(
             gcp["longitude"].interp(
-                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
+                azimuth_time=azimuth_time_mm[j],
+                slant_range_time=slant_range_time_mm[i],
+                method=method,
+                kwargs=kwargs,
             )
         )
         footprint.append((lon, lat))
@@ -742,7 +752,7 @@ def crop_burst_dataset(
             "geospatial_lon_min": min(lon for lon, _ in footprint),
             "geospatial_lon_max": max(lon for lon, _ in footprint),
         }
-        ds.attrs.update(geospatial_attrs)  #  type: ignore
+        ds.attrs.update(geospatial_attrs)  # type: ignore
 
     if "burst_ids" in ds.attrs:
         ds.attrs["burst_id"] = ds.attrs["burst_ids"][burst_index]

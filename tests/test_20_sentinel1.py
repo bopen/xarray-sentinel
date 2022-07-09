@@ -123,12 +123,12 @@ def test_open_coordinate_conversion_dataset() -> None:
 
 
 def test_open_gcp_dataset() -> None:
-    expected_polygon_text = (
+    expected_polygon_wkt = (
         "POLYGON((11.26870151724317 47.24053130234206,10.876144717121 45.73265733767158,"
         "12.04397933341514 45.57910451206848,12.42647347821595 47.09200435560957,"
         "11.26870151724317 47.24053130234206))"
     )
-    expected_polygon = shapely.wkt.loads(expected_polygon_text)
+    expected_polygon = shapely.wkt.loads(expected_polygon_wkt)
     expected_bbox = (
         10.876144717121,
         45.57910451206848,
@@ -143,7 +143,7 @@ def test_open_gcp_dataset() -> None:
     assert isinstance(res.attrs["geospatial_bounds"], str)
     assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).is_valid
     assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).equals(expected_polygon)
-    assert res.attrs["geospatial_bounds"] == expected_polygon_text
+    assert res.attrs["geospatial_bounds"] == expected_polygon_wkt
     bbox = (
         res.attrs["geospatial_lon_min"],
         res.attrs["geospatial_lat_min"],
@@ -359,6 +359,19 @@ def test_crop_burst_dataset() -> None:
 
 
 def test_crop_burst_dataset_gcp() -> None:
+    expected_polygon_wkt = (
+        "POLYGON((11.060741069073366 46.41270558692681,"
+        "11.010711557932021 46.228050403919134,12.175715782110206 46.076023778486665,"
+        "12.209682909257705 46.26327129178887,11.060741069073366 46.41270558692681))"
+    )
+    expected_polygon = shapely.wkt.loads(expected_polygon_wkt)
+    expected_bbox = (
+        11.010711557932021,
+        46.076023778486665,
+        12.209682909257705,
+        46.41270558692681,
+    )
+
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV")
     gcp_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/gcp")
 
@@ -366,7 +379,17 @@ def test_crop_burst_dataset_gcp() -> None:
 
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
     assert res.dims["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
-    assert res.attrs["geospatial_bounds"] == ""
+    assert isinstance(res.attrs["geospatial_bounds"], str)
+    assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).is_valid
+    assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).equals(expected_polygon)
+    assert res.attrs["geospatial_bounds"] == expected_polygon_wkt
+    bbox = (
+        res.attrs["geospatial_lon_min"],
+        res.attrs["geospatial_lat_min"],
+        res.attrs["geospatial_lon_max"],
+        res.attrs["geospatial_lat_max"],
+    )
+    assert np.allclose(bbox, expected_bbox)
 
 
 def test_mosaic_slc_iw() -> None:
