@@ -13,9 +13,6 @@ omit = ["setup.py"]
 [tool.isort]
 profile = "black"
 
-[tool.pytest.ini_options]
-addopts = "--doctest-glob='*.md'"
-
 [tool.setuptools_scm]
 write_to = "xarray_sentinel/version.py"
 write_to_template = '''

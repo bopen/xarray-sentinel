@@ -790,7 +790,8 @@ def calibrate_amplitude(
             line=digital_number.line,
             pixel=digital_number.pixel,
         ).astype(np.float32)
-        calibration = calibration.chunk(digital_number.chunksizes)
+        if digital_number.chunks is not None:
+            calibration = calibration.chunk(digital_number.chunksizes)
     amplitude = digital_number / calibration
     amplitude.attrs.update(digital_number.attrs)
     try:
