@@ -11,7 +11,7 @@ References:
 
 import os
 import warnings
-from typing import Any, Dict, List, Optional, Tuple, TypeVar
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar
 
 import fsspec
 import numpy as np
@@ -267,15 +267,7 @@ def open_gcp_dataset(
     )
 
     footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, ds)
-
-    wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
-    geospatial_attrs = {
-        "geospatial_bounds": wkt,
-        "geospatial_lat_min": min(lat for _, lat in footprint),
-        "geospatial_lat_max": max(lat for _, lat in footprint),
-        "geospatial_lon_min": min(lon for lon, _ in footprint),
-        "geospatial_lon_max": max(lon for lon, _ in footprint),
-    }
+    geospatial_attrs = make_geospatial_attributes(footprint)
     ds.attrs.update(geospatial_attrs)  # type: ignore
 
     return ds
@@ -319,6 +311,20 @@ def get_footprint_linestring(
     footprint.append(footprint[0])
 
     return footprint
+
+
+def make_geospatial_attributes(
+    footprint: Sequence[Tuple[float, float]]
+) -> Dict[str, Any]:
+    wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
+    geospatial_attrs = {
+        "geospatial_bounds": wkt,
+        "geospatial_lat_min": min(lat for _, lat in footprint),
+        "geospatial_lat_max": max(lat for _, lat in footprint),
+        "geospatial_lon_min": min(lon for lon, _ in footprint),
+        "geospatial_lon_max": max(lon for lon, _ in footprint),
+    }
+    return geospatial_attrs
 
 
 def open_attitude_dataset(
@@ -744,14 +750,7 @@ def crop_burst_dataset(
 
     if gcp is not None:
         footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, gcp)
-        wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
-        geospatial_attrs = {
-            "geospatial_bounds": wkt,
-            "geospatial_lat_min": min(lat for _, lat in footprint),
-            "geospatial_lat_max": max(lat for _, lat in footprint),
-            "geospatial_lon_min": min(lon for lon, _ in footprint),
-            "geospatial_lon_max": max(lon for lon, _ in footprint),
-        }
+        geospatial_attrs = make_geospatial_attributes(footprint)
         ds.attrs.update(geospatial_attrs)  # type: ignore
 
     if "burst_ids" in ds.attrs:
