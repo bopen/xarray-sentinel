@@ -403,6 +403,8 @@ Attributes:
     radar_frequency:                     5.40500045433435
     azimuth_pixel_spacing:               3.55338
     range_pixel_spacing:                 2.246363
+    product_first_line_utc_time:         2021-04-01T15:28:55.111501
+    product_last_line_utc_time:          2021-04-01T15:29:14.277650
     azimuth_time_interval:               0.0005194923129469381
     image_slant_range_time:              0.005272617843915159
     range_sampling_rate:                 66728395.09333333

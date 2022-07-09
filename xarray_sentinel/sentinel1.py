@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple, TypeVar
 
 import fsspec
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import rasterio
 import xarray as xr
@@ -281,21 +282,31 @@ def open_gcp_dataset(
 
 
 def get_footprint_linestring(
-    azimuth_time: xr.DataArray, slant_range_time: xr.DataArray, gcp: xr.Dataset
+    azimuth_time: xr.DataArray,
+    slant_range_time: xr.DataArray,
+    gcp: xr.Dataset,
+    method: str = "linear",
+    kwargs: Dict[str, Any] = {"fill_value": "extrapolate"},
 ) -> List[Tuple[float, float]]:
     azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
     slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
 
     footprint = []
-    for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
+    for j, i in [(0, 0), (1, 0), (1, 1), (0, 1)]:
         lat = float(
             gcp["latitude"].interp(
-                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
+                azimuth_time=azimuth_time_mm[j],
+                slant_range_time=slant_range_time_mm[i],
+                method=method,
+                kwargs=kwargs,
             )
         )
         lon = float(
             gcp["longitude"].interp(
-                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
+                azimuth_time=azimuth_time_mm[j],
+                slant_range_time=slant_range_time_mm[i],
+                method=method,
+                kwargs=kwargs,
             )
         )
         footprint.append((lon, lat))
@@ -497,6 +508,19 @@ def open_rasterio_dataarray(
     return arr  # type: ignore
 
 
+def make_azimuth_time(
+    product_first_line_utc_time: str,
+    product_last_line_utc_time: str,
+    number_of_lines: int,
+) -> npt.NDArray[np.datetime64]:
+    azimuth_time = pd.date_range(
+        start=product_first_line_utc_time,
+        end=product_last_line_utc_time,
+        periods=number_of_lines,
+    )
+    return azimuth_time.values  # type: ignore
+
+
 def open_pol_dataset(
     measurement: esa_safe.PathOrFileType,
     annotation: esa_safe.PathOrFileType,
@@ -511,6 +535,8 @@ def open_pol_dataset(
     number_of_samples = image_information["numberOfSamples"]
     range_sampling_rate = product_information["rangeSamplingRate"]
 
+    product_first_line_utc_time = image_information["productFirstLineUtcTime"]
+    product_last_line_utc_time = image_information["productLastLineUtcTime"]
     number_of_lines = image_information["numberOfLines"]
     azimuth_time_interval = image_information["azimuthTimeInterval"]
     number_of_bursts = swath_timing["burstList"]["@count"]
@@ -521,24 +547,26 @@ def open_pol_dataset(
     attrs.update(
         {
             "radar_frequency": product_information["radarFrequency"] / 10**9,
+            "ascending_node_time": image_information["ascendingNodeTime"],
             "azimuth_pixel_spacing": image_information["azimuthPixelSpacing"],
             "range_pixel_spacing": range_pixel_spacing,
+            "product_first_line_utc_time": product_first_line_utc_time,
+            "product_last_line_utc_time": product_last_line_utc_time,
             "azimuth_time_interval": azimuth_time_interval,
             "image_slant_range_time": image_slant_range_time,
             "range_sampling_rate": range_sampling_rate,
             "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
-            "ascending_node_time": image_information["ascendingNodeTime"],
         }
     )
     encoding = {}
     swap_dims = {}
     chunks: Optional[Dict[str, int]] = None
 
-    azimuth_time = pd.date_range(
-        start=image_information["productFirstLineUtcTime"],
-        periods=number_of_lines,
-        freq=pd.Timedelta(azimuth_time_interval, "s"),
-    ).values
+    azimuth_time = make_azimuth_time(
+        product_first_line_utc_time,
+        product_last_line_utc_time,
+        number_of_lines,
+    )
     if number_of_bursts == 0:
         swap_dims = {"line": "azimuth_time", "pixel": "slant_range_time"}
     else:
@@ -650,6 +678,7 @@ def crop_burst_dataset(
     azimuth_anx_time: Optional[float] = None,
     use_center: bool = False,
     burst_id: Optional[int] = None,
+    gcp: Optional[xr.Dataset] = None,
 ) -> DataArrayOrDataset:
     """Return the measurement dataset cropped to the selected burst.
 
@@ -712,6 +741,18 @@ def crop_burst_dataset(
     ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_time / ONE_SECOND
     ds.attrs["burst_index"] = burst_index
     ds.attrs.pop("subgroups", None)
+
+    if gcp is not None:
+        footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, gcp)
+        wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
+        geospatial_attrs = {
+            "geospatial_bounds": wkt,
+            "geospatial_lat_min": min(lat for _, lat in footprint),
+            "geospatial_lat_max": max(lat for _, lat in footprint),
+            "geospatial_lon_min": min(lon for lon, _ in footprint),
+            "geospatial_lon_max": max(lon for lon, _ in footprint),
+        }
+        ds.attrs.update(geospatial_attrs)  # type: ignore
 
     if "burst_ids" in ds.attrs:
         ds.attrs["burst_id"] = ds.attrs["burst_ids"][burst_index]
