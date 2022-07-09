@@ -292,7 +292,7 @@ def get_footprint_linestring(
     slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
 
     footprint = []
-    for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
+    for j, i in [(0, 0), (1, 0), (1, 1), (0, 1)]:
         lat = float(
             gcp["latitude"].interp(
                 azimuth_time=azimuth_time_mm[j],
