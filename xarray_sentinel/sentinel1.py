@@ -705,15 +705,18 @@ def crop_burst_dataset(
         )
     )
 
-    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
-    burst_azimuth_anx_times = ds.azimuth_time - anx_datetime
-    ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_times.values[0] / ONE_SECOND
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
+
+    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
+    burst_azimuth_anx_time = ds.azimuth_time.values[0] - anx_datetime
+    ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_time / ONE_SECOND
     ds.attrs["burst_index"] = burst_index
+    ds.attrs.pop("subgroups", None)
+
     if "burst_ids" in ds.attrs:
         ds.attrs["burst_id"] = ds.attrs["burst_ids"][burst_index]
         _ = ds.attrs.pop("burst_ids")
-    _ = ds.attrs.pop("subgroups", None)
+
     return ds
 
 
