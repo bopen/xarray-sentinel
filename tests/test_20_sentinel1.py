@@ -216,6 +216,11 @@ def test_open_pol_dataset_iw() -> None:
     assert set(res.dims) == {"line", "pixel"}
     assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
+    first_line = np.datetime64(res.attrs["product_first_line_utc_time"])
+    last_line = np.datetime64(res.attrs["product_last_line_utc_time"])
+    assert res.azimuth_time[0] == first_line
+    assert res.azimuth_time[-1] == last_line
+
 
 def test_open_pol_dataset_sm() -> None:
     res = sentinel1.open_pol_dataset(SLC_S3_VH_measurement, SLC_S3_VH_annotation)
@@ -346,6 +351,17 @@ def test_crop_burst_dataset() -> None:
 
     with pytest.raises(TypeError):
         sentinel1.crop_burst_dataset(swath_ds, burst_id=1)
+
+
+def test_crop_burst_dataset_gcp() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV")
+    gcp_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/gcp")
+
+    res = sentinel1.crop_burst_dataset(swath_ds, burst_index=5, gcp=gcp_ds)
+
+    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert res.dims["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
+    assert res.attrs["geospatial_bounds"] == ""
 
 
 def test_mosaic_slc_iw() -> None:
