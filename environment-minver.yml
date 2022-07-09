@@ -1,7 +1,6 @@
 channels:
 - conda-forge
 dependencies:
-- dask
 - fsspec
 - make
 - mypy
