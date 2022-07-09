@@ -239,7 +239,7 @@ def open_gcp_dataset(
             slant_range_time.append(ggp["slantRangeTime"])
             pixel_set.add(ggp["pixel"])
     shape = (len(azimuth_time), len(slant_range_time))
-    dims = ("azimuth_time", "slant_range_time")
+    dims = ("line", "pixel")
     data_vars = {
         "latitude": (dims, np.full(shape, np.nan), attrs),
         "longitude": (dims, np.full(shape, np.nan), attrs),
@@ -258,15 +258,15 @@ def open_gcp_dataset(
     ds = xr.Dataset(
         data_vars=data_vars,
         coords={
-            "azimuth_time": [np.datetime64(dt) for dt in azimuth_time],
-            "slant_range_time": slant_range_time,
-            "line": ("azimuth_time", line),
-            "pixel": ("slant_range_time", pixel),
+            "line": line,
+            "pixel": pixel,
+            "azimuth_time": ("line", [np.datetime64(dt) for dt in azimuth_time]),
+            "slant_range_time": ("pixel", slant_range_time),
         },
         attrs=attrs,
     )
 
-    footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, ds)
+    footprint = get_footprint_linestring(ds.line, ds.pixel, ds, method="nearest")
 
     wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
     geospatial_attrs = {
@@ -282,22 +282,21 @@ def open_gcp_dataset(
 
 
 def get_footprint_linestring(
-    azimuth_time: xr.DataArray, slant_range_time: xr.DataArray, gcp: xr.Dataset
+    line: xr.DataArray,
+    pixel: xr.DataArray,
+    gcp: xr.Dataset,
+    method: str = "linear",
 ) -> List[Tuple[float, float]]:
-    azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
-    slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
+    line_mm = [line.min(), line.max()]
+    pixel_mm = [pixel.min(), pixel.max()]
 
     footprint = []
     for j, i in [(0, 0), (-1, 0), (-1, -1), (0, -1)]:
         lat = float(
-            gcp["latitude"].interp(
-                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
-            )
+            gcp["latitude"].interp(line=line_mm[j], pixel=pixel_mm[i], method=method)
         )
         lon = float(
-            gcp["longitude"].interp(
-                azimuth_time=azimuth_time_mm[j], slant_range_time=slant_range_time_mm[i]
-            )
+            gcp["longitude"].interp(line=line_mm[j], pixel=pixel_mm[i], method=method)
         )
         footprint.append((lon, lat))
 
@@ -669,6 +668,7 @@ def crop_burst_dataset(
     use_center: bool = False,
     burst_id: Optional[int] = None,
     gcp: Optional[xr.Dataset] = None,
+    gcp_interp_method: str = "linear",
 ) -> DataArrayOrDataset:
     """Return the measurement dataset cropped to the selected burst.
 
@@ -733,7 +733,12 @@ def crop_burst_dataset(
     ds.attrs.pop("subgroups", None)
 
     if gcp is not None:
-        footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, gcp)
+        footprint = get_footprint_linestring(
+            ds.line,
+            ds.pixel,
+            gcp,
+            method=gcp_interp_method,
+        )
         wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
         geospatial_attrs = {
             "geospatial_bounds": wkt,
@@ -742,7 +747,7 @@ def crop_burst_dataset(
             "geospatial_lon_min": min(lon for lon, _ in footprint),
             "geospatial_lon_max": max(lon for lon, _ in footprint),
         }
-        ds.attrs.update(geospatial_attrs)  #  type: ignore
+        ds.attrs.update(geospatial_attrs)  # type: ignore
 
     if "burst_ids" in ds.attrs:
         ds.attrs["burst_id"] = ds.attrs["burst_ids"][burst_index]

@@ -163,18 +163,14 @@ def test_get_footprint_linestring() -> None:
         (11.26870151724317, 47.24053130234206),
     ]
 
-    res = sentinel1.get_footprint_linestring(
-        gcp_ds.azimuth_time, gcp_ds.slant_range_time, gcp_ds
-    )
+    res = sentinel1.get_footprint_linestring(gcp_ds.line, gcp_ds.pixel, gcp_ds)
 
     polygon = shapely.geometry.Polygon(res)
     assert polygon.is_valid
     assert shapely.geometry.polygon.orient(polygon, 1) == polygon
     assert res == expected_linestring
 
-    res = sentinel1.get_footprint_linestring(
-        gcp_ds.azimuth_time[::-1], gcp_ds.slant_range_time, gcp_ds
-    )
+    res = sentinel1.get_footprint_linestring(gcp_ds.line[::-1], gcp_ds.pixel, gcp_ds)
 
     polygon = shapely.geometry.Polygon(res)
     assert polygon.is_valid
@@ -359,6 +355,11 @@ def test_crop_burst_dataset() -> None:
 
 
 def test_crop_burst_dataset_gcp() -> None:
+    expected_polygon_wkt = (
+        "POLYGON((11.06074525319498 46.41272079078353,"
+        "11.015334055752268 46.24770997050164,12.181329303561078 46.09560203875612,"
+        "12.20968552195838 46.26328674201327,11.06074525319498 46.41272079078353))"
+    )
     swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV")
     gcp_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/gcp")
 
@@ -366,7 +367,7 @@ def test_crop_burst_dataset_gcp() -> None:
 
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
     assert res.dims["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
-    assert res.attrs["geospatial_bounds"] == ""
+    assert res.attrs["geospatial_bounds"] == expected_polygon_wkt
 
 
 def test_mosaic_slc_iw() -> None:

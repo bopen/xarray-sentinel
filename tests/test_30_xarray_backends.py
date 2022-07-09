@@ -157,7 +157,7 @@ def test_open_dataset_gcp(
     res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath_pol}/gcp")  # type: ignore
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert set(res.dims) == {"line", "pixel"}
 
 
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_PRODUCTS)
