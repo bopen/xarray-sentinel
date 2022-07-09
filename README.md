@@ -127,8 +127,8 @@ Attributes: ...
     orbit_number:                        37258
     relative_orbit_number:               86
     ...                                  ...
-    range_sampling_rate:                 66728395.09333333
-    incidence_angle_mid_swath:           32.03479766845703
+    geospatial_lon_min:                  42.772483374347
+    geospatial_lon_max:                  43.75770573943618
     group:                               /S3/VH
     subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
     Conventions:                         CF-1.8
@@ -264,8 +264,8 @@ Attributes: ...
     orbit_number:                        42768
     relative_orbit_number:               171
     ...                                  ...
-    number_of_bursts:                    9
-    lines_per_burst:                     1500
+    geospatial_lon_min:                  -61.94949110259839
+    geospatial_lon_max:                  -60.24826879672774
     group:                               /IW1/HH
     subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
     Conventions:                         CF-1.8
@@ -365,7 +365,7 @@ Attributes: ...
     orbit_number:                        26269
     relative_orbit_number:               168
     ...                                  ...
-    lines_per_burst:                     1501
+    geospatial_lon_max:                  12.093126130070317
     group:                               /IW1/VH
     azimuth_anx_time:                    2210.634453
     burst_index:                         8
@@ -410,6 +410,11 @@ Attributes:
     image_slant_range_time:              0.005272617843915159
     range_sampling_rate:                 66728395.09333333
     incidence_angle_mid_swath:           32.03479766845703
+    geospatial_bounds:                   POLYGON((43.75770573943618 -12.01571...
+    geospatial_lat_min:                  -12.17883496921861
+    geospatial_lat_max:                  -10.85986742252814
+    geospatial_lon_min:                  42.772483374347
+    geospatial_lon_max:                  43.75770573943618
     units:                               m2 m-2
     long_name:                           gamma
 
