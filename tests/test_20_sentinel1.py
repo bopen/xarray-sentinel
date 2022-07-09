@@ -229,6 +229,11 @@ def test_open_pol_dataset_sm() -> None:
     assert set(res.dims) == {"slant_range_time", "azimuth_time"}
     assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
+    first_line = np.datetime64(res.attrs["product_first_line_utc_time"])
+    last_line = np.datetime64(res.attrs["product_last_line_utc_time"])
+    assert res.azimuth_time[0] == first_line
+    assert res.azimuth_time[-1] == last_line
+
 
 def test_find_avalable_groups() -> None:
     _, product_files = esa_safe.parse_manifest_sentinel1(SLC_S3 / "manifest.safe")
