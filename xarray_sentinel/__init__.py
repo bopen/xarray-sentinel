@@ -31,6 +31,7 @@ from .sentinel1 import (
     open_sentinel1_dataset,
     slant_range_time_to_ground_range,
 )
+from .treenav import get_subgroup
 
 __all__ = [
     "__version__",
@@ -38,6 +39,7 @@ __all__ = [
     "calibrate_intensity",
     "crop_burst_dataset",
     "get_footprint_linestring",
+    "get_subgroup",
     "ground_range_to_slant_range_time",
     "make_stac_item",
     "mosaic_slc_iw",
