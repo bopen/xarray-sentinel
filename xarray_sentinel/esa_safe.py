@@ -46,7 +46,7 @@ def parse_tag(
     if hasattr(xml_path, "seek"):
         xml_path.seek(0)  # type: ignore
     xml_tree = ElementTree.parse(xml_path)
-    tag_dict: Dict[str, Any] = schema.decode(xml_tree, query, validation=validation)  # type: ignore
+    tag_dict: Any = schema.decode(xml_tree, query, validation=validation)
     assert isinstance(tag_dict, dict), f"{type(tag_dict)} is not dict"
     return tag_dict
 
@@ -59,7 +59,7 @@ def parse_tag_as_list(
 ) -> List[Dict[str, Any]]:
     schema = cached_sentinel1_schemas(schema_type)
     xml_tree = ElementTree.parse(xml_path)
-    tag: Union[None, list, dict] = schema.decode(xml_tree, query, validation=validation)  # type: ignore
+    tag: Any = schema.decode(xml_tree, query, validation=validation)
     if tag is None:
         tag = []
     elif isinstance(tag, dict):
