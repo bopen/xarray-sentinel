@@ -1,8 +1,8 @@
 channels:
 - conda-forge
 dependencies:
-- dask
-- fsspec
+- dask >= 2022.5.0
+- fsspec >= 2022.3.0
 - make
 - mypy
 - netcdf4
@@ -10,9 +10,9 @@ dependencies:
 - pytest
 - pytest-cov
 - rasterio >= 1.3.0
-- rioxarray
+- rioxarray >= 0.10.0
 - shapely
 - types-setuptools
 - xarray >= 2022.6.0
-- xmlschema
+- xmlschema >= 2.0.1
 - zarr

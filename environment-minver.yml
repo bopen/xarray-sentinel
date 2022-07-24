@@ -1,7 +1,7 @@
 channels:
 - conda-forge
 dependencies:
-- fsspec == 2021.11.0
+- fsspec == 2022.4.0
 - make
 - mypy
 - netcdf4
