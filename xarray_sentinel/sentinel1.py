@@ -984,6 +984,7 @@ def open_sentinel1_dataset(
     conventions.update_attributes(ds, group=metadata)
     ds.encoding["open_dataset_kwargs"] = {
         "filename_or_obj": manifest_path,
+        "engine": "sentinel-1",
         "drop_variables": drop_variables,
         "group": group,
         "storage_options": storage_options,
