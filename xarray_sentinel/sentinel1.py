@@ -8,6 +8,7 @@ References:
   - Sentinel-1 Product Specification v3.7 27 February 2020 S1-RS-MDA-52-7441 documenting IPF 3.30
     https://sentinel.esa.int/documents/247904/1877131/Sentinel-1-Product-Specification
 """
+from __future__ import annotations
 
 import os
 import warnings
