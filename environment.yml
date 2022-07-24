@@ -6,7 +6,6 @@ dependencies:
 - make
 - mypy
 - netcdf4
-- nomkl
 - numpy >= 1.22.0
 - pytest
 - pytest-cov
