@@ -93,7 +93,7 @@ def test_open_dataset_zip_metadata() -> None:
     res = sentinel1.open_sentinel1_dataset(zip_urlpath, group="IW1/VV/orbit")
 
     assert isinstance(res, xr.Dataset)
-    assert res.dims == {"axis": 3, "azimuth_time": 17}
+    assert res.dims == {"axis": 3, "azimuth_time": 17}  # type: ignore
 
 
 @pytest.mark.xfail(
@@ -109,5 +109,5 @@ def test_open_dataset_zip_data() -> None:
     res = sentinel1.open_sentinel1_dataset(zip_urlpath, group="IW1/VV/0")
 
     assert isinstance(res, xr.Dataset)
-    assert res.dims == {"slant_range_time": 21632, "azimuth_time": 1501}
+    assert res.dims == {"slant_range_time": 21632, "azimuth_time": 1501}  # type: ignore
     assert abs(res.measurement[:40, :40]).mean() >= 0

@@ -55,29 +55,29 @@ def test_open_dataset_root() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1")
 
     assert isinstance(res, xr.Dataset)
     for attr_name in COMMON_ATTRIBUTES:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
 
-    res = xr.open_dataset(product_path)  # type: ignore
+    res = xr.open_dataset(product_path)
 
     assert isinstance(res, xr.Dataset)
 
     product_path = product_path / "manifest.safe"
 
-    res = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1")
 
     assert isinstance(res, xr.Dataset)
 
-    res = xr.open_dataset(product_path)  # type: ignore
+    res = xr.open_dataset(product_path)
 
     assert isinstance(res, xr.Dataset)
 
     with pytest.raises(ValueError):
-        xr.open_dataset(None)  # type: ignore
+        xr.open_dataset("")
 
 
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_SLC_PRODUCTS)
@@ -85,7 +85,7 @@ def test_open_dataset_polarisation_slc(
     product_path: esa_safe.PathType,
     swath_pol: str,
 ) -> None:
-    res = xr.open_dataset(product_path, engine="sentinel-1", group=swath_pol)  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=swath_pol)
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"line", "pixel"} or set(res.dims) == {
@@ -100,7 +100,7 @@ def test_open_dataset_polarisation_grd(
     product_path: esa_safe.PathType,
     swath_pol: str,
 ) -> None:
-    res = xr.open_dataset(product_path, engine="sentinel-1", group=swath_pol)  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=swath_pol)
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"line", "pixel"} or set(res.dims) == {
@@ -115,7 +115,7 @@ def test_open_dataset_orbit(
     product_path: esa_safe.PathType,
     swath_pol: str,
 ) -> None:
-    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath_pol}/orbit")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath_pol}/orbit")
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"axis", "azimuth_time"}
@@ -127,7 +127,7 @@ def test_open_dataset_attitude(
     product_path: esa_safe.PathType,
     swath_pol: str,
 ) -> None:
-    res = xr.open_dataset(  # type: ignore
+    res = xr.open_dataset(
         product_path, engine="sentinel-1", group=f"{swath_pol}/attitude"
     )
 
@@ -154,7 +154,7 @@ def test_open_dataset_gcp(
     product_path: esa_safe.PathType,
     swath_pol: str,
 ) -> None:
-    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath_pol}/gcp")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath_pol}/gcp")
 
     assert isinstance(res, xr.Dataset)
     assert set(res.dims) == {"azimuth_time", "slant_range_time"}
@@ -165,7 +165,7 @@ def test_open_dataset_dc_estimate(
     product_path: esa_safe.PathType,
     swath_pol: str,
 ) -> None:
-    res = xr.open_dataset(  # type: ignore
+    res = xr.open_dataset(
         product_path, engine="sentinel-1", group=f"{swath_pol}/dc_estimate"
     )
 
@@ -185,7 +185,7 @@ def test_open_pol_dataset() -> None:
         "slant_range_time",
         "azimuth_time",
     }
-    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")
 
     assert isinstance(res, xr.Dataset)
     for attr_name in COMMON_ATTRIBUTES:
@@ -202,7 +202,7 @@ def test_burst_id_attribute() -> None:
         / "S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
     )
 
-    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/HH")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/HH")
     assert "burst_ids" in res.attrs
     assert len(res.attrs["burst_ids"]) == res.attrs["number_of_bursts"]
 
@@ -210,7 +210,7 @@ def test_burst_id_attribute() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")  # type: ignore
+    res = xr.open_dataset(product_path, engine="sentinel-1", group="IW1/VV")
     assert "burst_ids" not in res.attrs
 
 
@@ -219,7 +219,7 @@ def test_open_calibration_dataset() -> None:
         DATA_FOLDER
         / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     )
-    res = xr.open_dataset(  # type: ignore
+    res = xr.open_dataset(
         annotation_path, engine="sentinel-1", group="IW1/VV/calibration"
     )
 

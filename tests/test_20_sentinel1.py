@@ -311,7 +311,7 @@ def test_open_sentinel1_dataset() -> None:
     res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/orbit")
 
     assert isinstance(res, xr.Dataset)
-    assert res.dims == {"axis": 3, "azimuth_time": 17}
+    assert res.dims == {"axis": 3, "azimuth_time": 17}  # type: ignore
 
     with pytest.raises(ValueError):
         sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/non-existent")

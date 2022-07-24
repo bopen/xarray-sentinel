@@ -277,7 +277,7 @@ def get_footprint_linestring(
     azimuth_time: xr.DataArray,
     slant_range_time: xr.DataArray,
     gcp: xr.Dataset,
-    method: str = "linear",
+    method: xr.core.types.InterpOptions = "linear",
     kwargs: Dict[str, Any] = {"fill_value": "extrapolate"},
 ) -> List[Tuple[float, float]]:
     azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
@@ -510,8 +510,8 @@ def open_rasterio_dataarray(
                 raise FileNotFoundError(str(ex))
             raise
     else:
-        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)  # type: ignore
-    return arr  # type: ignore
+        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)
+    return arr
 
 
 def make_azimuth_time(
@@ -648,7 +648,7 @@ def open_pol_dataset(
 
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
-    arr = arr.assign_coords(coords)  # type: ignore
+    arr = arr.assign_coords(coords)
     arr = arr.swap_dims(swap_dims)
 
     if gcp:

@@ -9,9 +9,10 @@ def to_group_zarr(
     product_path: esa_safe.PathType,
     output_store: Any,
     groups: Optional[Dict[str, str]] = None,
+    **kwargs: Any,
 ) -> None:
-    root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
-    root.to_zarr(output_store, mode="w")
+    root = xr.open_dataset(product_path, engine="sentinel-1")
+    root.to_zarr(output_store, mode="w", **kwargs)
 
     if groups is None:
         groups = {g: g for g in root.attrs["subgroups"]}
@@ -20,22 +21,22 @@ def to_group_zarr(
         try:
             group_ds = xr.open_dataset(
                 product_path, engine="sentinel-1", group=group_in
-            )  # type: ignore
-            group_ds.to_zarr(output_store, mode="a", group=group_out)
+            )
+            group_ds.to_zarr(output_store, mode="a", group=group_out, **kwargs)
         except FileNotFoundError:
             pass
 
 
 # Apparently there is no way to save SLC images because "netcdf4" doesn't support complex data
-# and "n5necdf" crashes on same name dimensions.
+# and "h5netcdf" crashes on an issue related to dimension names
 def to_group_netcdf(
     product_path: esa_safe.PathType,
     output_store: str,
     groups: Optional[Dict[str, str]] = None,
-    engine: Optional[str] = None,
+    **kwargs: Any,
 ) -> None:
-    root = xr.open_dataset(product_path, engine="sentinel-1")  # type: ignore
-    root.to_netcdf(output_store, mode="w", engine=engine)
+    root = xr.open_dataset(product_path, engine="sentinel-1")
+    root.to_netcdf(output_store, mode="w", **kwargs)
 
     if groups is None:
         groups = {g: g for g in root.attrs["subgroups"]}
@@ -44,7 +45,7 @@ def to_group_netcdf(
         try:
             group_ds = xr.open_dataset(
                 product_path, engine="sentinel-1", group=group_in
-            )  # type: ignore
-            group_ds.to_netcdf(output_store, mode="a", group=group_out, engine=engine)
+            )
+            group_ds.to_netcdf(output_store, mode="a", group=group_out, **kwargs)
         except FileNotFoundError:
             pass
