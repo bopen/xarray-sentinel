@@ -982,5 +982,15 @@ def open_sentinel1_dataset(
         ds = crop_burst_dataset(ds, burst_index=burst_index, gcp=gcp)
 
     conventions.update_attributes(ds, group=metadata)
+    ds.encoding["open_dataset_kwargs"] = {
+        "filename_or_obj": manifest_path,
+        "drop_variables": drop_variables,
+        "group": group,
+        "storage_options": storage_options,
+        "override_product_files": override_product_files,
+        "fs": fs,
+        "check_files_exist": check_files_exist,
+        "parse_geospatial_attrs": parse_geospatial_attrs,
+    }
 
     return ds
