@@ -663,12 +663,12 @@ def open_pol_dataset(
 
 def find_bursts_index(
     pol_dataset: DataArrayOrDataset,
-    azimuth_anx_time: float,
+    azimuth_anx_seconds: float,
     use_center: bool = False,
 ) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
-    azimuth_anx_time = pd.Timedelta(azimuth_anx_time, unit="s")
+    azimuth_anx_time = pd.Timedelta(azimuth_anx_seconds, unit="s")
     if use_center:
         azimuth_anx_time_center = (
             pol_dataset.azimuth_time[lines_per_burst // 2 :: lines_per_burst]
