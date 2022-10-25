@@ -388,7 +388,7 @@ Coordinates:
     line              (azimuth_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
   * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T15:28:55.11150...
   * slant_range_time  (slant_range_time) float64 0.005273 0.005273 ... 0.005303
-Attributes:
+Attributes: ...
     family_name:                         SENTINEL-1
     number:                              A
     mode:                                SM
