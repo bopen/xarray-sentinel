@@ -395,22 +395,7 @@ Attributes:
     swaths:                              ['S3']
     orbit_number:                        37258
     relative_orbit_number:               86
-    pass:                                ASCENDING
-    ascending_node_time:                 2021-04-01T13:53:42.874198
-    transmitter_receiver_polarisations:  ['VV', 'VH']
-    product_type:                        SLC
-    start_time:                          2021-04-01T15:28:55.111501
-    stop_time:                           2021-04-01T15:29:14.277650
-    radar_frequency:                     5.40500045433435
-    azimuth_pixel_spacing:               3.55338
-    range_pixel_spacing:                 2.246363
-    product_first_line_utc_time:         2021-04-01T15:28:55.111501
-    product_last_line_utc_time:          2021-04-01T15:29:14.277650
-    azimuth_time_interval:               0.0005194923129469381
-    image_slant_range_time:              0.005272617843915159
-    range_sampling_rate:                 66728395.09333333
-    incidence_angle_mid_swath:           32.03479766845703
-    geospatial_bounds:                   POLYGON((43.75770573943618 -12.01571...
+    ...
     geospatial_lat_min:                  -12.17883496921861
     geospatial_lat_max:                  -10.85986742252814
     geospatial_lon_min:                  42.772483374347
