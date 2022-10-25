@@ -7,6 +7,7 @@ dependencies:
 - mypy
 - netcdf4
 - numpy >= 1.22.0
+- pandas-stubs
 - pytest
 - pytest-cov
 - rasterio >= 1.3.0
