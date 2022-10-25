@@ -269,7 +269,7 @@ def open_gcp_dataset(
 
     footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, ds)
     geospatial_attrs = make_geospatial_attributes(footprint)
-    ds.attrs.update(geospatial_attrs)  # type: ignore
+    ds.attrs.update(geospatial_attrs)
 
     return ds
 
@@ -653,10 +653,10 @@ def open_pol_dataset(
     arr = arr.swap_dims(swap_dims)
 
     if gcp:
-        attrs.update(gcp.attrs)  # type: ignore
+        attrs.update(gcp.attrs)
 
     arr.attrs.update(attrs)
-    arr.encoding.update(encoding)  # type: ignore
+    arr.encoding.update(encoding)
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
@@ -756,7 +756,7 @@ def crop_burst_dataset(
     if gcp is not None:
         footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, gcp)
         geospatial_attrs = make_geospatial_attributes(footprint)
-        ds.attrs.update(geospatial_attrs)  # type: ignore
+        ds.attrs.update(geospatial_attrs)
 
     if "burst_ids" in ds.attrs:
         ds.attrs["burst_id"] = ds.attrs["burst_ids"][burst_index]
