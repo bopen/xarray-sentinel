@@ -384,11 +384,11 @@ def open_orbit_dataset(
     if reference_system is not None:
         attrs.update({"reference_system": reference_system})
 
-    azimuth_time: List[Any] = []
+    azimuth_times: List[Any] = []
     positions: List[List[Any]] = [[], [], []]
     velocities: List[List[Any]] = [[], [], []]
     for orbit in orbits:
-        azimuth_time.append(orbit["time"])
+        azimuth_times.append(orbit["time"])
         positions[0].append(orbit["position"]["x"])
         positions[1].append(orbit["position"]["y"])
         positions[2].append(orbit["position"]["z"])
@@ -401,7 +401,7 @@ def open_orbit_dataset(
             )
             reference_system = None
 
-    return make_orbit(azimuth_time, positions, velocities, attrs)
+    return make_orbit(azimuth_times, positions, velocities, attrs)
 
 
 def open_dc_estimate_dataset(
