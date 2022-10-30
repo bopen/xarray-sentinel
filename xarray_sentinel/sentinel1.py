@@ -351,35 +351,14 @@ def open_attitude_dataset(
     return ds
 
 
-def open_orbit_dataset(
-    annotation: esa_safe.PathOrFileType, attrs: Dict[str, Any] = {}
+def make_orbit(
+    azimuth_time: List[Any],
+    positions: List[List[Any]],
+    velocities: List[List[Any]],
+    attrs: Dict[str, Any] = {},
 ) -> xr.Dataset:
-    orbits = esa_safe.parse_tag_as_list(annotation, ".//orbit")
-
-    reference_system = orbits[0]["frame"]
-    variables = ["position", "velocity"]
-    data: Dict[str, List[Any]] = {var: [[], [], []] for var in variables}
-    azimuth_time: List[Any] = []
-    for orbit in orbits:
-        azimuth_time.append(orbit["time"])
-        data["position"][0].append(orbit["position"]["x"])
-        data["position"][1].append(orbit["position"]["y"])
-        data["position"][2].append(orbit["position"]["z"])
-        data["velocity"][0].append(orbit["velocity"]["x"])
-        data["velocity"][1].append(orbit["velocity"]["y"])
-        data["velocity"][2].append(orbit["velocity"]["z"])
-        if orbit["frame"] != reference_system:
-            warnings.warn(
-                "reference_system is not consistent in all the state vectors. "
-            )
-            reference_system = None
-
-    position = xr.Variable(data=data["position"], dims=("axis", "azimuth_time"))  # type: ignore
-    velocity = xr.Variable(data=data["velocity"], dims=("axis", "azimuth_time"))  # type: ignore
-
-    attrs = attrs.copy()
-    if reference_system is not None:
-        attrs.update({"reference_system": reference_system})
+    position = xr.Variable(data=positions, dims=("axis", "azimuth_time"))  # type: ignore
+    velocity = xr.Variable(data=velocities, dims=("axis", "azimuth_time"))  # type: ignore
 
     ds = xr.Dataset(
         data_vars={"position": position, "velocity": velocity},
@@ -393,6 +372,36 @@ def open_orbit_dataset(
         ds[data_var].attrs = attrs
 
     return ds
+
+
+def open_orbit_dataset(
+    annotation: esa_safe.PathOrFileType, attrs: Dict[str, Any] = {}
+) -> xr.Dataset:
+    orbits = esa_safe.parse_tag_as_list(annotation, ".//orbit")
+
+    attrs = attrs.copy()
+    reference_system = orbits[0]["frame"]
+    if reference_system is not None:
+        attrs.update({"reference_system": reference_system})
+
+    azimuth_time: List[Any] = []
+    positions: List[List[Any]] = [[], [], []]
+    velocities: List[List[Any]] = [[], [], []]
+    for orbit in orbits:
+        azimuth_time.append(orbit["time"])
+        positions[0].append(orbit["position"]["x"])
+        positions[1].append(orbit["position"]["y"])
+        positions[2].append(orbit["position"]["z"])
+        velocities[0].append(orbit["velocity"]["x"])
+        velocities[1].append(orbit["velocity"]["y"])
+        velocities[2].append(orbit["velocity"]["z"])
+        if orbit["frame"] != reference_system:
+            warnings.warn(
+                "reference_system is not consistent in all the state vectors. "
+            )
+            reference_system = None
+
+    return make_orbit(azimuth_time, positions, velocities, attrs)
 
 
 def open_dc_estimate_dataset(
