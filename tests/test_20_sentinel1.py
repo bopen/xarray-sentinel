@@ -121,6 +121,9 @@ def test_open_coordinate_conversion_dataset() -> None:
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"azimuth_time", "degree"}
 
+    with pytest.raises(TypeError):
+        sentinel1.open_coordinate_conversion_dataset(SLC_IW1_VV_annotation)
+
 
 def test_open_gcp_dataset() -> None:
     expected_geospatial_bounds = (

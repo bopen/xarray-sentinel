@@ -182,6 +182,8 @@ def open_coordinate_conversion_dataset(
     coordinate_conversion = esa_safe.parse_tag_as_list(
         annotation_path, ".//coordinateConversionList/coordinateConversion"
     )
+    if len(coordinate_conversion) == 0:
+        raise TypeError("coordinateConversion tag not present in annotations")
 
     gr0 = []
     sr0 = []
@@ -203,15 +205,14 @@ def open_coordinate_conversion_dataset(
 
     coords: Dict[str, Any] = {}
     data_vars: Dict[str, Any] = {}
-    if srgrCoefficients:
-        coords["azimuth_time"] = [np.datetime64(dt) for dt in azimuth_time]
-        coords["degree"] = list(range(len(srgrCoefficients[0])))
+    coords["azimuth_time"] = [np.datetime64(dt) for dt in azimuth_time]
+    coords["degree"] = list(range(len(srgrCoefficients[0])))
 
-        data_vars["gr0"] = ("azimuth_time", gr0)
-        data_vars["sr0"] = ("azimuth_time", sr0)
-        data_vars["slant_range_time"] = ("azimuth_time", slant_range_time)
-        data_vars["srgrCoefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
-        data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
+    data_vars["gr0"] = ("azimuth_time", gr0)
+    data_vars["sr0"] = ("azimuth_time", sr0)
+    data_vars["slant_range_time"] = ("azimuth_time", slant_range_time)
+    data_vars["srgrCoefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
+    data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
 
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
