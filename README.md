@@ -23,7 +23,7 @@ with the following functionalities:
 - reads several metadata elements:
   satellite orbit and attitude, ground control points, radiometric calibration look up tables,
   Doppler centroid estimation and more
-- (partially broken, see #127) reads uncompressed and compressed SAFE data products on the local computer or
+- (partially broken, see [#127](https://github.com/bopen/xarray-sentinel/issues/127)) reads uncompressed and compressed SAFE data products on the local computer or
   on a network via [*fsspec*](https://filesystem-spec.readthedocs.io)
 - supports larger-than-memory and distributed data access via [*Dask*](https://dask.org) and
   [*rioxarray*](https://corteva.github.io/rioxarray) /
