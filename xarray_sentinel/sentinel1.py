@@ -521,7 +521,13 @@ def open_rasterio_dataarray(
                 raise FileNotFoundError(str(ex))
             raise
     else:
-        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)
+        # FIXME: rioxarray / rasterio do not support opening a file object any more, so
+        #   full fsspec support via `fs.open(measurement)` is now broken and we fall back
+        #   to hope that rasterio remote protocols works with fsspec urlpaths
+        maybe_rasterio_urlpath = fs.unstrip_protocol(measurement)
+        arr = xr.open_dataarray(
+            maybe_rasterio_urlpath, engine="rasterio", chunks=chunks
+        )
     return arr
 
 
