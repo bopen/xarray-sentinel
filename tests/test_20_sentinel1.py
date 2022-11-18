@@ -261,7 +261,6 @@ def test_find_avalable_groups() -> None:
         "S3/VV/orbit",
         "S3/VV/dc_estimate",
         "S3/VV/azimuth_fm_rate",
-        "S3/VV/coordinate_conversion",
         "S3/VV/calibration",
         "S3/VV/noise_range",
         "S3/VV/noise_azimuth",
@@ -272,18 +271,17 @@ def test_find_avalable_groups() -> None:
         "S3/VH/orbit",
         "S3/VH/dc_estimate",
         "S3/VH/azimuth_fm_rate",
-        "S3/VH/coordinate_conversion",
         "S3/VH/calibration",
         "S3/VH/noise_range",
         "S3/VH/noise_azimuth",
     }
 
-    res = sentinel1.find_available_groups(product_files, str(SLC_IW))
+    res = sentinel1.find_available_groups(product_files, str(SLC_IW), "SLC")
 
     assert set(res) == expected_groups
 
     res = sentinel1.find_available_groups(
-        product_files, str(SLC_IW), check_files_exist=True
+        product_files, str(SLC_IW), "SLC", check_files_exist=True
     )
     assert res == {}
 

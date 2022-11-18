@@ -474,6 +474,7 @@ def open_azimuth_fm_rate_dataset(
 def find_available_groups(
     product_files: Dict[str, Tuple[str, str, str, str, str]],
     product_path: str,
+    product_type: str,
     check_files_exist: bool = False,
     fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
 ) -> Dict[str, List[str]]:
@@ -493,9 +494,10 @@ def find_available_groups(
                 "azimuth_fm_rate",
                 "dc_estimate",
                 "gcp",
-                "coordinate_conversion",
             ]:
                 groups[f"{swath_pol_group}/{metadata_group}"] = [abspath]
+            if product_type == "GRD":
+                groups[f"{swath_pol_group}/coordinate_conversion"] = [abspath]
         elif type == "s1Level1CalibrationSchema":
             groups[f"{swath_pol_group}/calibration"] = [abspath]
         elif type == "s1Level1NoiseSchema":
@@ -951,7 +953,11 @@ def open_sentinel1_dataset(
         product_files = do_override_product_files(override_product_files, product_files)
 
     groups = find_available_groups(
-        product_files, product_path, check_files_exist=check_files_exist, fs=fs
+        product_files,
+        product_path,
+        common_attrs["product_type"],
+        check_files_exist=check_files_exist,
+        fs=fs,
     )
 
     group, burst_index = normalise_group(group)
