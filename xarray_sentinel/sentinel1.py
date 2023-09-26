@@ -182,6 +182,8 @@ def open_coordinate_conversion_dataset(
     coordinate_conversion = esa_safe.parse_tag_as_list(
         annotation_path, ".//coordinateConversionList/coordinateConversion"
     )
+    if len(coordinate_conversion) == 0:
+        raise TypeError("coordinateConversion tag not present in annotations")
 
     gr0 = []
     sr0 = []
@@ -203,15 +205,14 @@ def open_coordinate_conversion_dataset(
 
     coords: Dict[str, Any] = {}
     data_vars: Dict[str, Any] = {}
-    if srgrCoefficients:
-        coords["azimuth_time"] = [np.datetime64(dt) for dt in azimuth_time]
-        coords["degree"] = list(range(len(srgrCoefficients[0])))
+    coords["azimuth_time"] = [np.datetime64(dt) for dt in azimuth_time]
+    coords["degree"] = list(range(len(srgrCoefficients[0])))
 
-        data_vars["gr0"] = ("azimuth_time", gr0)
-        data_vars["sr0"] = ("azimuth_time", sr0)
-        data_vars["slant_range_time"] = ("azimuth_time", slant_range_time)
-        data_vars["srgrCoefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
-        data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
+    data_vars["gr0"] = ("azimuth_time", gr0)
+    data_vars["sr0"] = ("azimuth_time", sr0)
+    data_vars["slant_range_time"] = ("azimuth_time", slant_range_time)
+    data_vars["srgrCoefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
+    data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
 
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
@@ -473,6 +474,7 @@ def open_azimuth_fm_rate_dataset(
 def find_available_groups(
     product_files: Dict[str, Tuple[str, str, str, str, str]],
     product_path: str,
+    product_type: str,
     check_files_exist: bool = False,
     fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
 ) -> Dict[str, List[str]]:
@@ -492,9 +494,10 @@ def find_available_groups(
                 "azimuth_fm_rate",
                 "dc_estimate",
                 "gcp",
-                "coordinate_conversion",
             ]:
                 groups[f"{swath_pol_group}/{metadata_group}"] = [abspath]
+            if product_type == "GRD":
+                groups[f"{swath_pol_group}/coordinate_conversion"] = [abspath]
         elif type == "s1Level1CalibrationSchema":
             groups[f"{swath_pol_group}/calibration"] = [abspath]
         elif type == "s1Level1NoiseSchema":
@@ -520,7 +523,13 @@ def open_rasterio_dataarray(
                 raise FileNotFoundError(str(ex))
             raise
     else:
-        arr = xr.open_dataarray(fs.open(measurement), engine="rasterio", chunks=chunks)
+        # FIXME: rioxarray / rasterio do not support opening a file object any more, so
+        #   full fsspec support via `fs.open(measurement)` is now broken and we fall back
+        #   to hope that rasterio remote protocols works with fsspec urlpaths
+        maybe_rasterio_urlpath = fs.unstrip_protocol(measurement)
+        arr = xr.open_dataarray(
+            maybe_rasterio_urlpath, engine="rasterio", chunks=chunks
+        )
     return arr
 
 
@@ -534,7 +543,7 @@ def make_azimuth_time(
         end=product_last_line_utc_time,
         periods=number_of_lines,
     )
-    return azimuth_time.values  # type: ignore
+    return azimuth_time.values
 
 
 def open_pol_dataset(
@@ -544,7 +553,6 @@ def open_pol_dataset(
     attrs: Dict[str, Any] = {},
     gcp: Optional[xr.Dataset] = None,
 ) -> xr.Dataset:
-
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
     image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
     swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
@@ -677,7 +685,7 @@ def find_bursts_index(
 ) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
-    azimuth_anx_time = pd.Timedelta(azimuth_anx_seconds, unit="s")
+    azimuth_anx_time = pd.Timedelta(int(azimuth_anx_seconds * 10**9), unit="ns")
     if use_center:
         azimuth_anx_time_center = (
             pol_dataset.azimuth_time[lines_per_burst // 2 :: lines_per_burst]
@@ -944,7 +952,11 @@ def open_sentinel1_dataset(
         product_files = do_override_product_files(override_product_files, product_files)
 
     groups = find_available_groups(
-        product_files, product_path, check_files_exist=check_files_exist, fs=fs
+        product_files,
+        product_path,
+        common_attrs["product_type"],
+        check_files_exist=check_files_exist,
+        fs=fs,
     )
 
     group, burst_index = normalise_group(group)

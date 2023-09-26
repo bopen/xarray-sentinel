@@ -1,9 +1,9 @@
 [build-system]
 requires = [
-    "setuptools>=42",
-    "wheel",
-    "setuptools_scm[toml]>=3.4",
-    "setuptools_scm_git_archive",
+  "setuptools>=42",
+  "wheel",
+  "setuptools_scm[toml]>=3.4",
+  "setuptools_scm_git_archive"
 ]
 
 [tool.coverage.run]
@@ -11,6 +11,14 @@ branch = true
 
 [tool.isort]
 profile = "black"
+
+[tool.mypy]
+plugins = "numpy.typing.mypy_plugin"
+strict = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = ["fsspec", "rasterio", "shapely", "shapely.geometry", "shapely.wkt"]
 
 [tool.setuptools_scm]
 write_to = "xarray_sentinel/version.py"
