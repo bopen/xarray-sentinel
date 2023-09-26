@@ -543,7 +543,7 @@ def make_azimuth_time(
         end=product_last_line_utc_time,
         periods=number_of_lines,
     )
-    return azimuth_time.values  # type: ignore
+    return azimuth_time.values
 
 
 def open_pol_dataset(
@@ -553,7 +553,6 @@ def open_pol_dataset(
     attrs: Dict[str, Any] = {},
     gcp: Optional[xr.Dataset] = None,
 ) -> xr.Dataset:
-
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
     image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
     swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
@@ -686,7 +685,7 @@ def find_bursts_index(
 ) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
     anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
-    azimuth_anx_time = pd.Timedelta(azimuth_anx_seconds, unit="s")
+    azimuth_anx_time = pd.Timedelta(int(azimuth_anx_seconds * 10**9), unit="ns")
     if use_center:
         azimuth_anx_time_center = (
             pol_dataset.azimuth_time[lines_per_burst // 2 :: lines_per_burst]
