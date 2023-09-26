@@ -18,7 +18,14 @@ strict = true
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
-module = ["fsspec", "rasterio", "shapely", "shapely.geometry", "shapely.wkt"]
+module = [
+  "cfchecker",
+  "fsspec",
+  "rasterio",
+  "shapely",
+  "shapely.geometry",
+  "shapely.wkt"
+]
 
 [tool.setuptools_scm]
 write_to = "xarray_sentinel/version.py"
