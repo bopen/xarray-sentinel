@@ -358,8 +358,8 @@ def make_orbit(
     velocities: List[List[Any]],
     attrs: Dict[str, Any] = {},
 ) -> xr.Dataset:
-    position = xr.Variable(data=positions, dims=("axis", "azimuth_time"))  # type: ignore
-    velocity = xr.Variable(data=velocities, dims=("axis", "azimuth_time"))  # type: ignore
+    position = xr.Variable(data=positions, dims=("axis", "azimuth_time"))
+    velocity = xr.Variable(data=velocities, dims=("axis", "azimuth_time"))
 
     ds = xr.Dataset(
         data_vars={"position": position, "velocity": velocity},

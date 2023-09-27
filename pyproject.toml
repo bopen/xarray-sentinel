@@ -16,17 +16,6 @@ profile = "black"
 plugins = "numpy.typing.mypy_plugin"
 strict = true
 
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-module = [
-  "cfchecker",
-  "fsspec",
-  "rasterio",
-  "shapely",
-  "shapely.geometry",
-  "shapely.wkt"
-]
-
 [tool.setuptools_scm]
 write_to = "xarray_sentinel/version.py"
 write_to_template = '''
