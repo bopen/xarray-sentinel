@@ -105,7 +105,7 @@ def open_calibration_dataset(
             "Unable to organise calibration vectors in a regular line-pixel grid"
         )
     data_vars = {
-        "azimuth_time": ("line", [np.datetime64(dt) for dt in azimuth_time_list]),
+        "azimuth_time": ("line", [np.datetime64(dt, "ns") for dt in azimuth_time_list]),
         "sigmaNought": (("line", "pixel"), sigmaNought_list),
         "betaNought": (("line", "pixel"), betaNought_list),
         "gamma": (("line", "pixel"), gamma_list),
@@ -141,7 +141,7 @@ def open_noise_range_dataset(
             "Unable to organise noise vectors in a regular line-pixel grid"
         )
     data_vars = {
-        "azimuth_time": ("line", [np.datetime64(dt) for dt in azimuth_time_list]),
+        "azimuth_time": ("line", [np.datetime64(dt, "ns") for dt in azimuth_time_list]),
         "noiseRangeLut": (("line", "pixel"), noiseRangeLut_list),
     }
     coords = {"line": line_list, "pixel": pixel_list[0]}
@@ -205,7 +205,7 @@ def open_coordinate_conversion_dataset(
 
     coords: Dict[str, Any] = {}
     data_vars: Dict[str, Any] = {}
-    coords["azimuth_time"] = [np.datetime64(dt) for dt in azimuth_time]
+    coords["azimuth_time"] = [np.datetime64(dt, "ns") for dt in azimuth_time]
     coords["degree"] = list(range(len(srgrCoefficients[0])))
 
     data_vars["gr0"] = ("azimuth_time", gr0)
@@ -235,7 +235,7 @@ def open_gcp_dataset(
     pixel_set = set()
     for ggp in geolocation_grid_points:
         if ggp["line"] not in line_set:
-            azimuth_time.append(np.datetime64(ggp["azimuthTime"]))
+            azimuth_time.append(np.datetime64(ggp["azimuthTime"]), "ns")
             line_set.add(ggp["line"])
         if ggp["pixel"] not in pixel_set:
             slant_range_time.append(ggp["slantRangeTime"])
@@ -260,7 +260,7 @@ def open_gcp_dataset(
     ds = xr.Dataset(
         data_vars=data_vars,
         coords={
-            "azimuth_time": [np.datetime64(dt) for dt in azimuth_time],
+            "azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time],
             "slant_range_time": slant_range_time,
             "line": ("azimuth_time", line),
             "pixel": ("slant_range_time", pixel),
@@ -345,7 +345,7 @@ def open_attitude_dataset(
 
     ds = xr.Dataset(
         data_vars=data_vars,
-        coords={"azimuth_time": [np.datetime64(dt) for dt in azimuth_time]},
+        coords={"azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time]},
         attrs=attrs,
     )
 
@@ -365,7 +365,7 @@ def make_orbit(
         data_vars={"position": position, "velocity": velocity},
         attrs=attrs,
         coords={
-            "azimuth_time": [np.datetime64(dt) for dt in azimuth_time],
+            "azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time],
             "axis": [0, 1, 2],
         },
     )
@@ -426,7 +426,7 @@ def open_dc_estimate_dataset(
             "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly, attrs),
         },
         coords={
-            "azimuth_time": [np.datetime64(at) for at in azimuth_time],
+            "azimuth_time": [np.datetime64(at, "ns") for at in azimuth_time],
             "degree": list(range(len(data_dc_poly[0]))),
         },
         attrs=attrs,
@@ -463,7 +463,7 @@ def open_azimuth_fm_rate_dataset(
             ),
         },
         coords={
-            "azimuth_time": [np.datetime64(at) for at in azimuth_time],
+            "azimuth_time": [np.datetime64(at, "ns") for at in azimuth_time],
             "degree": list(range(len(azimuth_fm_rate_poly[0]))),
         },
         attrs=attrs,
@@ -613,7 +613,7 @@ def open_pol_dataset(
             azimuth_time_burst = pd.date_range(
                 start=first_azimuth_time_burst,
                 periods=lines_per_burst,
-                freq=pd.Timedelta(azimuth_time_interval, "s"),
+                freq=pd.Timedelta(azimuth_time_interval * 10**9, unit="ns"),
             )
             azimuth_time[
                 lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
@@ -684,7 +684,7 @@ def find_bursts_index(
     use_center: bool = False,
 ) -> int:
     lines_per_burst = pol_dataset.attrs["lines_per_burst"]
-    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
+    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"], "ns")
     azimuth_anx_time = pd.Timedelta(int(azimuth_anx_seconds * 10**9), unit="ns")
     if use_center:
         azimuth_anx_time_center = (
@@ -764,7 +764,7 @@ def crop_burst_dataset(
 
     ds = ds.swap_dims({"line": "azimuth_time", "pixel": "slant_range_time"})
 
-    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"])
+    anx_datetime = np.datetime64(pol_dataset.attrs["ascending_node_time"], "ns")
     burst_azimuth_anx_time = ds.azimuth_time.values[0] - anx_datetime
     ds.attrs["azimuth_anx_time"] = burst_azimuth_anx_time / ONE_SECOND
     ds.attrs["burst_index"] = burst_index
