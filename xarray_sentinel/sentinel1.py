@@ -235,7 +235,7 @@ def open_gcp_dataset(
     pixel_set = set()
     for ggp in geolocation_grid_points:
         if ggp["line"] not in line_set:
-            azimuth_time.append(np.datetime64(ggp["azimuthTime"]), "ns")
+            azimuth_time.append(np.datetime64(ggp["azimuthTime"], "ns"))
             line_set.add(ggp["line"])
         if ggp["pixel"] not in pixel_set:
             slant_range_time.append(ggp["slantRangeTime"])
