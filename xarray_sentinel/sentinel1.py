@@ -316,7 +316,7 @@ def get_footprint_linestring(
 
 
 def make_geospatial_attributes(
-    footprint: Sequence[Tuple[float, float]]
+    footprint: Sequence[Tuple[float, float]],
 ) -> Dict[str, Any]:
     wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
     geospatial_attrs = {
