@@ -1,0 +1,18 @@
+{
+  "template": "https://github.com/ecmwf-projects/cookiecutter-conda-package",
+  "commit": "d379e35af1aa17d816367bcb0942fcf3e238be9d",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "xarray-sentinel",
+      "project_slug": "xarray_sentinel",
+      "project_short_description": "Easily access and explore the SAR data products of the Copernicus Sentinel-1 satellite mission",
+      "copyright_holder": "B-Open Solutions srl and the xarray-sentinel authors",
+      "copyright_year": "2021",
+      "mypy_strict": true,
+      "integration_tests": true,
+      "_template": "https://github.com/ecmwf-projects/cookiecutter-conda-package"
+    }
+  },
+  "directory": null
+}
