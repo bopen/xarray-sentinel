@@ -1,0 +1,10 @@
+# environment-integration.yml: Additional dependencies to install in the integration environment (e.g., pinned dependencies).
+channels:
+- conda-forge
+- nodefaults
+dependencies:
+- make
+- pytest
+- pytest-cov
+# DO NOT EDIT ABOVE THIS LINE, ADD DEPENDENCIES BELOW
+- pandas-stubs
