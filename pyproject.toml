@@ -1,16 +1,51 @@
 [build-system]
-requires = [
-  "setuptools>=42",
-  "wheel",
-  "setuptools_scm[toml]>=3.4",
-  "setuptools_scm_git_archive"
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+
+[project]
+authors = [{ "name" = "B-Open", "email" = "software@bopen.eu" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering",
 ]
+dependencies = [
+  "fsspec",
+  "numpy",
+  "pandas",
+  "rioxarray",
+  "xarray >= 0.18.0",
+  "xmlschema",
+]
+description = "Easily access and explore the SAR data products of the Copernicus Sentinel-1 satellite mission"
+dynamic = ["version"]
+keywords = [
+  "copernicus",
+  "earth-observation",
+  "radar",
+  "remote-sensing",
+  "satellite-imagery",
+  "sentinel-1",
+  "sar",
+  "synthetic-aperture-radar",
+  "xarray",
+]
+license = { file = "LICENSE" }
+name = "xarray-sentinel"
+readme = "README.md"
+
+
+[project.entry-points."xarray.backends"]
+sentinel-1 = "xarray_sentinel.xarray_backends:Sentinel1Backend"
 
 [tool.coverage.run]
 branch = true
-
-[tool.isort]
-profile = "black"
 
 [tool.mypy]
 plugins = "numpy.typing.mypy_plugin"
@@ -24,12 +59,41 @@ module = [
   "rasterio",
   "shapely",
   "shapely.geometry",
-  "shapely.wkt"
+  "shapely.wkt",
 ]
+
+[tool.ruff]
+ignore = [
+  # pydocstyle: Missing Docstrings
+  "D1",
+]
+# Same as Black.
+indent-width = 4
+line-length = 88
+select = [
+  # pyflakes
+  "F",
+  # pycodestyle
+  "E",
+  "W",
+  # isort
+  "I",
+  # pydocstyle
+  "D",
+]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 110
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
+[tool.setuptools]
+packages = ["xarray_sentinel"]
 
 [tool.setuptools_scm]
 write_to = "xarray_sentinel/version.py"
 write_to_template = '''
-# don't change, don't track in version control
+# Do not change! Do not track in version control!
 __version__ = "{version}"
 '''
