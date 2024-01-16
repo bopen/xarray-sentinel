@@ -7,4 +7,17 @@ dependencies:
 - pytest
 - pytest-cov
 # DO NOT EDIT ABOVE THIS LINE, ADD DEPENDENCIES BELOW
-- pandas-stubs
+- fsspec == 2021.4.0
+- make
+- mypy
+- netcdf4
+- numpy == 1.22.0
+- pytest
+- pytest-cov
+- rasterio == 1.2.4
+- rioxarray == 0.8.0
+- shapely
+- types-setuptools
+- xarray == 0.21.1
+- xmlschema == 1.9.0
+- zarr
