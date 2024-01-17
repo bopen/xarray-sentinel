@@ -94,6 +94,9 @@ convention = "numpy"
 [tool.setuptools]
 packages = ["xarray_sentinel"]
 
+[tool.setuptools.package-data]
+xarray_sentinel = ["py.typed"]
+
 [tool.setuptools_scm]
 write_to = "xarray_sentinel/version.py"
 write_to_template = '''
