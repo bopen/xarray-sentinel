@@ -39,9 +39,13 @@ keywords = [
 license = {file = "LICENSE"}
 name = "xarray-sentinel"
 readme = "README.md"
+requires-python = ">=3.9"
 
 [project.entry-points."xarray.backends"]
 sentinel-1 = "xarray_sentinel.xarray_backends:Sentinel1Backend"
+
+[project.urls]
+repository = "https://github.com/bopen/xarray-sentinel"
 
 [tool.coverage.run]
 branch = true

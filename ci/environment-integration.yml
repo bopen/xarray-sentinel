@@ -9,8 +9,10 @@ dependencies:
 # DO NOT EDIT ABOVE THIS LINE, ADD DEPENDENCIES BELOW
 - fsspec == 2021.4.0
 - netcdf4
-- numpy == 1.22.0
-- rasterio == 1.2.4
+- numpy == 1.23.0
+- packaging == 22.0
+- pandas == 1.5.0
+- rasterio == 1.3.0
 - rioxarray == 0.8.0
 - shapely
 - xarray == 0.21.1
