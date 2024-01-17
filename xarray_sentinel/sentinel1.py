@@ -1,6 +1,7 @@
 """Map Sentinel-1 data products to xarray.
 
-References:
+References
+----------
   - Sentinel-1 document library:
     https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library
   - Sentinel-1 Product Specification v3.9 07 May 2021 S1-RS-MDA-52-7441-3-9 documenting IPF 3.40
@@ -316,7 +317,7 @@ def get_footprint_linestring(
 
 
 def make_geospatial_attributes(
-    footprint: Sequence[Tuple[float, float]]
+    footprint: Sequence[Tuple[float, float]],
 ) -> Dict[str, Any]:
     wkt = "POLYGON((" + ",".join(f"{y} {x}" for y, x in footprint) + "))"
     geospatial_attrs = {
@@ -797,7 +798,7 @@ def calibrate_amplitude(
     calibration_lut: xr.DataArray,
     **kwargs: Any,
 ) -> xr.DataArray:
-    """Return the calibrated amplitude. The calibration is done using the calibration LUT in the product metadata.
+    """Return the calibrated amplitude using the calibration LUT in the product metadata.
 
     :param digital_number: digital numbers to be calibrated
     :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
@@ -832,7 +833,7 @@ def calibrate_intensity(
     min_db: Optional[float] = -40.0,
     **kwargs: Any,
 ) -> xr.DataArray:
-    """Return the calibrated intensity. The calibration is done using the calibration LUT in the product metadata.
+    """Return the calibrated intensity using the calibration LUT in the product metadata.
 
     :param digital_number: digital numbers to be calibrated
     :param calibration_lut: calibration LUT (sigmaNought, betaNought or gamma).
