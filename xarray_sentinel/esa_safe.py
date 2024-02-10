@@ -135,6 +135,7 @@ def parse_manifest_sentinel1(
 
     ascending_node_time = findtext(manifest, ".//s1:ascendingNodeTime")
 
+    mission_data_take_id = findtext(manifest, ".//s1sarl1:missionDataTakeID")
     transmitter_receiver_polarisations = findall(
         manifest, ".//s1sarl1:transmitterReceiverPolarisation"
     )
@@ -152,6 +153,7 @@ def parse_manifest_sentinel1(
         "relative_orbit_number": int(relative_orbit_number[0]),
         "pass": orbit_pass,
         "ascending_node_time": ascending_node_time,
+        "mission_data_take_id": int(mission_data_take_id),
         "transmitter_receiver_polarisations": transmitter_receiver_polarisations,
         "product_type": product_type,
         "start_time": start_time,
