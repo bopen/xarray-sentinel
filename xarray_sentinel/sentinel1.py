@@ -116,6 +116,145 @@ def open_calibration_dataset(
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
+def open_reference_replica_dataset(
+        annotation_path: esa_safe.PathType, attrs: Dict[str, Any] = {}
+) -> xr.Dataset:
+    reference_replica = esa_safe.parse_tag_as_list(
+        annotation_path, ".//replicaInformationList/replicaInformation/referenceReplica"
+    )[0]
+    attrs.update({
+        "azimuth_time": reference_replica["azimuthTime"],
+        "chirp_source": reference_replica["chirpSource"],
+        "pg_source": reference_replica["pgSource"],
+        "time_delay": reference_replica["timeDelay"],
+        "gain": reference_replica["gain"],
+    })
+
+    reference_replica_amplitude_coefficients = [float(v) for v in
+                                                reference_replica["amplitudeCoefficients"]["$"].split()]
+
+    reference_replica_phase_coefficients = [float(v) for v in reference_replica["phaseCoefficients"]["$"].split()]
+
+    coords: Dict[str, Any] = {
+        "degree": range(len(reference_replica_amplitude_coefficients))
+    }
+    data_vars = {
+        "reference_replica_amplitude_coefficients": (
+        ("degree"), reference_replica_amplitude_coefficients),
+        "reference_replica_phase_coefficients": (
+        ("degree"), reference_replica_phase_coefficients)
+    }
+    da = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
+    return da
+
+
+def open_antenna_pattern(
+        annotation_path: esa_safe.PathType, attrs: Dict[str, Any] = {}
+) -> xr.Dataset:
+    antenna_pattern_list = esa_safe.parse_tag_as_list(
+        annotation_path, ".//antennaPattern/antennaPatternList/antennaPattern"
+    )
+
+    slant_range_time_list = []
+    azimuth_time_list = []
+    elevation_angle_list = []
+    elevation_pattern_list = []
+    incidence_angle_list = []
+    terrain_height_list = []
+    roll_list = []
+
+    for vector in antenna_pattern_list:
+        azimuth_time_list.append(vector["azimuthTime"])
+        slant_range_time = np.fromstring(vector["slantRangeTime"]["$"], dtype=np.float32, sep=" ")
+        slant_range_time_list.append(slant_range_time)
+
+        elevation_angle = np.fromstring(vector["elevationAngle"]["$"], dtype=np.float32, sep=" ")
+        elevation_angle_list.append(elevation_angle)
+
+        # elevation_pattern = np.fromstring(vector["elevationPattern"]["$"], dtype=np.float32, sep=" ")
+        # elevation_pattern_list.append(elevation_pattern)
+
+        incidence_angle = np.fromstring(vector["slantRangeTime"]["$"], dtype=np.float32, sep=" ")
+        incidence_angle_list.append(incidence_angle)
+
+        terrain_height_list.append(vector["terrainHeight"])
+        roll_list.append(vector["roll"])
+
+    slant_range_time_list = np.array(slant_range_time_list)
+    if (slant_range_time_list - slant_range_time_list[0]).any():
+        raise ValueError(
+            "Unable to organise noise vectors in a regular line-pixel grid"
+        )
+    data_vars = {
+        "elevation_angle": (
+            ("azimuth_time", "slant_range_time"), np.array(elevation_angle_list)),
+        # "elevation_pattern": (
+        #     ( "azimuth_time", "slant_range_time"), np.array(elevation_pattern_list)),
+        "incidence_angle": (
+            ( "azimuth_time", "slant_range_time"), np.array(incidence_angle_list)),
+        "terrain_height": ("azimuth_time", terrain_height_list),
+        "roll": ("azimuth_time", roll_list),
+    }
+    coords = {"slant_range_time": slant_range_time_list[0], "azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time_list]}
+    da = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
+    return da
+
+
+def open_replica_dataset(
+        annotation_path: esa_safe.PathType, attrs: Dict[str, Any] = {}
+) -> xr.Dataset:
+    replicaList = esa_safe.parse_tag_as_list(
+        annotation_path, ".//replicaInformationList/replicaInformation/replicaList/replica"
+    )
+    azimuth_time_list = []
+    cross_correlation_bandwidth_list = []
+    cross_correlation_pslr_list = []
+    cross_correlation_peak_location_list = []
+    reconstructed_replica_valid_flag_list = []
+    pg_product_phase_list = []
+    pg_product_amplitude_list = []
+    model_pg_product_amplitude_list = []
+    model_pg_product_phase_list = []
+    relative_pg_product_valid_flag_list = []
+    absolute_pg_product_valid_flag_list = []
+    internal_time_delay_list = []
+
+    for replica in replicaList:
+        azimuth_time_list.append(replica["azimuthTime"])
+        cross_correlation_bandwidth_list.append(replica["crossCorrelationBandwidth"])
+        cross_correlation_pslr_list.append(replica["crossCorrelationPslr"])
+        cross_correlation_peak_location_list.append(replica["crossCorrelationPeakLocation"])
+        reconstructed_replica_valid_flag_list.append(replica["reconstructedReplicaValidFlag"])
+        pg_product_amplitude_list.append(replica["pgProductAmplitude"])
+        pg_product_phase_list.append(replica["pgProductPhase"])
+        model_pg_product_amplitude_list.append(replica["modelPgProductAmplitude"])
+        model_pg_product_phase_list.append(replica["modelPgProductPhase"])
+        relative_pg_product_valid_flag_list.append(replica["relativePgProductValidFlag"])
+        absolute_pg_product_valid_flag_list.append(replica["absolutePgProductValidFlag"])
+        internal_time_delay_list.append(replica["internalTimeDelay"])
+
+    coords: Dict[str, Any] = {
+        "azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time_list],
+    }
+    data_vars = {
+        "cross_correlation_bandwidth": (("azimuth_time"), cross_correlation_bandwidth_list),
+        "cross_correlation_pslr": (("azimuth_time"), cross_correlation_pslr_list),
+        "cross_correlation_peak_location": (("azimuth_time"), cross_correlation_peak_location_list),
+        "reconstructed_replica_valid_flag": (("azimuth_time"), reconstructed_replica_valid_flag_list),
+        "pg_product_amplitude": (("azimuth_time"), pg_product_amplitude_list),
+        "pg_product_phase": (("azimuth_time"), pg_product_phase_list),
+        "model_pg_product_amplitude": (("azimuth_time"), model_pg_product_amplitude_list),
+        "model_pg_product_phase": (("azimuth_time"), model_pg_product_phase_list),
+        "relative_pg_product_valid_flag": (("azimuth_time"), relative_pg_product_valid_flag_list),
+        "absolute_pg_product_valid_flag": (("azimuth_time"), absolute_pg_product_valid_flag_list),
+        "internal_time_delay": (("azimuth_time"), internal_time_delay_list),
+
+    }
+
+    da = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
+    return da
+
+
 def open_noise_range_dataset(
     noise: esa_safe.PathType, attrs: Dict[str, Any] = {}
 ) -> xr.Dataset:
@@ -494,6 +633,9 @@ def find_available_groups(
                 "azimuth_fm_rate",
                 "dc_estimate",
                 "gcp",
+                "replica",
+                "reference_replica",
+                "antenna_pattern"
             ]:
                 groups[f"{swath_pol_group}/{metadata_group}"] = [abspath]
             if product_type == "GRD":
@@ -912,6 +1054,9 @@ METADATA_OPENERS = {
     "calibration": open_calibration_dataset,
     "noise_range": open_noise_range_dataset,
     "noise_azimuth": open_noise_azimuth_dataset,
+    "replica": open_replica_dataset,
+    "reference_replica": open_reference_replica_dataset,
+    "antenna_pattern": open_antenna_pattern,
 }
 
 
