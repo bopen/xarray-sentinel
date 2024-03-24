@@ -75,7 +75,10 @@ def open_calibration_dataset(
     calibration_vectors = esa_safe.parse_tag_as_list(
         calibration, ".//calibrationVector", "calibration"
     )
-
+    cal_attrs = esa_safe.parse_tag(
+        calibration, ".//calibrationInformation", "calibration"
+    )
+    attrs["absolute_calibration_constant"] = cal_attrs["absoluteCalibrationConstant"]
     azimuth_time_list = []
     pixel_list = []
     line_list = []
@@ -106,8 +109,8 @@ def open_calibration_dataset(
         )
     data_vars = {
         "azimuth_time": ("line", [np.datetime64(dt, "ns") for dt in azimuth_time_list]),
-        "sigmaNought": (("line", "pixel"), sigmaNought_list),
-        "betaNought": (("line", "pixel"), betaNought_list),
+        "sigma_nought": (("line", "pixel"), sigmaNought_list),
+        "beta_nought": (("line", "pixel"), betaNought_list),
         "gamma": (("line", "pixel"), gamma_list),
         "dn": (("line", "pixel"), dn_list),
     }
@@ -295,21 +298,21 @@ def open_noise_azimuth_dataset(
 
     first_range_sample = []
     line_list = []
-    noiseAzimuthLut_list = []
+    noise_azimuth_lut_list = []
     for vector in noise_vectors:
         first_range_sample.append(vector["firstRangeSample"])
         line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")
         line_list.append(line)
-        noiseAzimuthLut = np.fromstring(
+        noise_azimuth_lut = np.fromstring(
             vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" "
         )
-        noiseAzimuthLut_list.append(noiseAzimuthLut)
+        noise_azimuth_lut_list.append(noise_azimuth_lut)
 
-    # BROKEN: GRDs have line and noiseAzimuthLut of different size, we take the first one
+    # BROKEN: GRDs have line and noise_azimuth_lut of different size, we take the first one
     data_vars = {}
     coords = {}
     if first_range_sample:
-        data_vars["noiseAzimuthLut"] = ("line", noiseAzimuthLut_list[0])
+        data_vars["noise_azimuth_lut"] = ("line", noise_azimuth_lut_list[0])
         coords["line"] = line_list[0]
 
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
@@ -552,7 +555,19 @@ def open_dc_estimate_dataset(
     azimuth_time = []
     t0 = []
     data_dc_poly = []
+    geometry_dc_poly = []
+    data_dc_rms_error = []
+    data_dc_rms_error_above_threshold = []
+    fine_dce_azimuth_start_time = []
+    fine_dce_azimuth_stop_time = []
     for dc_estimate in dc_estimates:
+        geometry_dc_poly.append(
+            [float(c) for c in dc_estimate["geometryDcPolynomial"]["$"].split()]
+        )
+        data_dc_rms_error.append(dc_estimate["dataDcRmsError"])
+        data_dc_rms_error_above_threshold.append(dc_estimate["dataDcRmsErrorAboveThreshold"])
+        fine_dce_azimuth_start_time.append(dc_estimate["fineDceAzimuthStartTime"])
+        fine_dce_azimuth_stop_time.append(dc_estimate["fineDceAzimuthStopTime"])
         azimuth_time.append(dc_estimate["azimuthTime"])
         t0.append(dc_estimate["t0"])
         data_dc_poly.append(
@@ -563,6 +578,11 @@ def open_dc_estimate_dataset(
         data_vars={
             "t0": ("azimuth_time", t0, attrs),
             "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly, attrs),
+            "geometry_dc_polynomial": (("azimuth_time", "degree"), geometry_dc_poly, attrs),
+            "data_dc_rms_error": ("azimuth_time", data_dc_rms_error, attrs),
+            "data_dc_rms_error_above_threshold": ("azimuth_time", data_dc_rms_error, attrs),
+            "fine_dce_azimuth_start_time":  ("azimuth_time", [np.datetime64(at, "ns") for at in fine_dce_azimuth_start_time]),
+            "fine_dce_azimuth_stop_time": ("azimuth_time", [np.datetime64(at, "ns") for at in fine_dce_azimuth_stop_time]),
         },
         coords={
             "azimuth_time": [np.datetime64(at, "ns") for at in azimuth_time],
@@ -637,6 +657,8 @@ def find_available_groups(
                 "reference_replica",
                 "antenna_pattern"
             ]:
+                if product_type == "GRD" and  metadata_group == "antenna_pattern":
+                    continue
                 groups[f"{swath_pol_group}/{metadata_group}"] = [abspath]
             if product_type == "GRD":
                 groups[f"{swath_pol_group}/coordinate_conversion"] = [abspath]
