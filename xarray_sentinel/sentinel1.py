@@ -174,8 +174,10 @@ def open_antenna_pattern(
         elevation_angle = np.fromstring(vector["elevationAngle"]["$"], dtype=np.float32, sep=" ")
         elevation_angle_list.append(elevation_angle)
 
-        # elevation_pattern = np.fromstring(vector["elevationPattern"]["$"], dtype=np.float32, sep=" ")
-        # elevation_pattern_list.append(elevation_pattern)
+        elevation_pattern = np.fromstring(vector["elevationPattern"]["$"], dtype=np.float32, sep=" ")
+        elevation_pattern_list.append(
+            elevation_pattern[::2] * 1j + elevation_pattern[1::2]
+        )
 
         incidence_angle = np.fromstring(vector["slantRangeTime"]["$"], dtype=np.float32, sep=" ")
         incidence_angle_list.append(incidence_angle)
