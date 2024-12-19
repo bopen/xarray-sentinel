@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=64", "setuptools_scm>=8"]
 
 [project]
 authors = [{"name" = "B-Open", "email" = "software@bopen.eu"}]
@@ -66,13 +67,15 @@ module = [
 ]
 
 [tool.ruff]
+# Same as Black.
+indent-width = 4
+line-length = 88
+
+[tool.ruff.lint]
 ignore = [
   # pydocstyle: Missing Docstrings
   "D1"
 ]
-# Same as Black.
-indent-width = 4
-line-length = 88
 select = [
   # pyflakes
   "F",
@@ -88,7 +91,7 @@ select = [
 [tool.ruff.lint.pycodestyle]
 max-line-length = 110
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.setuptools]

@@ -2,6 +2,7 @@
 version.py
 
 # Sphinx automatic generation of API
+docs/README.md
 docs/_api/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,vim,visualstudiocode,pycharm,emacs,linux,macos,windows
