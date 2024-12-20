@@ -9,18 +9,20 @@ import typer
 DEFAULT_ODATA_URL: str = "https://catalogue.dataspace.copernicus.eu/odata/v1"
 DEFAULT_PRODUCTS_ODATA_FILTER_TEMPLATE = (
     "((Collection/Name eq 'SENTINEL-1' "
-    "and (Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'instrumentShortName' and att/OData.CSC.StringAttribute/Value eq 'SAR') "
+    "and (Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'instrumentShortName' "
+    "and att/OData.CSC.StringAttribute/Value eq 'SAR') "
     "and (contains(Name,'GRD') and contains(Name,'_COG') "
     "and OData.CSC.Intersects(area=geography'{geometry_wkt}'))) "
-    "and (Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'operationalMode' and att/OData.CSC.StringAttribute/Value eq 'IW') "
-    "and Attributes/OData.CSC.IntegerAttribute/any(att:att/Name eq 'relativeOrbitNumber' and att/OData.CSC.IntegerAttribute/Value eq {relative_orbit}))) "
+    "and (Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'operationalMode' "
+    "and att/OData.CSC.StringAttribute/Value eq 'IW') "
+    "and Attributes/OData.CSC.IntegerAttribute/any(att:att/Name eq 'relativeOrbitNumber' "
+    "and att/OData.CSC.IntegerAttribute/Value eq {relative_orbit}))) "
     "and ContentDate/Start ge {start_date_iso}Z and ContentDate/Start lt {stop_date_iso}Z)"
 )
 LOGGER = structlog.getLogger(__name__)
 
 
 class DataSpaceClient:
-
     def __init__(
         self,
         odata_url: str = DEFAULT_ODATA_URL,
@@ -54,11 +56,12 @@ class DataSpaceClient:
         bbox: tuple[float, float, float, float] = (-180, -90, 180, 90),
         limit: int = 100,
         log: structlog.BoundLogger = LOGGER,
-    ) -> dict[str, Any]:
+    ) -> Any:
         product_url = f"{self.odata_url}/Products"
         odata_filter = self.build_sentinel1_products_odata_filter(
             start_date, stop_date, relative_orbit, bbox
         )
+        params: dict[str, str | int]
         params = {
             "$filter": odata_filter,
             "$top": limit,
@@ -73,8 +76,8 @@ def get_s3paths(results: list[Any]) -> list[str]:
 
 
 def search_sentinel1_products(
-    start_date: str = "2024-01-01",
-    stop_date: str = "2024-12-31",
+    start_date: datetime.datetime = datetime.datetime(2024, 1, 1),
+    stop_date: datetime.datetime = datetime.datetime(2024, 12, 31),
     relative_orbit: int = 22,
     bbox: tuple[float, float, float, float] = (6.75, 36.62, 18.48, 47.11),
     limit: int = 100,
