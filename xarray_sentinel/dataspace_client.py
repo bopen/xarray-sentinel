@@ -3,7 +3,6 @@ from typing import Any
 
 import requests
 import shapely
-import structlog
 import typer
 
 DEFAULT_ODATA_URL: str = "https://catalogue.dataspace.copernicus.eu/odata/v1"
@@ -19,7 +18,6 @@ DEFAULT_PRODUCTS_ODATA_FILTER_TEMPLATE = (
     "and att/OData.CSC.IntegerAttribute/Value eq {relative_orbit}))) "
     "and ContentDate/Start ge {start_date_iso}Z and ContentDate/Start lt {stop_date_iso}Z)"
 )
-LOGGER = structlog.getLogger(__name__)
 
 
 class DataSpaceClient:
@@ -55,7 +53,6 @@ class DataSpaceClient:
         relative_orbit: int,
         bbox: tuple[float, float, float, float] = (-180, -90, 180, 90),
         limit: int = 100,
-        log: structlog.BoundLogger = LOGGER,
     ) -> Any:
         product_url = f"{self.odata_url}/Products"
         odata_filter = self.build_sentinel1_products_odata_filter(
