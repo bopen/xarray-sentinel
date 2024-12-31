@@ -26,7 +26,7 @@ import xarray as xr
 from . import conventions, esa_safe
 
 SPEED_OF_LIGHT = 299_792_458  # m / s
-ONE_SECOND = np.timedelta64(1, "s")
+ONE_SECOND = np.timedelta64(10**9, "ns")
 
 
 DataArrayOrDataset = TypeVar("DataArrayOrDataset", xr.DataArray, xr.Dataset)
