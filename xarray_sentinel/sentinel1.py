@@ -544,6 +544,7 @@ def make_azimuth_time(
         start=product_first_line_utc_time,
         end=product_last_line_utc_time,
         periods=number_of_lines,
+        unit="ns",
     )
     return azimuth_time.values
 
