@@ -133,7 +133,8 @@ def open_reference_replica_dataset(
             "chirpSource": reference_replica["chirpSource"],
             "pgSource": reference_replica["pgSource"],
             "timeDelay": reference_replica["timeDelay"],
-            "gain": reference_replica["gain"],
+            "gain_re": reference_replica["gain"]["re"],
+            "gain_im": reference_replica["gain"]["im"],
         }
     )
 
@@ -198,8 +199,8 @@ def open_antenna_pattern(
         terrain_height_list.append(vector["terrainHeight"])
         roll_list.append(vector["roll"])
 
-    slant_range_time_list = np.array(slant_range_time_list)
-    if (slant_range_time_list - slant_range_time_list[0]).any():
+    slant_range_time_array = np.array(slant_range_time_list)
+    if (slant_range_time_array - slant_range_time_array[0]).any():
         raise ValueError(
             "Unable to organise noise vectors in a regular line-pixel grid"
         )
@@ -218,7 +219,7 @@ def open_antenna_pattern(
         "roll": ("azimuth_time", roll_list),
     }
     coords = {
-        "slant_range_time": slant_range_time_list[0],
+        "slant_range_time": slant_range_time_array[0],
         "azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time_list],
     }
     da = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
