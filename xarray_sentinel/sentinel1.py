@@ -415,7 +415,21 @@ def open_dc_estimate_dataset(
     azimuth_time = []
     t0 = []
     data_dc_poly = []
+    geometry_dc_poly = []
+    data_dc_rms_error = []
+    data_dc_rms_error_above_threshold = []
+    fine_dce_azimuth_start_time = []
+    fine_dce_azimuth_stop_time = []
     for dc_estimate in dc_estimates:
+        geometry_dc_poly.append(
+            [float(c) for c in dc_estimate["geometryDcPolynomial"]["$"].split()]
+        )
+        data_dc_rms_error.append(dc_estimate["dataDcRmsError"])
+        data_dc_rms_error_above_threshold.append(
+            dc_estimate["dataDcRmsErrorAboveThreshold"]
+        )
+        fine_dce_azimuth_start_time.append(dc_estimate["fineDceAzimuthStartTime"])
+        fine_dce_azimuth_stop_time.append(dc_estimate["fineDceAzimuthStopTime"])
         azimuth_time.append(dc_estimate["azimuthTime"])
         t0.append(dc_estimate["t0"])
         data_dc_poly.append(
@@ -426,6 +440,25 @@ def open_dc_estimate_dataset(
         data_vars={
             "t0": ("azimuth_time", t0, attrs),
             "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly, attrs),
+            "geometry_dc_polynomial": (
+                ("azimuth_time", "degree"),
+                geometry_dc_poly,
+                attrs,
+            ),
+            "data_dc_rms_error": ("azimuth_time", data_dc_rms_error, attrs),
+            "data_dc_rms_error_above_threshold": (
+                "azimuth_time",
+                data_dc_rms_error,
+                attrs,
+            ),
+            "fine_dce_azimuth_start_time": (
+                "azimuth_time",
+                [np.datetime64(at, "ns") for at in fine_dce_azimuth_start_time],
+            ),
+            "fine_dce_azimuth_stop_time": (
+                "azimuth_time",
+                [np.datetime64(at, "ns") for at in fine_dce_azimuth_stop_time],
+            ),
         },
         coords={
             "azimuth_time": [np.datetime64(at, "ns") for at in azimuth_time],

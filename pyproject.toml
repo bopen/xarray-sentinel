@@ -3,7 +3,7 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools>=64", "setuptools_scm>=8"]
 
 [project]
-authors = [{ "name" = "B-Open", "email" = "software@bopen.eu" }]
+authors = [{"name" = "B-Open", "email" = "software@bopen.eu"}]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
@@ -14,7 +14,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering"
 ]
 dependencies = [
   "fsspec",
@@ -22,7 +22,7 @@ dependencies = [
   "pandas",
   "rioxarray",
   "xarray >= 0.18.0",
-  "xmlschema",
+  "xmlschema"
 ]
 description = "Easily access and explore the SAR data products of the Copernicus Sentinel-1 satellite mission"
 dynamic = ["version"]
@@ -35,9 +35,9 @@ keywords = [
   "sentinel-1",
   "sar",
   "synthetic-aperture-radar",
-  "xarray",
+  "xarray"
 ]
-license = { file = "LICENSE" }
+license = {file = "LICENSE"}
 name = "xarray-sentinel"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -63,7 +63,7 @@ module = [
   "rasterio",
   "shapely",
   "shapely.geometry",
-  "shapely.wkt",
+  "shapely.wkt"
 ]
 
 [tool.ruff]
@@ -74,7 +74,7 @@ line-length = 88
 [tool.ruff.lint]
 ignore = [
   # pydocstyle: Missing Docstrings
-  "D1",
+  "D1"
 ]
 select = [
   # pyflakes
@@ -85,7 +85,7 @@ select = [
   # isort
   "I",
   # pydocstyle
-  "D",
+  "D"
 ]
 
 [tool.ruff.lint.pycodestyle]
