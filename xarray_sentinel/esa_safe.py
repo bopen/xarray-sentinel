@@ -2,7 +2,7 @@ import functools
 import importlib.resources
 import os
 import re
-from typing import Any, Dict, List, Mapping, TextIO, Tuple, Union
+from typing import Any, Mapping, TextIO, Union
 from xml.etree import ElementTree
 
 import xmlschema
@@ -41,7 +41,7 @@ def parse_tag(
     query: str,
     schema_type: str = "annotation",
     validation: str = "skip",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     schema = cached_sentinel1_schemas(schema_type)
     if hasattr(xml_path, "seek"):
         xml_path.seek(0)
@@ -56,7 +56,7 @@ def parse_tag_as_list(
     query: str,
     schema_type: str = "annotation",
     validation: str = "skip",
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     schema = cached_sentinel1_schemas(schema_type)
     xml_tree = ElementTree.parse(xml_path)
     tag: Any = schema.decode(xml_tree, query, validation=validation)
@@ -64,7 +64,7 @@ def parse_tag_as_list(
         tag = []
     elif isinstance(tag, dict):
         tag = [tag]
-    tag_list: List[Dict[str, Any]] = tag
+    tag_list: list[dict[str, Any]] = tag
     assert isinstance(tag_list, list), f"{type(tag_list)} is not list"
     return tag_list
 
@@ -72,7 +72,7 @@ def parse_tag_as_list(
 def findtext(
     tree: ElementTree.Element,
     query: str,
-    namespaces: Dict[str, str] = SENTINEL1_NAMESPACES,
+    namespaces: dict[str, str] = SENTINEL1_NAMESPACES,
 ) -> str:
     value = tree.findtext(query, namespaces=namespaces)
     if value is None:
@@ -83,10 +83,10 @@ def findtext(
 def findall(
     tree: ElementTree.Element,
     query: str,
-    namespaces: Dict[str, str] = SENTINEL1_NAMESPACES,
-) -> List[str]:
+    namespaces: dict[str, str] = SENTINEL1_NAMESPACES,
+) -> list[str]:
     tags = tree.findall(query, namespaces=namespaces)
-    values: List[str] = []
+    values: list[str] = []
     for tag in tags:
         if tag.text is None:
             raise ValueError(f"{query=} returned None")
@@ -94,7 +94,7 @@ def findall(
     return values
 
 
-def parse_annotation_filename(name: str) -> Tuple[str, str, str, str]:
+def parse_annotation_filename(name: str) -> tuple[str, str, str, str]:
     match = re.match(
         r"([a-z-]*)s1[ab]-([^-]*)-[^-]*-([^-]*)-([\dt]*)-", os.path.basename(name)
     )
@@ -106,7 +106,7 @@ def parse_annotation_filename(name: str) -> Tuple[str, str, str, str]:
 @functools.lru_cache
 def parse_manifest_sentinel1(
     manifest_path: PathOrFileType,
-) -> Tuple[Dict[str, Any], Dict[str, Tuple[str, str, str, str, str]]]:
+) -> tuple[dict[str, Any], dict[str, tuple[str, str, str, str, str]]]:
     # We use ElementTree because we didn't find a XSD definition for the manifest
     manifest = ElementTree.parse(manifest_path).getroot()
 
@@ -176,7 +176,7 @@ def parse_manifest_sentinel1(
     return attributes, files
 
 
-def make_stac_item(attrs: Mapping[str, Any]) -> Dict[str, Any]:
+def make_stac_item(attrs: Mapping[str, Any]) -> dict[str, Any]:
     assert attrs["family_name"] == "SENTINEL-1"
 
     stac_item = {
