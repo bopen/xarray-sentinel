@@ -17,7 +17,7 @@ SENTINEL1_NAMESPACES = {
     "s1sarl1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1",
 }
 
-SENTINEL1_FOLDER = importlib.resources.files(__name__) / "resources/sentinel1"
+SENTINEL1_FOLDER = importlib.resources.files("xarray_sentinel") / "resources/sentinel1"
 SENTINEL1_SCHEMAS = {
     "manifest": SENTINEL1_FOLDER / "my-xfdu.xsd",
     "annotation": SENTINEL1_FOLDER / "s1-level-1-product.xsd",
