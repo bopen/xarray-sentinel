@@ -448,7 +448,7 @@ def open_gcp_dataset(
     ds = xr.Dataset(
         data_vars=data_vars,
         coords={
-            "azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time],
+            "azimuth_time": azimuth_time,
             "slant_range_time": slant_range_time,
             "line": ("azimuth_time", line),
             "pixel": ("slant_range_time", pixel),
