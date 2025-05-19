@@ -2,6 +2,9 @@
 build-backend = "setuptools.build_meta"
 requires = ["setuptools>=64", "setuptools_scm>=8"]
 
+[dependency-groups]
+dev = ["mypy", "pandas-stubs", "pytest", "pytest-cov", "shapely"]
+
 [project]
 authors = [{"name" = "B-Open", "email" = "software@bopen.eu"}]
 classifiers = [
@@ -14,6 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering"
 ]
 dependencies = [
@@ -21,6 +25,7 @@ dependencies = [
   "numpy",
   "pandas",
   "rioxarray",
+  "scipy",
   "xarray >= 0.18.0",
   "xmlschema"
 ]
@@ -40,7 +45,7 @@ keywords = [
 license = {file = "LICENSE"}
 name = "xarray-sentinel"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.entry-points."xarray.backends"]
 sentinel-1 = "xarray_sentinel.xarray_backends:Sentinel1Backend"
@@ -59,6 +64,7 @@ strict = true
 ignore_missing_imports = true
 module = [
   "cfchecker",
+  "dask",
   "fsspec",
   "rasterio",
   "shapely",

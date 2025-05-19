@@ -7,7 +7,7 @@ dependencies:
 - numpy >= 1.23.0
 - rasterio >= 1.3.0
 - rioxarray >= 0.10.0
-- shapely
+- scipy
 - xarray >= 2022.06.0
 - xmlschema >= 2.0.1
 - zarr
