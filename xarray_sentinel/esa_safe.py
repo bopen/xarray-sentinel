@@ -1,10 +1,10 @@
 import functools
+import importlib.resources
 import os
 import re
 from typing import Any, Dict, List, Mapping, TextIO, Tuple, Union
 from xml.etree import ElementTree
 
-import pkg_resources
 import xmlschema
 
 PathType = Union[str, "os.PathLike[str]"]
@@ -17,13 +17,13 @@ SENTINEL1_NAMESPACES = {
     "s1sarl1": "http://www.esa.int/safe/sentinel-1.0/sentinel-1/sar/level-1",
 }
 
-SENTINEL1_FOLDER = pkg_resources.resource_filename(__name__, "resources/sentinel1")
+SENTINEL1_FOLDER = importlib.resources.files(__name__) / "resources/sentinel1"
 SENTINEL1_SCHEMAS = {
-    "manifest": os.path.join(SENTINEL1_FOLDER, "my-xfdu.xsd"),
-    "annotation": os.path.join(SENTINEL1_FOLDER, "s1-level-1-product.xsd"),
-    "calibration": os.path.join(SENTINEL1_FOLDER, "s1-level-1-calibration.xsd"),
-    "noise": os.path.join(SENTINEL1_FOLDER, "s1-level-1-noise.xsd"),
-    "aux_orbit": os.path.join(SENTINEL1_FOLDER, "my-schema_orb.xsd"),
+    "manifest": SENTINEL1_FOLDER / "my-xfdu.xsd",
+    "annotation": SENTINEL1_FOLDER / "s1-level-1-product.xsd",
+    "calibration": SENTINEL1_FOLDER / "s1-level-1-calibration.xsd",
+    "noise": SENTINEL1_FOLDER / "s1-level-1-noise.xsd",
+    "aux_orbit": SENTINEL1_FOLDER / "my-schema_orb.xsd",
 }
 
 SENTINEL2_NAMESPACES = {
@@ -33,7 +33,7 @@ SENTINEL2_NAMESPACES = {
 
 @functools.lru_cache
 def cached_sentinel1_schemas(schema_type: str) -> xmlschema.XMLSchema:
-    return xmlschema.XMLSchema(SENTINEL1_SCHEMAS[schema_type])
+    return xmlschema.XMLSchema(str(SENTINEL1_SCHEMAS[schema_type]))
 
 
 def parse_tag(
