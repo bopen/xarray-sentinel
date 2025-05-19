@@ -3,7 +3,15 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools>=64", "setuptools_scm>=8"]
 
 [dependency-groups]
-dev = ["mypy", "pandas-stubs", "pytest", "pytest-cov", "shapely"]
+dev = [
+  "cfchecker>=4.1.0",
+  "mypy>=1.15.0",
+  "pandas-stubs>=1.4.0",
+  "pytest>=7.0",
+  "pytest-cov>=5.0",
+  "shapely>=2.1",
+  "zarr>=2.18.3"
+]
 
 [project]
 authors = [{"name" = "B-Open", "email" = "software@bopen.eu"}]
@@ -21,13 +29,13 @@ classifiers = [
   "Topic :: Scientific/Engineering"
 ]
 dependencies = [
-  "fsspec",
-  "numpy",
-  "pandas",
-  "rioxarray",
-  "scipy",
-  "xarray >= 0.18.0",
-  "xmlschema"
+  "fsspec>=2023.1.0",
+  "numpy>=1.22.0",
+  "pandas>=1.4.0",
+  "rioxarray>=0.13.0",
+  "scipy>=1.10.0",
+  "xarray>=2023.2.0",
+  "xmlschema>=2.2.0"
 ]
 description = "Easily access and explore the SAR data products of the Copernicus Sentinel-1 satellite mission"
 dynamic = ["version"]
