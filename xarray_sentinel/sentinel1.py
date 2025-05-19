@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import Any, Optional, Sequence, TypeVar
+from typing import Any, Sequence, TypeVar
 
 import fsspec
 import numpy as np
@@ -34,8 +34,8 @@ DataArrayOrDataset = TypeVar("DataArrayOrDataset", xr.DataArray, xr.Dataset)
 
 def get_fs_path(
     urlpath_or_path: esa_safe.PathType,
-    fs: Optional[fsspec.AbstractFileSystem] = None,
-    storage_options: Optional[dict[str, Any]] = None,
+    fs: fsspec.AbstractFileSystem | None = None,
+    storage_options: dict[str, Any] | None = None,
 ) -> tuple[fsspec.AbstractFileSystem, str]:
     if fs is not None and storage_options is not None:
         raise TypeError("only one of 'fs' and 'storage_options' can be not None")
@@ -58,7 +58,7 @@ def get_fs_path(
     return fs, path
 
 
-def normalise_group(group: Optional[str]) -> tuple[str, Optional[int]]:
+def normalise_group(group: str | None) -> tuple[str, int | None]:
     if group is None:
         group = ""
     if group.startswith("/"):
@@ -737,8 +737,8 @@ def find_available_groups(
 
 def open_rasterio_dataarray(
     measurement: esa_safe.PathOrFileType,
-    fs: Optional[fsspec.AbstractFileSystem],
-    chunks: Optional[dict[str, int]],
+    fs: fsspec.AbstractFileSystem | None,
+    chunks: dict[str, int] | None,
 ) -> xr.DataArray:
     # fsspec needs rasterio >= 1.3.0, but we allow earlier rasterio versions for local files
     if fs is None or isinstance(fs, fsspec.implementations.local.LocalFileSystem):
@@ -775,9 +775,9 @@ def make_azimuth_time(
 def open_pol_dataset(
     measurement: esa_safe.PathOrFileType,
     annotation: esa_safe.PathOrFileType,
-    fs: Optional[fsspec.AbstractFileSystem] = None,
+    fs: fsspec.AbstractFileSystem | None = None,
     attrs: dict[str, Any] = {},
-    gcp: Optional[xr.Dataset] = None,
+    gcp: xr.Dataset | None = None,
 ) -> xr.Dataset:
     product_information = esa_safe.parse_tag(annotation, ".//productInformation")
     image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
@@ -811,7 +811,7 @@ def open_pol_dataset(
     )
     encoding = {}
     swap_dims = {}
-    chunks: Optional[dict[str, int]] = None
+    chunks: dict[str, int] | None = None
 
     azimuth_time = make_azimuth_time(
         product_first_line_utc_time,
@@ -928,11 +928,11 @@ def find_bursts_index(
 
 def crop_burst_dataset(
     pol_dataset: DataArrayOrDataset,
-    burst_index: Optional[int] = None,
-    azimuth_anx_time: Optional[float] = None,
+    burst_index: int | None = None,
+    azimuth_anx_time: float | None = None,
     use_center: bool = False,
-    burst_id: Optional[int] = None,
-    gcp: Optional[xr.Dataset] = None,
+    burst_id: int | None = None,
+    gcp: xr.Dataset | None = None,
 ) -> DataArrayOrDataset:
     """Return the measurement dataset cropped to the selected burst.
 
@@ -1055,7 +1055,7 @@ def calibrate_intensity(
     digital_number: xr.DataArray,
     calibration_lut: xr.DataArray,
     as_db: bool = False,
-    min_db: Optional[float] = -40.0,
+    min_db: float | None = -40.0,
     **kwargs: Any,
 ) -> xr.DataArray:
     """Return the calibrated intensity using the calibration LUT in the product metadata.
@@ -1160,12 +1160,12 @@ def do_override_product_files(
 def open_sentinel1_dataset(
     product_urlpath: esa_safe.PathType,
     *,
-    drop_variables: Optional[tuple[str]] = None,
-    group: Optional[str] = None,
-    fs: Optional[fsspec.AbstractFileSystem] = None,
-    storage_options: Optional[dict[str, Any]] = None,
+    drop_variables: tuple[str] | None = None,
+    group: str | None = None,
+    fs: fsspec.AbstractFileSystem | None = None,
+    storage_options: dict[str, Any] | None = None,
     check_files_exist: bool = False,
-    override_product_files: Optional[str] = None,
+    override_product_files: str | None = None,
     parse_geospatial_attrs: bool = True,
 ) -> xr.Dataset:
     if drop_variables is not None:

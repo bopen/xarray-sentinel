@@ -1,5 +1,5 @@
 import os
-from typing import Any, Optional
+from typing import Any
 
 import fsspec
 import xarray as xr
@@ -11,11 +11,11 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
     def open_dataset(  # type: ignore
         self,
         filename_or_obj: str,
-        drop_variables: Optional[tuple[str]] = None,
-        group: Optional[str] = None,
-        storage_options: Optional[dict[str, Any]] = None,
-        override_product_files: Optional[str] = None,
-        fs: Optional[fsspec.AbstractFileSystem] = None,
+        drop_variables: tuple[str] | None = None,
+        group: str | None = None,
+        storage_options: dict[str, Any] | None = None,
+        override_product_files: str | None = None,
+        fs: fsspec.AbstractFileSystem | None = None,
         check_files_exist: bool = False,
         parse_geospatial_attrs: bool = True,
     ) -> xr.Dataset:
