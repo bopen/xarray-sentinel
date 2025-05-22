@@ -1276,7 +1276,7 @@ def make_sentinel1_stac_item(
             "https://stac-extensions.github.io/sat/v1.0.0/schema.json",
             "https://stac-extensions.github.io/view/v1.0.0/schema.json",
             "https://stac-extensions.github.io/sar/v1.2.0/schema.json",
-            # "https://stac-extensions.github.io/eopf/v1.0.0/schema.json",
+            "https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json",
         ],
         "id": item_id,
         "properties": {
@@ -1328,8 +1328,8 @@ def make_sentinel1_stac_item(
             "sar:beam_ids": esa_safe.findall(
                 manifest, ".//s1sarl1:instrumentMode/s1sarl1:swath"
             ),
-            "eopf:datatake_id": int(
-                esa_safe.findtext(manifest, ".//s1sarl1:missionDataTakeID")
+            "eopf:datatake_id": esa_safe.findtext(
+                manifest, ".//s1sarl1:missionDataTakeID"
             ),
         },
         "geometry": {"type": "Polygon", "coordinates": [coordinates]},
