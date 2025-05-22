@@ -78,7 +78,8 @@ module = [
   "rasterio",
   "shapely",
   "shapely.geometry",
-  "shapely.wkt"
+  "shapely.wkt",
+  "stac_validator"
 ]
 
 [tool.ruff]

@@ -1241,7 +1241,7 @@ def make_sentinel1_stac_item(
     item_id: str,
     manifest_path: esa_safe.PathOrFileType,
     annotation: esa_safe.PathOrFileType,
-    namespaces=esa_safe.SENTINEL1_NAMESPACES,
+    namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
 ) -> dict[str, Any]:
     manifest = ElementTree.parse(manifest_path).getroot()
 
@@ -1285,7 +1285,7 @@ def make_sentinel1_stac_item(
             "end_datetime": esa_safe.findtext(manifest, ".//safe:stopTime") + "Z",
             "created": manifest.find(
                 ".//safe:processing", namespaces=namespaces
-            ).attrib["stop"]
+            ).attrib["stop"]  # type: ignore
             + "Z",
             "platform": "sentinel-1"
             + esa_safe.findtext(manifest, ".//safe:platform/safe:number").lower(),
@@ -1300,7 +1300,7 @@ def make_sentinel1_stac_item(
             ],
             "processing:software": manifest.find(
                 ".//safe:software", namespaces=namespaces
-            ).attrib,
+            ).attrib,  # type: ignore
             "sat:platform_international_designator": esa_safe.findtext(
                 manifest, ".//safe:nssdcIdentifier"
             ),
