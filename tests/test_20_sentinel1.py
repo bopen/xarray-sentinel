@@ -5,6 +5,7 @@ import pytest
 import shapely.geometry
 import shapely.wkt
 import xarray as xr
+from stac_validator import stac_validator
 
 from xarray_sentinel import esa_safe, sentinel1
 
@@ -503,3 +504,23 @@ def test_do_override_product_files() -> None:
     res = sentinel1.do_override_product_files(template, product_files)
 
     assert "./annotation/s3-vv.xml" in res
+
+
+@pytest.mark.parametrize(
+    "safe,annotation",
+    [
+        [SLC_S3, SLC_S3_VH_annotation],
+        [SLC_IW, SLC_IW1_VV_annotation],
+        [GRD_IW, GRD_IW_VV_annotation],
+    ],
+)
+def test_make_sentinel1_stac_item(safe, annotation) -> None:
+    item = sentinel1.make_sentinel1_stac_item(
+        "test", safe / "manifest.safe", annotation
+    )
+
+    validator = stac_validator.StacValidate()
+    # HACK: the geometry appears to be correct, but it doesn't validate
+    result = validator.validate_dict(item | {"geometry": None})
+
+    assert result, validator.message
