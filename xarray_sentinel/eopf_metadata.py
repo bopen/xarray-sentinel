@@ -1,14 +1,16 @@
 import os
+from typing import Any
 
 import fsspec
 import numpy as np
 import pydantic.alias_generators
-from typing import Any
 
 from . import esa_safe, sentinel1
 
 
-def to_snake_recursive(struct: dict[str, Any] | list[Any]) -> dict[str, Any] | list[Any]:
+def to_snake_recursive(
+    struct: dict[str, Any] | list[Any],
+) -> dict[str, Any] | list[Any]:
     if isinstance(struct, dict):
         struct = {
             pydantic.alias_generators.to_snake(k): to_snake_recursive(v)
@@ -47,9 +49,8 @@ def filter_metadata_dict(image_information: dict[str, Any]) -> dict[str, Any]:
 
 
 def build_azimuth_fm_rate_list(
-        azimuth_fm_rate_list: list[dict[str, Any] | list[Any]]
+    azimuth_fm_rate_list: list[dict[str, Any] | list[Any]],
 ) -> list[dict[str, Any] | list[Any]]:
-
     azimuth_fm_rate_list_out: list[dict[str, Any] | list[Any]] = []
     for item in azimuth_fm_rate_list:
         azimuth_fm_rate_polynomial_str = item["azimuth_fm_rate_polynomial"]["$"]
