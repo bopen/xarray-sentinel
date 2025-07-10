@@ -10,3 +10,6 @@ dependencies:
 - mamba
 - notebook
 - sentinelsat
+- pytest
+- shapely
+- stac-validator
