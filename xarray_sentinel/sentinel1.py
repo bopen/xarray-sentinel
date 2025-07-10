@@ -76,10 +76,10 @@ def open_calibration_dataset(
     calibration: esa_safe.PathType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
     calibration_vectors = esa_safe.parse_tag_as_list(
-        calibration, ".//calibrationVector", "calibration"
+        calibration, "//calibrationVector", "calibration"
     )
     cal_attrs = esa_safe.parse_tag(
-        calibration, ".//calibrationInformation", "calibration"
+        calibration, "//calibrationInformation", "calibration"
     )
     attrs["absoluteCalibrationConstant"] = cal_attrs["absoluteCalibrationConstant"]
     azimuth_time_list = []
@@ -126,7 +126,7 @@ def open_reference_replica_dataset(
     annotation_path: esa_safe.PathType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
     reference_replica = esa_safe.parse_tag_as_list(
-        annotation_path, ".//replicaInformationList/replicaInformation/referenceReplica"
+        annotation_path, "//replicaInformationList/replicaInformation/referenceReplica"
     )[0]
     attrs.update(
         {
@@ -162,7 +162,7 @@ def open_antenna_pattern(
     annotation_path: esa_safe.PathType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
     antenna_pattern_list = esa_safe.parse_tag_as_list(
-        annotation_path, ".//antennaPattern/antennaPatternList/antennaPattern"
+        annotation_path, "//antennaPattern/antennaPatternList/antennaPattern"
     )
 
     slant_range_time_list = []
@@ -232,7 +232,7 @@ def open_replica_dataset(
 ) -> xr.Dataset:
     replicaList = esa_safe.parse_tag_as_list(
         annotation_path,
-        ".//replicaInformationList/replicaInformation/replicaList/replica",
+        "//replicaInformationList/replicaInformation/replicaList/replica",
     )
     azimuth_time_list = []
     cross_correlation_bandwidth_list = []
@@ -308,7 +308,7 @@ def open_replica_dataset(
 def open_noise_range_dataset(
     noise: esa_safe.PathType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    noise_vectors = esa_safe.parse_tag_as_list(noise, ".//noiseRangeVector", "noise")
+    noise_vectors = esa_safe.parse_tag_as_list(noise, "//noiseRangeVector", "noise")
 
     azimuth_time_list = []
     pixel_list = []
@@ -341,7 +341,7 @@ def open_noise_range_dataset(
 def open_noise_azimuth_dataset(
     noise: esa_safe.PathType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    noise_vectors = esa_safe.parse_tag_as_list(noise, ".//noiseAzimuthVector", "noise")
+    noise_vectors = esa_safe.parse_tag_as_list(noise, "//noiseAzimuthVector", "noise")
 
     first_range_sample = []
     line_list = []
@@ -369,7 +369,7 @@ def open_coordinate_conversion_dataset(
     annotation_path: esa_safe.PathType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
     coordinate_conversion = esa_safe.parse_tag_as_list(
-        annotation_path, ".//coordinateConversionList/coordinateConversion"
+        annotation_path, "//coordinateConversionList/coordinateConversion"
     )
     if len(coordinate_conversion) == 0:
         raise TypeError("coordinateConversion tag not present in annotations")
@@ -415,7 +415,7 @@ def open_gcp_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
     geolocation_grid_points = esa_safe.parse_tag_as_list(
-        annotation, ".//geolocationGridPoint"
+        annotation, "//geolocationGridPoint"
     )
 
     azimuth_time = []
@@ -521,7 +521,7 @@ def make_geospatial_attributes(
 def open_attitude_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    attitudes = esa_safe.parse_tag_as_list(annotation, ".//attitude")
+    attitudes = esa_safe.parse_tag_as_list(annotation, "//attitude")
 
     variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
     azimuth_time: list[Any] = []
@@ -567,7 +567,7 @@ def make_orbit(
 def open_orbit_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    orbits = esa_safe.parse_tag_as_list(annotation, ".//orbit")
+    orbits = esa_safe.parse_tag_as_list(annotation, "//orbit")
 
     attrs = attrs.copy()
     reference_system = orbits[0]["frame"]
@@ -597,7 +597,7 @@ def open_orbit_dataset(
 def open_dc_estimate_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    dc_estimates = esa_safe.parse_tag_as_list(annotation, ".//dcEstimate")
+    dc_estimates = esa_safe.parse_tag_as_list(annotation, "//dcEstimate")
 
     azimuth_time = []
     t0 = []
@@ -659,7 +659,7 @@ def open_dc_estimate_dataset(
 def open_azimuth_fm_rate_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    azimuth_fm_rates = esa_safe.parse_tag_as_list(annotation, ".//azimuthFmRate")
+    azimuth_fm_rates = esa_safe.parse_tag_as_list(annotation, "//azimuthFmRate")
 
     azimuth_time = []
     t0 = []
@@ -780,9 +780,9 @@ def open_pol_dataset(
     attrs: dict[str, Any] = {},
     gcp: xr.Dataset | None = None,
 ) -> xr.Dataset:
-    product_information = esa_safe.parse_tag(annotation, ".//productInformation")
-    image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
-    swath_timing = esa_safe.parse_tag(annotation, ".//swathTiming")
+    product_information = esa_safe.parse_tag(annotation, "//productInformation")
+    image_information = esa_safe.parse_tag(annotation, "//imageInformation")
+    swath_timing = esa_safe.parse_tag(annotation, "//swathTiming")
 
     number_of_samples = image_information["numberOfSamples"]
     range_sampling_rate = product_information["rangeSamplingRate"]
@@ -1245,8 +1245,8 @@ def make_sentinel1_stac_item(
 ) -> dict[str, Any]:
     manifest = ElementTree.parse(manifest_path).getroot()
 
-    product_information = esa_safe.parse_tag(annotation, ".//productInformation")
-    image_information = esa_safe.parse_tag(annotation, ".//imageInformation")
+    product_information = esa_safe.parse_tag(annotation, "//productInformation")
+    image_information = esa_safe.parse_tag(annotation, "//imageInformation")
 
     coordinates = [
         [float(v) for v in token.split(",")]
