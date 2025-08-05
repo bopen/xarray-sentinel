@@ -127,7 +127,7 @@ def test_parse_tag() -> None:
         "azimuthSteeringRate",
     }
 
-    res = esa_safe.parse_tag(ANNOTATION_PATH, ".//productInformation")
+    res = esa_safe.parse_tag(ANNOTATION_PATH, "//productInformation")
 
     assert isinstance(res, dict)
     assert set(res) == expected
@@ -143,19 +143,19 @@ def test_parse_tag_as_list() -> None:
         "azimuthAnxTime",
     }
 
-    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, ".//burst")
+    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, "//burst")
 
     assert isinstance(res, list)
     assert set(res[0]) == expected
 
     # XPath to a single element
-    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, ".//burst[1]")
+    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, "//burst[1]")
 
     assert isinstance(res, list)
     assert set(res[0]) == expected
 
     # XPath to a non existent element
-    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, ".//dummy")
+    res = esa_safe.parse_tag_as_list(ANNOTATION_PATH, "//dummy")
 
     assert isinstance(res, list)
     assert res == []
