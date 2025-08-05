@@ -21,9 +21,10 @@ def to_snake_recursive(
     return struct
 
 
-def fix_lists(struct: dict[str, Any] | list[Any]) -> dict[str, Any] | list[Any]:
-    fixed = {}
+def fix_lists(struct: Any) -> Any:
+    fixed: Any
     if isinstance(struct, dict):
+        fixed = {}
         for k, v in struct.items():
             if k == "@count":
                 continue
@@ -34,7 +35,6 @@ def fix_lists(struct: dict[str, Any] | list[Any]) -> dict[str, Any] | list[Any]:
                     fixed[k] = fix_lists(fix_lists(struct[k]))
             else:
                 fixed[k] = fix_lists(struct[k])
-
     elif isinstance(struct, list):
         fixed = [fix_lists(v) for v in struct]
     else:
@@ -43,7 +43,7 @@ def fix_lists(struct: dict[str, Any] | list[Any]) -> dict[str, Any] | list[Any]:
 
 
 def filter_metadata_dict(image_information: dict[str, Any]) -> dict[str, Any]:
-    image_information = to_snake_recursive(image_information)
+    image_information = to_snake_recursive(image_information)  # type: ignore
     image_information = fix_lists(image_information)
     return image_information
 
@@ -53,10 +53,10 @@ def build_azimuth_fm_rate_list(
 ) -> list[dict[str, Any] | list[Any]]:
     azimuth_fm_rate_list_out: list[dict[str, Any] | list[Any]] = []
     for item in azimuth_fm_rate_list:
-        azimuth_fm_rate_polynomial_str = item["azimuth_fm_rate_polynomial"]["$"]
+        azimuth_fm_rate_polynomial_str = item["azimuth_fm_rate_polynomial"]["$"]  # type: ignore
         azimuth_fm_rate_list_out.append(
             {
-                "azimuth_time": item["azimuth_time"],
+                "azimuth_time": item["azimuth_time"],  # type: ignore
                 "azimuth_fm_rate_polynomial": np.fromstring(
                     azimuth_fm_rate_polynomial_str, sep=" "
                 ).tolist(),
