@@ -1,4 +1,3 @@
-import os
 from typing import Any
 
 import fsspec
@@ -77,28 +76,34 @@ def build_general_annotation(general_annotation: dict[str, Any]) -> dict[str, An
 
 def extract_annotation_urlpath(product_urlpath: esa_safe.PathType) -> str:
     fs, manifest_path = sentinel1.get_fs_path(product_urlpath)
-    with fsspec.open("s3://" + manifest_path) as fp:
+    with fs.open(manifest_path) as fp:
         common_attrs, product_files = esa_safe.parse_manifest_sentinel1(fp)
-    for product_file, info in product_files.items():
-        if "s1Level1ProductSchema" == info[0]:
-            annotation_urlpath = os.path.join(
-                product_urlpath, os.path.normpath(product_file)
-            )
-    return annotation_urlpath
+    groups = sentinel1.find_available_groups(
+        product_files,
+        product_urlpath,
+        common_attrs["product_type"],
+        check_files_exist=True,
+        fs=fs,
+    )
+    annotation_urlpaths = set()
+    for group, paths in groups.items():
+        if group.count("/") == 1:
+            annotation_urlpaths.add(paths[1])  # assume the XML is the second
+    return list(annotation_urlpaths)[0]
 
 
 def build_other_metadata(product_urlpath: esa_safe.PathType) -> dict[str, Any]:
     annotation_urlpath = extract_annotation_urlpath(product_urlpath)
     with fsspec.open(annotation_urlpath) as fp:
-        quality_information = esa_safe.parse_tag(fp, ".//qualityInformation")
+        quality_information = esa_safe.parse_tag(fp, "//qualityInformation")
         quality_information = filter_metadata_dict(quality_information)
-        general_annotation = esa_safe.parse_tag(fp, ".//generalAnnotation")
+        general_annotation = esa_safe.parse_tag(fp, "//generalAnnotation")
         general_annotation = build_general_annotation(general_annotation)
-        image_information = esa_safe.parse_tag(fp, ".//imageAnnotation")
+        image_information = esa_safe.parse_tag(fp, "//imageAnnotation")
         image_information = filter_metadata_dict(image_information)
-        swath_merginig = esa_safe.parse_tag(fp, ".//swathMerging")
+        swath_merginig = esa_safe.parse_tag(fp, "//swathMerging")
         swath_merginig = filter_metadata_dict(swath_merginig)
-        swath_timing = esa_safe.parse_tag(fp, ".//swathTiming")
+        swath_timing = esa_safe.parse_tag(fp, "//swathTiming")
         swath_timing = filter_metadata_dict(swath_timing)
 
     other_metadata = {
