@@ -6,13 +6,13 @@ COV_REPORT := html
 default: qa unit-tests type-check
 
 qa:
-	pre-commit run --all-files
+	uv run --frozen -m pre_commit run --all-files
 
 unit-tests:
-	python -m pytest -vv --cov=. --cov-report=$(COV_REPORT)
+	uv run --frozen -m pytest -vv --cov=. --cov-report=$(COV_REPORT)
 
 type-check:
-	python -m mypy --strict .
+	uv run --frozen -m mypy --strict .
 
 conda-env-update:
 	$(CONDA) install -y -c conda-forge conda-merge
@@ -34,7 +34,7 @@ docs-build:
 # DO NOT EDIT ABOVE THIS LINE, ADD COMMANDS BELOW
 
 doc-tests:
-	python -m pytest -vv --doctest-glob="*.md" --doctest-glob="*.rst" README.md
+	uv run --frozen -m pytest -vv --doctest-glob="*.md" --doctest-glob="*.rst" README.md
 
 integration-tests:
-	python -m pytest -vv --cov=. --cov-report=$(COV_REPORT) --log-cli-level=INFO tests/integration*.py
+	uv run --frozen -m pytest -vv --cov=. --cov-report=$(COV_REPORT) --log-cli-level=INFO tests/integration*.py

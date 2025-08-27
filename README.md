@@ -4,7 +4,7 @@ Easily access and explore the SAR data products of the
 [Copernicus Sentinel-1 satellite mission](https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1)
 in Python.
 
-This Open Source project is sponsored by B-Open - https://www.bopen.eu.
+This Open Source project is sponsored by B-Open - <https://www.bopen.eu>.
 
 ## Features
 
@@ -75,7 +75,7 @@ and access the root group of the product, also known as `/`:
 >>> import xarray as xr
 >>> slc_sm_path = "tests/data/S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
 >>> xr.open_dataset(slc_sm_path, engine="sentinel-1")
-<xarray.Dataset>
+<xarray.Dataset> Size: 0B
 Dimensions:  ()
 Data variables:
     *empty*
@@ -110,7 +110,7 @@ In this example, the data contains the S3 beam mode and the VH polarization with
 ```python-repl
 >>> slc_s3_vh = xr.open_dataset(slc_sm_path, group="S3/VH", engine="sentinel-1", chunks=2048)
 >>> slc_s3_vh
-<xarray.Dataset>
+<xarray.Dataset> Size: 6GB
 Dimensions:           (slant_range_time: 18998, azimuth_time: 36895)
 Coordinates:
     pixel             (slant_range_time) int64 ...
@@ -170,11 +170,11 @@ For example, the image calibration metadata associated with the `S3/VH` image ca
 ```python-repl
 >>> slc_s3_vh_calibration = xr.open_dataset(slc_sm_path, group="S3/VH/calibration", engine="sentinel-1")
 >>> slc_s3_vh_calibration
-<xarray.Dataset>
+<xarray.Dataset> Size: 172kB
 Dimensions:       (line: 22, pixel: 476)
 Coordinates:
-  * line          (line) int64 0 1925 3850 5775 7700 ... 34649 36574 38499 40424
-  * pixel         (pixel) int64 0 40 80 120 160 ... 18880 18920 18960 18997
+  * line          (line) int64 ...
+  * pixel         (pixel) int64 ...
 Data variables:
     azimuth_time  (line) datetime64[ns] ...
     sigmaNought   (line, pixel) float32 ...
@@ -189,7 +189,7 @@ Attributes: ...
     orbit_number:                        37258
     relative_orbit_number:               86
     ...
-    stop_time:                           2021-04-01T15:29:14.277650
+    absoluteCalibrationConstant:         1.0
     group:                               /S3/VH/calibration
     Conventions:                         CF-1.8
     title:                               Calibration coefficients
@@ -247,11 +247,11 @@ product, in the current folder:
 >>> slc_iw_v340_path = "tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
 >>> slc_iw1_v340_hh = xr.open_dataset(slc_iw_v340_path, group="IW1/HH", engine="sentinel-1")
 >>> slc_iw1_v340_hh
-<xarray.Dataset>
+<xarray.Dataset> ...
 Dimensions:           (pixel: 21169, line: 13500)
 Coordinates:
-  * pixel             (pixel) int64 0 1 2 3 4 ... 21164 21165 21166 21167 21168
-  * line              (line) int64 0 1 2 3 4 5 ... 13495 13496 13497 13498 13499
+  * pixel             (pixel) int64 ...
+  * line              (line) int64 ...
     azimuth_time      (line) datetime64[ns] ...
     slant_range_time  (pixel) float64 ...
 Data variables:
@@ -281,13 +281,13 @@ Now the 9th burst out of 9 can be cropped from the swath data using `burst_index
 ```python-repl
 >>> import xarray_sentinel
 >>> xarray_sentinel.crop_burst_dataset(slc_iw1_v340_hh, burst_index=8)
-<xarray.Dataset>
+<xarray.Dataset> ...
 Dimensions:           (slant_range_time: 21169, azimuth_time: 1500)
 Coordinates:
-    pixel             (slant_range_time) int64 0 1 2 3 ... 21166 21167 21168
-    line              (azimuth_time) int64 12000 12001 12002 ... 13498 13499
-  * azimuth_time      (azimuth_time) datetime64[ns] 2022-04-14T10:22:33.80763...
-  * slant_range_time  (slant_range_time) float64 0.005348 0.005349 ... 0.005677
+    pixel             (slant_range_time) int64 ...
+    line              (azimuth_time) int64 ...
+  * azimuth_time      (azimuth_time) datetime64[ns] ...
+  * slant_range_time  (slant_range_time) float64 ...
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
 Attributes: ...
@@ -312,13 +312,13 @@ to be cropped using the `burst_id` key:
 
 ```python-repl
 >>> xarray_sentinel.crop_burst_dataset(slc_iw1_v340_hh, burst_id=365923)
-<xarray.Dataset>
+<xarray.Dataset> ...
 Dimensions:           (slant_range_time: 21169, azimuth_time: 1500)
 Coordinates:
-    pixel             (slant_range_time) int64 0 1 2 3 ... 21166 21167 21168
-    line              (azimuth_time) int64 12000 12001 12002 ... 13498 13499
-  * azimuth_time      (azimuth_time) datetime64[ns] 2022-04-14T10:22:33.80763...
-  * slant_range_time  (slant_range_time) float64 0.005348 0.005349 ... 0.005677
+    pixel             (slant_range_time) int64 ...
+    line              (azimuth_time) int64 ...
+  * azimuth_time      (azimuth_time) datetime64[ns] ...
+  * slant_range_time  (slant_range_time) float64 ...
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
 Attributes: ...
@@ -348,13 +348,13 @@ The burst groups are not listed in the `subgroup` attribute because they are not
 ```python-repl
 >>> slc_iw_v330_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
 >>> xr.open_dataset(slc_iw_v330_path, group="IW1/VH/8", engine="sentinel-1")
-<xarray.Dataset>
+<xarray.Dataset> ...
 Dimensions:           (slant_range_time: 21632, azimuth_time: 1501)
 Coordinates:
     pixel             (slant_range_time) int64 ...
     line              (azimuth_time) int64 ...
-  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T05:26:46.27227...
-  * slant_range_time  (slant_range_time) float64 0.005343 0.005343 ... 0.005679
+  * azimuth_time      (azimuth_time) datetime64[ns] ...
+  * slant_range_time  (slant_range_time) float64 ...
 Data variables:
     measurement       (azimuth_time, slant_range_time) complex64 ...
 Attributes: ...
@@ -381,13 +381,13 @@ You can compute the gamma intensity for part of the Stripmap image above with:
 
 ```python-repl
 >>> xarray_sentinel.calibrate_intensity(slc_s3_vh.measurement[:2048, :2048], slc_s3_vh_calibration.gamma)
-<xarray.DataArray (azimuth_time: 2048, slant_range_time: 2048)>
+<xarray.DataArray (azimuth_time: 2048, slant_range_time: 2048)> ...
 dask.array<pow, shape=(2048, 2048), dtype=float32, chunksize=(2048, 2048), chunktype=numpy.ndarray>
 Coordinates:
-    pixel             (slant_range_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
-    line              (azimuth_time) int64 dask.array<chunksize=(2048,), meta=np.ndarray>
-  * azimuth_time      (azimuth_time) datetime64[ns] 2021-04-01T15:28:55.11150...
-  * slant_range_time  (slant_range_time) float64 0.005273 0.005273 ... 0.005303
+    pixel             (slant_range_time) int64 ...
+    line              (azimuth_time) int64 ...
+  * azimuth_time      (azimuth_time) datetime64[ns] ...
+  * slant_range_time  (slant_range_time) float64 ...
 Attributes: ...
     family_name:                         SENTINEL-1
     number:                              A
@@ -419,11 +419,11 @@ For example you can open a product directly from a zip file with:
 ```python-repl
 >>> slc_iw_zip_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
 >>> xr.open_dataset(f"zip://*/manifest.safe::{slc_iw_zip_path}", group="IW1/VH", engine="sentinel-1")  # doctest: +SKIP
-<xarray.Dataset>
+<xarray.Dataset> ...
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
-  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
-  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+  * pixel             (pixel) int64 ...
+  * line              (line) int64 ...
     azimuth_time      (line) datetime64[ns] ...
     slant_range_time  (pixel) float64 ...
 Data variables:
@@ -449,11 +449,11 @@ As an example of remote access, you can open a product directly from a GitHub re
 
 ```python-repl
 >>> xr.open_dataset(f"github://bopen:xarray-sentinel@/{slc_iw_path}", group="IW1/VH", engine="sentinel-1")  # doctest: +SKIP
-<xarray.Dataset>
+<xarray.Dataset> ...
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
-  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
-  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+  * pixel             (pixel) int64 ...
+  * line              (line) int64 ...
     azimuth_time      (line) datetime64[ns] ...
     slant_range_time  (pixel) float64 ...
 Data variables:
@@ -487,11 +487,11 @@ zip file off a GitHub repo and cache the file locally with:
 ...         "simplecache": {"cache_storage": "/tmp/zipfiles/"},
 ...     },
 ... )  # doctest: +SKIP
-<xarray.Dataset>
+<xarray.Dataset> ...
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
-  * pixel             (pixel) int64 0 1 2 3 4 ... 21627 21628 21629 21630 21631
-  * line              (line) int64 0 1 2 3 4 5 ... 13504 13505 13506 13507 13508
+  * pixel             (pixel) int64 ...
+  * line              (line) int64 ...
     azimuth_time      (line) datetime64[ns] ...
     slant_range_time  (pixel) float64 ...
 Data variables:
@@ -567,7 +567,7 @@ This is the list of the reference documents:
 The main repository is hosted on GitHub.
 Testing, bug reports and contributions are highly welcomed and appreciated:
 
-https://github.com/bopen/xarray-sentinel
+<https://github.com/bopen/xarray-sentinel>
 
 Lead developers:
 
