@@ -5,7 +5,7 @@ import fsspec
 import numpy as np
 import pydantic.alias_generators
 
-from . import esa_safe, sentinel1
+from . import esa_safe
 
 
 def to_snake_recursive(
@@ -73,26 +73,6 @@ def build_general_annotation(general_annotation: dict[str, Any]) -> dict[str, An
         general_annotation["azimuth_fm_rate_list"]
     )
     return general_annotation
-
-
-def extract_annotation_urlpath(product_urlpath: esa_safe.PathType) -> list[str]:
-    fs, manifest_path = sentinel1.get_fs_path(product_urlpath)
-    with fs.open(manifest_path) as fp:
-        common_attrs, product_files = esa_safe.parse_manifest_sentinel1(fp)
-    groups = sentinel1.find_available_groups(
-        product_files,
-        product_urlpath,
-        common_attrs["product_type"],
-        check_files_exist=True,
-        fs=fs,
-    )
-    annotation_urlpaths = set()
-    for group, paths in groups.items():
-        if group.count("/") == 1:
-            for path in paths:
-                if path.endswith(".xml"):
-                    annotation_urlpaths.add(path)
-    return list(annotation_urlpaths)
 
 
 def build_other_metadata(annotation_urlpath: esa_safe.PathType) -> dict[str, Any]:

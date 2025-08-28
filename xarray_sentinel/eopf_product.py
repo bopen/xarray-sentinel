@@ -41,7 +41,7 @@ def open_datatree(
                 override_product_files=override_product_files,
                 group=xarray_sentinel_group,
                 parse_eopf_metadata=True,
-            ).rename({"measurement": "slc"})
+            ).rename(measurement="slc")
             if eopf_product_name not in dt.children:
                 product_ds = xr.Dataset(
                     attrs={
@@ -52,7 +52,7 @@ def open_datatree(
                 dt[f"{eopf_product_name}"] = product_ds
             measurement_ds.attrs.clear()
             dt[f"{eopf_product_name}/measurement"] = measurement_ds
-        elif dataset in {"orbit", "attitude", "doppler_centroid", "gcp"}:
+        elif dataset in {"orbit", "attitude", "dc_estimate", "gcp"}:
             ds = sentinel1.open_sentinel1_dataset(
                 product_urlpath,
                 fs=fs,
@@ -61,6 +61,8 @@ def open_datatree(
                 group=xarray_sentinel_group,
                 override_product_files=override_product_files,
             )
+            if dataset == "dc_estimate":
+                dataset = "doppler_centroid"
             ds.attrs.clear()
             dt[f"{eopf_product_name}/conditions/{dataset}"] = ds
         elif dataset in {"calibration", "noise_range", "noise_azimuth"}:
