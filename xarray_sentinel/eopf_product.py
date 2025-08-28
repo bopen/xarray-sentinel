@@ -57,16 +57,7 @@ def open_datatree(
                 dt[f"{eopf_product_name}/measurement"] = ds.rename(
                     {"measurement": "slc"}
                 )
-            elif dataset in {
-                "antenna_pattern",
-                "orbit",
-                "attitude",
-                "azimuth_fm_rate",
-                "doppler_centroid",
-                "reference_replica",
-                "replica",
-                "gcp",
-            }:
+            elif dataset in {"orbit", "attitude", "doppler_centroid", "gcp"}:
                 ds = sentinel1.open_sentinel1_dataset(
                     product_urlpath,
                     fs=fs,
