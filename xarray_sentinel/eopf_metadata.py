@@ -1,4 +1,5 @@
 from typing import Any
+import warnings
 
 import fsspec
 import numpy as np
@@ -95,6 +96,7 @@ def extract_annotation_urlpath(product_urlpath: esa_safe.PathType) -> str:
 
 
 def build_other_metadata(product_urlpath: esa_safe.PathType) -> dict[str, Any]:
+    warnings.warn("This is an unofficial, alpha converter", UserWarning)
     annotation_urlpath = extract_annotation_urlpath(product_urlpath)
     with fsspec.open(annotation_urlpath) as fp:
         quality_information = esa_safe.parse_tag(fp, "//qualityInformation")
