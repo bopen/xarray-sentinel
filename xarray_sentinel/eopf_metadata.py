@@ -88,7 +88,9 @@ def extract_annotation_urlpath(product_urlpath: esa_safe.PathType) -> str:
     annotation_urlpaths = set()
     for group, paths in groups.items():
         if group.count("/") == 1:
-            annotation_urlpaths.add(paths[1])  # assume the XML is the second
+            for path in paths:
+                if path.endswith(".xml"):
+                    annotation_urlpaths.add(path)
     return list(annotation_urlpaths)[0]
 
 
