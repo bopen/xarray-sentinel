@@ -13,6 +13,6 @@ SLC_S3 = (
 
 
 def test_open_datatree() -> None:
-    res = eopf_product.open_datatree(SLC_S3)
+    res = eopf_product.open_datatree(SLC_S3, check_files_exist=True)
 
     assert isinstance(res, xr.DataTree)
