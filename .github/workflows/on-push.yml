@@ -75,9 +75,9 @@ jobs:
         cache-downloads-key: downloads-${{ steps.date.outputs.date }}
         create-args: >-
           python=${{ matrix.python-version }}
-    - name: Install package
+    - name: Install uv
       run: |
-        python -m pip install --no-deps -e .
+        python -m pip install uv
     - name: Run tests
       run: |
         make unit-tests COV_REPORT=xml
@@ -104,9 +104,9 @@ jobs:
         cache-downloads-key: downloads-${{ steps.date.outputs.date }}
         create-args: >-
           python=3.13
-    - name: Install package
+    - name: Install uv
       run: |
-        python -m pip install --no-deps -e .
+        python -m pip install uv
     - name: Run code quality checks
       run: |
         make type-check
@@ -133,9 +133,9 @@ jobs:
         cache-downloads-key: downloads-${{ steps.date.outputs.date }}
         create-args: >-
           python=3.13
-    - name: Install package
+    - name: Install uv
       run: |
-        python -m pip install --no-deps -e .
+        python -m pip install uv
     - name: Build documentation
       run: |
         make docs-build
