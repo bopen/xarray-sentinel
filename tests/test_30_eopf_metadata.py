@@ -8,6 +8,11 @@ SLC_IW = (
     DATA_FOLDER
     / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
 )
+SLC_IW1_VV_annotation = (
+    SLC_IW
+    / "annotation"
+    / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+)
 
 
 def test_to_snake_recursive() -> None:
@@ -20,7 +25,7 @@ def test_to_snake_recursive() -> None:
 
 
 def test_build_other_metadata() -> None:
-    res = eopf_metadata.build_other_metadata(SLC_IW)
+    res = eopf_metadata.build_other_metadata(SLC_IW1_VV_annotation)
     expected_quality_information = {
         "product_quality_index": 0.0,
         "quality_data_list": [

@@ -75,7 +75,7 @@ def build_general_annotation(general_annotation: dict[str, Any]) -> dict[str, An
     return general_annotation
 
 
-def extract_annotation_urlpath(product_urlpath: esa_safe.PathType) -> str:
+def extract_annotation_urlpath(product_urlpath: esa_safe.PathType) -> list[str]:
     fs, manifest_path = sentinel1.get_fs_path(product_urlpath)
     with fs.open(manifest_path) as fp:
         common_attrs, product_files = esa_safe.parse_manifest_sentinel1(fp)
@@ -92,12 +92,11 @@ def extract_annotation_urlpath(product_urlpath: esa_safe.PathType) -> str:
             for path in paths:
                 if path.endswith(".xml"):
                     annotation_urlpaths.add(path)
-    return list(annotation_urlpaths)[0]
+    return list(annotation_urlpaths)
 
 
-def build_other_metadata(product_urlpath: esa_safe.PathType) -> dict[str, Any]:
+def build_other_metadata(annotation_urlpath: esa_safe.PathType) -> dict[str, Any]:
     warnings.warn("This is an unofficial, alpha converter", UserWarning)
-    annotation_urlpath = extract_annotation_urlpath(product_urlpath)
     with fsspec.open(annotation_urlpath) as fp:
         quality_information = esa_safe.parse_tag(fp, "//qualityInformation")
         quality_information = filter_metadata_dict(quality_information)
