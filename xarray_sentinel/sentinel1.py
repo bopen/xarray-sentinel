@@ -27,7 +27,7 @@ import xarray as xr
 from . import conventions, eopf_metadata, esa_safe
 
 SPEED_OF_LIGHT = 299_792_458  # m / s
-ONE_SECOND = np.timedelta64(1, "s")
+ONE_SECOND = np.timedelta64(10**9, "ns")
 
 
 DataArrayOrDataset = TypeVar("DataArrayOrDataset", xr.DataArray, xr.Dataset)
@@ -769,6 +769,7 @@ def make_azimuth_time(
         start=product_first_line_utc_time,
         end=product_last_line_utc_time,
         periods=number_of_lines,
+        unit="ns",
     )
     return azimuth_time.values
 
