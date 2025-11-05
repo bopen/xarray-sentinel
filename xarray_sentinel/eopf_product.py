@@ -51,7 +51,7 @@ def open_datatree(
                 )
                 dt[f"{eopf_product_name}"] = product_ds
             measurement_ds.attrs.clear()
-            dt[f"{eopf_product_name}/measurement"] = measurement_ds
+            dt[f"{eopf_product_name}/measurements"] = measurement_ds
         elif dataset in {"orbit", "attitude", "dc_estimate", "gcp"}:
             ds = sentinel1.open_sentinel1_dataset(
                 product_urlpath,
