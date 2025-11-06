@@ -97,7 +97,7 @@ def findall(
 
 def parse_annotation_filename(name: str) -> tuple[str, str, str, str]:
     match = re.match(
-        r"([a-z-]*)s1[abc]-([^-]*)-[^-]*-([^-]*)-([\dt]*)-", os.path.basename(name)
+        r"([a-z-]*)s1[abcd]-([^-]*)-[^-]*-([^-]*)-([\dt]*)-", os.path.basename(name)
     )
     if match is None:
         raise ValueError(f"cannot parse name {name!r}")
