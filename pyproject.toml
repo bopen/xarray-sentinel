@@ -13,11 +13,11 @@ dev = [
   "pytest-cov>=5.0",
   "shapely>=2.1",
   "stac-validator>=3.6.0",
-  "zarr>=2.18.3"
+  "zarr>=2.18.3",
 ]
 
 [project]
-authors = [{"name" = "B-Open", "email" = "software@bopen.eu"}]
+authors = [{ "name" = "B-Open", "email" = "software@bopen.eu" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
@@ -29,7 +29,8 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
-  "Topic :: Scientific/Engineering"
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering",
 ]
 dependencies = [
   "fsspec>=2023.1.0",
@@ -39,7 +40,7 @@ dependencies = [
   "rioxarray>=0.13.0",
   "scipy>=1.10.0",
   "xarray>=2023.2.0",
-  "xmlschema>=2.2.0"
+  "xmlschema>=2.2.0",
 ]
 description = "Easily access and explore the SAR data products of the Copernicus Sentinel-1 satellite mission"
 dynamic = ["version"]
@@ -52,9 +53,9 @@ keywords = [
   "sentinel-1",
   "sar",
   "synthetic-aperture-radar",
-  "xarray"
+  "xarray",
 ]
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 name = "xarray-sentinel"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -83,7 +84,7 @@ module = [
   "shapely",
   "shapely.geometry",
   "shapely.wkt",
-  "stac_validator"
+  "stac_validator",
 ]
 
 [tool.ruff]
@@ -94,7 +95,7 @@ line-length = 88
 [tool.ruff.lint]
 ignore = [
   # pydocstyle: Missing Docstrings
-  "D1"
+  "D1",
 ]
 select = [
   # pyflakes
@@ -105,7 +106,7 @@ select = [
   # isort
   "I",
   # pydocstyle
-  "D"
+  "D",
 ]
 
 [tool.ruff.lint.pycodestyle]
@@ -121,6 +122,7 @@ packages = ["xarray_sentinel"]
 xarray_sentinel = ["py.typed"]
 
 [tool.setuptools_scm]
+fallback_version = "999"
 write_to = "xarray_sentinel/version.py"
 write_to_template = '''
 # Do not change! Do not track in version control!
