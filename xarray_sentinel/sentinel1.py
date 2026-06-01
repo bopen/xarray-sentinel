@@ -837,6 +837,7 @@ def open_pol_dataset(
                 burst_ids.append(burst["burstId"]["$"])
             attrs["burst_ids"] = burst_ids
         lines_per_burst = swath_timing["linesPerBurst"]
+        encoding["preferred_chunks"] = {"azimuth_time": lines_per_burst}
         attrs.update(
             {
                 "azimuth_steering_rate": product_information["azimuthSteeringRate"],
@@ -875,7 +876,6 @@ def open_pol_dataset(
             number_of_samples,
         )
         coords["slant_range_time"] = ("pixel", slant_range_time)
-        encoding["preferred_chunks"] = {"azimuth_time": lines_per_burst}
     elif product_information["projection"] == "Ground Range":
         ground_range = np.linspace(
             0,
