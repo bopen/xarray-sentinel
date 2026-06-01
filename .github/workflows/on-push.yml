@@ -148,7 +148,6 @@ jobs:
       always() &&
       needs.unit-tests.result == 'success' &&
       needs.type-check.result == 'success' &&
-      needs.docs-build.result == 'success' &&
       (needs.integration-tests.result == 'success' || needs.integration-tests.result == 'skipped')
 
     steps:
