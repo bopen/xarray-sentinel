@@ -6,7 +6,7 @@ resolution-markers = [
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
 ]
-
+ 
 [[package]]
 name = "affine"
 version = "2.4.0"
