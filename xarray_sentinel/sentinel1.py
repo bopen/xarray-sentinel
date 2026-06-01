@@ -771,7 +771,7 @@ def make_azimuth_time(
         periods=number_of_lines,
     )
     # return a read-write array from the Pandas read-only `.values`
-    return np.array(azimuth_time.values)
+    return np.array(azimuth_time.values, dtype="datetime64[ns]")
 
 
 def open_pol_dataset(
