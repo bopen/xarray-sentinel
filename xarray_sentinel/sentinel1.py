@@ -855,7 +855,6 @@ def open_pol_dataset(
                 lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
             ] = azimuth_time_burst
 
-
     coords = {
         "pixel": np.arange(0, number_of_samples, dtype=int),
         "line": np.arange(0, number_of_lines, dtype=int),
@@ -885,7 +884,7 @@ def open_pol_dataset(
         )
         coords["ground_range"] = ("pixel", ground_range)
         swap_dims = {"line": "azimuth_time", "pixel": "ground_range"}
-        encoding["preferred_chunks"] = {"azimuth_time": 1024, "ground_range": 1024 }
+        encoding["preferred_chunks"] = {"azimuth_time": 1024, "ground_range": 1024}
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
