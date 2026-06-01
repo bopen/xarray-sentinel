@@ -41,11 +41,12 @@ jobs:
     - name: Install uv and set the python version
       uses: astral-sh/setup-uv@v7
       with:
-        python-version: "3.14"
+        version: "0.11.17"
+        enable-cache: true
+        python-version: ${{ matrix.python-version }}
 
-    - name: Run tests
-      run: |
-        make unit-tests COV_REPORT=xml
+    - name: Run unit tests
+      run: make unit-tests COV_REPORT=xml
 
   type-check:
     needs: [unit-tests]
@@ -56,10 +57,11 @@ jobs:
     - name: Install uv and set the python version
       uses: astral-sh/setup-uv@v7
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Run code quality checks
-      run: |
-        make type-check
+        version: "0.11.17"
+        enable-cache: true
+        python-version: "3.14"
+    - name: Run type checks
+      run: make type-check
 
   # docs-build:
   #   needs: [combine-environments, unit-tests]
@@ -109,6 +111,8 @@ jobs:
     - name: Install uv and set the python version
       uses: astral-sh/setup-uv@v7
       with:
+        version: "0.11.17"
+        enable-cache: true
         python-version: ${{ matrix.python-version }}
 
     - name: Install the project
