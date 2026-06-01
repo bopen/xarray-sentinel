@@ -770,7 +770,8 @@ def make_azimuth_time(
         end=product_last_line_utc_time,
         periods=number_of_lines,
     )
-    return azimuth_time.values
+    # return a read-write array from the Pandas read-only `.values`
+    return np.array(azimuth_time.values)
 
 
 def open_pol_dataset(
