@@ -5,7 +5,6 @@ requires = ["setuptools>=64", "setuptools_scm>=8"]
 [dependency-groups]
 dev = [
   "cfchecker>=4.1.0",
-  "dask>=2025.7.0",
   "mypy>=1.15.0",
   "pandas-stubs>=1.4.0",
   "pre-commit>=4.3.0",
@@ -33,6 +32,7 @@ classifiers = [
   "Topic :: Scientific/Engineering"
 ]
 dependencies = [
+  "dask>=2025.7.0",
   "fsspec>=2023.1.0",
   "numpy>=1.22.0",
   "pandas>=1.4.0",
@@ -128,3 +128,8 @@ write_to_template = '''
 # Do not change! Do not track in version control!
 __version__ = "{version}"
 '''
+
+[tool.uv]
+# Wait before upgrading to the newest versions to avoid
+# regressions and supply-chain attacks
+exclude-newer = "7 days"

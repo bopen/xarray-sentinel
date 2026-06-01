@@ -38,13 +38,16 @@ Overall, the software is in the **beta** phase and the usual caveats apply.
 
 ## Install
 
-The easiest way to install *xarray-sentinel* is in a *conda* environment.
-The following commands create a new environment, activate it, install the package and its dependencies:
+The easiest way to install *xarray-sentinel* is via *pip*:
 
 ```shell
-    conda create -n XARRAY-SENTINEL
-    conda activate XARRAY-SENTINEL
-    conda install -c conda-forge dask "rasterio=>1.3.0" xarray-sentinel
+    pip install xarray-sentinel
+```
+
+If you have `uv` installed the simplest way to test the library is to start a `ipython` session with:
+
+```shell
+    uvx --with xarray-sentinel ipython
 ```
 
 ## Usage
