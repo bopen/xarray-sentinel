@@ -11,7 +11,7 @@ This Open Source project is sponsored by B-Open - <https://www.bopen.eu>.
 *xarray-sentinel* is a Python library and [*Xarray*](https://xarray.pydata.org) backend
 with the following functionalities:
 
-- supports the following data products as [distributed by ESA](https://scihub.copernicus.eu/dhus/#/home):
+- supports the following data products as [distributed by ESA](https://browser.dataspace.copernicus.eu/):
   - Sentinel-1 Ground Range Detected (GRD):
     - Stripmap (SM)
     - Interferometric Wide Swath (IW)
