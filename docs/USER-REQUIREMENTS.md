@@ -38,12 +38,19 @@ High level requirements:
 
 ```python
 >>> import xarray as xr
->>> ds = xr.open_dataset("tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE/manifest.safe")
->>> ds = xr.open_dataset("tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE")
+>>> ds = xr.open_dataset(
+...     "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE/manifest.safe"
+... )
+>>> ds = xr.open_dataset(
+...     "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+... )
 >>> ds
 <xarray.Dataset>
 ...
->>> ds_iw1_gpc = xr.open_dataset("tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE", group="IW1/VV/gcp")
+>>> ds_iw1_gpc = xr.open_dataset(
+...     "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE",
+...     group="IW1/VV/gcp",
+... )
 
 ```
 

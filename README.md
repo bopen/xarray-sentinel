@@ -108,7 +108,9 @@ The measurement can then be read by selecting the desired beam mode and polariza
 In this example, the data contains the S3 beam mode and the VH polarization with `group="S3/VH"` is selected:
 
 ```python-repl
->>> slc_s3_vh = xr.open_dataset(slc_sm_path, group="S3/VH", engine="sentinel-1", chunks=2048)
+>>> slc_s3_vh = xr.open_dataset(
+...     slc_sm_path, group="S3/VH", engine="sentinel-1", chunks=2048
+... )
 >>> slc_s3_vh
 <xarray.Dataset> Size: 6GB
 Dimensions:           (slant_range_time: 18998, azimuth_time: 36895)
@@ -168,7 +170,9 @@ For example, the image calibration metadata associated with the `S3/VH` image ca
 `group="S3/VH/calibration"`:
 
 ```python-repl
->>> slc_s3_vh_calibration = xr.open_dataset(slc_sm_path, group="S3/VH/calibration", engine="sentinel-1")
+>>> slc_s3_vh_calibration = xr.open_dataset(
+...     slc_sm_path, group="S3/VH/calibration", engine="sentinel-1"
+... )
 >>> slc_s3_vh_calibration
 <xarray.Dataset> Size: 172kB
 Dimensions:       (line: 22, pixel: 476)
@@ -245,7 +249,9 @@ product, in the current folder:
 
 ```python-repl
 >>> slc_iw_v340_path = "tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
->>> slc_iw1_v340_hh = xr.open_dataset(slc_iw_v340_path, group="IW1/HH", engine="sentinel-1")
+>>> slc_iw1_v340_hh = xr.open_dataset(
+...     slc_iw_v340_path, group="IW1/HH", engine="sentinel-1"
+... )
 >>> slc_iw1_v340_hh
 <xarray.Dataset> ...
 Dimensions:           (pixel: 21169, line: 13500)
@@ -380,7 +386,9 @@ Attributes: ...
 You can compute the gamma intensity for part of the Stripmap image above with:
 
 ```python-repl
->>> xarray_sentinel.calibrate_intensity(slc_s3_vh.measurement[:2048, :2048], slc_s3_vh_calibration.gamma)
+>>> xarray_sentinel.calibrate_intensity(
+...     slc_s3_vh.measurement[:2048, :2048], slc_s3_vh_calibration.gamma
+... )
 <xarray.DataArray (azimuth_time: 2048, slant_range_time: 2048)> ...
 dask.array<pow, shape=(2048, 2048), dtype=float32, chunksize=(2048, 2048), chunktype=numpy.ndarray>
 Coordinates:
@@ -418,7 +426,9 @@ For example you can open a product directly from a zip file with:
 
 ```python-repl
 >>> slc_iw_zip_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
->>> xr.open_dataset(f"zip://*/manifest.safe::{slc_iw_zip_path}", group="IW1/VH", engine="sentinel-1")  # doctest: +SKIP
+>>> xr.open_dataset(
+...     f"zip://*/manifest.safe::{slc_iw_zip_path}", group="IW1/VH", engine="sentinel-1"
+... )  # doctest: +SKIP
 <xarray.Dataset> ...
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
@@ -448,7 +458,11 @@ Attributes: ...
 As an example of remote access, you can open a product directly from a GitHub repo with:
 
 ```python-repl
->>> xr.open_dataset(f"github://bopen:xarray-sentinel@/{slc_iw_path}", group="IW1/VH", engine="sentinel-1")  # doctest: +SKIP
+>>> xr.open_dataset(
+...     f"github://bopen:xarray-sentinel@/{slc_iw_path}",
+...     group="IW1/VH",
+...     engine="sentinel-1",
+... )  # doctest: +SKIP
 <xarray.Dataset> ...
 Dimensions:           (pixel: 21632, line: 13509)
 Coordinates:
