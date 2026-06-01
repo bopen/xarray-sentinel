@@ -815,6 +815,14 @@ def open_pol_dataset(
     swap_dims = {}
     chunks: dict[str, int] | None = None
 
+    # open COG with chunks if dask is present
+    try:
+        import dask  # noqa
+
+        chunks = {}
+    except ModuleNotFoundError:
+        pass
+
     azimuth_time = make_azimuth_time(
         product_first_line_utc_time,
         product_last_line_utc_time,
@@ -847,14 +855,6 @@ def open_pol_dataset(
                 lines_per_burst * burst_index : lines_per_burst * (burst_index + 1)
             ] = azimuth_time_burst
 
-        # chunk at burst boundaries if dask is present
-        try:
-            import dask  # noqa
-
-            encoding["preferred_chunks"] = {"line": lines_per_burst}
-            chunks = {}
-        except ModuleNotFoundError:
-            pass
 
     coords = {
         "pixel": np.arange(0, number_of_samples, dtype=int),
@@ -876,6 +876,7 @@ def open_pol_dataset(
             number_of_samples,
         )
         coords["slant_range_time"] = ("pixel", slant_range_time)
+        encoding["preferred_chunks"] = {"azimuth_time": lines_per_burst}
     elif product_information["projection"] == "Ground Range":
         ground_range = np.linspace(
             0,
@@ -884,12 +885,13 @@ def open_pol_dataset(
         )
         coords["ground_range"] = ("pixel", ground_range)
         swap_dims = {"line": "azimuth_time", "pixel": "ground_range"}
+        encoding["preferred_chunks"] = {"azimuth_time": 1024, "ground_range": 1024 }
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
     arr = open_rasterio_dataarray(measurement, fs, chunks)
 
-    # clear the encoding as many GeoTIFF details are inconpatible with the CF conventions
+    # clear the encoding as many GeoTIFF details are incompatible with the CF conventions
     arr.encoding.clear()
 
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
