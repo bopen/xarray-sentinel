@@ -2,17 +2,18 @@ PROJECT := xarray-sentinel
 CONDA := conda
 CONDAFLAGS :=
 COV_REPORT := html
+PYTHON := uv run --frozen
 
 default: qa unit-tests type-check
 
 qa:
-	uv run --frozen -m pre_commit run --all-files
+	$(PYTHON) -m pre_commit run --all-files
 
 unit-tests:
-	uv run --frozen -m pytest -vv --cov=. --cov-report=$(COV_REPORT)
+	$(PYTHON) -m pytest -vv --cov=. --cov-report=$(COV_REPORT)
 
 type-check:
-	uv run --frozen -m mypy --strict .
+	$(PYTHON) -m mypy --strict .
 
 conda-env-update:
 	$(CONDA) install -y -c conda-forge conda-merge
@@ -25,16 +26,11 @@ docker-build:
 docker-run:
 	docker run --rm -ti -v $(PWD):/srv $(PROJECT)
 
-template-update:
-	pre-commit run --all-files cruft -c .pre-commit-config-cruft.yaml
-
 docs-build:
 	cp README.md docs/. && cd docs && rm -fr _api && make clean && make html
 
-# DO NOT EDIT ABOVE THIS LINE, ADD COMMANDS BELOW
-
 doc-tests:
-	uv run --frozen -m pytest -vv --doctest-glob="*.md" --doctest-glob="*.rst" README.md
+	$(PYTHON) -m pytest -vv --doctest-glob="*.md" --doctest-glob="*.rst" README.md
 
 integration-tests:
-	uv run --frozen -m pytest -vv --cov=. --cov-report=$(COV_REPORT) --log-cli-level=INFO tests/integration*.py
+	$(PYTHON) -m pytest -vv --cov=. --cov-report=$(COV_REPORT) --log-cli-level=INFO tests/integration*.py
