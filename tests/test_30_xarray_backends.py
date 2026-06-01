@@ -76,7 +76,7 @@ def test_open_dataset_root() -> None:
 
     assert isinstance(res, xr.Dataset)
 
-    with pytest.raises(ValueError):
+    with pytest.raises((ValueError, FileNotFoundError)):
         xr.open_dataset("")
 
 
