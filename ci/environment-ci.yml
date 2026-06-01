@@ -1,4 +1,0 @@
-# environment-ci.yml: Additional dependencies to install in the CI environment.
-channels:
-- conda-forge
-- nodefaults

@@ -1,6 +1,4 @@
 PROJECT := xarray-sentinel
-CONDA := conda
-CONDAFLAGS :=
 COV_REPORT := html
 PYTHON := uv run --frozen
 
@@ -14,11 +12,6 @@ unit-tests:
 
 type-check:
 	$(PYTHON) -m mypy --strict .
-
-conda-env-update:
-	$(CONDA) install -y -c conda-forge conda-merge
-	$(CONDA) run conda-merge environment.yml ci/environment-ci.yml > ci/combined-environment-ci.yml
-	$(CONDA) env update $(CONDAFLAGS) -f ci/combined-environment-ci.yml
 
 docker-build:
 	docker build -t $(PROJECT) .
