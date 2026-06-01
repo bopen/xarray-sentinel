@@ -811,7 +811,7 @@ def open_pol_dataset(
             "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
         }
     )
-    encoding = {}
+    encoding = {"preferred_chunks": {"azimuth_time": 1024, "ground_range": 1024}}
     swap_dims = {}
     chunks: dict[str, int] | None = None
 
@@ -837,7 +837,7 @@ def open_pol_dataset(
                 burst_ids.append(burst["burstId"]["$"])
             attrs["burst_ids"] = burst_ids
         lines_per_burst = swath_timing["linesPerBurst"]
-        encoding["preferred_chunks"] = {"azimuth_time": lines_per_burst}
+        encoding["preferred_chunks"] = {"line": lines_per_burst}
         attrs.update(
             {
                 "azimuth_steering_rate": product_information["azimuthSteeringRate"],
@@ -884,7 +884,6 @@ def open_pol_dataset(
         )
         coords["ground_range"] = ("pixel", ground_range)
         swap_dims = {"line": "azimuth_time", "pixel": "ground_range"}
-        encoding["preferred_chunks"] = {"azimuth_time": 1024, "ground_range": 1024}
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
