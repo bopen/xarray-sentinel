@@ -1,4 +1,3 @@
-PROJECT := xarray-sentinel
 COV_REPORT := html
 PYTHON := uv run --frozen
 
@@ -13,12 +12,6 @@ unit-tests:
 type-check:
 	$(PYTHON) -m mypy --strict .
 
-docker-build:
-	docker build -t $(PROJECT) .
-
-docker-run:
-	docker run --rm -ti -v $(PWD):/srv $(PROJECT)
-
 docs-build:
 	cp README.md docs/. && cd docs && rm -fr _api && make clean && make html
 
@@ -28,8 +21,9 @@ doc-tests:
 integration-tests:
 	$(PYTHON) -m pytest -vv --cov=. --cov-report=$(COV_REPORT) --log-cli-level=INFO tests/integration*.py
 
-.env:
-	echo -n "AWS_ENDPOINT_URL=https://eodata.dataspace.copernicus.eu/\nAWS_S3_ENDPOINT=eodata.dataspace.copernicus.eu\nAWS_VIRTUAL_HOSTING=False" > $@
+.env: .env.in
+	-mv $@ $@.bck
+	cp $^ $@
 
 lab: .env
 	$(PYTHON) --extra lab --env-file .env -m jupyter lab
