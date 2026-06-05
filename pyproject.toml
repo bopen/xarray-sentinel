@@ -63,6 +63,9 @@ requires-python = ">=3.10"
 [project.entry-points."xarray.backends"]
 sentinel-1 = "xarray_sentinel.xarray_backends:Sentinel1Backend"
 
+[project.optional-dependencies]
+lab = ["jupyterlab>=4.5.7", "matplotlib>=3.10.9", "s3fs>=2026.4.0"]
+
 [project.urls]
 repository = "https://github.com/bopen/xarray-sentinel"
 

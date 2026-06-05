@@ -27,3 +27,9 @@ doc-tests:
 
 integration-tests:
 	$(PYTHON) -m pytest -vv --cov=. --cov-report=$(COV_REPORT) --log-cli-level=INFO tests/integration*.py
+
+.env:
+	echo -n "AWS_ENDPOINT_URL=https://eodata.dataspace.copernicus.eu/\nAWS_S3_ENDPOINT=eodata.dataspace.copernicus.eu\nAWS_VIRTUAL_HOSTING=False" > $@
+
+lab: .env
+	$(PYTHON) --extra lab --env-file .env -m jupyter lab
