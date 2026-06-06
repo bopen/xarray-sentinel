@@ -18,6 +18,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         fs: fsspec.AbstractFileSystem | None = None,
         check_files_exist: bool = False,
         parse_geospatial_attrs: bool = True,
+        rasterio_chunks: dict[str, int] | None = None,
     ) -> xr.Dataset:
         ds = sentinel1.open_sentinel1_dataset(
             filename_or_obj,
@@ -28,6 +29,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
             fs=fs,
             check_files_exist=check_files_exist,
             parse_geospatial_attrs=parse_geospatial_attrs,
+            rasterio_chunks=rasterio_chunks,
         )
         return ds
 

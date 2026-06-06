@@ -17,7 +17,21 @@ def test_open_pol_dataset_iw_preferred_chunks() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert len(res.dims) == 2
-    assert res.measurement.chunks[0][0] == res.attrs["lines_per_burst"]
+    line_index = list(res.dims).index("line")
+    assert res.measurement.chunks[line_index][0] == 1
+
+    res = xr.open_dataset(
+        product_path,
+        engine="sentinel-1",
+        group="IW1/VV",
+        chunks={},
+        rasterio_chunks={"y": 64},
+    )
+
+    assert isinstance(res, xr.Dataset)
+    assert len(res.dims) == 2
+    line_index = list(res.dims).index("line")
+    assert res.measurement.chunks[line_index][0] == 64
 
 
 def test_open_pol_dataset_sm_preferred_chunks() -> None:
@@ -29,4 +43,18 @@ def test_open_pol_dataset_sm_preferred_chunks() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert len(res.dims) == 2
-    assert res.measurement.chunks[0][0] == 1024
+    azimuth_time_index = list(res.dims).index("azimuth_time")
+    assert res.measurement.chunks[azimuth_time_index][0] == 1
+
+    res = xr.open_dataset(
+        product_path,
+        engine="sentinel-1",
+        group="S3/VH",
+        chunks={},
+        rasterio_chunks={"y": 64},
+    )
+
+    assert isinstance(res, xr.Dataset)
+    assert len(res.dims) == 2
+    azimuth_time_index = list(res.dims).index("azimuth_time")
+    assert res.measurement.chunks[azimuth_time_index][0] == 64

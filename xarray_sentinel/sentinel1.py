@@ -780,6 +780,7 @@ def open_pol_dataset(
     fs: fsspec.AbstractFileSystem | None = None,
     attrs: dict[str, Any] = {},
     gcp: xr.Dataset | None = None,
+    rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.Dataset:
     product_information = esa_safe.parse_tag(annotation, "//productInformation")
     image_information = esa_safe.parse_tag(annotation, "//imageInformation")
@@ -811,15 +812,14 @@ def open_pol_dataset(
             "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
         }
     )
-    encoding = {}
     swap_dims = {}
-    chunks: dict[str, int] | None = None
 
     # open COG with chunks if dask is present
     try:
         import dask  # noqa
 
-        chunks = {}
+        if rasterio_chunks is None:
+            rasterio_chunks = {}
     except ModuleNotFoundError:
         pass
 
@@ -830,7 +830,6 @@ def open_pol_dataset(
     )
     if number_of_bursts == 0:
         swap_dims = {"line": "azimuth_time", "pixel": "slant_range_time"}
-        encoding["preferred_chunks"] = {"azimuth_time": 1024}
     else:
         if "burstId" in swath_timing["burstList"]["burst"][0]:
             burst_ids = []
@@ -838,7 +837,6 @@ def open_pol_dataset(
                 burst_ids.append(burst["burstId"]["$"])
             attrs["burst_ids"] = burst_ids
         lines_per_burst = swath_timing["linesPerBurst"]
-        encoding["preferred_chunks"] = {"line": lines_per_burst}
         attrs.update(
             {
                 "azimuth_steering_rate": product_information["azimuthSteeringRate"],
@@ -885,27 +883,29 @@ def open_pol_dataset(
         )
         coords["ground_range"] = ("pixel", ground_range)
         swap_dims = {"line": "azimuth_time", "pixel": "ground_range"}
-        encoding["preferred_chunks"] = {"azimuth_time": 1024, "ground_range": 1024}
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
-    arr = open_rasterio_dataarray(measurement, fs, chunks)
+    arr = open_rasterio_dataarray(measurement, fs, rasterio_chunks)
 
+    preferred_chunks = arr.encoding.get("preferred_chunks")
     # clear the encoding as many GeoTIFF details are incompatible with the CF conventions
     arr.encoding.clear()
 
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
+    preferred_chunks["line"] = rasterio_chunks.get("x", preferred_chunks["x"])
+    preferred_chunks["pixel"] = rasterio_chunks.get("y", preferred_chunks["y"])
     arr = arr.assign_coords(coords)
     arr = arr.swap_dims(swap_dims)
+    for from_name, to_name in swap_dims.items():
+        preferred_chunks[to_name] = preferred_chunks[from_name]
+    arr.encoding.update({"preferred_chunks": preferred_chunks})
 
     if gcp:
         attrs.update(gcp.attrs)
 
     arr.attrs.update(attrs)
-    arr.encoding.update(encoding)
-
-    print(arr.encoding)
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
@@ -1174,6 +1174,7 @@ def open_sentinel1_dataset(
     override_product_files: str | None = None,
     parse_geospatial_attrs: bool = True,
     parse_eopf_metadata: bool = False,
+    rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.Dataset:
     if drop_variables is not None:
         warnings.warn("'drop_variables' is currently ignored")
@@ -1225,6 +1226,7 @@ def open_sentinel1_dataset(
                     fs=fs,
                     attrs=common_attrs,
                     gcp=gcp,
+                    rasterio_chunks=rasterio_chunks,
                 )
                 if parse_eopf_metadata:
                     ds.attrs["other_metadata"] = eopf_metadata.build_other_metadata(
