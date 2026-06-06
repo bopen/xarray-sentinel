@@ -4697,24 +4697,6 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "click"},
-  {name = "jsonschema"},
-  {name = "pyyaml"},
-  {name = "referencing"},
-  {name = "requests"},
-  {name = "stac-valid"},
-  {name = "tqdm"}
-]
-name = "stac-validator"
-sdist = {url = "https://files.pythonhosted.org/packages/2c/67/905687aabbadfdf742f3457fe95798a5252973a1dfa232c813e18897ce8f/stac_validator-4.1.2.tar.gz", hash = "sha256:0c81ebec6c79c390644b672047b874564f1463290212abc488bb83243c5f25ed", size = 67364, upload-time = "2026-04-27T16:37:39.885Z"}
-source = {registry = "https://pypi.org/simple"}
-version = "4.1.2"
-wheels = [
-  {url = "https://files.pythonhosted.org/packages/4d/b7/b768b1752d46c4d633438a9dcfc0652bff6869182ba8203b8aaa5a281ee8/stac_validator-4.1.2-py3-none-any.whl", hash = "sha256:14917325d05e6c3de2f632286fa475129b57e0e0ed15a17343f148be7a49dc17", size = 40038, upload-time = "2026-04-27T16:37:38.167Z"}
-]
-
-[[package]]
-dependencies = [
   {name = "asttokens"},
   {name = "executing"},
   {name = "pure-eval"}
@@ -5129,7 +5111,7 @@ dev = [
   {name = "pytest"},
   {name = "pytest-cov"},
   {name = "shapely"},
-  {name = "stac-validator"},
+  {name = "stac-valid"},
   {name = "zarr", version = "2.18.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "zarr", version = "3.1.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "zarr", version = "3.2.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
@@ -5162,7 +5144,7 @@ dev = [
   {name = "pytest", specifier = ">=7.0"},
   {name = "pytest-cov", specifier = ">=5.0"},
   {name = "shapely", specifier = ">=2.1"},
-  {name = "stac-validator", specifier = ">=3.6.0"},
+  {name = "stac-valid", specifier = ">=4.2.1"},
   {name = "zarr", specifier = ">=2.18.3"}
 ]
 
