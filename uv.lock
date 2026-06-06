@@ -1879,6 +1879,18 @@ wheels = [
 ]
 
 [[package]]
+dependencies = [
+  {name = "jupyterlab"}
+]
+name = "jupyterlab-execute-time"
+sdist = {url = "https://files.pythonhosted.org/packages/4a/19/0458b8602b61c802c4c9ab0ee84776b7f1ea7bb5efb602692a1b91badc89/jupyterlab_execute_time-3.3.0.tar.gz", hash = "sha256:900fd1aebbfd3d943d3625eef973eed555bb2745d49840402783959c8a1dfc3a", size = 191870, upload-time = "2025-12-23T15:51:50.925Z"}
+source = {registry = "https://pypi.org/simple"}
+version = "3.3.0"
+wheels = [
+  {url = "https://files.pythonhosted.org/packages/ad/2d/96861673abb8e9336b74568bd920d9e3e61c911e2fba4bcfa7d10e8dd919/jupyterlab_execute_time-3.3.0-py3-none-any.whl", hash = "sha256:ed246db4d25c2fdbf2825206203d9d12251ebb38d46eb17ce0e11d271b2738f7", size = 45630, upload-time = "2025-12-23T15:51:49.537Z"}
+]
+
+[[package]]
 name = "jupyterlab-pygments"
 sdist = {url = "https://files.pythonhosted.org/packages/90/51/9187be60d989df97f5f0aba133fa54e7300f17616e065d1ada7d7646b6d6/jupyterlab_pygments-0.3.0.tar.gz", hash = "sha256:721aca4d9029252b11cfa9d185e5b5af4d54772bb8072f9b7036f4170054d35d", size = 512900, upload-time = "2023-11-23T09:26:37.44Z"}
 source = {registry = "https://pypi.org/simple"}
@@ -5129,6 +5141,7 @@ requires-dist = [
   {name = "dask", specifier = ">=2025.7.0"},
   {name = "fsspec", specifier = ">=2023.1.0"},
   {name = "jupyterlab", marker = "extra == 'lab'", specifier = ">=4.5.7"},
+  {name = "jupyterlab-execute-time", marker = "extra == 'lab'", specifier = ">=3.3.0"},
   {name = "matplotlib", marker = "extra == 'lab'", specifier = ">=3.10.9"},
   {name = "numpy", specifier = ">=1.22.0"},
   {name = "pandas", specifier = ">=1.4.0"},
@@ -5156,6 +5169,7 @@ dev = [
 [package.optional-dependencies]
 lab = [
   {name = "jupyterlab"},
+  {name = "jupyterlab-execute-time"},
   {name = "matplotlib"},
   {name = "s3fs"}
 ]
