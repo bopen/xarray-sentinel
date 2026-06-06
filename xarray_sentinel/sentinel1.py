@@ -406,9 +406,14 @@ def open_coordinate_conversion_dataset(
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
 
+# taken from `np.cross` docs
+def cross2d(x: np.ndarray, y: np.ndarray) -> float:
+    return float(x[..., 0] * y[..., 1] - x[..., 1] * y[..., 0])
+
+
 def is_clockwise(poly: list[tuple[float, float]]) -> bool:
     start = np.array(poly[0])
-    return float(np.cross(poly[1] - start, poly[2] - start)) < 0
+    return cross2d(poly[1] - start, poly[2] - start) < 0
 
 
 def open_gcp_dataset(
@@ -934,7 +939,7 @@ def find_bursts_index(
             pol_dataset.azimuth_time[::lines_per_burst] - anx_datetime
         )
         distance = abs(azimuth_anx_time_first_line - azimuth_anx_time)
-    return distance.argmin().item()  # type: ignore
+    return np.argmin(distance.data).item()
 
 
 def crop_burst_dataset(
