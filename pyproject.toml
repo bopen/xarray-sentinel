@@ -92,7 +92,7 @@ module = [
   "shapely",
   "shapely.geometry",
   "shapely.wkt",
-  "stac_valid"
+  "stac_validator"
 ]
 
 [tool.ruff]
