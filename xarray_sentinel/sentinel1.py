@@ -888,18 +888,23 @@ def open_pol_dataset(
 
     arr = open_rasterio_dataarray(measurement, fs, rasterio_chunks)
 
-    preferred_chunks = arr.encoding.get("preferred_chunks")
+    preferred_chunks = arr.encoding["preferred_chunks"]
     # clear the encoding as many GeoTIFF details are incompatible with the CF conventions
     arr.encoding.clear()
 
     arr = arr.squeeze("band").drop_vars(["band", "spatial_ref"])
     arr = arr.rename({"y": "line", "x": "pixel"})
-    preferred_chunks["line"] = rasterio_chunks.get("x", preferred_chunks["x"])
-    preferred_chunks["pixel"] = rasterio_chunks.get("y", preferred_chunks["y"])
     arr = arr.assign_coords(coords)
     arr = arr.swap_dims(swap_dims)
+
+    # setting the preferred_chunks for the output to the current arr chunks
+    if rasterio_chunks is None:
+        rasterio_chunks = {}
+    preferred_chunks["line"] = rasterio_chunks.get("x", preferred_chunks["x"])
+    preferred_chunks["pixel"] = rasterio_chunks.get("y", preferred_chunks["y"])
     for from_name, to_name in swap_dims.items():
         preferred_chunks[to_name] = preferred_chunks[from_name]
+
     arr.encoding.update({"preferred_chunks": preferred_chunks})
 
     if gcp:
