@@ -811,7 +811,7 @@ def open_pol_dataset(
             "incidence_angle_mid_swath": image_information["incidenceAngleMidSwath"],
         }
     )
-    encoding = {"preferred_chunks": {"azimuth_time": 1024, "ground_range": 1024}}
+    encoding = {}
     swap_dims = {}
     chunks: dict[str, int] | None = None
 
@@ -830,6 +830,7 @@ def open_pol_dataset(
     )
     if number_of_bursts == 0:
         swap_dims = {"line": "azimuth_time", "pixel": "slant_range_time"}
+        encoding["preferred_chunks"] = {"azimuth_time": 1024}
     else:
         if "burstId" in swath_timing["burstList"]["burst"][0]:
             burst_ids = []
@@ -884,6 +885,7 @@ def open_pol_dataset(
         )
         coords["ground_range"] = ("pixel", ground_range)
         swap_dims = {"line": "azimuth_time", "pixel": "ground_range"}
+        encoding["preferred_chunks"] = {"azimuth_time": 1024, "ground_range": 1024}
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
@@ -902,6 +904,8 @@ def open_pol_dataset(
 
     arr.attrs.update(attrs)
     arr.encoding.update(encoding)
+
+    print(arr.encoding)
 
     return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
 
