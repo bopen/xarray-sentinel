@@ -32,15 +32,15 @@ classifiers = [
   "Topic :: Scientific/Engineering"
 ]
 dependencies = [
-  "dask>=2025.7.0",
-  "fsspec>=2023.1.0",
-  "numpy>=1.22.0",
-  "pandas>=1.4.0",
-  "pydantic>=2.11.7",
-  "rioxarray>=0.13.0",
-  "scipy>=1.10.0",
-  "xarray>=2023.2.0",
-  "xmlschema>=2.2.0"
+  "dask>=2023.9",
+  "fsspec>=2024.1",
+  "numpy>=1.25",
+  "pandas>=2.1",
+  "pydantic>=2.9",
+  "rioxarray>=0.18",
+  "scipy>=1.11",
+  "xarray>=2024.10",
+  "xmlschema>=3.4"
 ]
 description = "Easily access and explore the SAR data products of the Copernicus Sentinel-1 satellite mission"
 dynamic = ["version"]
