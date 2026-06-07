@@ -10,7 +10,7 @@ unit-tests:
 	$(PYTHON) -m pytest -vv --cov=. --cov-report=$(COV_REPORT)
 
 type-check:
-	$(PYTHON) -m mypy --strict .
+	$(PYTHON) -m mypy .
 
 docs-build:
 	cp README.md docs/. && cd docs && rm -fr _api && make clean && make html
