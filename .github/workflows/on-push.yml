@@ -63,34 +63,23 @@ jobs:
     - name: Run type checks
       run: make type-check
 
-  # docs-build:
-  #   needs: [combine-environments, unit-tests]
-  #   runs-on: ubuntu-latest
+  docs-build:
+    needs: [unit-tests]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   - uses: actions/checkout@v6
-  #   - uses: actions/download-artifact@v8
-  #     with:
-  #       name: combined-environments
-  #       path: ci
-  #   - name: Get current date
-  #     id: date
-  #     run: echo "date=$(date +%Y-%m-%d)" >> "${GITHUB_OUTPUT}"
-  #   - uses: mamba-org/setup-micromamba@v3
-  #     with:
-  #       environment-file: ci/combined-environment-ci.yml
-  #       environment-name: DEVELOP
-  #       cache-environment: true
-  #       cache-environment-key: environment-${{ steps.date.outputs.date }}
-  #       cache-downloads-key: downloads-${{ steps.date.outputs.date }}
-  #       create-args: >-
-  #         python=3.13
-  #   - name: Install uv
-  #     run: |
-  #       python -m pip install uv
-  #   - name: Build documentation
-  #     run: |
-  #       make docs-build
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.11.17"
+        enable-cache: true
+    - name: "Set up Python"
+      uses: actions/setup-python@v6
+      with:
+        python-version-file: ".python-version"
+    - name: Build documentation
+      run: uv run --frozen make docs-build
 
   integration-tests:
     needs: [unit-tests]
@@ -115,11 +104,8 @@ jobs:
         enable-cache: true
         python-version: ${{ matrix.python-version }}
 
-    - name: Install the project
-      run: uv sync --locked --dev
-
-    - name: Run tests
-      run: uv run pytest -vv
+    - name: Run unit tests
+      run: uv run --frozen -m pytest .
 
   minver-tests:
     needs: [unit-tests]
@@ -132,14 +118,9 @@ jobs:
 
     - name: Install uv and set the python version
       uses: astral-sh/setup-uv@v7
-      with:
-        python-version: "3.10"
-
-    - name: Install the project
-      run: uv sync --dev --resolution lowest-direct
 
     - name: Run tests
-      run: uv run pytest -vv
+      run: uv run --resolution lowest-direct -p python3.10 -m pytest .
 
   distribution:
     runs-on: ubuntu-latest
@@ -154,7 +135,7 @@ jobs:
     - uses: actions/checkout@v6
     - uses: actions/setup-python@v6
       with:
-        python-version: '3.12'
+        python-version-file: ".python-version"
     - name: Install package
       run: |
         python -m pip install --upgrade pip
