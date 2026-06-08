@@ -17,7 +17,7 @@ def test_open_pol_dataset_iw_preferred_chunks() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert len(res.dims) == 2
-    line_index = list(res.dims).index("line")
+    line_index = res.measurement.dims.index("line")
     assert res.measurement.chunks[line_index][0] == 1
 
     res = xr.open_dataset(
@@ -30,7 +30,7 @@ def test_open_pol_dataset_iw_preferred_chunks() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert len(res.dims) == 2
-    line_index = list(res.dims).index("line")
+    line_index = res.measurement.dims.index("line")
     assert res.measurement.chunks[line_index][0] == 64
 
 
@@ -43,7 +43,7 @@ def test_open_pol_dataset_sm_preferred_chunks() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert len(res.dims) == 2
-    azimuth_time_index = list(res.dims).index("azimuth_time")
+    azimuth_time_index = res.measurement.dims.index("azimuth_time")
     assert res.measurement.chunks[azimuth_time_index][0] == 1
 
     res = xr.open_dataset(
@@ -56,5 +56,5 @@ def test_open_pol_dataset_sm_preferred_chunks() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert len(res.dims) == 2
-    azimuth_time_index = list(res.dims).index("azimuth_time")
+    azimuth_time_index = res.measurement.dims.index("azimuth_time")
     assert res.measurement.chunks[azimuth_time_index][0] == 64

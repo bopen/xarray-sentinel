@@ -217,7 +217,7 @@ def test_open_pol_dataset_iw() -> None:
     res = sentinel1.open_pol_dataset(SLC_IW1_VV_measurement, SLC_IW1_VV_annotation)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"line", "pixel"}
+    assert set(res.sizes) == {"line", "pixel"}
     assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
     first_line = np.datetime64(res.attrs["product_first_line_utc_time"])
@@ -243,7 +243,7 @@ def test_open_pol_dataset_sm() -> None:
     res = sentinel1.open_pol_dataset(SLC_S3_VH_measurement, SLC_S3_VH_annotation)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"slant_range_time", "azimuth_time"}
+    assert set(res.sizes) == {"slant_range_time", "azimuth_time"}
     assert set(res.coords) == {"slant_range_time", "azimuth_time", "line", "pixel"}
 
     first_line = np.datetime64(res.attrs["product_first_line_utc_time"])
@@ -318,7 +318,7 @@ def test_open_sentinel1_dataset() -> None:
     res = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/orbit")
 
     assert isinstance(res, xr.Dataset)
-    assert res.dims == {"axis": 3, "azimuth_time": 17}
+    assert res.sizes == {"axis": 3, "azimuth_time": 17}
 
     with pytest.raises(ValueError):
         sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VV/non-existent")
@@ -337,8 +337,8 @@ def test_crop_burst_dataset() -> None:
 
     res1 = sentinel1.crop_burst_dataset(swath_ds, 8)
 
-    assert set(res1.dims) == {"azimuth_time", "slant_range_time"}
-    assert res1.dims["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
+    assert set(res1.sizes) == {"azimuth_time", "slant_range_time"}
+    assert res1.sizes["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
 
     res2 = sentinel1.crop_burst_dataset(swath_ds, azimuth_anx_time=2210)
 
@@ -397,8 +397,8 @@ def test_crop_burst_dataset_gcp() -> None:
 
     res = sentinel1.crop_burst_dataset(swath_ds, burst_index=5, gcp=gcp_ds)
 
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
-    assert res.dims["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
+    assert set(res.sizes) == {"azimuth_time", "slant_range_time"}
+    assert res.sizes["azimuth_time"] == swath_ds.attrs["lines_per_burst"]
     assert isinstance(res.attrs["geospatial_bounds"], str)
     assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).is_valid
     assert shapely.wkt.loads(res.attrs["geospatial_bounds"]).equals(expected_polygon)
@@ -431,12 +431,12 @@ def test_calibrate_amplitude() -> None:
 
     res = sentinel1.calibrate_amplitude(burst_ds.measurement, cal_ds["betaNought"])
 
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert set(res.sizes) == {"azimuth_time", "slant_range_time"}
     assert np.issubdtype(res.dtype, np.complex64)
 
     res = sentinel1.calibrate_amplitude(burst_ds.measurement, cal_ds["gamma"])
 
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert set(res.sizes) == {"azimuth_time", "slant_range_time"}
     assert np.issubdtype(res.dtype, np.complex64)
 
 
@@ -447,7 +447,7 @@ def test_calibrate_intensity() -> None:
 
     res = sentinel1.calibrate_intensity(burst_ds.measurement, cal_ds["betaNought"])
 
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert set(res.sizes) == {"azimuth_time", "slant_range_time"}
     assert np.issubdtype(res.dtype, np.float32)
 
     cal_ds["betaNought"].attrs.pop("long_name")
@@ -456,7 +456,7 @@ def test_calibrate_intensity() -> None:
         burst_ds.measurement, cal_ds["betaNought"], as_db=True
     )
 
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert set(res.sizes) == {"azimuth_time", "slant_range_time"}
     assert np.issubdtype(res.dtype, np.float32)
 
     res = sentinel1.calibrate_intensity(

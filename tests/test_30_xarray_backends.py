@@ -88,7 +88,7 @@ def test_open_dataset_polarisation_slc(
     res = xr.open_dataset(product_path, engine="sentinel-1", group=swath_pol)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"line", "pixel"} or set(res.dims) == {
+    assert set(res.sizes) == {"line", "pixel"} or set(res.sizes) == {
         "azimuth_time",
         "slant_range_time",
     }
@@ -103,7 +103,7 @@ def test_open_dataset_polarisation_grd(
     res = xr.open_dataset(product_path, engine="sentinel-1", group=swath_pol)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"line", "pixel"} or set(res.dims) == {
+    assert set(res.sizes) == {"line", "pixel"} or set(res.sizes) == {
         "azimuth_time",
         "ground_range",
     }
@@ -118,7 +118,7 @@ def test_open_dataset_orbit(
     res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath_pol}/orbit")
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"axis", "azimuth_time"}
+    assert set(res.sizes) == {"axis", "azimuth_time"}
     assert set(res.variables) == {"azimuth_time", "axis", "velocity", "position"}
 
 
@@ -132,7 +132,7 @@ def test_open_dataset_attitude(
     )
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"azimuth_time"}
+    assert set(res.sizes) == {"azimuth_time"}
     expected = {
         "azimuth_time",
         "roll",
@@ -157,7 +157,7 @@ def test_open_dataset_gcp(
     res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath_pol}/gcp")
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"azimuth_time", "slant_range_time"}
+    assert set(res.sizes) == {"azimuth_time", "slant_range_time"}
 
 
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_PRODUCTS)
@@ -170,7 +170,7 @@ def test_open_dataset_dc_estimate(
     )
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"azimuth_time", "degree"}
+    assert set(res.sizes) == {"azimuth_time", "degree"}
 
 
 def test_open_pol_dataset() -> None:
@@ -192,7 +192,7 @@ def test_open_pol_dataset() -> None:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
 
-    assert set(res.dims) == {"line", "pixel"}
+    assert set(res.sizes) == {"line", "pixel"}
     assert set(res.variables) == expected_variables
 
 
@@ -224,4 +224,4 @@ def test_open_calibration_dataset() -> None:
     )
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.dims) == {"line", "pixel"}
+    assert set(res.sizes) == {"line", "pixel"}
