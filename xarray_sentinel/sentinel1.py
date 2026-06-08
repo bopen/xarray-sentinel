@@ -905,8 +905,8 @@ def open_pol_dataset(
     # setting the preferred_chunks for the output to the current arr chunks
     if rasterio_chunks is None:
         rasterio_chunks = {}
-    preferred_chunks["line"] = rasterio_chunks.get("x", preferred_chunks["x"])
-    preferred_chunks["pixel"] = rasterio_chunks.get("y", preferred_chunks["y"])
+    preferred_chunks["line"] = rasterio_chunks.get("y", preferred_chunks["y"])
+    preferred_chunks["pixel"] = rasterio_chunks.get("x", preferred_chunks["x"])
     for from_name, to_name in swap_dims.items():
         preferred_chunks[to_name] = preferred_chunks[from_name]
 
