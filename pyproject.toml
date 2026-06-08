@@ -39,7 +39,6 @@ dependencies = [
   "fsspec>=2024.1",
   "numpy>=1.25",
   "pandas>=2.1",
-  "pydantic>=2.9",
   "rioxarray>=0.18",
   "scipy>=1.11",
   "xarray>=2024.10",
