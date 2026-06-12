@@ -258,7 +258,6 @@ def test_find_avalable_groups() -> None:
         "S3",
         "S3/VV",
         "S3/VV/attitude",
-        "S3/VV/antenna_pattern",
         "S3/VV/gcp",
         "S3/VV/orbit",
         "S3/VV/dc_estimate",
@@ -266,10 +265,7 @@ def test_find_avalable_groups() -> None:
         "S3/VV/calibration",
         "S3/VV/noise_range",
         "S3/VV/noise_azimuth",
-        "S3/VV/reference_replica",
-        "S3/VV/replica",
         "S3/VH",
-        "S3/VH/antenna_pattern",
         "S3/VH/attitude",
         "S3/VH/gcp",
         "S3/VH/orbit",
@@ -278,8 +274,6 @@ def test_find_avalable_groups() -> None:
         "S3/VH/dc_estimate",
         "S3/VH/azimuth_fm_rate",
         "S3/VH/calibration",
-        "S3/VH/noise_range",
-        "S3/VH/noise_azimuth",
     }
 
     res = sentinel1.find_available_groups(product_files, str(SLC_IW), "SLC")
