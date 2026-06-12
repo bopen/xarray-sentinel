@@ -643,14 +643,17 @@ def open_dc_estimate_dataset(
                 data_dc_rms_error,
                 attrs,
             ),
-            "fine_dce_azimuth_start_time": (
-                "azimuth_time",
-                [np.datetime64(at, "ns") for at in fine_dce_azimuth_start_time],
-            ),
-            "fine_dce_azimuth_stop_time": (
-                "azimuth_time",
-                [np.datetime64(at, "ns") for at in fine_dce_azimuth_stop_time],
-            ),
+            #
+            # Not present in the new Zarr products
+            #
+            # "fine_dce_azimuth_start_time": (
+            #     "azimuth_time",
+            #     [np.datetime64(at, "ns") for at in fine_dce_azimuth_start_time],
+            # ),
+            # "fine_dce_azimuth_stop_time": (
+            #     "azimuth_time",
+            #     [np.datetime64(at, "ns") for at in fine_dce_azimuth_stop_time],
+            # ),
         },
         coords={
             "azimuth_time": [np.datetime64(at, "ns") for at in azimuth_time],
@@ -721,9 +724,9 @@ def find_available_groups(
                 "azimuth_fm_rate",
                 "dc_estimate",
                 "gcp",
-                "replica",
-                "reference_replica",
-                "antenna_pattern",
+                # "replica",
+                # "reference_replica",
+                # "antenna_pattern",
             ]:
                 if product_type == "GRD" and metadata_group == "antenna_pattern":
                     continue
