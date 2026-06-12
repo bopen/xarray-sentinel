@@ -103,7 +103,19 @@ VARIABLE_ATTRIBUTES = {
     },
     "data_dc_polynomial": {
         "units": "1",
-        "long_name": "Coppler centroid estimated from data",
+        "long_name": "Doppler centroid estimated from data",
+    },
+    "geometry_dc_polynomial": {
+        "units": "1",
+        "long_name": "Doppler centroid estimated from geometry",
+    },
+    "data_dc_rms_error": {
+        "units": "1",
+        "long_name": "RMS error of the Doppler centroid estimate",
+    },
+    "data_dc_rms_error_above_threshold": {
+        "units": "1",
+        "long_name": "RMS error is below the acceptable threshold for the Doppler centroid estimated from the data",
     },
     "azimuth_fm_rate_polynomial": {
         "units": "1",
