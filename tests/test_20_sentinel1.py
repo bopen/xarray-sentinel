@@ -269,11 +269,11 @@ def test_find_avalable_groups() -> None:
         "S3/VH/attitude",
         "S3/VH/gcp",
         "S3/VH/orbit",
-        "S3/VH/reference_replica",
-        "S3/VH/replica",
         "S3/VH/dc_estimate",
         "S3/VH/azimuth_fm_rate",
         "S3/VH/calibration",
+        "S3/VH/noise_range",
+        "S3/VH/noise_azimuth",
     }
 
     res = sentinel1.find_available_groups(product_files, str(SLC_IW), "SLC")
