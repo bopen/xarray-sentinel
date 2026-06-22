@@ -24,7 +24,7 @@ version = 1
 
 [options]
 exclude-newer = "0001-01-01T00:00:00Z"  # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
-exclude-newer-span = "P7D"
+exclude-newer-span = "PT0S"
 
 [[package]]
 dependencies = [
@@ -1844,6 +1844,20 @@ wheels = [
 [[package]]
 dependencies = [
   {name = "jupyter-core"},
+  {name = "tomli", marker = "python_full_version < '3.11'"},
+  {name = "traitlets"}
+]
+name = "jupyter-builder"
+sdist = {url = "https://files.pythonhosted.org/packages/fb/45/d0df8b43c10a61529c0f4a8af5e19ebe108f0c3af8f57e0fc358969907af/jupyter_builder-1.0.2.tar.gz", hash = "sha256:6155d78a5325010532a6419ffcba89eac643fd1aa56ea83115e661924d6f6aab", size = 968638, upload-time = "2026-06-12T02:33:25.767Z"}
+source = {registry = "https://pypi.org/simple"}
+version = "1.0.2"
+wheels = [
+  {url = "https://files.pythonhosted.org/packages/28/b6/c418e0b3256f67c04933566b80bfce947350682db92c4b786a8653db32d6/jupyter_builder-1.0.2-py3-none-any.whl", hash = "sha256:b024f65d36e1d530542db597b00dd513261aa59842e0d0fbbb1015a9f1935e9c", size = 910789, upload-time = "2026-06-12T02:33:23.317Z"}
+]
+
+[[package]]
+dependencies = [
+  {name = "jupyter-core"},
   {name = "python-dateutil"},
   {name = "pyzmq"},
   {name = "tornado"},
@@ -1924,11 +1938,11 @@ dependencies = [
   {name = "websocket-client"}
 ]
 name = "jupyter-server"
-sdist = {url = "https://files.pythonhosted.org/packages/76/a0/eb3c511f54df7b54ca5fc7bff3f4d2277d69052d6a7f521643dfed5279d6/jupyter_server-2.19.0.tar.gz", hash = "sha256:1731236bc32b680223e1ceb9d68209a845203475012ef68773a81434b46a31a7", size = 754561, upload-time = "2026-05-29T11:21:26.057Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/6b/dc/db3a582633170186f8c8b31298d7eb26ad0eb031a1f53476c258b64eed05/jupyter_server-2.20.0.tar.gz", hash = "sha256:b5778ba337d8015a3dc2b80803ecdd5ac18d3797fddf61a50ea5fb472b4ebe14", size = 756523, upload-time = "2026-06-17T12:09:09.435Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "2.19.0"
+version = "2.20.0"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/c1/78/d2881e68894cecdcd05912a9c585cfb776ef1fb38b62c8dba98f12ab3adc/jupyter_server-2.19.0-py3-none-any.whl", hash = "sha256:cb76591b76d7093584c2ad2ae72ac3d58614a4b597507a1bb04e1f9f683cf9ea", size = 392244, upload-time = "2026-05-29T11:21:23.871Z"}
+  {url = "https://files.pythonhosted.org/packages/f3/71/8c002223e873a870f5c41dc69b0a7c922301123e4a31d5d01ecb700aef77/jupyter_server-2.20.0-py3-none-any.whl", hash = "sha256:c3b67c93c471e947c18b5026f04f21614218adb706df8f48227d3ee8e0a7cdcc", size = 393143, upload-time = "2026-06-17T12:09:07.234Z"}
 ]
 
 [[package]]
@@ -1950,23 +1964,23 @@ dependencies = [
   {name = "httpx"},
   {name = "ipykernel"},
   {name = "jinja2"},
+  {name = "jupyter-builder"},
   {name = "jupyter-core"},
   {name = "jupyter-lsp"},
   {name = "jupyter-server"},
   {name = "jupyterlab-server"},
   {name = "notebook-shim"},
   {name = "packaging"},
-  {name = "setuptools"},
   {name = "tomli", marker = "python_full_version < '3.11'"},
   {name = "tornado"},
   {name = "traitlets"}
 ]
 name = "jupyterlab"
-sdist = {url = "https://files.pythonhosted.org/packages/0e/74/089613e6099e851a6130816f2df592c839d8565f8746a701edada05a33e4/jupyterlab-4.5.8.tar.gz", hash = "sha256:af54d7242cc689a1e6c3ad213cc9b6d9781787d9ec67c52ec9a8f4707088cadd", size = 23994076, upload-time = "2026-06-04T12:32:12.906Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/f8/3c/1ebd737b860cdbe61eed71536d06aab4e1781fbdcf07ecd5a1afe05b8adf/jupyterlab-4.6.0.tar.gz", hash = "sha256:6a8b88f2aae7ed4d012c634fc957c1a27f3aa217c32f0ced0175fac9ee17f9e5", size = 28181861, upload-time = "2026-06-18T13:52:56.039Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "4.5.8"
+version = "4.6.0"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/c9/d1/56a400100559cbf154a23cd29989261941ae5c9f743898fc10e8a5508b7c/jupyterlab-4.5.8-py3-none-any.whl", hash = "sha256:7d514c856d0d607601ec7692374da4f26e2aaf3b6e7cd363136b422a50588d6c", size = 12449443, upload-time = "2026-06-04T12:32:08.442Z"}
+  {url = "https://files.pythonhosted.org/packages/0a/eb/aa48075d0aa3d0188db34ba2704f53791757743c0bb02e18c4eef989b6de/jupyterlab-4.6.0-py3-none-any.whl", hash = "sha256:b6938cb8a1ef3d43860ff4745a680c62cc0a9385f9672295bb56cd2e7cfeebe2", size = 17143447, upload-time = "2026-06-18T13:52:51.42Z"}
 ]
 
 [[package]]
@@ -4855,15 +4869,6 @@ source = {registry = "https://pypi.org/simple"}
 version = "2.1.0"
 wheels = [
   {url = "https://files.pythonhosted.org/packages/1c/78/504fdd027da3b84ff1aecd9f6957e65f35134534ccc6da8628eb71e76d3f/send2trash-2.1.0-py3-none-any.whl", hash = "sha256:0da2f112e6d6bb22de6aa6daa7e144831a4febf2a87261451c4ad849fe9a873c", size = 17610, upload-time = "2026-01-14T06:27:35.218Z"}
-]
-
-[[package]]
-name = "setuptools"
-sdist = {url = "https://files.pythonhosted.org/packages/4f/db/cfac1baf10650ab4d1c111714410d2fbb77ac5a616db26775db562c8fab2/setuptools-82.0.1.tar.gz", hash = "sha256:7d872682c5d01cfde07da7bccc7b65469d3dca203318515ada1de5eda35efbf9", size = 1152316, upload-time = "2026-03-09T12:47:17.221Z"}
-source = {registry = "https://pypi.org/simple"}
-version = "82.0.1"
-wheels = [
-  {url = "https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl", hash = "sha256:a59e362652f08dcd477c78bb6e7bd9d80a7995bc73ce773050228a348ce2e5bb", size = 1006223, upload-time = "2026-03-09T12:47:15.026Z"}
 ]
 
 [[package]]
