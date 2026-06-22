@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath("../"))
 # -- Project information -----------------------------------------------------
 
 project = "xarray_sentinel"
-copyright = "2023, B-Open Solutions srl"
+copyright = "2021-2026 B-Open Solutions srl"
 author = "B-Open Solutions srl"
 version = xarray_sentinel.__version__
 release = xarray_sentinel.__version__
