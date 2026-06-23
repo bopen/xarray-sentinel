@@ -24,8 +24,10 @@ def to_group_zarr(
                 engine="sentinel-1",
                 group=group_in,
                 chunks={},
-                rasterio_chunks={"x": 4096, "y": 4096},
+                # rasterio_chunks={"x": 4096, "y": 2048},
+                rasterio_chunks={"y": 2048},
             )
+            group_ds = group_ds.chunk(azimuth_time=2048, ground_range=4096)
             group_ds.to_zarr(output_store, mode="a", group=group_out, **kwargs)
         except FileNotFoundError:
             pass
