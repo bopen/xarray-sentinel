@@ -103,7 +103,19 @@ VARIABLE_ATTRIBUTES = {
     },
     "data_dc_polynomial": {
         "units": "1",
-        "long_name": "Coppler centroid estimated from data",
+        "long_name": "Doppler centroid estimated from data",
+    },
+    "geometry_dc_polynomial": {
+        "units": "1",
+        "long_name": "Doppler centroid estimated from geometry",
+    },
+    "data_dc_rms_error": {
+        "units": "1",
+        "long_name": "RMS error of the Doppler centroid estimate",
+    },
+    "data_dc_rms_error_above_threshold": {
+        "units": "1",
+        "long_name": "RMS error below the acceptable threshold for Doppler centroid estimated from the data",
     },
     "azimuth_fm_rate_polynomial": {
         "units": "1",
@@ -115,7 +127,7 @@ VARIABLE_ATTRIBUTES = {
 
 def update_attributes(ds: xr.Dataset, group: str = "") -> xr.Dataset:
     # NOTE: keep the version in sync with the capabilities of CF compliance checkers
-    ds.attrs["Conventions"] = "CF-1.8"
+    ds.attrs["Conventions"] = "CF-1.11"
     ds.attrs.update(GROUP_ATTRIBUTES.get(group, {}))
     ds.attrs["history"] = f"created by xarray_sentinel-{__version__}"
     for var in ds.variables:

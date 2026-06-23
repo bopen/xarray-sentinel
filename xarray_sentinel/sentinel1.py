@@ -643,14 +643,17 @@ def open_dc_estimate_dataset(
                 data_dc_rms_error,
                 attrs,
             ),
-            "fine_dce_azimuth_start_time": (
-                "azimuth_time",
-                [np.datetime64(at, "ns") for at in fine_dce_azimuth_start_time],
-            ),
-            "fine_dce_azimuth_stop_time": (
-                "azimuth_time",
-                [np.datetime64(at, "ns") for at in fine_dce_azimuth_stop_time],
-            ),
+            #
+            # Not present in the new Zarr products
+            #
+            # "fine_dce_azimuth_start_time": (
+            #     "azimuth_time",
+            #     [np.datetime64(at, "ns") for at in fine_dce_azimuth_start_time],
+            # ),
+            # "fine_dce_azimuth_stop_time": (
+            #     "azimuth_time",
+            #     [np.datetime64(at, "ns") for at in fine_dce_azimuth_stop_time],
+            # ),
         },
         coords={
             "azimuth_time": [np.datetime64(at, "ns") for at in azimuth_time],
@@ -721,9 +724,9 @@ def find_available_groups(
                 "azimuth_fm_rate",
                 "dc_estimate",
                 "gcp",
-                "replica",
-                "reference_replica",
-                "antenna_pattern",
+                # "replica",
+                # "reference_replica",
+                # "antenna_pattern",
             ]:
                 if product_type == "GRD" and metadata_group == "antenna_pattern":
                     continue
@@ -879,14 +882,19 @@ def open_pol_dataset(
             image_slant_range_time + (number_of_samples - 1) / range_sampling_rate,
             number_of_samples,
         )
-        coords["slant_range_time"] = ("pixel", slant_range_time)
+        coords["slant_range_time"] = (
+            "pixel",
+            slant_range_time,
+            {},
+            {"_FillValue": None},
+        )
     elif product_information["projection"] == "Ground Range":
         ground_range = np.linspace(
             0,
             range_pixel_spacing * (number_of_samples - 1),
             number_of_samples,
         )
-        coords["ground_range"] = ("pixel", ground_range)
+        coords["ground_range"] = ("pixel", ground_range, {}, {"_FillValue": None})
         swap_dims = {"line": "azimuth_time", "pixel": "ground_range"}
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
