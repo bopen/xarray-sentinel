@@ -20,7 +20,11 @@ def to_group_zarr(
     for group_out, group_in in groups.items():
         try:
             group_ds = xr.open_dataset(
-                product_path, engine="sentinel-1", group=group_in
+                product_path,
+                engine="sentinel-1",
+                group=group_in,
+                chunks={},
+                rasterio_chunks={"x": 4096, "y": 4096},
             )
             group_ds.to_zarr(output_store, mode="a", group=group_out, **kwargs)
         except FileNotFoundError:

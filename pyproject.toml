@@ -36,11 +36,13 @@ classifiers = [
 ]
 dependencies = [
   "dask>=2023.9",
+  "distributed>=2023.9",
   "fsspec>=2024.1",
   "numpy>=1.25",
   "pandas>=2.1",
   "rioxarray>=0.18",
   "scipy>=1.11",
+  "typer>=0.26.7",
   "xarray>=2024.10",
   "xmlschema>=3.4"
 ]
