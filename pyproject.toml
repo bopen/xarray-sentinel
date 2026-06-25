@@ -89,6 +89,7 @@ ignore_missing_imports = true
 module = [
   "cfchecker",
   "dask",
+  "distributed",
   "fsspec",
   "pydantic",
   "pydantic.alias_generators",
