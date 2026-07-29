@@ -12,7 +12,7 @@ def convert(source: str, target: str) -> None:
         "IW/VV": "IW/VV",
         "IW/VH": "IW/VH",
     }
-    client = distributed.Client(processes=True)
+    client = distributed.Client(processes=True)  # type: ignore
     print(client)
     xarray_sentinel.reformat.to_group_zarr(source, target, groups=groups)
 
