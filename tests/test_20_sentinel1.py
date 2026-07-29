@@ -128,9 +128,8 @@ def test_open_coordinate_conversion_dataset() -> None:
 
 def test_open_gcp_dataset() -> None:
     expected_geospatial_bounds = (
-        "POLYGON((11.26870151724317 47.24053130234206,"
-        "10.876144717121 45.73265733767158,12.04397933341514 45.57910451206848,"
-        "12.42647347821595 47.09200435560957,11.26870151724317 47.24053130234206))"
+        "POLYGON((11.268702 47.240531,10.876145 45.732657,12.043979 45.579105,"
+        "12.426473 47.092004,11.268702 47.240531))"
     )
     expected_polygon = shapely.wkt.loads(expected_geospatial_bounds)
     expected_geospatial_bbox = (
@@ -160,11 +159,11 @@ def test_open_gcp_dataset() -> None:
 def test_get_footprint_linestring() -> None:
     gcp_ds = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
     expected_linestring = [
-        (11.26870151724317, 47.24053130234206),
-        (10.876144717121, 45.73265733767158),
-        (12.04397933341514, 45.57910451206848),
-        (12.42647347821595, 47.09200435560957),
-        (11.26870151724317, 47.24053130234206),
+        (11.268702, 47.240531),
+        (10.876145, 45.732657),
+        (12.043979, 45.579105),
+        (12.426473, 47.092004),
+        (11.268702, 47.240531),
     ]
 
     res = sentinel1.get_footprint_linestring(
@@ -226,9 +225,8 @@ def test_open_pol_dataset_iw() -> None:
     assert res.azimuth_time[-1] == last_line
 
     expected_geospatial_bounds = (
-        "POLYGON((11.26870151724317 47.24053130234206,"
-        "10.876144717121 45.73265733767158,12.04397933341514 45.57910451206848,"
-        "12.42647347821595 47.09200435560957,11.26870151724317 47.24053130234206))"
+        "POLYGON((11.268702 47.240531,10.876145 45.732657,12.043979 45.579105,"
+        "12.426473 47.092004,11.268702 47.240531))"
     )
     gcp_ds = sentinel1.open_gcp_dataset(SLC_IW1_VV_annotation)
 
@@ -374,9 +372,8 @@ def test_crop_burst_dataset() -> None:
 
 def test_crop_burst_dataset_gcp() -> None:
     expected_geospatial_bounds = (
-        "POLYGON((11.060741069073366 46.41270558692681,"
-        "11.010711557932021 46.228050403919134,12.175715782110206 46.076023778486665,"
-        "12.209682909257705 46.26327129178887,11.060741069073366 46.41270558692681))"
+        "POLYGON((11.060741 46.412706,11.010712 46.22805,12.175716 46.076024,"
+        "12.209683 46.263271,11.060741 46.412706))"
     )
     expected_polygon = shapely.wkt.loads(expected_geospatial_bounds)
     expected_geospatial_bbox = (

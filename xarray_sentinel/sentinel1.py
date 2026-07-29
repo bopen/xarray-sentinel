@@ -481,22 +481,20 @@ def get_footprint_linestring(
 
     footprint = []
     for j, i in [(0, 0), (1, 0), (1, 1), (0, 1)]:
-        lat = float(
-            gcp["latitude"].interp(
-                azimuth_time=azimuth_time_mm[j],
-                slant_range_time=slant_range_time_mm[i],
-                method=method,
-                kwargs=kwargs,
-            )
+        lat_array = gcp["latitude"].interp(
+            azimuth_time=azimuth_time_mm[j],
+            slant_range_time=slant_range_time_mm[i],
+            method=method,
+            kwargs=kwargs,
         )
-        lon = float(
-            gcp["longitude"].interp(
-                azimuth_time=azimuth_time_mm[j],
-                slant_range_time=slant_range_time_mm[i],
-                method=method,
-                kwargs=kwargs,
-            )
+        lat = round(lat_array.item(), 6)
+        lon_array = gcp["longitude"].interp(
+            azimuth_time=azimuth_time_mm[j],
+            slant_range_time=slant_range_time_mm[i],
+            method=method,
+            kwargs=kwargs,
         )
+        lon = round(lon_array.item(), 6)
         footprint.append((lon, lat))
 
     # check that the poly as the correct orientation
