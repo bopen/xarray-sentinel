@@ -864,14 +864,10 @@ def open_pol_dataset(
     coords = {
         "pixel": np.arange(0, number_of_samples, dtype=int),
         "line": np.arange(0, number_of_lines, dtype=int),
-        # set "units" explicitly as CF conventions don't support "nanoseconds".
+        # We don't need top set the "units" as Xarray now detects the best resolution.
         # See: https://github.com/pydata/xarray/issues/4183#issuecomment-685200043
-        "azimuth_time": (
-            "line",
-            azimuth_time,
-            {},
-            {"units": f"microseconds since {azimuth_time[0]}"},
-        ),
+        #   and https://github.com/pydata/xarray/pull/4684
+        "azimuth_time": ("line", azimuth_time),
     }
 
     if product_information["projection"] == "Slant Range":
