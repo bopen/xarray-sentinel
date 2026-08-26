@@ -1103,6 +1103,27 @@ def calibrate_intensity(
     return intensity
 
 
+def slant_range_to_ground_range(
+    azimuth_time: xr.DataArray,
+    slant_range: xr.DataArray,
+    coordinate_conversion: xr.Dataset,
+) -> xr.DataArray:
+    """Convert slant range to ground range using the coordinate conversion metadata.
+
+    :param azimuth_time: azimuth time coordinates
+    :param slant_range: slant range
+    :param coordinate_conversion: coordinate conversion dataset.
+    The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
+    """
+    sr0 = coordinate_conversion.sr0.interp(azimuth_time=azimuth_time)
+    srgrCoefficients = coordinate_conversion.srgrCoefficients.interp(
+        azimuth_time=azimuth_time,
+    )
+    x = slant_range - sr0
+    ground_range = (srgrCoefficients * x**srgrCoefficients.degree).sum("degree")
+    return ground_range  # type: ignore
+
+
 def slant_range_time_to_ground_range(
     azimuth_time: xr.DataArray,
     slant_range_time: xr.DataArray,
@@ -1116,13 +1137,7 @@ def slant_range_time_to_ground_range(
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
     """
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
-    sr0 = coordinate_conversion.sr0.interp(azimuth_time=azimuth_time)
-    srgrCoefficients = coordinate_conversion.srgrCoefficients.interp(
-        azimuth_time=azimuth_time,
-    )
-    x = slant_range - sr0
-    ground_range = (srgrCoefficients * x**srgrCoefficients.degree).sum("degree")
-    return ground_range  # type: ignore
+    return slant_range_to_ground_range(azimuth_time, slant_range, coordinate_conversion)
 
 
 def ground_range_to_slant_range_time(

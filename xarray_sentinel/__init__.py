@@ -30,6 +30,7 @@ from .sentinel1 import (
     mosaic_slc_iw,
     open_sentinel1_dataset,
     slant_range_time_to_ground_range,
+    slant_range_to_ground_range,
 )
 
 __all__ = [
@@ -43,4 +44,5 @@ __all__ = [
     "mosaic_slc_iw",
     "open_sentinel1_dataset",
     "slant_range_time_to_ground_range",
+    "slant_range_to_ground_range",
 ]
