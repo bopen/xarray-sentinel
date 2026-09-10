@@ -86,7 +86,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - "3.10"
         - "3.11"
         - "3.12"
         - "3.13"
@@ -120,7 +119,7 @@ jobs:
         enable-cache: true
         python-version: "3.14"
     - name: Run tests
-      run: uv run --resolution lowest-direct -p python3.10 -m pytest .
+      run: uv run --resolution lowest-direct -p python3.11 -m pytest .
 
   distribution:
     runs-on: ubuntu-latest
