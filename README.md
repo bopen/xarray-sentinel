@@ -48,7 +48,7 @@ The easiest way to install *xarray-sentinel* is via *pip*:
     pip install xarray-sentinel
 ```
 
-If you have `uv` installed the simplest way to test the library is to start a `ipython` session with:
+If you have `uv` installed the simplest way to test the library is to start an `ipython` session with:
 
 ```shell
     uvx --with xarray-sentinel ipython
@@ -66,7 +66,7 @@ Due to the inherent complexity and redundancy of the SAFE format *xarray-sentine
 maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
 but it may also contain *subgroups*, that are listed in the `subgroups` attribute.
 
-The following sections show some example of xarray-sentinel usage.
+The following sections show some examples of xarray-sentinel usage.
 In the `notebooks` folder you
 can also find notebooks, one for each supported product, that allow you to explore the
 data in more detail using the xarray-sentinel functions.
@@ -111,8 +111,8 @@ the names of all available groups below this one.
 ### Measurements datasets
 
 To open the other groups we need to add the keyword `group` to `xr.open_dataset`.
-The measurement can then be read by selecting the desired beam mode and polarization.
-In this example, the data contains the S3 beam mode and the VH polarization with `group="S3/VH"` is selected:
+The measurement can then be read by selecting the desired swath and polarization.
+In this example, the data contains the S3 swath and the VH polarization with `group="S3/VH"` is selected:
 
 ```python-repl
 >>> slc_s3_vh = xr.open_dataset(
@@ -145,7 +145,7 @@ Attributes: ...
 
 ```
 
-The `measurement` variable contains the Single Look Complex measurements as a `complex64`
+The `measurement` variable contains the Single Look Complex measurements as `complex64`
 and has dimensions `slant_range_time` and `azimuth_time`.
 The `azimuth_time` is an `np.datetime64` coordinate that contains the UTC zero-Doppler time
 associated with the image line
@@ -153,7 +153,7 @@ and `slant_range_time` is an `np.float64` coordinate that contains the two-way r
 in seconds associated with the image pixel.
 
 Since Sentinel-1 IPF version 3.40, a unique identifier for bursts has been added to the SLC product metadata.
-For these products, the list of the burst ids is stored the `burst_ids` dataset attribute.
+For these products, the list of the burst ids is stored in the `burst_ids` dataset attribute.
 
 ### Metadata datasets
 
@@ -245,12 +245,12 @@ The groups present in a typical Sentinel-1 Stripmap product are:
 ### TOPS burst datasets
 
 The IW and EW products, that use the Terrain Observation with Progressive Scan (TOPS) acquisition mode,
-are more complex because they contain several beam modes in the same SAFE package,
+are more complex because they contain several swaths in the same SAFE package,
 but also because the measurement array is a collage of sub-images called *bursts*.
 
 *xarray-sentinel* provides a helper function that crops a burst out of a measurement dataset for you.
 
-You need to first open the desired measurement dataset, for example, the HH polarisation
+You need to first open the desired measurement dataset, for example, the HH polarization
 of the first IW swath of the `S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE`
 product, in the current folder:
 
@@ -286,7 +286,7 @@ Attributes: ...
 
 ```
 
-Note that the measurement data for IW and EW acquisition modes can not be indexed by physical
+Note that the measurement data for IW and EW acquisition modes cannot be indexed by physical
 coordinates because of the collage nature of the image.
 
 Now the 9th burst out of 9 can be cropped from the swath data using `burst_index=8`, via:
@@ -555,9 +555,9 @@ This is the list of the reference documents:
 - The main design choice for *xarray-sentinel* is for it to be as much as viable a pure map of
   the content of the SAFE data package, with as little interpretation as possible.
   - The tree-like structure follows the structure of the SAFE package even when information,
-    like orbit and attitude, is expected to be identical for different beam modes.
+    like orbit and attitude, is expected to be identical for different swaths.
     We observed at least a case where the number of orbital state vectors reported
-    was different between beam modes.
+    was different between swaths.
   - Data and metadata are converted to the closest available data-type in *Python* / *numpy*.
     The most significant conversion is from `CInt16` to `np.complex64` for the SLC measurements
     that double the space requirements for the data.
@@ -572,8 +572,8 @@ This is the list of the reference documents:
 - As an exception to the metadata naming rule above we add some attributes to get
   CF-Conventions compliance.
 - We aim at opening available data and metadata even for partial SAFE packages, for example,
-  *xarray-sentinel* can open a measurement dataset for a beam mode even when the TIFF files of other
-  beam modes / polarizations are missing.
+  *xarray-sentinel* can open a measurement dataset for a swath even when the TIFF files of other
+  swaths / polarizations are missing.
 - Accuracy considerations and rationale for coordinates data-types:
   - `azimuth_time` can be expressed as `np.datetime64[ns]` since
     spatial resolution at LEO speed is 10km/s * 1ns ~= 0.001cm.
