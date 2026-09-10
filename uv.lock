@@ -23,7 +23,7 @@ revision = 3
 version = 1
 
 [options]
-exclude-newer = "0001-01-01T00:00:00Z"  # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer = "2026-09-03T13:48:47.690974Z"
 exclude-newer-span = "P7D"
 
 [[package]]
@@ -826,7 +826,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "click"}
+  {name = "click", marker = "python_full_version < '3.12'"}
 ]
 name = "click-plugins"
 sdist = {url = "https://files.pythonhosted.org/packages/c3/a4/34847b59150da33690a36da3681d6bbc2ec14ee9a846bc30a6746e5984e4/click_plugins-1.1.1.2.tar.gz", hash = "sha256:d7af3984a99d243c131aa1a828331e7630f4a88a9741fd05c927b204bcf92261", size = 8343, upload-time = "2025-06-25T00:47:37.555Z"}
@@ -838,7 +838,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "click"}
+  {name = "click", marker = "python_full_version < '3.12'"}
 ]
 name = "cligj"
 sdist = {url = "https://files.pythonhosted.org/packages/ea/0d/837dbd5d8430fd0f01ed72c4cfb2f548180f4c68c635df84ce87956cff32/cligj-0.7.2.tar.gz", hash = "sha256:a4bc13d623356b373c2c27c53dbd9c68cae5d526270bfa71f6c6fa69669c6b27", size = 9803, upload-time = "2021-05-28T21:23:27.935Z"}
@@ -877,7 +877,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}}
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"}
 ]
 name = "contourpy"
 resolution-markers = [
@@ -948,7 +948,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
 ]
 name = "contourpy"
@@ -1331,7 +1331,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "pyyaml"}
+  {name = "pyyaml", marker = "python_full_version >= '3.11'"}
 ]
 name = "donfig"
 sdist = {url = "https://files.pythonhosted.org/packages/25/71/80cc718ff6d7abfbabacb1f57aaa42e9c1552bfdd01e64ddd704e4a03638/donfig-0.8.1.post1.tar.gz", hash = "sha256:3bef3413a4c1c601b585e8d297256d0c1470ea012afa6e8461dc28bfb7c23f52", size = 19506, upload-time = "2024-05-23T14:14:31.513Z"}
@@ -1352,7 +1352,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "typing-extensions"}
+  {name = "typing-extensions", marker = "python_full_version < '3.11'"}
 ]
 name = "exceptiongroup"
 sdist = {url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z"}
@@ -1704,7 +1704,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "zipp"}
+  {name = "zipp", marker = "python_full_version < '3.12'"}
 ]
 name = "importlib-metadata"
 sdist = {url = "https://files.pythonhosted.org/packages/a9/01/15bb152d77b21318514a96f43af312635eb2500c96b55398d020c93d86ea/importlib_metadata-9.0.0.tar.gz", hash = "sha256:a4f57ab599e6a2e3016d7595cfd72eb4661a5106e787a95bcc90c7105b831efc", size = 56405, upload-time = "2026-03-20T06:42:56.999Z"}
@@ -1750,17 +1750,17 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "colorama", marker = "sys_platform == 'win32'"},
-  {name = "decorator"},
-  {name = "exceptiongroup"},
-  {name = "jedi"},
-  {name = "matplotlib-inline"},
-  {name = "pexpect", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'"},
-  {name = "prompt-toolkit"},
-  {name = "pygments"},
-  {name = "stack-data"},
-  {name = "traitlets"},
-  {name = "typing-extensions"}
+  {name = "colorama", marker = "python_full_version < '3.11' and sys_platform == 'win32'"},
+  {name = "decorator", marker = "python_full_version < '3.11'"},
+  {name = "exceptiongroup", marker = "python_full_version < '3.11'"},
+  {name = "jedi", marker = "python_full_version < '3.11'"},
+  {name = "matplotlib-inline", marker = "python_full_version < '3.11'"},
+  {name = "pexpect", marker = "python_full_version < '3.11' and sys_platform != 'emscripten' and sys_platform != 'win32'"},
+  {name = "prompt-toolkit", marker = "python_full_version < '3.11'"},
+  {name = "pygments", marker = "python_full_version < '3.11'"},
+  {name = "stack-data", marker = "python_full_version < '3.11'"},
+  {name = "traitlets", marker = "python_full_version < '3.11'"},
+  {name = "typing-extensions", marker = "python_full_version < '3.11'"}
 ]
 name = "ipython"
 resolution-markers = [
@@ -1776,17 +1776,17 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "colorama", marker = "sys_platform == 'win32'"},
-  {name = "ipython-pygments-lexers"},
-  {name = "jedi"},
-  {name = "matplotlib-inline"},
-  {name = "pexpect", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'"},
-  {name = "prompt-toolkit"},
-  {name = "psutil", marker = "sys_platform != 'cygwin' and sys_platform != 'emscripten'"},
-  {name = "pygments"},
-  {name = "stack-data"},
-  {name = "traitlets"},
-  {name = "typing-extensions", marker = "python_full_version < '3.12'"}
+  {name = "colorama", marker = "python_full_version >= '3.11' and sys_platform == 'win32'"},
+  {name = "ipython-pygments-lexers", marker = "python_full_version >= '3.11'"},
+  {name = "jedi", marker = "python_full_version >= '3.11'"},
+  {name = "matplotlib-inline", marker = "python_full_version >= '3.11'"},
+  {name = "pexpect", marker = "python_full_version >= '3.11' and sys_platform != 'emscripten' and sys_platform != 'win32'"},
+  {name = "prompt-toolkit", marker = "python_full_version >= '3.11'"},
+  {name = "psutil", marker = "python_full_version >= '3.11' and sys_platform != 'cygwin' and sys_platform != 'emscripten'"},
+  {name = "pygments", marker = "python_full_version >= '3.11'"},
+  {name = "stack-data", marker = "python_full_version >= '3.11'"},
+  {name = "traitlets", marker = "python_full_version >= '3.11'"},
+  {name = "typing-extensions", marker = "python_full_version == '3.11.*'"}
 ]
 name = "ipython"
 resolution-markers = [
@@ -1816,7 +1816,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "pygments"}
+  {name = "pygments", marker = "python_full_version >= '3.11'"}
 ]
 name = "ipython-pygments-lexers"
 sdist = {url = "https://files.pythonhosted.org/packages/ef/4c/5dd1d8af08107f88c7f741ead7a40854b8ac24ddf9ae850afbcf698aa552/ipython_pygments_lexers-1.1.1.tar.gz", hash = "sha256:09c0138009e56b6854f9535736f4171d855c8c08a563a0dcd8022f78355c7e81", size = 8393, upload-time = "2025-01-17T11:24:34.505Z"}
@@ -2387,7 +2387,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "mdurl"}
+  {name = "mdurl", marker = "python_full_version < '3.11'"}
 ]
 name = "markdown-it-py"
 resolution-markers = [
@@ -2403,7 +2403,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "mdurl"}
+  {name = "mdurl", marker = "python_full_version >= '3.11'"}
 ]
 name = "markdown-it-py"
 resolution-markers = [
@@ -2518,15 +2518,15 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "contourpy", version = "1.3.2", source = {registry = "https://pypi.org/simple"}},
-  {name = "cycler"},
-  {name = "fonttools"},
-  {name = "kiwisolver"},
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}},
-  {name = "packaging"},
-  {name = "pillow"},
-  {name = "pyparsing"},
-  {name = "python-dateutil"}
+  {name = "contourpy", version = "1.3.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "cycler", marker = "python_full_version < '3.11'"},
+  {name = "fonttools", marker = "python_full_version < '3.11'"},
+  {name = "kiwisolver", marker = "python_full_version < '3.11'"},
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "packaging", marker = "python_full_version < '3.11'"},
+  {name = "pillow", marker = "python_full_version < '3.11'"},
+  {name = "pyparsing", marker = "python_full_version < '3.11'"},
+  {name = "python-dateutil", marker = "python_full_version < '3.11'"}
 ]
 name = "matplotlib"
 resolution-markers = [
@@ -2595,16 +2595,16 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "contourpy", version = "1.3.3", source = {registry = "https://pypi.org/simple"}},
-  {name = "cycler"},
-  {name = "fonttools"},
-  {name = "kiwisolver"},
-  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "contourpy", version = "1.3.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"},
+  {name = "cycler", marker = "python_full_version >= '3.11'"},
+  {name = "fonttools", marker = "python_full_version >= '3.11'"},
+  {name = "kiwisolver", marker = "python_full_version >= '3.11'"},
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
-  {name = "packaging"},
-  {name = "pillow"},
-  {name = "pyparsing"},
-  {name = "python-dateutil"}
+  {name = "packaging", marker = "python_full_version >= '3.11'"},
+  {name = "pillow", marker = "python_full_version >= '3.11'"},
+  {name = "pyparsing", marker = "python_full_version >= '3.11'"},
+  {name = "python-dateutil", marker = "python_full_version >= '3.11'"}
 ]
 name = "matplotlib"
 resolution-markers = [
@@ -3004,12 +3004,12 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "docutils", version = "0.21.2", source = {registry = "https://pypi.org/simple"}},
-  {name = "jinja2"},
-  {name = "markdown-it-py", version = "3.0.0", source = {registry = "https://pypi.org/simple"}},
-  {name = "mdit-py-plugins"},
-  {name = "pyyaml"},
-  {name = "sphinx", version = "8.1.3", source = {registry = "https://pypi.org/simple"}}
+  {name = "docutils", version = "0.21.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "jinja2", marker = "python_full_version < '3.11'"},
+  {name = "markdown-it-py", version = "3.0.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "mdit-py-plugins", marker = "python_full_version < '3.11'"},
+  {name = "pyyaml", marker = "python_full_version < '3.11'"},
+  {name = "sphinx", version = "8.1.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"}
 ]
 name = "myst-parser"
 resolution-markers = [
@@ -3025,12 +3025,12 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "docutils", version = "0.22.4", source = {registry = "https://pypi.org/simple"}},
-  {name = "jinja2"},
-  {name = "markdown-it-py", version = "4.2.0", source = {registry = "https://pypi.org/simple"}},
-  {name = "mdit-py-plugins"},
-  {name = "pyyaml"},
-  {name = "sphinx", version = "9.0.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "docutils", version = "0.22.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"},
+  {name = "jinja2", marker = "python_full_version >= '3.11'"},
+  {name = "markdown-it-py", version = "4.2.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"},
+  {name = "mdit-py-plugins", marker = "python_full_version >= '3.11'"},
+  {name = "pyyaml", marker = "python_full_version >= '3.11'"},
+  {name = "sphinx", version = "9.0.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "sphinx", version = "9.1.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
 ]
 name = "myst-parser"
@@ -3125,9 +3125,9 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "certifi"},
-  {name = "cftime"},
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}}
+  {name = "certifi", marker = "python_full_version < '3.11' and platform_machine == 'ARM64' and sys_platform == 'win32'"},
+  {name = "cftime", marker = "python_full_version < '3.11' and platform_machine == 'ARM64' and sys_platform == 'win32'"},
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11' and platform_machine == 'ARM64' and sys_platform == 'win32'"}
 ]
 name = "netcdf4"
 resolution-markers = [
@@ -3139,8 +3139,8 @@ version = "1.7.3"
 
 [[package]]
 dependencies = [
-  {name = "certifi"},
-  {name = "cftime"},
+  {name = "certifi", marker = "python_full_version >= '3.11' or platform_machine != 'ARM64' or sys_platform != 'win32'"},
+  {name = "cftime", marker = "python_full_version >= '3.11' or platform_machine != 'ARM64' or sys_platform != 'win32'"},
   {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "(python_full_version < '3.11' and platform_machine != 'ARM64') or (python_full_version < '3.11' and sys_platform != 'win32')"},
   {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
@@ -3215,7 +3215,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}}
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"}
 ]
 name = "numcodecs"
 resolution-markers = [
@@ -3246,9 +3246,9 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
-  {name = "typing-extensions"}
+  {name = "typing-extensions", marker = "python_full_version >= '3.11'"}
 ]
 name = "numcodecs"
 resolution-markers = [
@@ -3553,10 +3553,10 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}},
-  {name = "python-dateutil"},
-  {name = "pytz"},
-  {name = "tzdata"}
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "python-dateutil", marker = "python_full_version < '3.11'"},
+  {name = "pytz", marker = "python_full_version < '3.11'"},
+  {name = "tzdata", marker = "python_full_version < '3.11'"}
 ]
 name = "pandas"
 resolution-markers = [
@@ -3618,10 +3618,10 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
-  {name = "python-dateutil"},
-  {name = "tzdata", marker = "sys_platform == 'emscripten' or sys_platform == 'win32'"}
+  {name = "python-dateutil", marker = "python_full_version >= '3.11'"},
+  {name = "tzdata", marker = "(python_full_version >= '3.11' and sys_platform == 'emscripten') or (python_full_version >= '3.11' and sys_platform == 'win32')"}
 ]
 name = "pandas"
 resolution-markers = [
@@ -3691,8 +3691,8 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}},
-  {name = "types-pytz"}
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "types-pytz", marker = "python_full_version < '3.11'"}
 ]
 name = "pandas-stubs"
 resolution-markers = [
@@ -3708,7 +3708,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
 ]
 name = "pandas-stubs"
@@ -3779,7 +3779,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "ptyprocess"}
+  {name = "ptyprocess", marker = "(python_full_version < '3.11' and platform_machine != 'ARM64' and sys_platform == 'win32') or (python_full_version < '3.11' and sys_platform == 'emscripten') or (sys_platform != 'emscripten' and sys_platform != 'win32')"}
 ]
 name = "pexpect"
 sdist = {url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z"}
@@ -4123,13 +4123,13 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "accessible-pygments"},
-  {name = "babel"},
-  {name = "beautifulsoup4"},
-  {name = "docutils", version = "0.21.2", source = {registry = "https://pypi.org/simple"}},
-  {name = "pygments"},
-  {name = "sphinx", version = "8.1.3", source = {registry = "https://pypi.org/simple"}},
-  {name = "typing-extensions"}
+  {name = "accessible-pygments", marker = "python_full_version < '3.11'"},
+  {name = "babel", marker = "python_full_version < '3.11'"},
+  {name = "beautifulsoup4", marker = "python_full_version < '3.11'"},
+  {name = "docutils", version = "0.21.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "pygments", marker = "python_full_version < '3.11'"},
+  {name = "sphinx", version = "8.1.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "typing-extensions", marker = "python_full_version < '3.11'"}
 ]
 name = "pydata-sphinx-theme"
 resolution-markers = [
@@ -4145,14 +4145,14 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "accessible-pygments"},
-  {name = "babel"},
-  {name = "beautifulsoup4"},
-  {name = "docutils", version = "0.22.4", source = {registry = "https://pypi.org/simple"}},
-  {name = "jinja2"},
-  {name = "pygments"},
-  {name = "requests"},
-  {name = "sphinx", version = "9.0.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "accessible-pygments", marker = "python_full_version >= '3.11'"},
+  {name = "babel", marker = "python_full_version >= '3.11'"},
+  {name = "beautifulsoup4", marker = "python_full_version >= '3.11'"},
+  {name = "docutils", version = "0.22.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"},
+  {name = "jinja2", marker = "python_full_version >= '3.11'"},
+  {name = "pygments", marker = "python_full_version >= '3.11'"},
+  {name = "requests", marker = "python_full_version >= '3.11'"},
+  {name = "sphinx", version = "9.0.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "sphinx", version = "9.1.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
 ]
 name = "pydata-sphinx-theme"
@@ -4201,7 +4201,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "certifi"}
+  {name = "certifi", marker = "python_full_version < '3.11'"}
 ]
 name = "pyproj"
 resolution-markers = [
@@ -4248,7 +4248,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "certifi"}
+  {name = "certifi", marker = "python_full_version >= '3.11'"}
 ]
 name = "pyproj"
 resolution-markers = [
@@ -4564,15 +4564,15 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "affine"},
-  {name = "attrs"},
-  {name = "certifi"},
-  {name = "click"},
-  {name = "click-plugins"},
-  {name = "cligj"},
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version != '3.11.*'"},
+  {name = "affine", marker = "python_full_version < '3.12'"},
+  {name = "attrs", marker = "python_full_version < '3.12'"},
+  {name = "certifi", marker = "python_full_version < '3.12'"},
+  {name = "click", marker = "python_full_version < '3.12'"},
+  {name = "click-plugins", marker = "python_full_version < '3.12'"},
+  {name = "cligj", marker = "python_full_version < '3.12'"},
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
-  {name = "pyparsing"}
+  {name = "pyparsing", marker = "python_full_version < '3.12'"}
 ]
 name = "rasterio"
 resolution-markers = [
@@ -4632,12 +4632,12 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "affine"},
-  {name = "attrs"},
-  {name = "certifi"},
-  {name = "click"},
-  {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}},
-  {name = "pyparsing"}
+  {name = "affine", marker = "python_full_version >= '3.12'"},
+  {name = "attrs", marker = "python_full_version >= '3.12'"},
+  {name = "certifi", marker = "python_full_version >= '3.12'"},
+  {name = "click", marker = "python_full_version >= '3.12'"},
+  {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
+  {name = "pyparsing", marker = "python_full_version >= '3.12'"}
 ]
 name = "rasterio"
 resolution-markers = [
@@ -4773,13 +4773,13 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version != '3.11.*'"},
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
-  {name = "packaging"},
-  {name = "pyproj", version = "3.7.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version != '3.11.*'"},
+  {name = "packaging", marker = "python_full_version < '3.12'"},
+  {name = "pyproj", version = "3.7.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "pyproj", version = "3.7.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
-  {name = "rasterio", version = "1.4.4", source = {registry = "https://pypi.org/simple"}},
-  {name = "xarray", version = "2025.6.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version != '3.11.*'"},
+  {name = "rasterio", version = "1.4.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "xarray", version = "2025.6.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "xarray", version = "2026.7.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"}
 ]
 name = "rioxarray"
@@ -4800,11 +4800,11 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}},
-  {name = "packaging"},
-  {name = "pyproj", version = "3.7.2", source = {registry = "https://pypi.org/simple"}},
-  {name = "rasterio", version = "1.5.1", source = {registry = "https://pypi.org/simple"}},
-  {name = "xarray", version = "2026.7.0", source = {registry = "https://pypi.org/simple"}}
+  {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
+  {name = "packaging", marker = "python_full_version >= '3.12'"},
+  {name = "pyproj", version = "3.7.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
+  {name = "rasterio", version = "1.5.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
+  {name = "xarray", version = "2026.7.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
 ]
 name = "rioxarray"
 resolution-markers = [
@@ -5120,7 +5120,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}}
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"}
 ]
 name = "scipy"
 resolution-markers = [
@@ -5180,7 +5180,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}}
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"}
 ]
 name = "scipy"
 resolution-markers = [
@@ -5257,7 +5257,7 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}}
+  {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
 ]
 name = "scipy"
 resolution-markers = [
@@ -5445,23 +5445,23 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "alabaster"},
-  {name = "babel"},
-  {name = "colorama", marker = "sys_platform == 'win32'"},
-  {name = "docutils", version = "0.21.2", source = {registry = "https://pypi.org/simple"}},
-  {name = "imagesize"},
-  {name = "jinja2"},
-  {name = "packaging"},
-  {name = "pygments"},
-  {name = "requests"},
-  {name = "snowballstemmer"},
-  {name = "sphinxcontrib-applehelp"},
-  {name = "sphinxcontrib-devhelp"},
-  {name = "sphinxcontrib-htmlhelp"},
-  {name = "sphinxcontrib-jsmath"},
-  {name = "sphinxcontrib-qthelp"},
-  {name = "sphinxcontrib-serializinghtml"},
-  {name = "tomli"}
+  {name = "alabaster", marker = "python_full_version < '3.11'"},
+  {name = "babel", marker = "python_full_version < '3.11'"},
+  {name = "colorama", marker = "python_full_version < '3.11' and sys_platform == 'win32'"},
+  {name = "docutils", version = "0.21.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "imagesize", marker = "python_full_version < '3.11'"},
+  {name = "jinja2", marker = "python_full_version < '3.11'"},
+  {name = "packaging", marker = "python_full_version < '3.11'"},
+  {name = "pygments", marker = "python_full_version < '3.11'"},
+  {name = "requests", marker = "python_full_version < '3.11'"},
+  {name = "snowballstemmer", marker = "python_full_version < '3.11'"},
+  {name = "sphinxcontrib-applehelp", marker = "python_full_version < '3.11'"},
+  {name = "sphinxcontrib-devhelp", marker = "python_full_version < '3.11'"},
+  {name = "sphinxcontrib-htmlhelp", marker = "python_full_version < '3.11'"},
+  {name = "sphinxcontrib-jsmath", marker = "python_full_version < '3.11'"},
+  {name = "sphinxcontrib-qthelp", marker = "python_full_version < '3.11'"},
+  {name = "sphinxcontrib-serializinghtml", marker = "python_full_version < '3.11'"},
+  {name = "tomli", marker = "python_full_version < '3.11'"}
 ]
 name = "sphinx"
 resolution-markers = [
@@ -5477,23 +5477,23 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "alabaster"},
-  {name = "babel"},
-  {name = "colorama", marker = "sys_platform == 'win32'"},
-  {name = "docutils", version = "0.22.4", source = {registry = "https://pypi.org/simple"}},
-  {name = "imagesize"},
-  {name = "jinja2"},
-  {name = "packaging"},
-  {name = "pygments"},
-  {name = "requests"},
-  {name = "roman-numerals"},
-  {name = "snowballstemmer"},
-  {name = "sphinxcontrib-applehelp"},
-  {name = "sphinxcontrib-devhelp"},
-  {name = "sphinxcontrib-htmlhelp"},
-  {name = "sphinxcontrib-jsmath"},
-  {name = "sphinxcontrib-qthelp"},
-  {name = "sphinxcontrib-serializinghtml"}
+  {name = "alabaster", marker = "python_full_version == '3.11.*'"},
+  {name = "babel", marker = "python_full_version == '3.11.*'"},
+  {name = "colorama", marker = "python_full_version == '3.11.*' and sys_platform == 'win32'"},
+  {name = "docutils", version = "0.22.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
+  {name = "imagesize", marker = "python_full_version == '3.11.*'"},
+  {name = "jinja2", marker = "python_full_version == '3.11.*'"},
+  {name = "packaging", marker = "python_full_version == '3.11.*'"},
+  {name = "pygments", marker = "python_full_version == '3.11.*'"},
+  {name = "requests", marker = "python_full_version == '3.11.*'"},
+  {name = "roman-numerals", marker = "python_full_version == '3.11.*'"},
+  {name = "snowballstemmer", marker = "python_full_version == '3.11.*'"},
+  {name = "sphinxcontrib-applehelp", marker = "python_full_version == '3.11.*'"},
+  {name = "sphinxcontrib-devhelp", marker = "python_full_version == '3.11.*'"},
+  {name = "sphinxcontrib-htmlhelp", marker = "python_full_version == '3.11.*'"},
+  {name = "sphinxcontrib-jsmath", marker = "python_full_version == '3.11.*'"},
+  {name = "sphinxcontrib-qthelp", marker = "python_full_version == '3.11.*'"},
+  {name = "sphinxcontrib-serializinghtml", marker = "python_full_version == '3.11.*'"}
 ]
 name = "sphinx"
 resolution-markers = [
@@ -5511,23 +5511,23 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "alabaster"},
-  {name = "babel"},
-  {name = "colorama", marker = "sys_platform == 'win32'"},
-  {name = "docutils", version = "0.22.4", source = {registry = "https://pypi.org/simple"}},
-  {name = "imagesize"},
-  {name = "jinja2"},
-  {name = "packaging"},
-  {name = "pygments"},
-  {name = "requests"},
-  {name = "roman-numerals"},
-  {name = "snowballstemmer"},
-  {name = "sphinxcontrib-applehelp"},
-  {name = "sphinxcontrib-devhelp"},
-  {name = "sphinxcontrib-htmlhelp"},
-  {name = "sphinxcontrib-jsmath"},
-  {name = "sphinxcontrib-qthelp"},
-  {name = "sphinxcontrib-serializinghtml"}
+  {name = "alabaster", marker = "python_full_version >= '3.12'"},
+  {name = "babel", marker = "python_full_version >= '3.12'"},
+  {name = "colorama", marker = "python_full_version >= '3.12' and sys_platform == 'win32'"},
+  {name = "docutils", version = "0.22.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
+  {name = "imagesize", marker = "python_full_version >= '3.12'"},
+  {name = "jinja2", marker = "python_full_version >= '3.12'"},
+  {name = "packaging", marker = "python_full_version >= '3.12'"},
+  {name = "pygments", marker = "python_full_version >= '3.12'"},
+  {name = "requests", marker = "python_full_version >= '3.12'"},
+  {name = "roman-numerals", marker = "python_full_version >= '3.12'"},
+  {name = "snowballstemmer", marker = "python_full_version >= '3.12'"},
+  {name = "sphinxcontrib-applehelp", marker = "python_full_version >= '3.12'"},
+  {name = "sphinxcontrib-devhelp", marker = "python_full_version >= '3.12'"},
+  {name = "sphinxcontrib-htmlhelp", marker = "python_full_version >= '3.12'"},
+  {name = "sphinxcontrib-jsmath", marker = "python_full_version >= '3.12'"},
+  {name = "sphinxcontrib-qthelp", marker = "python_full_version >= '3.12'"},
+  {name = "sphinxcontrib-serializinghtml", marker = "python_full_version >= '3.12'"}
 ]
 name = "sphinx"
 resolution-markers = [
@@ -5990,9 +5990,9 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}},
-  {name = "packaging"},
-  {name = "pandas", version = "2.3.3", source = {registry = "https://pypi.org/simple"}}
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "packaging", marker = "python_full_version < '3.11'"},
+  {name = "pandas", version = "2.3.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"}
 ]
 name = "xarray"
 resolution-markers = [
@@ -6008,10 +6008,10 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
   {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
-  {name = "packaging"},
-  {name = "pandas", version = "3.0.5", source = {registry = "https://pypi.org/simple"}}
+  {name = "packaging", marker = "python_full_version >= '3.11'"},
+  {name = "pandas", version = "3.0.5", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"}
 ]
 name = "xarray"
 resolution-markers = [
@@ -6049,6 +6049,8 @@ dependencies = [
   {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
   {name = "pandas", version = "2.3.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "pandas", version = "3.0.5", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"},
+  {name = "rasterio", version = "1.4.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "rasterio", version = "1.5.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
   {name = "rioxarray", version = "0.19.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
   {name = "rioxarray", version = "0.23.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
   {name = "scipy", version = "1.15.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
@@ -6057,7 +6059,10 @@ dependencies = [
   {name = "typer"},
   {name = "xarray", version = "2025.6.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "xarray", version = "2026.7.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"},
-  {name = "xmlschema"}
+  {name = "xmlschema"},
+  {name = "zarr", version = "2.18.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "zarr", version = "3.1.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
+  {name = "zarr", version = "3.3.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
 ]
 name = "xarray-sentinel"
 source = {editable = "."}
@@ -6068,6 +6073,8 @@ dev = [
   {name = "mypy"},
   {name = "myst-parser", version = "4.0.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "myst-parser", version = "5.1.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"},
+  {name = "netcdf4", version = "1.7.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11' and platform_machine == 'ARM64' and sys_platform == 'win32'"},
+  {name = "netcdf4", version = "1.7.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11' or platform_machine != 'ARM64' or sys_platform != 'win32'"},
   {name = "pandas-stubs", version = "2.3.3.260113", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
   {name = "pandas-stubs", version = "3.0.5.260730", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.11'"},
   {name = "pre-commit"},
@@ -6077,10 +6084,7 @@ dev = [
   {name = "pytest-cov"},
   {name = "shapely"},
   {name = "sphinx-autoapi"},
-  {name = "stac-valid"},
-  {name = "zarr", version = "2.18.3", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
-  {name = "zarr", version = "3.1.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
-  {name = "zarr", version = "3.3.0", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
+  {name = "stac-valid"}
 ]
 
 [package.metadata]
@@ -6094,12 +6098,14 @@ requires-dist = [
   {name = "matplotlib", marker = "extra == 'lab'", specifier = ">=3.10.9"},
   {name = "numpy", specifier = ">=1.25"},
   {name = "pandas", specifier = ">=2.1"},
+  {name = "rasterio", specifier = ">=1.3.5"},
   {name = "rioxarray", specifier = ">=0.18"},
   {name = "s3fs", marker = "extra == 'lab'", specifier = ">=2026.4.0"},
   {name = "scipy", specifier = ">=1.11"},
   {name = "typer", specifier = ">=0.26.7"},
   {name = "xarray", specifier = ">=2024.10"},
-  {name = "xmlschema", specifier = ">=3.4"}
+  {name = "xmlschema", specifier = ">=3.4"},
+  {name = "zarr", specifier = ">=2.18.3"}
 ]
 
 [package.metadata.requires-dev]
@@ -6107,6 +6113,7 @@ dev = [
   {name = "cfchecker", specifier = ">=4.1.0"},
   {name = "mypy", specifier = ">=1.15.0"},
   {name = "myst-parser", specifier = ">=4.0.1"},
+  {name = "netcdf4", specifier = ">=1.7"},
   {name = "pandas-stubs", specifier = ">=1.4.0"},
   {name = "pre-commit", specifier = ">=4.3.0"},
   {name = "pydata-sphinx-theme", specifier = ">=0.16.1"},
@@ -6114,8 +6121,7 @@ dev = [
   {name = "pytest-cov", specifier = ">=5.0"},
   {name = "shapely", specifier = ">=2.1"},
   {name = "sphinx-autoapi", specifier = ">=3.6.0"},
-  {name = "stac-valid", specifier = ">=4.2.1"},
-  {name = "zarr", specifier = ">=2.18.3"}
+  {name = "stac-valid", specifier = ">=4.2.1"}
 ]
 
 [package.optional-dependencies]
@@ -6257,10 +6263,10 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "asciitree"},
-  {name = "fasteners", marker = "sys_platform != 'emscripten'"},
-  {name = "numcodecs", version = "0.13.1", source = {registry = "https://pypi.org/simple"}},
-  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}}
+  {name = "asciitree", marker = "python_full_version < '3.11'"},
+  {name = "fasteners", marker = "python_full_version < '3.11' and sys_platform != 'emscripten'"},
+  {name = "numcodecs", version = "0.13.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"},
+  {name = "numpy", version = "2.2.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.11'"}
 ]
 name = "zarr"
 resolution-markers = [
@@ -6276,12 +6282,12 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "donfig"},
-  {name = "google-crc32c"},
-  {name = "numcodecs", version = "0.16.5", source = {registry = "https://pypi.org/simple"}},
-  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}},
-  {name = "packaging"},
-  {name = "typing-extensions"}
+  {name = "donfig", marker = "python_full_version == '3.11.*'"},
+  {name = "google-crc32c", marker = "python_full_version == '3.11.*'"},
+  {name = "numcodecs", version = "0.16.5", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version == '3.11.*'"},
+  {name = "packaging", marker = "python_full_version == '3.11.*'"},
+  {name = "typing-extensions", marker = "python_full_version == '3.11.*'"}
 ]
 name = "zarr"
 resolution-markers = [
@@ -6299,12 +6305,12 @@ wheels = [
 
 [[package]]
 dependencies = [
-  {name = "donfig"},
-  {name = "google-crc32c"},
-  {name = "numcodecs", version = "0.16.5", source = {registry = "https://pypi.org/simple"}},
-  {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}},
-  {name = "packaging"},
-  {name = "typing-extensions"}
+  {name = "donfig", marker = "python_full_version >= '3.12'"},
+  {name = "google-crc32c", marker = "python_full_version >= '3.12'"},
+  {name = "numcodecs", version = "0.16.5", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
+  {name = "numpy", version = "2.5.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
+  {name = "packaging", marker = "python_full_version >= '3.12'"},
+  {name = "typing-extensions", marker = "python_full_version >= '3.12'"}
 ]
 name = "zarr"
 resolution-markers = [

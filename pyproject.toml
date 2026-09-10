@@ -7,6 +7,7 @@ dev = [
   "cfchecker>=4.1.0",
   "mypy>=1.15.0",
   "myst-parser>=4.0.1",
+  "netCDF4>=1.7",
   "pandas-stubs>=1.4.0",
   "pre-commit>=4.3.0",
   "pydata-sphinx-theme>=0.16.1",
@@ -14,8 +15,7 @@ dev = [
   "pytest-cov>=5.0",
   "shapely>=2.1",
   "sphinx-autoapi>=3.6.0",
-  "stac-valid>=4.2.1",
-  "zarr>=2.18.3"
+  "stac-valid>=4.2.1"
 ]
 
 [project]
@@ -40,11 +40,17 @@ dependencies = [
   "fsspec>=2024.1",
   "numpy>=1.25",
   "pandas>=2.1",
+  "rasterio>=1.3.5",
   "rioxarray>=0.18",
+  # Not imported directly, pinned explicitly to control the minimal version:
+  # it is required to enable interpolation via the xarray "scipy" backend.
   "scipy>=1.11",
   "typer>=0.26.7",
   "xarray>=2024.10",
-  "xmlschema>=3.4"
+  "xmlschema>=3.4",
+  # Not imported directly: needed by `reformat.to_group_zarr`, which is the
+  # default output of `python -m xarray_sentinel convert` (xarray "zarr" backend).
+  "zarr>=2.18.3"
 ]
 description = "Easily access and explore the SAR data products of the Copernicus Sentinel-1 satellite mission"
 dynamic = ["version"]

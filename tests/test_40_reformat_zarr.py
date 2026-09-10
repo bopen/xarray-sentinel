@@ -1,11 +1,7 @@
 import pathlib
 from typing import Any
 
-import pytest
-
 from xarray_sentinel import reformat
-
-pytest.importorskip("zarr")
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
