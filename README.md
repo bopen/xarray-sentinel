@@ -110,9 +110,8 @@ the names of all available groups below this one.
 
 ### Measurements datasets
 
-To open the other groups we need to add the keyword `group` to `xr.open_dataset`.
-The measurement can then be read by selecting the desired swath and polarization.
-In this example, the data contains the S3 swath and the VH polarization with `group="S3/VH"` is selected:
+To open any subgroup, pass its name with the `group` keyword to `xr.open_dataset`.
+Measurements are read by selecting the swath and polarization, for example `group="S3/VH"`:
 
 ```python-repl
 >>> slc_s3_vh = xr.open_dataset(
@@ -157,8 +156,8 @@ For these products, the list of the burst ids is stored in the `burst_ids` datas
 
 ### Metadata datasets
 
-The measurement group contains several subgroups with metadata associated with the image. Currently,
-*xarray-sentinel* supports the following metadata datasets:
+Every swath and polarization group, such as `/S3/VH`, holds the `measurement` variable plus the
+following metadata subgroups:
 
 - product XML file
   - `orbit` from the `<orbit>` tags
