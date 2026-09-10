@@ -73,8 +73,8 @@ data in more detail using the xarray-sentinel functions.
 
 ### The root dataset
 
-For example let's explore the Sentinel-1 SLC Stripmap product in the local folder
-`./S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE`.
+For example, let's explore the Sentinel-1 SLC Stripmap product in the local folder
+`tests/data/S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE`.
 First, we can open the SAR data product by passing the `engine="sentinel-1"` option to `xr.open_dataset`
 and access the root group of the product, also known as `/`:
 
@@ -250,9 +250,9 @@ but also because the measurement array is a collage of sub-images called *bursts
 
 *xarray-sentinel* provides a helper function that crops a burst out of a measurement dataset for you.
 
-You need to first open the desired measurement dataset, for example, the HH polarization
-of the first IW swath of the `S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE`
-product, in the current folder:
+First, open the desired measurement dataset: here, the HH polarization of the first IW swath
+of the `tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE`
+product:
 
 ```python-repl
 >>> slc_iw_v340_path = "tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
@@ -351,11 +351,12 @@ Attributes: ...
 
 ```
 
-Note that the helper function also performs additional changes, such as swapping the dimensions
-to the physical coordinates and adding burst attributes.
+The helper also returns the burst with `azimuth_time` and `slant_range_time` as dimensions,
+instead of the `line` and `pixel` of the swath, and adds the `burst_index`, `burst_id` and
+`azimuth_anx_time` attributes.
 
-As a quick way to access burst data, you can add the `burst_index` to the group specification on
-open, for example, `group="IW1/VH/8"`.
+As a quick way to access burst data, you can add the `burst_index` to the group specification
+when opening the dataset, for example, `group="IW1/VH/8"`.
 The burst groups are not listed in the `subgroups` attribute because they are not structural.
 
 ```python-repl
