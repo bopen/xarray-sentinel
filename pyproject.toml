@@ -34,7 +34,7 @@ classifiers = [
   "Topic :: Scientific/Engineering"
 ]
 # NOTE: some dependencies are not explicitly imported in the code, but we
-# rely on the packages being installed or we need to set minimum versinos
+# rely on the packages being installed or we need to set minimum versions
 dependencies = [
   "dask>=2024.6",
   "distributed>=2024.6",
