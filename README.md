@@ -23,8 +23,12 @@ with the following functionalities:
 - reads several metadata elements:
   satellite orbit and attitude, ground control points, radiometric calibration look up tables,
   Doppler centroid estimation and more
-- (partially broken, see [#127](https://github.com/bopen/xarray-sentinel/issues/127)) reads uncompressed and compressed SAFE data products on the local computer or
-  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io)
+- reads uncompressed and compressed SAFE data products on the local computer or
+  on a network via [*fsspec*](https://filesystem-spec.readthedocs.io):
+  metadata is read through *fsspec* on any filesystem, while measurements require a
+  URL scheme that *rasterio* / *GDAL* opens natively (e.g. `http(s)`, `s3`, `gs`, `az`);
+  measurements on other filesystems, such as `zip` or chained caching filesystems,
+  are currently broken (see [#127](https://github.com/bopen/xarray-sentinel/issues/127))
 - supports larger-than-memory and distributed data access via [*Dask*](https://dask.org) and
   [*rioxarray*](https://corteva.github.io/rioxarray) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
@@ -352,7 +356,7 @@ to the physical coordinates and adding burst attributes.
 
 As a quick way to access burst data, you can add the `burst_index` to the group specification on
 open, for example, `group="IW1/VH/8"`.
-The burst groups are not listed in the `subgroup` attribute because they are not structural.
+The burst groups are not listed in the `subgroups` attribute because they are not structural.
 
 ```python-repl
 >>> slc_iw_v330_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
@@ -418,10 +422,15 @@ Attributes: ...
 
 ### Advanced data access via fsspec
 
-**You need the unreleased rasterio >= 1.3.0 for fsspec to work on measurement data**
+**Metadata is read through *fsspec* on any filesystem. Measurement data, instead, can
+only be read from URL schemes that *rasterio* / *GDAL* opens natively (e.g. `http(s)`,
+`s3`, `gs`, `az`): this covers the common remote access cases, such as the Copernicus
+Data Space S3 store, but not compressed or chained filesystems like `zip://` or
+`simplecache::`. See [#127](https://github.com/bopen/xarray-sentinel/issues/127).**
 
-*xarray-sentinel* can read data from a variety of data stores including local file systems,
-network file systems, cloud object stores and compressed file formats, like Zip.
+*xarray-sentinel* can read data from a variety of data stores including local file
+systems, network file systems and cloud object stores, and metadata also from
+compressed file formats like Zip.
 This is done by passing *fsspec* compatible URLs to `xr.open_dataset` and optionally
 the `storage_options` keyword argument.
 
