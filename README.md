@@ -136,8 +136,8 @@ Attributes: ...
     orbit_number:                        37258
     relative_orbit_number:               86
     ...
-    geospatial_lon_min:                  42.772483374347
-    geospatial_lon_max:                  43.75770573943618
+    geospatial_lon_min:                  42.772483
+    geospatial_lon_max:                  43.757706
     group:                               /S3/VH
     subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
     Conventions:                         CF-1.11
@@ -277,8 +277,8 @@ Attributes: ...
     orbit_number:                        42768
     relative_orbit_number:               171
     ...
-    geospatial_lon_min:                  -61.94949110259839
-    geospatial_lon_max:                  -60.24826879672774
+    geospatial_lon_min:                  -61.949491
+    geospatial_lon_max:                  -60.248269
     group:                               /IW1/HH
     subgroups:                           ['orbit', 'attitude', 'azimuth_fm_ra...
     Conventions:                         CF-1.11
@@ -378,7 +378,7 @@ Attributes: ...
     orbit_number:                        26269
     relative_orbit_number:               168
     ...
-    geospatial_lon_max:                  12.093126130070317
+    geospatial_lon_max:                  12.093126
     group:                               /IW1/VH
     azimuth_anx_time:                    2210.634453
     burst_index:                         8
@@ -411,10 +411,10 @@ Attributes: ...
     orbit_number:                        37258
     relative_orbit_number:               86
     ...
-    geospatial_lat_min:                  -12.17883496921861
-    geospatial_lat_max:                  -10.85986742252814
-    geospatial_lon_min:                  42.772483374347
-    geospatial_lon_max:                  43.75770573943618
+    geospatial_lat_min:                  -12.178835
+    geospatial_lat_max:                  -10.859867
+    geospatial_lon_min:                  42.772483
+    geospatial_lon_max:                  43.757706
     units:                               m2 m-2
     long_name:                           gamma
 
@@ -471,7 +471,7 @@ As an example of remote access, you can open a product directly from a GitHub re
 
 ```python-repl
 >>> xr.open_dataset(
-...     f"github://bopen:xarray-sentinel@/{slc_iw_path}",
+...     f"github://bopen:xarray-sentinel@/{slc_iw_zip_path}",
 ...     group="IW1/VH",
 ...     engine="sentinel-1",
 ... )  # doctest: +SKIP
