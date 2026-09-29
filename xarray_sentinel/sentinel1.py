@@ -14,7 +14,8 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import Any, Sequence, TypeVar
+from collections.abc import Sequence
+from typing import Any, TypeVar
 from xml.etree import ElementTree
 
 import fsspec
@@ -753,7 +754,7 @@ def open_rasterio_dataarray(
             arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)
         except rasterio.RasterioIOError as ex:
             if "No such file" in str(ex):
-                raise FileNotFoundError(str(ex))
+                raise FileNotFoundError(str(ex)) from ex
             raise
     else:
         # FIXME: rioxarray / rasterio do not support opening a file object any more, so

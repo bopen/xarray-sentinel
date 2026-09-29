@@ -19,7 +19,7 @@ dev = [
 ]
 
 [project]
-authors = [{"name" = "B-Open", "email" = "software@bopen.eu"}]
+authors = [{ "name" = "B-Open", "email" = "software@bopen.eu" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
@@ -108,23 +108,20 @@ module = [
 # Same as Black.
 indent-width = 4
 line-length = 88
+target-version = "py311"
+
+[tool.ruff.format]
+exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
+exclude = ["*.ipynb"]
 ignore = [
   # pydocstyle: Missing Docstrings
-  "D1"
+  "D1",
+  # flake8-bugbear: Mutable argument defaults are safe if not mutated
+  "B006"
 ]
-select = [
-  # pyflakes
-  "F",
-  # pycodestyle
-  "E",
-  "W",
-  # isort
-  "I",
-  # pydocstyle
-  "D"
-]
+select = ["F", "E", "W", "I", "D", "B", "C4", "SIM", "UP", "RUF"]
 
 [tool.ruff.lint.pycodestyle]
 max-line-length = 110
