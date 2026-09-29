@@ -19,7 +19,7 @@ dev = [
 ]
 
 [project]
-authors = [{ "name" = "B-Open", "email" = "software@bopen.eu" }]
+authors = [{"name" = "B-Open", "email" = "software@bopen.eu"}]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
@@ -78,6 +78,9 @@ lab = [
   "matplotlib>=3.10.9",
   "s3fs>=2026.4.0"
 ]
+
+[project.scripts]
+xarray-sentinel = "xarray_sentinel.__main__:app"
 
 [project.urls]
 repository = "https://github.com/bopen/xarray-sentinel"
