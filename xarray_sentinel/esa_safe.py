@@ -173,7 +173,7 @@ def parse_manifest_sentinel1(
             except ValueError:
                 continue
             file_type = file_tag.attrib["repID"]
-            files[file_href] = (file_type,) + description
+            files[file_href] = (file_type, *description)
 
     return attributes, files
 

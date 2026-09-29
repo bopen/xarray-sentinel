@@ -705,8 +705,9 @@ def find_available_groups(
     product_path: str,
     product_type: str,
     check_files_exist: bool = False,
-    fs: fsspec.AbstractFileSystem = fsspec.filesystem("file"),
+    fs: fsspec.AbstractFileSystem | None = None,
 ) -> dict[str, list[str]]:
+    fs = fs or fsspec.filesystem("file")
     groups: dict[str, list[str]] = {}
     for path, (type, _, swath, polarization, _) in product_files.items():
         swath_pol_group = f"{swath}/{polarization}".upper()
@@ -716,7 +717,7 @@ def find_available_groups(
                 continue
         if type == "s1Level1ProductSchema":
             groups[swath.upper()] = [""]
-            groups[swath_pol_group] = [abspath] + groups.get(swath_pol_group, [])
+            groups[swath_pol_group] = [abspath, *groups.get(swath_pol_group, [])]
             for metadata_group in [
                 "orbit",
                 "attitude",
@@ -738,7 +739,7 @@ def find_available_groups(
             groups[f"{swath_pol_group}/noise_range"] = [abspath]
             groups[f"{swath_pol_group}/noise_azimuth"] = [abspath]
         elif type == "s1Level1MeasurementSchema":
-            groups[swath_pol_group] = [abspath] + groups.get(swath_pol_group, [])
+            groups[swath_pol_group] = [abspath, *groups.get(swath_pol_group, [])]
 
     return groups
 
