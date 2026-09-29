@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any, Dict
+from typing import Any
 from xml.etree import ElementTree
 
 import pytest
@@ -195,7 +195,7 @@ def test_findall() -> None:
 
 
 @pytest.mark.parametrize("product_id,expected", SENTINEL1_ATTRIBUTES.items())
-def test_parse_manifest_sentinel1(product_id: str, expected: Dict[str, Any]) -> None:
+def test_parse_manifest_sentinel1(product_id: str, expected: dict[str, Any]) -> None:
     manifest_path = DATA_FOLDER / (product_id + ".SAFE") / "manifest.safe"
 
     res_attrs, res_files = esa_safe.parse_manifest_sentinel1(manifest_path)

@@ -2,13 +2,14 @@ import functools
 import importlib.resources
 import os
 import re
-from typing import Any, Mapping, TextIO, Union
+from collections.abc import Mapping
+from typing import Any, TextIO
 from xml.etree import ElementTree
 
 import xmlschema
 
-PathType = Union[str, "os.PathLike[str]"]
-PathOrFileType = Union[PathType, TextIO]
+PathType = str | os.PathLike[str]
+PathOrFileType = PathType | TextIO
 
 
 SENTINEL1_NAMESPACES = {
@@ -172,7 +173,7 @@ def parse_manifest_sentinel1(
             except ValueError:
                 continue
             file_type = file_tag.attrib["repID"]
-            files[file_href] = (file_type,) + description
+            files[file_href] = (file_type, *description)
 
     return attributes, files
 

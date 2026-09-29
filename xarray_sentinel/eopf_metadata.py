@@ -53,11 +53,11 @@ def fix_lists(struct: Any) -> Any:
                 continue
             if k[-5:] == "_list":
                 try:
-                    fixed[k] = fix_lists(struct[k][k[:-5]])
+                    fixed[k] = fix_lists(v[k[:-5]])
                 except Exception:
-                    fixed[k] = fix_lists(fix_lists(struct[k]))
+                    fixed[k] = fix_lists(fix_lists(v))
             else:
-                fixed[k] = fix_lists(struct[k])
+                fixed[k] = fix_lists(v)
     elif isinstance(struct, list):
         fixed = [fix_lists(v) for v in struct]
     else:
