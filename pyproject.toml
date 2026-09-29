@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=64", "setuptools_scm>=8"]
+requires = ["setuptools>=77", "setuptools_scm>=8"]
 
 [dependency-groups]
 dev = [
@@ -23,7 +23,6 @@ authors = [{"name" = "B-Open", "email" = "software@bopen.eu"}]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: Apache Software License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
@@ -63,7 +62,8 @@ keywords = [
   "synthetic-aperture-radar",
   "xarray"
 ]
-license = {file = "LICENSE"}
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 name = "xarray-sentinel"
 readme = "README.md"
 requires-python = ">=3.11"
