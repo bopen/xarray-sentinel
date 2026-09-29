@@ -78,7 +78,7 @@ For example, let's explore the Sentinel-1 SLC Stripmap product in the local fold
 First, we can open the SAR data product by passing the `engine="sentinel-1"` option to `xr.open_dataset`
 and access the root group of the product, also known as `/`:
 
-```python-repl
+```python
 >>> import xarray as xr
 >>> slc_sm_path = "tests/data/S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
 >>> xr.open_dataset(slc_sm_path, engine="sentinel-1")
@@ -113,7 +113,7 @@ the names of all available groups below this one.
 To open any subgroup, pass its name with the `group` keyword to `xr.open_dataset`.
 Measurements are read by selecting the swath and polarization, for example `group="S3/VH"`:
 
-```python-repl
+```python
 >>> slc_s3_vh = xr.open_dataset(
 ...     slc_sm_path, group="S3/VH", engine="sentinel-1", chunks=2048
 ... )
@@ -175,7 +175,7 @@ following metadata subgroups:
 For example, the image calibration metadata associated with the `S3/VH` image can be read using
 `group="S3/VH/calibration"`:
 
-```python-repl
+```python
 >>> slc_s3_vh_calibration = xr.open_dataset(
 ...     slc_sm_path, group="S3/VH/calibration", engine="sentinel-1"
 ... )
@@ -253,7 +253,7 @@ First, open the desired measurement dataset: here, the HH polarization of the fi
 of the `tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE`
 product:
 
-```python-repl
+```python
 >>> slc_iw_v340_path = "tests/data/S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
 >>> slc_iw1_v340_hh = xr.open_dataset(
 ...     slc_iw_v340_path, group="IW1/HH", engine="sentinel-1"
@@ -290,7 +290,7 @@ coordinates because of the collage nature of the image.
 
 Now the 9th burst out of 9 can be cropped from the swath data using `burst_index=8`, via:
 
-```python-repl
+```python
 >>> import xarray_sentinel
 >>> xarray_sentinel.crop_burst_dataset(slc_iw1_v340_hh, burst_index=8)
 <xarray.Dataset> ...
@@ -322,7 +322,7 @@ Attributes: ...
 If IPF processor version is 3.40 or higher, it is also possible to select the burst
 to be cropped using the `burst_id` key:
 
-```python-repl
+```python
 >>> xarray_sentinel.crop_burst_dataset(slc_iw1_v340_hh, burst_id=365923)
 <xarray.Dataset> ...
 Dimensions:           (slant_range_time: 21169, azimuth_time: 1500)
@@ -358,7 +358,7 @@ As a quick way to access burst data, you can add the `burst_index` to the group 
 when opening the dataset, for example, `group="IW1/VH/8"`.
 The burst groups are not listed in the `subgroups` attribute because they are not structural.
 
-```python-repl
+```python
 >>> slc_iw_v330_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
 >>> xr.open_dataset(slc_iw_v330_path, group="IW1/VH/8", engine="sentinel-1")
 <xarray.Dataset> ...
@@ -392,7 +392,7 @@ Attributes: ...
 *xarray-sentinel* provides helper functions to calibrate the data using the calibration metadata.
 You can compute the gamma intensity for part of the Stripmap image above with:
 
-```python-repl
+```python
 >>> xarray_sentinel.calibrate_intensity(
 ...     slc_s3_vh.measurement[:2048, :2048], slc_s3_vh_calibration.gamma
 ... )
@@ -436,7 +436,7 @@ the `storage_options` keyword argument.
 
 For example you can open a product directly from a zip file with:
 
-```python-repl
+```python
 >>> slc_iw_zip_path = "tests/data/S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.zip"
 >>> xr.open_dataset(
 ...     f"zip://*/manifest.safe::{slc_iw_zip_path}", group="IW1/VH", engine="sentinel-1"
@@ -469,7 +469,7 @@ Attributes: ...
 
 As an example of remote access, you can open a product directly from a GitHub repo with:
 
-```python-repl
+```python
 >>> xr.open_dataset(
 ...     f"github://bopen:xarray-sentinel@/{slc_iw_zip_path}",
 ...     group="IW1/VH",
@@ -504,7 +504,7 @@ Attributes: ...
 *fsspec* is very powerful and supports caching and chaining, for example you can open a
 zip file off a GitHub repo and cache the file locally with:
 
-```python-repl
+```python
 >>> xr.open_dataset(
 ...     f"zip://*/manifest.safe::simplecache::github://bopen:xarray-sentinel@/{slc_iw_zip_path}",
 ...     engine="sentinel-1",
