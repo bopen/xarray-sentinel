@@ -110,7 +110,6 @@ def test_open_datatree_bursts() -> None:
     assert "polarization" not in node["conditions/orbit"].dims
 
 
-@PENDING
 def test_open_datatree_groups(
     slc_iw_node_structure: dict[str, dict[str, list[Any]]],
 ) -> None:
@@ -124,7 +123,7 @@ def test_open_datatree_groups(
         "conditions",
         "quality",
         pytest.param("measurements", marks=PENDING),
-        pytest.param("conditions/antenna_pattern", marks=PENDING),
+        "conditions/antenna_pattern",
         pytest.param("conditions/attitude", marks=PENDING),
         pytest.param("conditions/doppler_centroid", marks=PENDING),
         pytest.param("conditions/gcp", marks=PENDING),

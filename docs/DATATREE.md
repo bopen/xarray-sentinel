@@ -16,6 +16,11 @@ dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
 - Entry point: `Sentinel1Backend.open_datatree` and `open_groups_as_dict`.
 - Strict EOPF content: no groups that EOPF lacks, for now. See `azimuth_fm_rate` in
   [Open points](#open-points).
+- The EOPF datasets are the base: `eopf_sentinel1` builds them from the `parse_xml`
+  dicts with `get_tag`. The `sentinel1` openers become wrappers converting them back to
+  the xarray-sentinel layout, with one `parse_xml` per call until all are ported. The
+  xarray-sentinel layout may get the EOPF float32 where float64 doesn't matter. Openers
+  never exposed in the xarray-sentinel layout, like antenna pattern, are EOPF only.
 
 ## References
 
@@ -205,7 +210,12 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
    `image_slant_range_time + pixel / range_sampling_rate` for SLC and
    `pixel * range_pixel_spacing` for GRD.
 1. noise_azimuth: from the existing opener, quirk 6.
-1. antenna_pattern, and GRD coordinate_conversion.
+1. Done: antenna_pattern, and GRD coordinate_conversion. `eopf_product.ANNOTATION_GROUPS`
+   holds the converters of the `parse_xml` annotation, a converter returns `None` when
+   the product lacks the group. The GRD antenna patterns of different swaths are padded
+   with NaN along `count`. `eopf_sentinel1.open_coordinate_conversion` is the base of
+   `sentinel1.open_coordinate_conversion_dataset`, `eopf_sentinel1.open_antenna_pattern`
+   is EOPF only.
 1. measurements: split TOPS SLC by burst with `crop_burst_dataset` on one lazy array per
    swath and polarisation, quirk 4. Rename to `slc` or `grd`, keep only `long_name`,
    set the CPM chunks. SM and GRD as one image, WV per vignette.

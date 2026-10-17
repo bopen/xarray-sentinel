@@ -9,7 +9,7 @@ from typing import Any
 import fsspec
 import xarray as xr
 
-from . import conventions, eopf_metadata, esa_safe, sentinel1
+from . import conventions, eopf_metadata, eopf_sentinel1, esa_safe, sentinel1
 
 EOPF_GROUPS: dict[str, tuple[str, Callable[..., xr.Dataset]]] = {
     "conditions/attitude": ("attitude", sentinel1.open_attitude_dataset),
@@ -44,6 +44,12 @@ def make_product_name(safe_name: str) -> str:
         f"_{unique_id}_{datatake_id}"
     )
     return product_name
+
+
+ANNOTATION_GROUPS: dict[str, Callable[[dict[str, Any]], xr.Dataset | None]] = {
+    "conditions/antenna_pattern": eopf_sentinel1.open_antenna_pattern,
+    "conditions/coordinate_conversion": eopf_sentinel1.open_coordinate_conversion,
+}
 
 
 def split_bursts(pol_dataset: xr.Dataset) -> dict[str | None, xr.Dataset]:
@@ -123,6 +129,10 @@ def open_datatree(
                     pol_datasets.setdefault(eopf_group, {})[pol] = ds.drop_attrs(
                         deep=False
                     )
+            for eopf_group, converter in ANNOTATION_GROUPS.items():
+                converted = converter(annotations[pol])
+                if converted is not None:
+                    pol_datasets.setdefault(eopf_group, {})[pol] = converted
             other_metadata[pol] = eopf_metadata.build_other_metadata(annotations[pol])
 
         stac_discovery = eopf_metadata.build_stac_discovery(

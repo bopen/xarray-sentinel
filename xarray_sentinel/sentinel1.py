@@ -24,7 +24,7 @@ import pandas as pd
 import rasterio
 import xarray as xr
 
-from . import conventions, esa_safe
+from . import conventions, eopf_sentinel1, esa_safe
 
 SPEED_OF_LIGHT = 299_792_458  # m / s
 ONE_SECOND = np.timedelta64(1, "s")
@@ -153,75 +153,6 @@ def open_reference_replica_dataset(
     data_vars = {
         "amplitudeCoefficients": (("degree"), reference_replica_amplitude_coefficients),
         "phaseCoefficients": (("degree"), reference_replica_phase_coefficients),
-    }
-    da = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
-    return da
-
-
-def open_antenna_pattern(
-    annotation_path: esa_safe.PathType, attrs: dict[str, Any] = {}
-) -> xr.Dataset:
-    antenna_pattern_list = esa_safe.parse_tag_as_list(
-        annotation_path, "//antennaPattern/antennaPatternList/antennaPattern"
-    )
-
-    slant_range_time_list = []
-    azimuth_time_list = []
-    elevation_angle_list = []
-    elevation_pattern_list = []
-    incidence_angle_list = []
-    terrain_height_list = []
-    roll_list = []
-
-    for vector in antenna_pattern_list:
-        azimuth_time_list.append(vector["azimuthTime"])
-        slant_range_time = np.fromstring(
-            vector["slantRangeTime"]["$"], dtype=np.float32, sep=" "
-        )
-        slant_range_time_list.append(slant_range_time)
-
-        elevation_angle = np.fromstring(
-            vector["elevationAngle"]["$"], dtype=np.float32, sep=" "
-        )
-        elevation_angle_list.append(elevation_angle)
-
-        elevation_pattern = np.fromstring(
-            vector["elevationPattern"]["$"], dtype=np.float32, sep=" "
-        )
-        elevation_pattern_list.append(
-            elevation_pattern[::2] * 1j + elevation_pattern[1::2]
-        )
-
-        incidence_angle = np.fromstring(
-            vector["incidenceAngle"]["$"], dtype=np.float32, sep=" "
-        )
-        incidence_angle_list.append(incidence_angle)
-
-        terrain_height_list.append(vector["terrainHeight"])
-        roll_list.append(vector["roll"])
-
-    slant_range_time_array = np.array(slant_range_time_list)
-    if (slant_range_time_array - slant_range_time_array[0]).any():
-        raise ValueError(
-            "Unable to organise noise vectors in a regular line-pixel grid"
-        )
-    data_vars = {
-        "elevationAngle": (
-            ("azimuth_time", "slant_range_time"),
-            np.array(elevation_angle_list),
-        ),
-        # "elevationPattern": (
-        #     ( "azimuth_time", "slant_range_time"), np.array(elevation_pattern_list)),
-        "incidenceAngle": (
-            ("azimuth_time", "slant_range_time"),
-            np.array(incidence_angle_list),
-        ),
-        "terrainHeight": ("azimuth_time", terrain_height_list),
-        "roll": ("azimuth_time", roll_list),
-    }
-    coords = {
-        "slant_range_time": slant_range_time_array[0],
-        "azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time_list],
     }
     da = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
     return da
@@ -369,42 +300,15 @@ def open_noise_azimuth_dataset(
 def open_coordinate_conversion_dataset(
     annotation_path: esa_safe.PathType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    coordinate_conversion = esa_safe.parse_tag_as_list(
-        annotation_path, "//coordinateConversionList/coordinateConversion"
-    )
-    if len(coordinate_conversion) == 0:
+    annotation = esa_safe.parse_xml(annotation_path)
+    ds = eopf_sentinel1.open_coordinate_conversion(annotation)
+    if ds is None:
         raise TypeError("coordinateConversion tag not present in annotations")
-
-    gr0 = []
-    sr0 = []
-    azimuth_time = []
-    slant_range_time = []
-    srgrCoefficients: list[list[float]] = []
-    grsrCoefficients: list[list[float]] = []
-    for values in coordinate_conversion:
-        sr0.append(values["sr0"])
-        gr0.append(values["gr0"])
-        azimuth_time.append(values["azimuthTime"])
-        slant_range_time.append(values["slantRangeTime"])
-        srgrCoefficients.append(
-            [float(v) for v in values["srgrCoefficients"]["$"].split()]
-        )
-        grsrCoefficients.append(
-            [float(v) for v in values["grsrCoefficients"]["$"].split()]
-        )
-
-    coords: dict[str, Any] = {}
-    data_vars: dict[str, Any] = {}
-    coords["azimuth_time"] = [np.datetime64(dt, "ns") for dt in azimuth_time]
-    coords["degree"] = list(range(len(srgrCoefficients[0])))
-
-    data_vars["gr0"] = ("azimuth_time", gr0)
-    data_vars["sr0"] = ("azimuth_time", sr0)
-    data_vars["slant_range_time"] = ("azimuth_time", slant_range_time)
-    data_vars["srgrCoefficients"] = (("azimuth_time", "degree"), srgrCoefficients)
-    data_vars["grsrCoefficients"] = (("azimuth_time", "degree"), grsrCoefficients)
-
-    return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
+    ds = ds.rename(
+        srgr_coefficients="srgrCoefficients", grsr_coefficients="grsrCoefficients"
+    )
+    ds.attrs.update(attrs)
+    return ds
 
 
 # taken from `np.cross` docs
@@ -726,10 +630,7 @@ def find_available_groups(
                 "gcp",
                 # "replica",
                 # "reference_replica",
-                # "antenna_pattern",
             ]:
-                if product_type == "GRD" and metadata_group == "antenna_pattern":
-                    continue
                 groups[f"{swath_pol_group}/{metadata_group}"] = [abspath]
             if product_type == "GRD":
                 groups[f"{swath_pol_group}/coordinate_conversion"] = [abspath]
@@ -1175,7 +1076,6 @@ METADATA_OPENERS = {
     "noise_azimuth": open_noise_azimuth_dataset,
     "replica": open_replica_dataset,
     "reference_replica": open_reference_replica_dataset,
-    "antenna_pattern": open_antenna_pattern,
 }
 
 
