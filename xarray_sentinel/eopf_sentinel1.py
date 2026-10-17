@@ -2,6 +2,7 @@ import warnings
 from typing import Any
 
 import numpy as np
+import pandas as pd
 import xarray as xr
 
 from . import esa_safe
@@ -244,3 +245,47 @@ def open_calibration(
 def open_noise_range(noise: dict[str, Any], annotation: dict[str, Any]) -> xr.Dataset:
     vectors = esa_safe.get_tag(noise, "noiseRangeVectorList/noiseRangeVector")
     return open_range_vectors(vectors, {"noise_range_lut": "noiseRangeLut"}, annotation)
+
+
+def azimuth_time_coordinate(line: np.ndarray, annotation: dict[str, Any]) -> np.ndarray:
+    image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
+    swath_timing = esa_safe.get_tag(annotation, "swathTiming")
+    azimuth_time: np.ndarray = pd.date_range(
+        start=image_information["productFirstLineUtcTime"],
+        end=image_information["productLastLineUtcTime"],
+        periods=image_information["numberOfLines"],
+    ).to_numpy(dtype="datetime64[ns]", copy=True)
+    interval = pd.Timedelta(image_information["azimuthTimeInterval"] * 10**9, unit="ns")
+    lines_per_burst = swath_timing["linesPerBurst"]
+    for burst_index, burst in enumerate(swath_timing["burstList"].get("burst", [])):
+        start = lines_per_burst * burst_index
+        azimuth_time[start : start + lines_per_burst] = pd.date_range(
+            start=burst["azimuthTime"], periods=lines_per_burst, freq=interval
+        )
+    return azimuth_time.take(line)
+
+
+def open_noise_azimuth(noise: dict[str, Any], annotation: dict[str, Any]) -> xr.Dataset:
+    vectors = esa_safe.get_tag(noise, "noiseAzimuthVectorList/noiseAzimuthVector")
+    vector_datasets = []
+    for vector in vectors:
+        line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")
+        noise_azimuth_lut = np.fromstring(
+            vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" "
+        )
+        data_vars = {
+            "noise_azimuth_lut": ("line", noise_azimuth_lut),
+            "first_azimuth_line": vector["firstAzimuthLine"],
+            "last_azimuth_line": vector["lastAzimuthLine"],
+            "first_range_sample": vector["firstRangeSample"],
+            "last_range_sample": vector["lastRangeSample"],
+        }
+        vector_dataset = xr.Dataset(data_vars=data_vars, coords={"line": line})
+        vector_datasets.append(vector_dataset.expand_dims(swath=[vector["swath"]]))
+    # one swath entry per block on the lines of all blocks, see quirk 6 in docs/DATATREE.md
+    ds = xr.concat(vector_datasets, dim="swath", join="outer")
+    azimuth_time = azimuth_time_coordinate(ds.line.values, annotation)
+    ds = ds.assign_coords(
+        azimuth_time=("line", azimuth_time), swath=ds.swath.values.astype(str)
+    )
+    return ds.swap_dims(line="azimuth_time").transpose("azimuth_time", "swath")

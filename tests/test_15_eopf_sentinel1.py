@@ -29,6 +29,21 @@ GRD_IW_VV_annotation = (
     / "annotation"
     / "s1b-iw-grd-vv-20210401t052623-20210401t052648-026269-032297-001.xml"
 )
+GRD_IW_2 = (
+    DATA_FOLDER
+    / "S1B_IW_GRDH_1SDV_20211223T051122_20211223T051147_030148_039993_5371.SAFE"
+)
+GRD_IW_2_VV_annotation = (
+    GRD_IW_2
+    / "annotation"
+    / "s1b-iw-grd-vv-20211223t051122-20211223t051147-030148-039993-001.xml"
+)
+GRD_IW_2_VV_noise = (
+    GRD_IW_2
+    / "annotation"
+    / "calibration"
+    / "noise-s1b-iw-grd-vv-20211223t051122-20211223t051147-030148-039993-001.xml"
+)
 
 
 def test_open_antenna_pattern() -> None:
@@ -150,3 +165,53 @@ def test_open_noise_range() -> None:
 
     assert dict(res.sizes) == {"azimuth_time": 10, "slant_range_time": 542}
     assert res.noise_range_lut.dtype == "float32"
+
+
+def test_azimuth_time_coordinate() -> None:
+    annotation = esa_safe.parse_xml(SLC_IW1_VV_annotation)
+    swath_timing = esa_safe.get_tag(annotation, "swathTiming")
+    bursts = swath_timing["burstList"]["burst"]
+    line = np.array([0, swath_timing["linesPerBurst"]])
+
+    res = eopf_sentinel1.azimuth_time_coordinate(line, annotation)
+
+    expected = [np.datetime64(b["azimuthTime"], "ns") for b in bursts[:2]]
+    np.testing.assert_array_equal(res, expected)
+
+    annotation = esa_safe.parse_xml(GRD_IW_VV_annotation)
+    image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
+    line = np.array([0, image_information["numberOfLines"] - 1])
+
+    res = eopf_sentinel1.azimuth_time_coordinate(line, annotation)
+
+    expected = [
+        np.datetime64(image_information["productFirstLineUtcTime"], "ns"),
+        np.datetime64(image_information["productLastLineUtcTime"], "ns"),
+    ]
+    np.testing.assert_array_equal(res, expected)
+
+
+def test_open_noise_azimuth() -> None:
+    res = eopf_sentinel1.open_noise_azimuth(
+        esa_safe.parse_xml(SLC_IW1_VV_noise, "noise"),
+        esa_safe.parse_xml(SLC_IW1_VV_annotation),
+    )
+
+    assert res.noise_azimuth_lut.dims == ("azimuth_time", "swath")
+    assert res.noise_azimuth_lut.dtype == "float32"
+    assert res.swath.values.tolist() == ["IW1"]
+    assert res.line.dims == ("azimuth_time",)
+
+    res = eopf_sentinel1.open_noise_azimuth(
+        esa_safe.parse_xml(GRD_IW_2_VV_noise, "noise"),
+        esa_safe.parse_xml(GRD_IW_2_VV_annotation),
+    )
+
+    assert res.swath.values.tolist() == ["IW1", "IW2", "IW3"]
+    assert res.first_range_sample.values.tolist() == [0, 8890, 17701]
+    assert res.noise_azimuth_lut.count("azimuth_time").values.tolist() == [
+        1689,
+        1688,
+        1686,
+    ]
+    assert res.indexes["azimuth_time"].is_monotonic_increasing

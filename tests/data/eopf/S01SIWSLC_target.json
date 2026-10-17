@@ -77,11 +77,12 @@
   },
   "quality/noise_azimuth": {
     "azimuth_time": [["azimuth_time"], "datetime64[ns]"],
-    "first_azimuth_line": [["polarization", "swath"], "float64"],
-    "first_range_sample": [["polarization", "swath"], "float64"],
-    "last_azimuth_line": [["polarization", "swath"], "float64"],
-    "last_range_sample": [["polarization", "swath"], "float64"],
-    "noise_azimuth_lut": [["polarization", "azimuth_time", "swath"], "float64"],
+    "first_azimuth_line": [["polarization", "swath"], "int64"],
+    "first_range_sample": [["polarization", "swath"], "int64"],
+    "last_azimuth_line": [["polarization", "swath"], "int64"],
+    "last_range_sample": [["polarization", "swath"], "int64"],
+    "line": [["azimuth_time"], "int64"],
+    "noise_azimuth_lut": [["polarization", "azimuth_time", "swath"], "float32"],
     "polarization": [["polarization"], "<U2"],
     "swath": [["swath"], "<U3"]
   },

@@ -17,6 +17,10 @@ SLC_S3 = (
     DATA_FOLDER
     / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
 )
+GRD_IW_2 = (
+    DATA_FOLDER
+    / "S1B_IW_GRDH_1SDV_20211223T051122_20211223T051147_030148_039993_5371.SAFE"
+)
 SLC_IW_NODE = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
 # the CPM 3.0 burst node with our deliberate differences, see docs/DATATREE.md
 EXPECTED_SLC_IW_STRUCTURE = json.loads(
@@ -59,6 +63,18 @@ def test_make_product_name(safe_name: str, expected: str) -> None:
 def test_make_product_name_error() -> None:
     with pytest.raises(ValueError):
         eopf_product.make_product_name("S2A_MSIL1C_20210403T101021_N0300_R022_T33TUM")
+
+
+def test_open_datatree_grd() -> None:
+    res = eopf_product.open_datatree(GRD_IW_2, check_files_exist=True)
+
+    assert list(res.children) == ["S01SIWGRD_20211223T051122_0025_B172_5371_039993"]
+
+    node = res["S01SIWGRD_20211223T051122_0025_B172_5371_039993"]
+
+    assert "coordinate_conversion" in node["conditions"].children
+    for group in ["conditions/gcp", "quality/calibration", "quality/noise_range"]:
+        assert "ground_range" in node[group].dims
 
 
 @pytest.fixture(scope="module")
@@ -110,7 +126,7 @@ def test_open_datatree_groups(
         "conditions/gcp",
         "conditions/orbit",
         "quality/calibration",
-        pytest.param("quality/noise_azimuth", marks=PENDING),
+        "quality/noise_azimuth",
         "quality/noise_range",
     ],
 )

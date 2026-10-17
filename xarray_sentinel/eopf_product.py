@@ -11,9 +11,6 @@ import xarray as xr
 
 from . import conventions, eopf_metadata, eopf_sentinel1, esa_safe, sentinel1
 
-EOPF_GROUPS: dict[str, tuple[str, Callable[..., xr.Dataset]]] = {
-    "quality/noise_azimuth": ("noise_azimuth", sentinel1.open_noise_azimuth_dataset),
-}
 POLARIZATION_INDEPENDENT_GROUPS = {"conditions/attitude", "conditions/orbit"}
 SAFE_NAME_RE = re.compile(
     r"S(\d)(\w)_(\w{2})_(\w{3})\w_\w{4}_(\w{15})_(\w{15})_(\d{6})_(\w{6})_(\w{4})"
@@ -47,6 +44,11 @@ QUALITY_GROUPS: dict[
         "calibration",
         "calibration",
         eopf_sentinel1.open_calibration,
+    ),
+    "quality/noise_azimuth": (
+        "noise_azimuth",
+        "noise",
+        eopf_sentinel1.open_noise_azimuth,
     ),
     "quality/noise_range": ("noise_range", "noise", eopf_sentinel1.open_noise_range),
 }
@@ -130,13 +132,6 @@ def open_datatree(
             for burst_id, burst in split_bursts(pol_dataset).items():
                 burst = burst.rename(measurement="slc").drop_attrs(deep=False)
                 bursts.setdefault(burst_id, {})[pol] = burst
-            for eopf_group, (group, opener) in EOPF_GROUPS.items():
-                if f"{swath}/{pol}/{group}" in groups:
-                    xml_path = groups[f"{swath}/{pol}/{group}"][0]
-                    ds = conventions.update_attributes(opener(xml_files[xml_path]))
-                    pol_datasets.setdefault(eopf_group, {})[pol] = ds.drop_attrs(
-                        deep=False
-                    )
             for eopf_group, (
                 group,
                 schema_type,

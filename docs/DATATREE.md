@@ -135,7 +135,7 @@ Still served by the sample service: one node per polarisation, swath and burst, 
 | `IW1/VV/azimuth_fm_rate` | none | only in `other_metadata` |
 | `IW1/VV/calibration` | `quality/calibration` | snake_case names, `(line, pixel)` is `(azimuth_time, slant_range_time\|ground_range)` with `line` and `pixel` as coordinates |
 | `IW1/VV/noise_range` | `quality/noise_range` | as calibration |
-| `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | snake_case names, `(swath, line)` is `(azimuth_time, swath)` |
+| `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | snake_case names, `(swath, line)` is `(azimuth_time, swath)` with `line` as coordinate |
 | none | `burst_timing` attrs | per-line valid samples |
 
 All EOPF groups except orbit and attitude also stack the polarisations along
@@ -164,7 +164,10 @@ What we do in each case follows the decisions above.
 1. `noise_azimuth`, from reading the code, not checked on data: times come from the
    linear grid of quirk 1, all swath columns share the `azimuth_time` of the last swath
    (GRD has several), blocks of a swath are concatenated keeping the first and last
-   line and sample of the first block only.
+   line and sample of the first block only. We use the burst-aware times of the
+   measurement grid and keep one `swath` entry per block, aligned on their lines, with
+   its own first and last line and sample: a swath label repeats when it has several
+   blocks.
 1. Wrong `long_name`s, e.g. `doppler_centroid/azimuth_time` "of terrain height
    measurement" and `noise_range/line` "image pixel".
 
@@ -227,7 +230,11 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
    They need the annotation for the range coordinate while the `sentinel1` openers only
    get their own file, so these are EOPF only and the `sentinel1` openers keep their
    code.
-1. noise_azimuth: from the existing opener, quirk 6.
+1. Done: noise_azimuth, `eopf_sentinel1.open_noise_azimuth` with quirk 6, `line` as
+   additional coordinate, the LUT as float32 and the first and last lines and samples as
+   int64. `eopf_sentinel1.azimuth_time_coordinate` gives the azimuth time of any line,
+   identical to the measurement grid. EOPF only like calibration, as it needs the
+   annotation.
 1. Done: antenna_pattern, and GRD coordinate_conversion. `eopf_product.ANNOTATION_GROUPS`
    holds the converters of the `parse_xml` annotation, a converter returns `None` when
    the product lacks the group. The GRD antenna patterns of different swaths are padded
