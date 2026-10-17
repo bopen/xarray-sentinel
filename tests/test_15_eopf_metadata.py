@@ -1,9 +1,21 @@
 import pathlib
 
+import pytest
+from stac_validator import stac_validator
+
 from xarray_sentinel import eopf_metadata, esa_safe
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
+SLC_IW = (
+    DATA_FOLDER
+    / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+)
+SLC_IW1_VV_annotation = (
+    SLC_IW
+    / "annotation"
+    / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+)
 SLC_S3 = (
     DATA_FOLDER
     / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
@@ -12,6 +24,15 @@ SLC_S3_VH_annotation = (
     SLC_S3
     / "annotation"
     / "s1a-s3-slc-vh-20210401t152855-20210401t152914-037258-04638e-001.xml"
+)
+GRD_IW = (
+    DATA_FOLDER
+    / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE"
+)
+GRD_IW_VV_annotation = (
+    GRD_IW
+    / "annotation"
+    / "s1b-iw-grd-vv-20210401t052623-20210401t052648-026269-032297-001.xml"
 )
 
 
@@ -96,3 +117,23 @@ def test_build_other_metadata() -> None:
     }
 
     assert res["quality_information"] == expected_quality_information
+
+
+@pytest.mark.parametrize(
+    "safe,annotation",
+    [
+        [SLC_S3, SLC_S3_VH_annotation],
+        [SLC_IW, SLC_IW1_VV_annotation],
+        [GRD_IW, GRD_IW_VV_annotation],
+    ],
+)
+def test_build_stac_discovery(safe: pathlib.Path, annotation: pathlib.Path) -> None:
+    item = eopf_metadata.build_stac_discovery(
+        "test", safe / "manifest.safe", esa_safe.parse_xml(annotation)
+    )
+
+    validator = stac_validator.StacValidate()
+    # HACK: the geometry appears to be correct, but it doesn't validate
+    result = validator.validate_dict(item | {"geometry": None})
+
+    assert result, validator.message

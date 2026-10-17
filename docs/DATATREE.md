@@ -168,6 +168,13 @@ What we do in each case follows the decisions above.
   sample service GeoZarr post-processing: out of scope.
 - `calibrate_amplitude` and `calibrate_intensity` interpolate on `line` and `pixel`, they
   need a variant for the EOPF layout.
+- The manifest is still read with ElementTree, so `eopf_metadata.build_stac_discovery`
+  takes it as a path or file while the annotation is a dict from `esa_safe.parse_xml`.
+  `parse_xml(..., "manifest")` with `strip_namespaces=True` decodes all the test
+  products in ~4 ms with plain keys, lists for repeated fields except `frameSet/frame`
+  (a list for WV only), ints for `missionDataTakeID` and orbit numbers as
+  `[{"@type": "start", "$": ...}, ...]`. But `my-xfdu.xsd` was generated automatically
+  long ago and is untested, so this is on hold.
 
 ## Plan
 
@@ -195,7 +202,7 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
 1. Attributes, in three parts:
    1. `stac_discovery` of root and nodes following the CPM mapping keys
       `stac_discovery`, `stac_discovery_annotation` and
-      `stac_discovery_annotation_manifest`, extending `make_sentinel1_stac_item`.
+      `stac_discovery_annotation_manifest`, extending `eopf_metadata.build_stac_discovery`.
    1. `other_metadata` extending `eopf_metadata.build_other_metadata`: `burst_timing`
       with the node's burst merged in, drop empty `swath_merging` and the CPM
       `DEPRECATED_ATTRS`, numeric lists instead of `$` strings, `t_0` as `t0`.

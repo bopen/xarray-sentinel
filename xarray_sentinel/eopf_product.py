@@ -100,7 +100,7 @@ def open_datatree(
                     )
             other_metadata[pol] = eopf_metadata.build_other_metadata(annotations[pol])
 
-        stac_discovery = sentinel1.make_sentinel1_stac_item(
+        stac_discovery = eopf_metadata.build_stac_discovery(
             "noid", manifest, annotations[pols[0]]
         )
         node_groups = {}
