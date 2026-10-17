@@ -126,7 +126,7 @@ Still served by the sample service: one node per polarisation, swath and burst, 
 | `IW1/VV/azimuth_fm_rate` | none | only in `other_metadata` |
 | `IW1/VV/calibration` | `quality/calibration` | snake_case names, `(line, pixel)` is `(azimuth_time, slant_range_time\|ground_range)` |
 | `IW1/VV/noise_range` | `quality/noise_range` | as calibration |
-| `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | xarray-sentinel keeps the first vector only, EOPF all vectors along `swath` with their first and last line and sample |
+| `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | snake_case names, `(swath, line)` is `(polarization, azimuth_time, swath)` |
 | none | `burst_timing` attrs | per-line valid samples |
 
 Replica, reference replica and terrain height are only in `other_metadata` in EOPF.
@@ -187,7 +187,7 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
 1. calibration, noise_range: snake_case names, range coordinate from `pixel` as
    `image_slant_range_time + pixel / range_sampling_rate` for SLC and
    `pixel * range_pixel_spacing` for GRD.
-1. noise_azimuth: new parser keeping all vectors, quirk 6.
+1. noise_azimuth: from the existing opener, quirk 6.
 1. antenna_pattern, and GRD coordinate_conversion.
 1. measurements: split TOPS SLC by burst with `crop_burst_dataset` on one lazy array per
    swath and polarisation, quirk 4. Rename to `slc` or `grd`, keep only `long_name`,
@@ -206,11 +206,3 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
    environment (the test SAFEs lack the `support/*.xsd` the CPM needs), compare
    structure exactly and values within tolerance, list the deviations due to the
    quirks. Optionally open our Zarr output with `xarray-eopf`.
-
-## Side findings in the current code
-
-- `open_dc_estimate_dataset` fills `data_dc_rms_error_above_threshold` with the
-  `data_dc_rms_error` values.
-- `eopf_metadata.build_other_metadata` returns the key `swath_merginig`.
-- `open_noise_azimuth_dataset` keeps only the first vector.
-- `eopf_product.open_datatree` prints the groups it skips.
