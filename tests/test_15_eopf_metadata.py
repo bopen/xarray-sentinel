@@ -133,7 +133,14 @@ def test_build_stac_discovery(safe: pathlib.Path, annotation: pathlib.Path) -> N
     )
 
     validator = stac_validator.StacValidate()
-    # HACK: the geometry appears to be correct, but it doesn't validate
-    result = validator.validate_dict(item | {"geometry": None})
+    result = validator.validate_dict(item)
 
     assert result, validator.message
+    west, south, east, north = item["bbox"]
+    assert west < east and south < north
+    assert item["properties"]["product:type"].startswith("S01S")
+    start, end = (
+        item["properties"]["start_datetime"],
+        item["properties"]["end_datetime"],
+    )
+    assert start < item["properties"]["datetime"] < end

@@ -21,10 +21,17 @@ GRD_IW_2 = (
     DATA_FOLDER
     / "S1B_IW_GRDH_1SDV_20211223T051122_20211223T051147_030148_039993_5371.SAFE"
 )
+SLC_IW_V340 = (
+    DATA_FOLDER
+    / "S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
+)
 SLC_IW_NODE = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
 # the CPM 3.0 burst node with our deliberate differences, see docs/DATATREE.md
 EXPECTED_SLC_IW_STRUCTURE = json.loads(
     (DATA_FOLDER / "eopf" / "S01SIWSLC_target.json").read_text()
+)
+EXPECTED_SLC_IW_ATTRS = json.loads(
+    (DATA_FOLDER / "eopf" / "S01SIWSLC_target_attrs.json").read_text()
 )
 
 
@@ -36,6 +43,12 @@ def datatree_structure(dt: xr.DataTree) -> dict[str, dict[str, list[Any]]]:
         }
         for node in dt.subtree
     }
+
+
+def attrs_structure(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: attrs_structure(item) for key, item in value.items()}
+    return type(value).__name__
 
 
 @pytest.mark.parametrize(
@@ -129,3 +142,15 @@ def test_open_datatree_group_structure(
     slc_iw_node_structure: dict[str, dict[str, list[Any]]], group: str
 ) -> None:
     assert slc_iw_node_structure.get(group) == EXPECTED_SLC_IW_STRUCTURE[group]
+
+
+def test_open_datatree_attrs() -> None:
+    res = eopf_product.open_datatree(SLC_IW_V340, check_files_exist=True)
+    node = res.children["S01SIWSLC_20220414T102209_0027_A244_E677_051AA4_IW1_365915"]
+    stac_discovery = node.attrs["stac_discovery"]
+
+    assert {
+        key: attrs_structure(node.attrs[key]) for key in EXPECTED_SLC_IW_ATTRS
+    } == EXPECTED_SLC_IW_ATTRS
+    assert stac_discovery["id"] == node.name
+    assert stac_discovery["properties"]["sar:relative_burst"] == 365915

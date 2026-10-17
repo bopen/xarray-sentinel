@@ -116,10 +116,23 @@ def build_other_metadata(annotation: dict[str, Any]) -> dict[str, Any]:
     return other_metadata
 
 
+PRODUCT_TIMELINESS = {"Fast-24h": "PT24H", "NRT-3h": "PT3H"}
+STAC_EXTENSIONS = [
+    "https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/product/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/sat/v1.1.0/schema.json",
+    "https://stac-extensions.github.io/view/v1.1.0/schema.json",
+    "https://stac-extensions.github.io/processing/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/sar/v1.3.1/schema.json",
+]
+
+
 def build_stac_discovery(
     item_id: str,
     manifest_path: esa_safe.PathOrFileType,
     annotation: dict[str, Any],
+    footprint: list[tuple[float, float]] | None = None,
+    relative_burst: int | None = None,
     namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
 ) -> dict[str, Any]:
     if hasattr(manifest_path, "seek"):
@@ -130,93 +143,99 @@ def build_stac_discovery(
         annotation, "generalAnnotation/productInformation"
     )
     image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
+    processing_information = esa_safe.get_tag(
+        annotation, "imageAnnotation/processingInformation"
+    )
 
-    coordinates = [
-        [float(v) for v in token.split(",")]
-        for token in esa_safe.findtext(manifest, ".//gml:coordinates").split()
-    ]
-    coordinates += coordinates[:1]
-    product_timeliness = esa_safe.findtext(
+    if footprint is None:
+        # the manifest footprint is in lat,lon order
+        footprint = []
+        for token in esa_safe.findtext(manifest, ".//gml:coordinates").split():
+            lat, lon = (float(v) for v in token.split(","))
+            footprint.append((lon, lat))
+        footprint.append(footprint[0])
+    lons, lats = zip(*footprint)
+
+    start_time = np.datetime64(esa_safe.findtext(manifest, ".//safe:startTime"), "us")
+    stop_time = np.datetime64(esa_safe.findtext(manifest, ".//safe:stopTime"), "us")
+    middle_time = start_time + (stop_time - start_time) // 2
+    processing = manifest.find(".//safe:processing", namespaces=namespaces)
+    facility = manifest.find(".//safe:processing/safe:facility", namespaces=namespaces)
+    software = manifest.find(".//safe:facility/safe:software", namespaces=namespaces)
+    assert processing is not None and facility is not None and software is not None
+    mode = esa_safe.findtext(manifest, ".//s1sarl1:instrumentMode/s1sarl1:mode")
+    product_type = esa_safe.findtext(manifest, ".//s1sarl1:productType")
+    timeliness_category = esa_safe.findtext(
         manifest, ".//s1sarl1:productTimelinessCategory"
     )
-    product_timeliness_map = {
-        "Fast-24h": {
-            "product:timeliness_category": "STC",
-            "product:timeliness": "PT24H",
-        },
-        "NRT-3h": {
-            "product:timeliness_category": "NRT",
-            "product:timeliness": "PT3H",
-        },
+
+    properties = {
+        "mission": "copernicus",
+        "datetime": np.datetime_as_string(middle_time) + "Z",
+        "start_datetime": np.datetime_as_string(start_time) + "Z",
+        "end_datetime": np.datetime_as_string(stop_time) + "Z",
+        "created": processing.attrib["stop"] + "Z",
+        "platform": "sentinel-1"
+        + esa_safe.findtext(manifest, ".//safe:platform/safe:number").lower(),
+        "instruments": ["sar"],
+        "providers": [
+            {"name": facility.attrib["name"], "roles": ["processor"]},
+            {"name": facility.attrib["organisation"], "roles": ["producer"]},
+        ],
+        "constellation": "sentinel-1",
+        "product:type": f"S01S{mode}{product_type}",
+        "product:timeliness_category": timeliness_category,
+        "product:timeliness": PRODUCT_TIMELINESS[timeliness_category],
+        "processing:datetime": processing.attrib["stop"] + "Z",
+        "processing:facility": facility.attrib["name"],
+        "processing:software": {software.attrib["name"]: software.attrib["version"]},
+        "processing:version": software.attrib["version"],
+        "processing:lineage": "systematic",
+        "sat:platform_international_designator": esa_safe.findtext(
+            manifest, ".//safe:nssdcIdentifier"
+        ),
+        "sat:absolute_orbit": int(esa_safe.findall(manifest, ".//safe:orbitNumber")[0]),
+        "sat:relative_orbit": int(
+            esa_safe.findall(manifest, ".//safe:relativeOrbitNumber")[0]
+        ),
+        "sat:orbit_state": esa_safe.findtext(manifest, ".//s1:pass").lower(),
+        "sat:anx_datetime": esa_safe.findtext(manifest, ".//s1:ascendingNodeTime")
+        + "Z",
+        "view:incidence_angle": image_information["incidenceAngleMidSwath"],
+        "sar:polarizations": esa_safe.findall(
+            manifest, ".//s1sarl1:transmitterReceiverPolarisation"
+        ),
+        "sar:instrument_mode": mode,
+        "sar:frequency_band": "C",
+        "sar:center_frequency": product_information["radarFrequency"] / 1e9,
+        "sar:pixel_spacing_range": image_information["rangePixelSpacing"],
+        "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
+        "sar:observation_direction": "right",
+        "sar:beam_ids": esa_safe.findall(
+            manifest, ".//s1sarl1:instrumentMode/s1sarl1:swath"
+        ),
+        "eopf:datatake_id": esa_safe.findtext(manifest, ".//s1sarl1:missionDataTakeID"),
+        "eopf:instrument_mode": mode,
     }
+    if relative_burst is not None:
+        properties["sar:relative_burst"] = relative_burst
 
     stac_item = {
         "type": "Feature",
         "stac_version": "1.1.0",
-        "stac_extensions": [
-            "https://stac-extensions.github.io/product/v0.1.0/schema.json",
-            "https://stac-extensions.github.io/processing/v1.2.0/schema.json",
-            "https://stac-extensions.github.io/sat/v1.0.0/schema.json",
-            "https://stac-extensions.github.io/view/v1.0.0/schema.json",
-            "https://stac-extensions.github.io/sar/v1.2.0/schema.json",
-            "https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json",
-        ],
+        "stac_extensions": STAC_EXTENSIONS,
         "id": item_id,
-        "properties": {
-            "datetime": None,
-            "start_datetime": esa_safe.findtext(manifest, ".//safe:startTime") + "Z",
-            "end_datetime": esa_safe.findtext(manifest, ".//safe:stopTime") + "Z",
-            "created": manifest.find(
-                ".//safe:processing", namespaces=namespaces
-            ).attrib["stop"]  # type: ignore
-            + "Z",
-            "platform": "sentinel-1"
-            + esa_safe.findtext(manifest, ".//safe:platform/safe:number").lower(),
-            "instruments": ["sar"],
-            "constellation": "sentinel-1",
-            "product:type": esa_safe.findtext(manifest, ".//s1sarl1:productType"),
-            "product:timeliness_category": product_timeliness_map[product_timeliness][
-                "product:timeliness_category"
-            ],
-            "product:timeliness": product_timeliness_map[product_timeliness][
-                "product:timeliness"
-            ],
-            "processing:software": manifest.find(
-                ".//safe:software", namespaces=namespaces
-            ).attrib,  # type: ignore
-            "sat:platform_international_designator": esa_safe.findtext(
-                manifest, ".//safe:nssdcIdentifier"
-            ),
-            "sat:absolute_orbit": int(
-                esa_safe.findall(manifest, ".//safe:orbitNumber")[0]
-            ),
-            "sat:relative_orbit": int(
-                esa_safe.findall(manifest, ".//safe:relativeOrbitNumber")[0]
-            ),
-            "sat:orbit_state": esa_safe.findtext(manifest, ".//s1:pass").lower(),
-            "sat:anx_datetime": esa_safe.findtext(manifest, ".//s1:ascendingNodeTime")
-            + "Z",
-            "view:incidence_angle": image_information["incidenceAngleMidSwath"],
-            "sar:polarizations": esa_safe.findall(
-                manifest, ".//s1sarl1:transmitterReceiverPolarisation"
-            ),
-            "sar:instrument_mode": esa_safe.findtext(
-                manifest, ".//s1sarl1:instrumentMode/s1sarl1:mode"
-            ),
-            "sar:frequency_band": "C",
-            "sar:center_frequency": product_information["radarFrequency"] / 1e9,
-            "sar:pixel_spacing_range": image_information["rangePixelSpacing"],
-            "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
-            "sar:observation_direction": "right",
-            "sar:beam_ids": esa_safe.findall(
-                manifest, ".//s1sarl1:instrumentMode/s1sarl1:swath"
-            ),
-            "eopf:datatake_id": esa_safe.findtext(
-                manifest, ".//s1sarl1:missionDataTakeID"
-            ),
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[list(point) for point in footprint]],
         },
-        "geometry": {"type": "Polygon", "coordinates": [coordinates]},
+        "bbox": [min(lons), min(lats), max(lons), max(lats)],
+        "properties": properties,
         "links": [],
         "assets": {},
+        "detectionPerformed": processing_information["detectionPerformed"],
+        "thermalNoiseCorrectionPerformed": processing_information[
+            "thermalNoiseCorrectionPerformed"
+        ],
     }
     return stac_item

@@ -170,6 +170,20 @@ What we do in each case follows the decisions above.
    blocks.
 1. Wrong `long_name`s, e.g. `doppler_centroid/azimuth_time` "of terrain height
    measurement" and `noise_range/line` "image pixel".
+1. `stac_discovery`, the CPM mapping and formatters:
+   - `id` is the product class description, the same for all items. We use the node
+     name.
+   - `bbox` is `[max_lon, min_lat, min_lon, max_lat]` of the whole product footprint
+     while `geometry` is the burst footprint. We use `[min_lon, min_lat, max_lon, max_lat]` of `geometry`.
+   - `provider` instead of the STAC `providers`.
+   - `processing:datetime` is the acquisition time, `processing:version` the CPM mapping
+     version. We use the processing stop time and the IPF version.
+   - `sar:center_frequency` is in Hz instead of GHz.
+   - `sar:relative_burst` needs the SAR extension v1.3.1, the CPM declares v1.3.0.
+   - the eopf extension URL does not exist, we use
+     `https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json`.
+   - `detectionPerformed` and `thermalNoiseCorrectionPerformed` are strings, we use
+     bools, `links` points to a Zarr v2 `.zattrs.json`, we use none.
 
 ## Open points
 
@@ -246,14 +260,21 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
    variable is `slc` or `grd` with only `long_name`, `line` and `pixel` as additional
    coordinates and the CPM chunks. SM and GRD are one image. WV is not supported yet, as
    xarray-sentinel finds one annotation per WV swath instead of one per vignette.
-1. Attributes, in three parts:
-   1. `stac_discovery` of root and nodes following the CPM mapping keys
-      `stac_discovery`, `stac_discovery_annotation` and
-      `stac_discovery_annotation_manifest`, extending `eopf_metadata.build_stac_discovery`.
-   1. `other_metadata` extending `eopf_metadata.build_other_metadata`: `burst_timing`
-      with the node's burst merged in, drop empty `swath_merging` and the CPM
-      `DEPRECATED_ATTRS`, numeric lists instead of `$` strings, `t_0` as `t0`.
-   1. `processing_history`.
+1. Attributes, in four parts. `tests/data/eopf/S01SIWSLC_target_attrs.json` holds the
+   key and type tree of the node attributes, the CPM 3.0 burst node with our deliberate
+   differences.
+   1. Done: node `stac_discovery`, `eopf_metadata.build_stac_discovery` following the
+      CPM mapping keys `stac_discovery`, `stac_discovery_annotation` and
+      `stac_discovery_annotation_manifest`, quirk 8. `geometry` is the node footprint
+      interpolated from the GCPs, `sar:relative_burst` is set when the product has
+      burst ids. The items validate against the declared STAC extensions.
+   1. root `stac_discovery` and `other_metadata`.
+   1. node `other_metadata` extending `eopf_metadata.build_other_metadata`:
+      `eopf_category`, `title`, `image_number`, `burst_timing` with the node's burst
+      merged in, drop empty `swath_merging`, numeric lists instead of `$` strings,
+      `t_0` as `t0`. We keep the CPM `DEPRECATED_ATTRS`.
+   1. `processing_history`, by level from the manifest as in CPM 2.7, the CPM 3.0 one
+      is a single `"Unknown"` entry.
 1. API and docs: `Sentinel1Backend.open_datatree` and `open_groups_as_dict`, README,
    this file.
 1. Validation: convert one or two full SAFE products with CPM 3.0 in a throwaway

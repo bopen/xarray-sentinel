@@ -162,9 +162,10 @@ def open_datatree(
                     pol_datasets.setdefault(eopf_group, {})[pol] = converted
             other_metadata[pol] = eopf_metadata.build_other_metadata(annotations[pol])
 
-        stac_discovery = eopf_metadata.build_stac_discovery(
-            "noid", manifest, annotations[pols[0]]
-        )
+        annotation = annotations[pols[0]]
+        burst_list = esa_safe.get_tag(annotation, "swathTiming/burstList")
+        has_burst_ids = "burstId" in burst_list.get("burst", [{}])[0]
+        gcp = pol_datasets["conditions/gcp"][pols[0]]
         node_groups = {}
         for eopf_group, datasets in pol_datasets.items():
             if eopf_group in POLARIZATION_INDEPENDENT_GROUPS:
@@ -176,6 +177,15 @@ def open_datatree(
             node = product_name
             if burst_id is not None:
                 node += f"_{swath}_{burst_id}"
+            measurement = burst_pols[pols[0]][measurement_name]
+            azimuth_time, range_coordinate = (measurement[d] for d in measurement.dims)
+            footprint = sentinel1.get_footprint_linestring(
+                azimuth_time, range_coordinate, gcp
+            )
+            relative_burst = int(burst_id) if has_burst_ids and burst_id else None
+            stac_discovery = eopf_metadata.build_stac_discovery(
+                node, manifest, annotation, footprint, relative_burst
+            )
             dt[node] = xr.Dataset(
                 attrs={
                     "other_metadata": other_metadata,
