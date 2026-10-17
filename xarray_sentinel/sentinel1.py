@@ -1280,6 +1280,8 @@ def make_sentinel1_stac_item(
     annotation: esa_safe.PathOrFileType,
     namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
 ) -> dict[str, Any]:
+    if hasattr(manifest_path, "seek"):
+        manifest_path.seek(0)
     manifest = ElementTree.parse(manifest_path).getroot()
 
     product_information = esa_safe.parse_tag(annotation, "//productInformation")

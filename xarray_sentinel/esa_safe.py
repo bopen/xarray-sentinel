@@ -60,6 +60,8 @@ def parse_tag_as_list(
     validation: str = "skip",
 ) -> list[dict[str, Any]]:
     schema = cached_sentinel1_schemas(schema_type)
+    if hasattr(xml_path, "seek"):
+        xml_path.seek(0)
     xml_tree = ElementTree.parse(xml_path)
     tag: Any = schema.decode(xml_tree, query, validation=validation)
     if tag is None:

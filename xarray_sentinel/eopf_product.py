@@ -1,4 +1,3 @@
-import functools
 import io
 import os
 import pathlib
@@ -48,14 +47,9 @@ def open_datatree(
 ) -> xr.DataTree:
     fs, manifest_path = sentinel1.get_fs_path(product_urlpath, fs, storage_options)
     product_path = os.path.dirname(manifest_path)
-    read_file = functools.cache(fs.cat_file)
+    manifest = io.BytesIO(fs.cat_file(manifest_path))
 
-    def open_xml(path: str) -> io.BytesIO:
-        return io.BytesIO(read_file(path))
-
-    common_attrs, product_files = esa_safe.parse_manifest_sentinel1(
-        open_xml(manifest_path)
-    )
+    common_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     if override_product_files:
         product_files = sentinel1.do_override_product_files(
             override_product_files, product_files
@@ -67,6 +61,12 @@ def open_datatree(
         check_files_exist=check_files_exist,
         fs=fs,
     )
+    xml_files = {
+        path: io.BytesIO(fs.cat_file(path))
+        for paths in groups.values()
+        for path in paths
+        if path.endswith(".xml")
+    }
 
     swath_pols: dict[str, list[str]] = {}
     for group in groups:
@@ -83,7 +83,7 @@ def open_datatree(
         for pol in pols:
             measurement, annotation = groups[f"{swath}/{pol}"][:2]
             pol_dataset = sentinel1.open_pol_dataset(
-                measurement, open_xml(annotation), fs=fs
+                measurement, xml_files[annotation], fs=fs
             )
             pol_dataset = conventions.update_attributes(pol_dataset)
             for burst_id, burst in split_bursts(pol_dataset).items():
@@ -92,17 +92,17 @@ def open_datatree(
             for eopf_group, (group, opener) in EOPF_GROUPS.items():
                 if f"{swath}/{pol}/{group}" in groups:
                     xml_path = groups[f"{swath}/{pol}/{group}"][0]
-                    ds = conventions.update_attributes(opener(open_xml(xml_path)))
+                    ds = conventions.update_attributes(opener(xml_files[xml_path]))
                     pol_datasets.setdefault(eopf_group, {})[pol] = ds.drop_attrs(
                         deep=False
                     )
             other_metadata[pol] = eopf_metadata.build_other_metadata(
-                open_xml(annotation)
+                xml_files[annotation]
             )
 
         first_annotation = groups[f"{swath}/{pols[0]}"][1]
         stac_discovery = sentinel1.make_sentinel1_stac_item(
-            "noid", open_xml(manifest_path), open_xml(first_annotation)
+            "noid", manifest, xml_files[first_annotation]
         )
         node_groups = {}
         for eopf_group, datasets in pol_datasets.items():
