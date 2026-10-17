@@ -154,10 +154,12 @@ def test_open_dataset_gcp(
     product_path: esa_safe.PathType,
     swath_pol: str,
 ) -> None:
+    range_dim = "ground_range" if "_GRD" in str(product_path) else "slant_range_time"
+
     res = xr.open_dataset(product_path, engine="sentinel-1", group=f"{swath_pol}/gcp")
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.sizes) == {"azimuth_time", "slant_range_time"}
+    assert set(res.sizes) == {"azimuth_time", range_dim}
 
 
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_PRODUCTS)

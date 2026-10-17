@@ -326,13 +326,13 @@ def open_gcp_dataset(
 ) -> xr.Dataset:
     xml_dict = esa_safe.parse_xml(annotation)
     ds = eopf_sentinel1.open_gcp(xml_dict)
-    ds = ds.drop_vars(["azimuth_time_gcp", "slant_range_time_gcp"])
     ds = ds.rename(incidence_angle="incidenceAngle", elevation_angle="elevationAngle")
     for data_var in ds.data_vars.values():
         data_var.attrs.update(attrs)
     ds.attrs.update(attrs)
 
-    footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, ds)
+    range_coordinate = ds[ds.latitude.dims[1]]
+    footprint = get_footprint_linestring(ds.azimuth_time, range_coordinate, ds)
     geospatial_attrs = make_geospatial_attributes(footprint)
     ds.attrs.update(geospatial_attrs)
 
@@ -341,29 +341,23 @@ def open_gcp_dataset(
 
 def get_footprint_linestring(
     azimuth_time: xr.DataArray,
-    slant_range_time: xr.DataArray,
+    range_coordinate: xr.DataArray,
     gcp: xr.Dataset,
     method: xr.core.types.InterpOptions = "linear",
     kwargs: dict[str, Any] = {"fill_value": "extrapolate"},
 ) -> list[tuple[float, float]]:
     azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
-    slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
+    range_coordinate_mm = [range_coordinate.min(), range_coordinate.max()]
 
     footprint = []
     for j, i in [(0, 0), (1, 0), (1, 1), (0, 1)]:
-        lat_array = gcp["latitude"].interp(
-            azimuth_time=azimuth_time_mm[j],
-            slant_range_time=slant_range_time_mm[i],
-            method=method,
-            kwargs=kwargs,
-        )
+        corner = {
+            azimuth_time.name: azimuth_time_mm[j],
+            range_coordinate.name: range_coordinate_mm[i],
+        }
+        lat_array = gcp["latitude"].interp(corner, method=method, kwargs=kwargs)
         lat = round(lat_array.item(), 6)
-        lon_array = gcp["longitude"].interp(
-            azimuth_time=azimuth_time_mm[j],
-            slant_range_time=slant_range_time_mm[i],
-            method=method,
-            kwargs=kwargs,
-        )
+        lon_array = gcp["longitude"].interp(corner, method=method, kwargs=kwargs)
         lon = round(lon_array.item(), 6)
         footprint.append((lon, lat))
 
@@ -394,141 +388,32 @@ def make_geospatial_attributes(
 def open_attitude_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    attitudes = esa_safe.parse_tag_as_list(annotation, "//attitude")
-
-    variables = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
-    azimuth_time: list[Any] = []
-    data_vars: dict[str, Any]
-    data_vars = {var: ("azimuth_time", [], attrs) for var in variables}
-    for attitude in attitudes:
-        azimuth_time.append(attitude["time"])
-        for var in variables:
-            data_vars[var][1].append(attitude[var])
-
-    ds = xr.Dataset(
-        data_vars=data_vars,
-        coords={"azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time]},
-        attrs=attrs,
-    )
-
-    return ds
-
-
-def make_orbit(
-    azimuth_time: list[Any],
-    positions: list[list[Any]],
-    velocities: list[list[Any]],
-    attrs: dict[str, Any] = {},
-) -> xr.Dataset:
-    position = xr.Variable(data=positions, dims=("axis", "azimuth_time"))
-    velocity = xr.Variable(data=velocities, dims=("axis", "azimuth_time"))
-
-    ds = xr.Dataset(
-        data_vars={"position": position, "velocity": velocity},
-        attrs=attrs,
-        coords={
-            "azimuth_time": [np.datetime64(dt, "ns") for dt in azimuth_time],
-            "axis": [0, 1, 2],
-        },
-    )
-    for data_var in ds.data_vars:
-        ds[data_var].attrs = attrs
-
+    ds = eopf_sentinel1.open_attitude(esa_safe.parse_xml(annotation))
+    for data_var in ds.data_vars.values():
+        data_var.attrs.update(attrs)
+    ds.attrs.update(attrs)
     return ds
 
 
 def open_orbit_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    orbits = esa_safe.parse_tag_as_list(annotation, "//orbit")
-
-    attrs = attrs.copy()
-    reference_system = orbits[0]["frame"]
-    if reference_system is not None:
-        attrs.update({"reference_system": reference_system})
-
-    azimuth_times: list[Any] = []
-    positions: list[list[Any]] = [[], [], []]
-    velocities: list[list[Any]] = [[], [], []]
-    for orbit in orbits:
-        azimuth_times.append(orbit["time"])
-        positions[0].append(orbit["position"]["x"])
-        positions[1].append(orbit["position"]["y"])
-        positions[2].append(orbit["position"]["z"])
-        velocities[0].append(orbit["velocity"]["x"])
-        velocities[1].append(orbit["velocity"]["y"])
-        velocities[2].append(orbit["velocity"]["z"])
-        if orbit["frame"] != reference_system:
-            warnings.warn(
-                "reference_system is not consistent in all the state vectors. "
-            )
-            reference_system = None
-
-    return make_orbit(azimuth_times, positions, velocities, attrs)
+    ds = eopf_sentinel1.open_orbit(esa_safe.parse_xml(annotation))
+    ds = ds.transpose("axis", "azimuth_time").assign_coords(axis=[0, 1, 2])
+    attrs = attrs | ds.attrs
+    for data_var in ds.data_vars.values():
+        data_var.attrs = attrs
+    ds.attrs = attrs
+    return ds
 
 
 def open_dc_estimate_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    dc_estimates = esa_safe.parse_tag_as_list(annotation, "//dcEstimate")
-
-    azimuth_time = []
-    t0 = []
-    data_dc_poly = []
-    geometry_dc_poly = []
-    data_dc_rms_error = []
-    data_dc_rms_error_above_threshold = []
-    fine_dce_azimuth_start_time = []
-    fine_dce_azimuth_stop_time = []
-    for dc_estimate in dc_estimates:
-        geometry_dc_poly.append(
-            [float(c) for c in dc_estimate["geometryDcPolynomial"]["$"].split()]
-        )
-        data_dc_rms_error.append(dc_estimate["dataDcRmsError"])
-        data_dc_rms_error_above_threshold.append(
-            dc_estimate["dataDcRmsErrorAboveThreshold"]
-        )
-        fine_dce_azimuth_start_time.append(dc_estimate["fineDceAzimuthStartTime"])
-        fine_dce_azimuth_stop_time.append(dc_estimate["fineDceAzimuthStopTime"])
-        azimuth_time.append(dc_estimate["azimuthTime"])
-        t0.append(dc_estimate["t0"])
-        data_dc_poly.append(
-            [float(c) for c in dc_estimate["dataDcPolynomial"]["$"].split()]
-        )
-
-    ds = xr.Dataset(
-        data_vars={
-            "t0": ("azimuth_time", t0, attrs),
-            "data_dc_polynomial": (("azimuth_time", "degree"), data_dc_poly, attrs),
-            "geometry_dc_polynomial": (
-                ("azimuth_time", "degree"),
-                geometry_dc_poly,
-                attrs,
-            ),
-            "data_dc_rms_error": ("azimuth_time", data_dc_rms_error, attrs),
-            "data_dc_rms_error_above_threshold": (
-                "azimuth_time",
-                data_dc_rms_error_above_threshold,
-                attrs,
-            ),
-            #
-            # Not present in the new Zarr products
-            #
-            # "fine_dce_azimuth_start_time": (
-            #     "azimuth_time",
-            #     [np.datetime64(at, "ns") for at in fine_dce_azimuth_start_time],
-            # ),
-            # "fine_dce_azimuth_stop_time": (
-            #     "azimuth_time",
-            #     [np.datetime64(at, "ns") for at in fine_dce_azimuth_stop_time],
-            # ),
-        },
-        coords={
-            "azimuth_time": [np.datetime64(at, "ns") for at in azimuth_time],
-            "degree": list(range(len(data_dc_poly[0]))),
-        },
-        attrs=attrs,
-    )
+    ds = eopf_sentinel1.open_doppler_centroid(esa_safe.parse_xml(annotation))
+    for data_var in ds.data_vars.values():
+        data_var.attrs.update(attrs)
+    ds.attrs.update(attrs)
     return ds
 
 

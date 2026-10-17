@@ -17,35 +17,22 @@ SLC_S3 = (
     DATA_FOLDER
     / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
 )
-SLC_IW_NODE = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
-EOPF_SLC_IW_NODE = (
+GRD_IW_2 = (
     DATA_FOLDER
-    / "eopf"
-    / "S01SIWSLC_20260731T234807_0014_C050_C079_0116E8_IW3_258176.json"
+    / "S1B_IW_GRDH_1SDV_20211223T051122_20211223T051147_030148_039993_5371.SAFE"
 )
-
-# EOPF quirks we fix and data we add, see docs/DATATREE.md
-EOPF_FIXES = {
-    "conditions/doppler_centroid": {
-        "fine_dce_azimuth_start_time": [
-            ["polarization", "azimuth_time"],
-            "datetime64[ns]",
-        ],
-        "fine_dce_azimuth_stop_time": [
-            ["polarization", "azimuth_time"],
-            "datetime64[ns]",
-        ],
-    },
-    "conditions/gcp": {
-        "line": [["azimuth_time"], "int64"],
-        "pixel": [["slant_range_time"], "int64"],
-    },
-}
-EXPECTED_SLC_IW_STRUCTURE = {
-    group: variables | EOPF_FIXES.get(group, {})
-    for group, variables in json.loads(EOPF_SLC_IW_NODE.read_text()).items()
-}
-PENDING = pytest.mark.xfail(strict=True, reason="EOPF converter not implemented yet")
+SLC_IW_V340 = (
+    DATA_FOLDER
+    / "S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
+)
+SLC_IW_NODE = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
+# the CPM 3.0 burst node with our deliberate differences, see docs/DATATREE.md
+EXPECTED_SLC_IW_STRUCTURE = json.loads(
+    (DATA_FOLDER / "eopf" / "S01SIWSLC_target.json").read_text()
+)
+EXPECTED_SLC_IW_ATTRS = json.loads(
+    (DATA_FOLDER / "eopf" / "S01SIWSLC_target_attrs.json").read_text()
+)
 
 
 def datatree_structure(dt: xr.DataTree) -> dict[str, dict[str, list[Any]]]:
@@ -56,6 +43,12 @@ def datatree_structure(dt: xr.DataTree) -> dict[str, dict[str, list[Any]]]:
         }
         for node in dt.subtree
     }
+
+
+def attrs_structure(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: attrs_structure(item) for key, item in value.items()}
+    return type(value).__name__
 
 
 @pytest.mark.parametrize(
@@ -84,6 +77,23 @@ def test_make_product_name_error() -> None:
         eopf_product.make_product_name("S2A_MSIL1C_20210403T101021_N0300_R022_T33TUM")
 
 
+def test_open_datatree_grd() -> None:
+    res = eopf_product.open_datatree(GRD_IW_2, check_files_exist=True)
+
+    assert list(res.children) == ["S01SIWGRD_20211223T051122_0025_B172_5371_039993"]
+
+    node = res["S01SIWGRD_20211223T051122_0025_B172_5371_039993"]
+
+    assert "coordinate_conversion" in node["conditions"].children
+    assert node["measurements/grd"].dims == (
+        "polarization",
+        "azimuth_time",
+        "ground_range",
+    )
+    for group in ["conditions/gcp", "quality/calibration", "quality/noise_range"]:
+        assert "ground_range" in node[group].dims
+
+
 @pytest.fixture(scope="module")
 def slc_iw_node_structure() -> dict[str, dict[str, list[Any]]]:
     dt = eopf_product.open_datatree(SLC_IW, check_files_exist=True)
@@ -110,6 +120,13 @@ def test_open_datatree_bursts() -> None:
     assert isinstance(slc, xr.DataArray)
     assert slc.dims == ("polarization", "azimuth_time", "slant_range_time")
     assert slc.polarization.values.tolist() == ["VH", "VV"]
+    assert slc.attrs == {"long_name": "digital number"}
+    assert slc.chunks is not None
+    assert {d: c[0] for d, c in zip(slc.dims, slc.chunks)} == {
+        "polarization": 1,
+        "azimuth_time": slc.sizes["azimuth_time"],
+        "slant_range_time": 4096,
+    }
     assert node["quality/calibration"].sizes["polarization"] == 2
     assert "polarization" not in node["conditions/orbit"].dims
 
@@ -120,24 +137,20 @@ def test_open_datatree_groups(
     assert slc_iw_node_structure.keys() == EXPECTED_SLC_IW_STRUCTURE.keys()
 
 
-@pytest.mark.parametrize(
-    "group",
-    [
-        ".",
-        "conditions",
-        "quality",
-        pytest.param("measurements", marks=PENDING),
-        "conditions/antenna_pattern",
-        pytest.param("conditions/attitude", marks=PENDING),
-        pytest.param("conditions/doppler_centroid", marks=PENDING),
-        "conditions/gcp",
-        pytest.param("conditions/orbit", marks=PENDING),
-        pytest.param("quality/calibration", marks=PENDING),
-        pytest.param("quality/noise_azimuth", marks=PENDING),
-        pytest.param("quality/noise_range", marks=PENDING),
-    ],
-)
+@pytest.mark.parametrize("group", sorted(EXPECTED_SLC_IW_STRUCTURE))
 def test_open_datatree_group_structure(
     slc_iw_node_structure: dict[str, dict[str, list[Any]]], group: str
 ) -> None:
     assert slc_iw_node_structure.get(group) == EXPECTED_SLC_IW_STRUCTURE[group]
+
+
+def test_open_datatree_attrs() -> None:
+    res = eopf_product.open_datatree(SLC_IW_V340, check_files_exist=True)
+    node = res.children["S01SIWSLC_20220414T102209_0027_A244_E677_051AA4_IW1_365915"]
+    stac_discovery = node.attrs["stac_discovery"]
+
+    assert {
+        key: attrs_structure(node.attrs[key]) for key in EXPECTED_SLC_IW_ATTRS
+    } == EXPECTED_SLC_IW_ATTRS
+    assert stac_discovery["id"] == node.name
+    assert stac_discovery["properties"]["sar:relative_burst"] == 365915

@@ -11,14 +11,6 @@ import xarray as xr
 
 from . import conventions, eopf_metadata, eopf_sentinel1, esa_safe, sentinel1
 
-EOPF_GROUPS: dict[str, tuple[str, Callable[..., xr.Dataset]]] = {
-    "conditions/attitude": ("attitude", sentinel1.open_attitude_dataset),
-    "conditions/doppler_centroid": ("dc_estimate", sentinel1.open_dc_estimate_dataset),
-    "conditions/orbit": ("orbit", sentinel1.open_orbit_dataset),
-    "quality/calibration": ("calibration", sentinel1.open_calibration_dataset),
-    "quality/noise_azimuth": ("noise_azimuth", sentinel1.open_noise_azimuth_dataset),
-    "quality/noise_range": ("noise_range", sentinel1.open_noise_range_dataset),
-}
 POLARIZATION_INDEPENDENT_GROUPS = {"conditions/attitude", "conditions/orbit"}
 SAFE_NAME_RE = re.compile(
     r"S(\d)(\w)_(\w{2})_(\w{3})\w_\w{4}_(\w{15})_(\w{15})_(\d{6})_(\w{6})_(\w{4})"
@@ -45,21 +37,51 @@ def make_product_name(safe_name: str) -> str:
     return product_name
 
 
+QUALITY_GROUPS: dict[
+    str, tuple[str, str, Callable[[dict[str, Any], dict[str, Any]], xr.Dataset]]
+] = {
+    "quality/calibration": (
+        "calibration",
+        "calibration",
+        eopf_sentinel1.open_calibration,
+    ),
+    "quality/noise_azimuth": (
+        "noise_azimuth",
+        "noise",
+        eopf_sentinel1.open_noise_azimuth,
+    ),
+    "quality/noise_range": ("noise_range", "noise", eopf_sentinel1.open_noise_range),
+}
 ANNOTATION_GROUPS: dict[str, Callable[[dict[str, Any]], xr.Dataset | None]] = {
     "conditions/antenna_pattern": eopf_sentinel1.open_antenna_pattern,
+    "conditions/attitude": eopf_sentinel1.open_attitude,
     "conditions/coordinate_conversion": eopf_sentinel1.open_coordinate_conversion,
+    "conditions/doppler_centroid": eopf_sentinel1.open_doppler_centroid,
     "conditions/gcp": eopf_sentinel1.open_gcp,
+    "conditions/orbit": eopf_sentinel1.open_orbit,
 }
 
 
-def split_bursts(pol_dataset: xr.Dataset) -> dict[str | None, xr.Dataset]:
-    if "number_of_bursts" not in pol_dataset.attrs:
-        return {None: pol_dataset}
+def split_measurements(
+    pol_dataset: xr.Dataset, name: str
+) -> dict[str | None, xr.Dataset]:
     bursts: dict[str | None, xr.Dataset] = {}
-    for burst_index in range(pol_dataset.attrs["number_of_bursts"]):
-        burst = sentinel1.crop_burst_dataset(pol_dataset, burst_index=burst_index)
-        bursts[str(burst.attrs.get("burst_id", burst_index))] = burst
-    return bursts
+    if "number_of_bursts" in pol_dataset.attrs:
+        for burst_index in range(pol_dataset.attrs["number_of_bursts"]):
+            burst = sentinel1.crop_burst_dataset(pol_dataset, burst_index=burst_index)
+            bursts[str(burst.attrs.get("burst_id", burst_index))] = burst
+        azimuth_chunk = -1
+    else:
+        bursts[None] = pol_dataset
+        azimuth_chunk = 4096
+    measurements = {}
+    for burst_id, burst in bursts.items():
+        measurement = burst.measurement.rename(name)
+        measurement.attrs = {"long_name": measurement.attrs["long_name"]}
+        # the CPM chunks, whole TOPS bursts along azimuth
+        chunks = {"azimuth_time": azimuth_chunk, measurement.dims[1]: 4096}
+        measurements[burst_id] = measurement.chunk(chunks).to_dataset()
+    return measurements
 
 
 def stack_polarizations(datasets: dict[str, xr.Dataset]) -> xr.Dataset:
@@ -119,25 +141,31 @@ def open_datatree(
                 measurement_path, xml_files[annotation_path], fs=fs
             )
             pol_dataset = conventions.update_attributes(pol_dataset)
-            for burst_id, burst in split_bursts(pol_dataset).items():
-                burst = burst.rename(measurement="slc").drop_attrs(deep=False)
+            measurement_name = common_attrs["product_type"].lower()
+            for burst_id, burst in split_measurements(
+                pol_dataset, measurement_name
+            ).items():
                 bursts.setdefault(burst_id, {})[pol] = burst
-            for eopf_group, (group, opener) in EOPF_GROUPS.items():
+            for eopf_group, (
+                group,
+                schema_type,
+                open_quality,
+            ) in QUALITY_GROUPS.items():
                 if f"{swath}/{pol}/{group}" in groups:
                     xml_path = groups[f"{swath}/{pol}/{group}"][0]
-                    ds = conventions.update_attributes(opener(xml_files[xml_path]))
-                    pol_datasets.setdefault(eopf_group, {})[pol] = ds.drop_attrs(
-                        deep=False
-                    )
+                    xml_dict = esa_safe.parse_xml(xml_files[xml_path], schema_type)
+                    quality = open_quality(xml_dict, annotations[pol])
+                    pol_datasets.setdefault(eopf_group, {})[pol] = quality
             for eopf_group, converter in ANNOTATION_GROUPS.items():
                 converted = converter(annotations[pol])
                 if converted is not None:
                     pol_datasets.setdefault(eopf_group, {})[pol] = converted
             other_metadata[pol] = eopf_metadata.build_other_metadata(annotations[pol])
 
-        stac_discovery = eopf_metadata.build_stac_discovery(
-            "noid", manifest, annotations[pols[0]]
-        )
+        annotation = annotations[pols[0]]
+        burst_list = esa_safe.get_tag(annotation, "swathTiming/burstList")
+        has_burst_ids = "burstId" in burst_list.get("burst", [{}])[0]
+        gcp = pol_datasets["conditions/gcp"][pols[0]]
         node_groups = {}
         for eopf_group, datasets in pol_datasets.items():
             if eopf_group in POLARIZATION_INDEPENDENT_GROUPS:
@@ -149,6 +177,15 @@ def open_datatree(
             node = product_name
             if burst_id is not None:
                 node += f"_{swath}_{burst_id}"
+            measurement = burst_pols[pols[0]][measurement_name]
+            azimuth_time, range_coordinate = (measurement[d] for d in measurement.dims)
+            footprint = sentinel1.get_footprint_linestring(
+                azimuth_time, range_coordinate, gcp
+            )
+            relative_burst = int(burst_id) if has_burst_ids and burst_id else None
+            stac_discovery = eopf_metadata.build_stac_discovery(
+                node, manifest, annotation, footprint, relative_burst
+            )
             dt[node] = xr.Dataset(
                 attrs={
                     "other_metadata": other_metadata,

@@ -1,0 +1,55 @@
+{
+  "stac_discovery": {
+    "assets": {},
+    "bbox": "list",
+    "detectionPerformed": "bool",
+    "geometry": {
+      "coordinates": "list",
+      "type": "str"
+    },
+    "id": "str",
+    "links": "list",
+    "properties": {
+      "constellation": "str",
+      "created": "str",
+      "datetime": "str",
+      "end_datetime": "str",
+      "eopf:datatake_id": "str",
+      "eopf:instrument_mode": "str",
+      "instruments": "list",
+      "mission": "str",
+      "platform": "str",
+      "processing:datetime": "str",
+      "processing:facility": "str",
+      "processing:lineage": "str",
+      "processing:software": {
+        "Sentinel-1 IPF": "str"
+      },
+      "processing:version": "str",
+      "product:timeliness": "str",
+      "product:timeliness_category": "str",
+      "product:type": "str",
+      "providers": "list",
+      "sar:beam_ids": "list",
+      "sar:center_frequency": "float",
+      "sar:frequency_band": "str",
+      "sar:instrument_mode": "str",
+      "sar:observation_direction": "str",
+      "sar:pixel_spacing_azimuth": "float",
+      "sar:pixel_spacing_range": "float",
+      "sar:polarizations": "list",
+      "sar:relative_burst": "int",
+      "sat:absolute_orbit": "int",
+      "sat:anx_datetime": "str",
+      "sat:orbit_state": "str",
+      "sat:platform_international_designator": "str",
+      "sat:relative_orbit": "int",
+      "start_datetime": "str",
+      "view:incidence_angle": "float"
+    },
+    "stac_extensions": "list",
+    "stac_version": "str",
+    "thermalNoiseCorrectionPerformed": "bool",
+    "type": "str"
+  }
+}

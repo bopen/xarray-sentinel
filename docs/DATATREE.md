@@ -19,8 +19,10 @@ dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
 - The EOPF datasets are the base: `eopf_sentinel1` builds them from the `parse_xml`
   dicts with `get_tag`. The `sentinel1` openers become wrappers converting them back to
   the xarray-sentinel layout, with one `parse_xml` per call until all are ported. The
-  xarray-sentinel layout may get the EOPF float32 where float64 doesn't matter. Openers
-  never exposed in the xarray-sentinel layout, like antenna pattern, are EOPF only.
+  xarray-sentinel layout may get the EOPF float32 where float64 doesn't matter and the
+  additional EOPF variables, so the wrappers only rename, transpose and add attributes.
+  Openers never exposed in the xarray-sentinel layout, like antenna pattern, are EOPF
+  only.
 
 ## References
 
@@ -123,20 +125,22 @@ Still served by the sample service: one node per polarisation, swath and burst, 
 
 | xarray-sentinel `group=` | EOPF | Differences |
 |---|---|---|
-| `IW1/VV`, `IW1/VV/<n>` | `measurements/slc`, `grd` | one node per burst instead of the swath image and burst crop, `measurement` is `slc` or `grd`, no `line`/`pixel`, product attrs move to the node |
+| `IW1/VV`, `IW1/VV/<n>` | `measurements/slc`, `grd` | one node per burst instead of the swath image and burst crop, `measurement` is `slc` or `grd`, product attrs move to the node |
 | `IW1/VV/orbit` | `conditions/orbit` | `(axis, azimuth_time)` is `(azimuth_time, axis)`, `axis` is `"x", "y", "z"` |
-| `IW1/VV/attitude` | `conditions/attitude` | `q0` to `q3` are float32 |
-| `IW1/VV/dc_estimate` | `conditions/doppler_centroid` | adds `fine_dce_azimuth_start_time` and `fine_dce_azimuth_stop_time` |
-| `IW1/VV/gcp` | `conditions/gcp` | snake_case names, adds 2-D `azimuth_time_gcp` and `slant_range_time_gcp` |
-| none, `open_antenna_pattern` is not exposed | `conditions/antenna_pattern` | `(azimuth_time, count)` with 2-D `slant_range_time_ap`, adds `swath` |
+| `IW1/VV/attitude` | `conditions/attitude` | none |
+| `IW1/VV/dc_estimate` | `conditions/doppler_centroid` | none |
+| `IW1/VV/gcp` | `conditions/gcp` | snake_case names |
+| none | `conditions/antenna_pattern` | EOPF only |
 | `IW/VV/coordinate_conversion`, GRD only | `conditions/coordinate_conversion` | snake_case names |
 | `IW1/VV/azimuth_fm_rate` | none | only in `other_metadata` |
-| `IW1/VV/calibration` | `quality/calibration` | snake_case names, `(line, pixel)` is `(azimuth_time, slant_range_time\|ground_range)` |
+| `IW1/VV/calibration` | `quality/calibration` | snake_case names, `(line, pixel)` is `(azimuth_time, slant_range_time\|ground_range)` with `line` and `pixel` as coordinates |
 | `IW1/VV/noise_range` | `quality/noise_range` | as calibration |
-| `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | snake_case names, `(swath, line)` is `(polarization, azimuth_time, swath)` |
+| `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | snake_case names, `(swath, line)` is `(azimuth_time, swath)` with `line` as coordinate |
 | none | `burst_timing` attrs | per-line valid samples |
 
-Replica, reference replica and terrain height are only in `other_metadata` in EOPF.
+All EOPF groups except orbit and attitude also stack the polarisations along
+`polarization`. Replica, reference replica and terrain height are only in
+`other_metadata` in EOPF.
 
 ## EOPF quirks
 
@@ -160,16 +164,32 @@ What we do in each case follows the decisions above.
 1. `noise_azimuth`, from reading the code, not checked on data: times come from the
    linear grid of quirk 1, all swath columns share the `azimuth_time` of the last swath
    (GRD has several), blocks of a swath are concatenated keeping the first and last
-   line and sample of the first block only.
+   line and sample of the first block only. We use the burst-aware times of the
+   measurement grid and keep one `swath` entry per block, aligned on their lines, with
+   its own first and last line and sample: a swath label repeats when it has several
+   blocks.
 1. Wrong `long_name`s, e.g. `doppler_centroid/azimuth_time` "of terrain height
    measurement" and `noise_range/line` "image pixel".
+1. `stac_discovery`, the CPM mapping and formatters:
+   - `id` is the product class description, the same for all items. We use the node
+     name.
+   - `bbox` is `[max_lon, min_lat, min_lon, max_lat]` of the whole product footprint
+     while `geometry` is the burst footprint. We use `[min_lon, min_lat, max_lon, max_lat]` of `geometry`.
+   - `provider` instead of the STAC `providers`.
+   - `processing:datetime` is the acquisition time, `processing:version` the CPM mapping
+     version. We use the processing stop time and the IPF version.
+   - `sar:center_frequency` is in Hz instead of GHz.
+   - `sar:relative_burst` needs the SAR extension v1.3.1, the CPM declares v1.3.0.
+   - the eopf extension URL does not exist, we use
+     `https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json`.
+   - `detectionPerformed` and `thermalNoiseCorrectionPerformed` are strings, we use
+     bools, `links` points to a Zarr v2 `.zattrs.json`, we use none.
 
 ## Open points
 
 - `line` and `pixel` coordinates: CPM 2.7 has them, the CPM 3.0 sample does not. The
   CPM 3.0 code drops them from calibration and noise but builds them for gcp. We keep
-  them in gcp, as additional data is safe. For the other groups check on a CPM 3.0
-  conversion, step 11, until then omit them.
+  them in all groups that have them, as additional data is safe.
 - `azimuth_fm_rate`, needed by sarsen: in EOPF it is only
   `other_metadata[pol]["general_annotation"]["azimuth_fm_rate_list"]`.
 - `zarr_conventions`, `spatial:bbox` and `proj:code` on the CPM 3.0 sample come from the
@@ -201,35 +221,60 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
      `build_stac_discovery`, while the registry openers and `open_pol_dataset` still
      parse their XML at every call. New converters take the `parse_xml` dict and use
      `get_tag`.
-   - `tests/test_30_eopf_product.py` compares each group with the CPM 3.0 burst node in
-     `tests/data/eopf/`. Groups not converted yet are marked `PENDING`, each step
-     removes the marks of its groups.
+   - `tests/test_30_eopf_product.py` compares each group with our target structure in
+     `tests/data/eopf/S01SIWSLC_target.json`, the CPM 3.0 burst node next to it with our
+     deliberate differences. Groups not converted yet are marked `PENDING`, each step
+     removes the marks of its groups and updates the target where it differs from EOPF.
 1. Done: node names, `eopf_product.make_product_name` tested on the examples above.
-1. orbit, attitude, doppler_centroid: from the existing openers, quirks 2 and 3.
+1. Done: orbit, attitude, doppler_centroid, `eopf_sentinel1.open_orbit`, `open_attitude`
+   and `open_doppler_centroid` with quirks 2 and 3, the bases of the `sentinel1` openers.
+   Quaternions and Doppler polynomials are float32 as in EOPF, also in the
+   xarray-sentinel layout: the XML has 7 digits, float32 keeps them within 6e-8. All
+   attitude variables are float32, where EOPF has float64 for the angular velocity and
+   the angles: pitch, roll and yaw are derived from the quaternions.
 1. Done: gcp, `eopf_sentinel1.open_gcp` with snake_case names, 2-D annotated times,
-   quirk 1, and `line` and `pixel` as additional coordinates. It is the base of
-   `sentinel1.open_gcp_dataset`.
-1. calibration, noise_range: snake_case names, range coordinate from `pixel` as
+   quirk 1, and `line` and `pixel` as additional coordinates. The range dimension comes
+   from `pixel` like in calibration: `ground_range` for GRD, where the annotated slant
+   range times vary along azimuth by up to 3 µs. It is the base of
+   `sentinel1.open_gcp_dataset`, so the xarray-sentinel GRD gcp uses `ground_range` too.
+1. Done: calibration, noise_range, `eopf_sentinel1.open_calibration` and
+   `open_noise_range` with snake_case names, range coordinate from `pixel` as
    `image_slant_range_time + pixel / range_sampling_rate` for SLC and
-   `pixel * range_pixel_spacing` for GRD.
-1. noise_azimuth: from the existing opener, quirk 6.
+   `pixel * range_pixel_spacing` for GRD, `line` and `pixel` as additional coordinates.
+   They need the annotation for the range coordinate while the `sentinel1` openers only
+   get their own file, so these are EOPF only and the `sentinel1` openers keep their
+   code.
+1. Done: noise_azimuth, `eopf_sentinel1.open_noise_azimuth` with quirk 6, `line` as
+   additional coordinate, the LUT as float32 and the first and last lines and samples as
+   int64. `eopf_sentinel1.azimuth_time_coordinate` gives the azimuth time of any line,
+   identical to the measurement grid. EOPF only like calibration, as it needs the
+   annotation.
 1. Done: antenna_pattern, and GRD coordinate_conversion. `eopf_product.ANNOTATION_GROUPS`
    holds the converters of the `parse_xml` annotation, a converter returns `None` when
    the product lacks the group. The GRD antenna patterns of different swaths are padded
    with NaN along `count`. `eopf_sentinel1.open_coordinate_conversion` is the base of
    `sentinel1.open_coordinate_conversion_dataset`, `eopf_sentinel1.open_antenna_pattern`
    is EOPF only.
-1. measurements: split TOPS SLC by burst with `crop_burst_dataset` on one lazy array per
-   swath and polarisation, quirk 4. Rename to `slc` or `grd`, keep only `long_name`,
-   set the CPM chunks. SM and GRD as one image, WV per vignette.
-1. Attributes, in three parts:
-   1. `stac_discovery` of root and nodes following the CPM mapping keys
-      `stac_discovery`, `stac_discovery_annotation` and
-      `stac_discovery_annotation_manifest`, extending `eopf_metadata.build_stac_discovery`.
-   1. `other_metadata` extending `eopf_metadata.build_other_metadata`: `burst_timing`
-      with the node's burst merged in, drop empty `swath_merging` and the CPM
-      `DEPRECATED_ATTRS`, numeric lists instead of `$` strings, `t_0` as `t0`.
-   1. `processing_history`.
+1. Done: measurements, `eopf_product.split_measurements` splits TOPS SLC by burst with
+   `crop_burst_dataset` on one lazy array per swath and polarisation, quirk 4. The
+   variable is `slc` or `grd` with only `long_name`, `line` and `pixel` as additional
+   coordinates and the CPM chunks. SM and GRD are one image. WV is not supported yet, as
+   xarray-sentinel finds one annotation per WV swath instead of one per vignette.
+1. Attributes, in four parts. `tests/data/eopf/S01SIWSLC_target_attrs.json` holds the
+   key and type tree of the node attributes, the CPM 3.0 burst node with our deliberate
+   differences.
+   1. Done: node `stac_discovery`, `eopf_metadata.build_stac_discovery` following the
+      CPM mapping keys `stac_discovery`, `stac_discovery_annotation` and
+      `stac_discovery_annotation_manifest`, quirk 8. `geometry` is the node footprint
+      interpolated from the GCPs, `sar:relative_burst` is set when the product has
+      burst ids. The items validate against the declared STAC extensions.
+   1. root `stac_discovery` and `other_metadata`.
+   1. node `other_metadata` extending `eopf_metadata.build_other_metadata`:
+      `eopf_category`, `title`, `image_number`, `burst_timing` with the node's burst
+      merged in, drop empty `swath_merging`, numeric lists instead of `$` strings,
+      `t_0` as `t0`. We keep the CPM `DEPRECATED_ATTRS`.
+   1. `processing_history`, by level from the manifest as in CPM 2.7, the CPM 3.0 one
+      is a single `"Unknown"` entry.
 1. API and docs: `Sentinel1Backend.open_datatree` and `open_groups_as_dict`, README,
    this file.
 1. Validation: convert one or two full SAFE products with CPM 3.0 in a throwaway
