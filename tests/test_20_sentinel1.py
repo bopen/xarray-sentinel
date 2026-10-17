@@ -65,6 +65,13 @@ GRD_IW_VV_annotation = (
     / "annotation"
     / "s1b-iw-grd-vv-20210401t052623-20210401t052648-026269-032297-001.xml"
 )
+GRD_IW_VV_noise = (
+    DATA_FOLDER
+    / "S1B_IW_GRDH_1SDV_20211223T051122_20211223T051147_030148_039993_5371.SAFE"
+    / "annotation"
+    / "calibration"
+    / "noise-s1b-iw-grd-vv-20211223t051122-20211223t051147-030148-039993-001.xml"
+)
 
 
 def test_get_fs_path() -> None:
@@ -113,7 +120,15 @@ def test_open_noise_azimuth_dataset() -> None:
     res = sentinel1.open_noise_azimuth_dataset(SLC_IW1_VV_noise)
 
     assert isinstance(res, xr.Dataset)
-    assert set(res.coords) == {"line"}
+    assert set(res.coords) == {"swath", "line"}
+    assert res.noiseAzimuthLut.dims == ("swath", "line")
+    assert res.swath.values.tolist() == ["IW1"]
+
+    res = sentinel1.open_noise_azimuth_dataset(GRD_IW_VV_noise)
+
+    assert res.swath.values.tolist() == ["IW1", "IW2", "IW3"]
+    assert res.firstRangeSample.values.tolist() == [0, 8890, 17701]
+    assert res.noiseAzimuthLut.count("line").values.tolist() == [1689, 1688, 1686]
 
 
 def test_open_coordinate_conversion_dataset() -> None:
@@ -203,6 +218,7 @@ def test_open_dc_estimate_dataset() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert set(res.coords) == {"degree", "azimuth_time"}
+    assert res.data_dc_rms_error_above_threshold.dtype == bool
 
 
 def test_open_azimuth_fm_rate_dataset() -> None:

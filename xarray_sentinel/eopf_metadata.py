@@ -107,8 +107,8 @@ def build_other_metadata(annotation_urlpath: esa_safe.PathType) -> dict[str, Any
         general_annotation = build_general_annotation(general_annotation)
         image_information = esa_safe.parse_tag(fp, "//imageAnnotation")
         image_information = filter_metadata_dict(image_information)
-        swath_merginig = esa_safe.parse_tag(fp, "//swathMerging")
-        swath_merginig = filter_metadata_dict(swath_merginig)
+        swath_merging = esa_safe.parse_tag(fp, "//swathMerging")
+        swath_merging = filter_metadata_dict(swath_merging)
         swath_timing = esa_safe.parse_tag(fp, "//swathTiming")
         swath_timing = filter_metadata_dict(swath_timing)
 
@@ -117,6 +117,6 @@ def build_other_metadata(annotation_urlpath: esa_safe.PathType) -> dict[str, Any
         "general_annotation": general_annotation,
         "image_annotation": image_information,
         "swath_timing": swath_timing,
-        "swath_merginig": swath_merginig,
+        "swath_merging": swath_merging,
     }
     return other_metadata
