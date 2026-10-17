@@ -12,9 +12,6 @@ import xarray as xr
 from . import conventions, eopf_metadata, eopf_sentinel1, esa_safe, sentinel1
 
 EOPF_GROUPS: dict[str, tuple[str, Callable[..., xr.Dataset]]] = {
-    "conditions/attitude": ("attitude", sentinel1.open_attitude_dataset),
-    "conditions/doppler_centroid": ("dc_estimate", sentinel1.open_dc_estimate_dataset),
-    "conditions/orbit": ("orbit", sentinel1.open_orbit_dataset),
     "quality/calibration": ("calibration", sentinel1.open_calibration_dataset),
     "quality/noise_azimuth": ("noise_azimuth", sentinel1.open_noise_azimuth_dataset),
     "quality/noise_range": ("noise_range", sentinel1.open_noise_range_dataset),
@@ -47,8 +44,11 @@ def make_product_name(safe_name: str) -> str:
 
 ANNOTATION_GROUPS: dict[str, Callable[[dict[str, Any]], xr.Dataset | None]] = {
     "conditions/antenna_pattern": eopf_sentinel1.open_antenna_pattern,
+    "conditions/attitude": eopf_sentinel1.open_attitude,
     "conditions/coordinate_conversion": eopf_sentinel1.open_coordinate_conversion,
+    "conditions/doppler_centroid": eopf_sentinel1.open_doppler_centroid,
     "conditions/gcp": eopf_sentinel1.open_gcp,
+    "conditions/orbit": eopf_sentinel1.open_orbit,
 }
 
 

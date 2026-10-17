@@ -19,8 +19,10 @@ dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
 - The EOPF datasets are the base: `eopf_sentinel1` builds them from the `parse_xml`
   dicts with `get_tag`. The `sentinel1` openers become wrappers converting them back to
   the xarray-sentinel layout, with one `parse_xml` per call until all are ported. The
-  xarray-sentinel layout may get the EOPF float32 where float64 doesn't matter. Openers
-  never exposed in the xarray-sentinel layout, like antenna pattern, are EOPF only.
+  xarray-sentinel layout may get the EOPF float32 where float64 doesn't matter and the
+  additional EOPF variables, so the wrappers only rename, transpose and add attributes.
+  Openers never exposed in the xarray-sentinel layout, like antenna pattern, are EOPF
+  only.
 
 ## References
 
@@ -205,7 +207,12 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
      `tests/data/eopf/`. Groups not converted yet are marked `PENDING`, each step
      removes the marks of its groups.
 1. Done: node names, `eopf_product.make_product_name` tested on the examples above.
-1. orbit, attitude, doppler_centroid: from the existing openers, quirks 2 and 3.
+1. Done: orbit, attitude, doppler_centroid, `eopf_sentinel1.open_orbit`, `open_attitude`
+   and `open_doppler_centroid` with quirks 2 and 3, the bases of the `sentinel1` openers.
+   Quaternions and Doppler polynomials are float32 as in EOPF, also in the
+   xarray-sentinel layout: the XML has 7 digits, float32 keeps them within 6e-8. All
+   attitude variables are float32, where EOPF has float64 for the angular velocity and
+   the angles: pitch, roll and yaw are derived from the quaternions.
 1. Done: gcp, `eopf_sentinel1.open_gcp` with snake_case names, 2-D annotated times,
    quirk 1, and `line` and `pixel` as additional coordinates. It is the base of
    `sentinel1.open_gcp_dataset`.

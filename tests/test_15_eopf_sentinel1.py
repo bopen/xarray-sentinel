@@ -28,6 +28,32 @@ def test_open_antenna_pattern() -> None:
     assert res.slant_range_time_ap.count("count").values.min() == 563
 
 
+def test_open_attitude() -> None:
+    res = eopf_sentinel1.open_attitude(esa_safe.parse_xml(SLC_IW1_VV_annotation))
+
+    assert dict(res.sizes) == {"azimuth_time": 25}
+    assert {str(var.dtype) for var in res.data_vars.values()} == {"float32"}
+
+
+def test_open_orbit() -> None:
+    res = eopf_sentinel1.open_orbit(esa_safe.parse_xml(SLC_IW1_VV_annotation))
+
+    assert res.position.dims == ("azimuth_time", "axis")
+    assert res.axis.values.tolist() == ["x", "y", "z"]
+    assert res.attrs == {"reference_system": "Earth Fixed"}
+
+
+def test_open_doppler_centroid() -> None:
+    res = eopf_sentinel1.open_doppler_centroid(
+        esa_safe.parse_xml(SLC_IW1_VV_annotation)
+    )
+
+    assert res.degree.values.tolist() == [0, 1, 2]
+    assert res.data_dc_polynomial.dtype == "float32"
+    assert res.fine_dce_azimuth_start_time.dtype == "datetime64[ns]"
+    assert res.data_dc_rms_error_above_threshold.dtype == bool
+
+
 def test_open_coordinate_conversion() -> None:
     # dims and dtypes from the CPM 3.0 S01SIWGRD mapping
     expected = {
