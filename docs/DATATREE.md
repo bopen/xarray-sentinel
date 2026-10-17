@@ -202,9 +202,10 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
      `build_stac_discovery`, while the registry openers and `open_pol_dataset` still
      parse their XML at every call. New converters take the `parse_xml` dict and use
      `get_tag`.
-   - `tests/test_30_eopf_product.py` compares each group with the CPM 3.0 burst node in
-     `tests/data/eopf/`. Groups not converted yet are marked `PENDING`, each step
-     removes the marks of its groups.
+   - `tests/test_30_eopf_product.py` compares each group with our target structure in
+     `tests/data/eopf/S01SIWSLC_target.json`, the CPM 3.0 burst node next to it with our
+     deliberate differences. Groups not converted yet are marked `PENDING`, each step
+     removes the marks of its groups and updates the target where it differs from EOPF.
 1. Done: node names, `eopf_product.make_product_name` tested on the examples above.
 1. Done: orbit, attitude, doppler_centroid, `eopf_sentinel1.open_orbit`, `open_attitude`
    and `open_doppler_centroid` with quirks 2 and 3, the bases of the `sentinel1` openers.

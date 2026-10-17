@@ -18,45 +18,10 @@ SLC_S3 = (
     / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
 )
 SLC_IW_NODE = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
-EOPF_SLC_IW_NODE = (
-    DATA_FOLDER
-    / "eopf"
-    / "S01SIWSLC_20260731T234807_0014_C050_C079_0116E8_IW3_258176.json"
+# the CPM 3.0 burst node with our deliberate differences, see docs/DATATREE.md
+EXPECTED_SLC_IW_STRUCTURE = json.loads(
+    (DATA_FOLDER / "eopf" / "S01SIWSLC_target.json").read_text()
 )
-
-# EOPF quirks we fix, data we add and dtypes we change, see docs/DATATREE.md
-EOPF_FIXES = {
-    "conditions/attitude": {
-        name: [["azimuth_time"], "float32"]
-        for name in ["wx", "wy", "wz", "pitch", "roll", "yaw"]
-    },
-    "conditions/doppler_centroid": {
-        "fine_dce_azimuth_start_time": [
-            ["polarization", "azimuth_time"],
-            "datetime64[ns]",
-        ],
-        "fine_dce_azimuth_stop_time": [
-            ["polarization", "azimuth_time"],
-            "datetime64[ns]",
-        ],
-    },
-    "conditions/gcp": {
-        "line": [["azimuth_time"], "int64"],
-        "pixel": [["slant_range_time"], "int64"],
-    },
-    "quality/calibration": {
-        "line": [["azimuth_time"], "int64"],
-        "pixel": [["slant_range_time"], "int64"],
-    },
-    "quality/noise_range": {
-        "line": [["azimuth_time"], "int64"],
-        "pixel": [["slant_range_time"], "int64"],
-    },
-}
-EXPECTED_SLC_IW_STRUCTURE = {
-    group: variables | EOPF_FIXES.get(group, {})
-    for group, variables in json.loads(EOPF_SLC_IW_NODE.read_text()).items()
-}
 PENDING = pytest.mark.xfail(strict=True, reason="EOPF converter not implemented yet")
 
 
