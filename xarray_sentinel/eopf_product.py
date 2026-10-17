@@ -12,9 +12,7 @@ import xarray as xr
 from . import conventions, eopf_metadata, eopf_sentinel1, esa_safe, sentinel1
 
 EOPF_GROUPS: dict[str, tuple[str, Callable[..., xr.Dataset]]] = {
-    "quality/calibration": ("calibration", sentinel1.open_calibration_dataset),
     "quality/noise_azimuth": ("noise_azimuth", sentinel1.open_noise_azimuth_dataset),
-    "quality/noise_range": ("noise_range", sentinel1.open_noise_range_dataset),
 }
 POLARIZATION_INDEPENDENT_GROUPS = {"conditions/attitude", "conditions/orbit"}
 SAFE_NAME_RE = re.compile(
@@ -42,6 +40,16 @@ def make_product_name(safe_name: str) -> str:
     return product_name
 
 
+QUALITY_GROUPS: dict[
+    str, tuple[str, str, Callable[[dict[str, Any], dict[str, Any]], xr.Dataset]]
+] = {
+    "quality/calibration": (
+        "calibration",
+        "calibration",
+        eopf_sentinel1.open_calibration,
+    ),
+    "quality/noise_range": ("noise_range", "noise", eopf_sentinel1.open_noise_range),
+}
 ANNOTATION_GROUPS: dict[str, Callable[[dict[str, Any]], xr.Dataset | None]] = {
     "conditions/antenna_pattern": eopf_sentinel1.open_antenna_pattern,
     "conditions/attitude": eopf_sentinel1.open_attitude,
@@ -129,6 +137,16 @@ def open_datatree(
                     pol_datasets.setdefault(eopf_group, {})[pol] = ds.drop_attrs(
                         deep=False
                     )
+            for eopf_group, (
+                group,
+                schema_type,
+                open_quality,
+            ) in QUALITY_GROUPS.items():
+                if f"{swath}/{pol}/{group}" in groups:
+                    xml_path = groups[f"{swath}/{pol}/{group}"][0]
+                    xml_dict = esa_safe.parse_xml(xml_files[xml_path], schema_type)
+                    quality = open_quality(xml_dict, annotations[pol])
+                    pol_datasets.setdefault(eopf_group, {})[pol] = quality
             for eopf_group, converter in ANNOTATION_GROUPS.items():
                 converted = converter(annotations[pol])
                 if converted is not None:

@@ -170,8 +170,7 @@ What we do in each case follows the decisions above.
 
 - `line` and `pixel` coordinates: CPM 2.7 has them, the CPM 3.0 sample does not. The
   CPM 3.0 code drops them from calibration and noise but builds them for gcp. We keep
-  them in gcp, as additional data is safe. For the other groups check on a CPM 3.0
-  conversion, step 11, until then omit them.
+  them in gcp, calibration and noise_range, as additional data is safe.
 - `azimuth_fm_rate`, needed by sarsen: in EOPF it is only
   `other_metadata[pol]["general_annotation"]["azimuth_fm_rate_list"]`.
 - `zarr_conventions`, `spatial:bbox` and `proj:code` on the CPM 3.0 sample come from the
@@ -216,9 +215,13 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
 1. Done: gcp, `eopf_sentinel1.open_gcp` with snake_case names, 2-D annotated times,
    quirk 1, and `line` and `pixel` as additional coordinates. It is the base of
    `sentinel1.open_gcp_dataset`.
-1. calibration, noise_range: snake_case names, range coordinate from `pixel` as
+1. Done: calibration, noise_range, `eopf_sentinel1.open_calibration` and
+   `open_noise_range` with snake_case names, range coordinate from `pixel` as
    `image_slant_range_time + pixel / range_sampling_rate` for SLC and
-   `pixel * range_pixel_spacing` for GRD.
+   `pixel * range_pixel_spacing` for GRD, `line` and `pixel` as additional coordinates.
+   They need the annotation for the range coordinate while the `sentinel1` openers only
+   get their own file, so these are EOPF only and the `sentinel1` openers keep their
+   code.
 1. noise_azimuth: from the existing opener, quirk 6.
 1. Done: antenna_pattern, and GRD coordinate_conversion. `eopf_product.ANNOTATION_GROUPS`
    holds the converters of the `parse_xml` annotation, a converter returns `None` when

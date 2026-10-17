@@ -7,6 +7,12 @@ import xarray as xr
 from . import esa_safe
 
 ATTITUDE_VARIABLES = ["q0", "q1", "q2", "q3", "wx", "wy", "wz", "pitch", "roll", "yaw"]
+CALIBRATION_VARIABLES = {
+    "sigma_nought": "sigmaNought",
+    "beta_nought": "betaNought",
+    "gamma": "gamma",
+    "dn": "dn",
+}
 GCP_VARIABLES = {
     "latitude": "latitude",
     "longitude": "longitude",
@@ -171,3 +177,67 @@ def open_coordinate_conversion(annotation: dict[str, Any]) -> xr.Dataset | None:
         "degree": np.arange(srgr_coefficients[0].size),
     }
     return xr.Dataset(data_vars=data_vars, coords=coords)
+
+
+def range_coordinate(
+    pixel: np.ndarray, annotation: dict[str, Any]
+) -> tuple[str, np.ndarray]:
+    product_information = esa_safe.get_tag(
+        annotation, "generalAnnotation/productInformation"
+    )
+    image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
+    projection = product_information["projection"]
+    if projection == "Slant Range":
+        slant_range_time = (
+            image_information["slantRangeTime"]
+            + pixel / product_information["rangeSamplingRate"]
+        )
+        return "slant_range_time", slant_range_time
+    elif projection == "Ground Range":
+        return "ground_range", pixel * image_information["rangePixelSpacing"]
+    raise ValueError(f"unknown projection {projection!r}")
+
+
+def open_range_vectors(
+    vectors: list[dict[str, Any]],
+    variables: dict[str, str],
+    annotation: dict[str, Any],
+) -> xr.Dataset:
+    pixel = np.fromstring(vectors[0]["pixel"]["$"], dtype=int, sep=" ")
+    for vector in vectors:
+        if not np.array_equal(
+            np.fromstring(vector["pixel"]["$"], dtype=int, sep=" "), pixel
+        ):
+            raise ValueError("Unable to organise vectors in a regular line-pixel grid")
+    range_name, range_values = range_coordinate(pixel, annotation)
+    dims = ("azimuth_time", range_name)
+    data_vars = {
+        name: (
+            dims,
+            [np.fromstring(v[tag]["$"], dtype=np.float32, sep=" ") for v in vectors],
+        )
+        for name, tag in variables.items()
+    }
+    coords = {
+        "azimuth_time": [np.datetime64(v["azimuthTime"], "ns") for v in vectors],
+        range_name: range_values,
+        "line": ("azimuth_time", [v["line"] for v in vectors]),
+        "pixel": (range_name, pixel),
+    }
+    return xr.Dataset(data_vars=data_vars, coords=coords)
+
+
+def open_calibration(
+    calibration: dict[str, Any], annotation: dict[str, Any]
+) -> xr.Dataset:
+    vectors = esa_safe.get_tag(calibration, "calibrationVectorList/calibrationVector")
+    ds = open_range_vectors(vectors, CALIBRATION_VARIABLES, annotation)
+    ds.attrs["absolute_calibration_constant"] = esa_safe.get_tag(
+        calibration, "calibrationInformation/absoluteCalibrationConstant"
+    )
+    return ds
+
+
+def open_noise_range(noise: dict[str, Any], annotation: dict[str, Any]) -> xr.Dataset:
+    vectors = esa_safe.get_tag(noise, "noiseRangeVectorList/noiseRangeVector")
+    return open_range_vectors(vectors, {"noise_range_lut": "noiseRangeLut"}, annotation)

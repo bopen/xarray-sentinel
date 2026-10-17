@@ -44,6 +44,14 @@ EOPF_FIXES = {
         "line": [["azimuth_time"], "int64"],
         "pixel": [["slant_range_time"], "int64"],
     },
+    "quality/calibration": {
+        "line": [["azimuth_time"], "int64"],
+        "pixel": [["slant_range_time"], "int64"],
+    },
+    "quality/noise_range": {
+        "line": [["azimuth_time"], "int64"],
+        "pixel": [["slant_range_time"], "int64"],
+    },
 }
 EXPECTED_SLC_IW_STRUCTURE = {
     group: variables | EOPF_FIXES.get(group, {})
@@ -136,9 +144,9 @@ def test_open_datatree_groups(
         "conditions/doppler_centroid",
         "conditions/gcp",
         "conditions/orbit",
-        pytest.param("quality/calibration", marks=PENDING),
+        "quality/calibration",
         pytest.param("quality/noise_azimuth", marks=PENDING),
-        pytest.param("quality/noise_range", marks=PENDING),
+        "quality/noise_range",
     ],
 )
 def test_open_datatree_group_structure(

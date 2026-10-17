@@ -1,5 +1,6 @@
 import pathlib
 
+import numpy as np
 import xarray as xr
 
 from xarray_sentinel import eopf_sentinel1, esa_safe
@@ -11,6 +12,16 @@ SLC_IW1_VV_annotation = (
     / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
     / "annotation"
     / "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+)
+SLC_IW1_VV_calibration = (
+    SLC_IW1_VV_annotation.parent
+    / "calibration"
+    / "calibration-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
+)
+SLC_IW1_VV_noise = (
+    SLC_IW1_VV_annotation.parent
+    / "calibration"
+    / "noise-s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"
 )
 GRD_IW_VV_annotation = (
     DATA_FOLDER
@@ -90,3 +101,43 @@ def test_open_gcp() -> None:
     assert res.azimuth_time_gcp.dtype == "datetime64[ns]"
     assert (res.azimuth_time == res.azimuth_time_gcp.isel(slant_range_time=0)).all()
     assert (res.slant_range_time == res.slant_range_time_gcp.isel(azimuth_time=0)).all()
+
+
+def test_range_coordinate() -> None:
+    pixel = np.array([0, 10])
+    annotation = esa_safe.parse_xml(SLC_IW1_VV_annotation)
+    image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
+
+    name, values = eopf_sentinel1.range_coordinate(pixel, annotation)
+
+    assert name == "slant_range_time"
+    assert values[0] == image_information["slantRangeTime"]
+
+    name, values = eopf_sentinel1.range_coordinate(
+        pixel, esa_safe.parse_xml(GRD_IW_VV_annotation)
+    )
+
+    assert name == "ground_range"
+    assert values.tolist() == [0.0, 100.0]
+
+
+def test_open_calibration() -> None:
+    res = eopf_sentinel1.open_calibration(
+        esa_safe.parse_xml(SLC_IW1_VV_calibration, "calibration"),
+        esa_safe.parse_xml(SLC_IW1_VV_annotation),
+    )
+
+    assert res.sigma_nought.dims == ("azimuth_time", "slant_range_time")
+    assert res.sigma_nought.dtype == "float32"
+    assert res.pixel.dims == ("slant_range_time",)
+    assert res.attrs == {"absolute_calibration_constant": 1.393}
+
+
+def test_open_noise_range() -> None:
+    res = eopf_sentinel1.open_noise_range(
+        esa_safe.parse_xml(SLC_IW1_VV_noise, "noise"),
+        esa_safe.parse_xml(SLC_IW1_VV_annotation),
+    )
+
+    assert dict(res.sizes) == {"azimuth_time": 10, "slant_range_time": 542}
+    assert res.noise_range_lut.dtype == "float32"
