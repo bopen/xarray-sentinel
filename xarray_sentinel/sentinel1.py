@@ -343,27 +343,28 @@ def open_noise_azimuth_dataset(
     noise: esa_safe.PathType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
     noise_vectors = esa_safe.parse_tag_as_list(noise, "//noiseAzimuthVector", "noise")
+    if not noise_vectors:
+        return xr.Dataset(attrs=attrs)
 
-    first_range_sample = []
-    line_list = []
-    noise_azimuth_lut_list = []
+    vector_datasets = []
     for vector in noise_vectors:
-        first_range_sample.append(vector["firstRangeSample"])
         line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")
-        line_list.append(line)
         noise_azimuth_lut = np.fromstring(
             vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" "
         )
-        noise_azimuth_lut_list.append(noise_azimuth_lut)
+        data_vars = {
+            "noiseAzimuthLut": ("line", noise_azimuth_lut),
+            "firstAzimuthLine": vector["firstAzimuthLine"],
+            "lastAzimuthLine": vector["lastAzimuthLine"],
+            "firstRangeSample": vector["firstRangeSample"],
+            "lastRangeSample": vector["lastRangeSample"],
+        }
+        vector_ds = xr.Dataset(data_vars=data_vars, coords={"line": line})
+        vector_datasets.append(vector_ds.expand_dims(swath=[vector["swath"]]))
 
-    # BROKEN: GRDs have line and noise_azimuth_lut of different size, we take the first one
-    data_vars = {}
-    coords = {}
-    if first_range_sample:
-        data_vars["noiseAzimuthLut"] = ("line", noise_azimuth_lut_list[0])
-        coords["line"] = line_list[0]
-
-    return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
+    ds = xr.concat(vector_datasets, dim="swath", join="outer")
+    ds.attrs.update(attrs)
+    return ds
 
 
 def open_coordinate_conversion_dataset(
@@ -639,7 +640,7 @@ def open_dc_estimate_dataset(
             "data_dc_rms_error": ("azimuth_time", data_dc_rms_error, attrs),
             "data_dc_rms_error_above_threshold": (
                 "azimuth_time",
-                data_dc_rms_error,
+                data_dc_rms_error_above_threshold,
                 attrs,
             ),
             #

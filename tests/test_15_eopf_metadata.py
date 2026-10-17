@@ -87,6 +87,12 @@ def test_build_other_metadata() -> None:
         ],
     }
 
-    assert len(res) == 5
+    assert set(res) == {
+        "quality_information",
+        "general_annotation",
+        "image_annotation",
+        "swath_timing",
+        "swath_merging",
+    }
 
     assert res["quality_information"] == expected_quality_information

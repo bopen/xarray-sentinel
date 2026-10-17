@@ -76,7 +76,5 @@ def open_datatree(
             )
             ds.attrs.clear()
             dt[f"{eopf_product_name}/quality/{dataset}"] = ds
-        else:
-            print(f"Skipping {xarray_sentinel_group=}")
 
     return dt

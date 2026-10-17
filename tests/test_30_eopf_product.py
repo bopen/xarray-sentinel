@@ -1,5 +1,6 @@
 import pathlib
 
+import pytest
 import xarray as xr
 
 from xarray_sentinel import eopf_product
@@ -12,7 +13,8 @@ SLC_S3 = (
 )
 
 
-def test_open_datatree() -> None:
+def test_open_datatree(capsys: pytest.CaptureFixture[str]) -> None:
     res = eopf_product.open_datatree(SLC_S3, check_files_exist=True)
 
     assert isinstance(res, xr.DataTree)
+    assert capsys.readouterr().out == ""
