@@ -127,18 +127,20 @@ Still served by the sample service: one node per polarisation, swath and burst, 
 |---|---|---|
 | `IW1/VV`, `IW1/VV/<n>` | `measurements/slc`, `grd` | one node per burst instead of the swath image and burst crop, `measurement` is `slc` or `grd`, no `line`/`pixel`, product attrs move to the node |
 | `IW1/VV/orbit` | `conditions/orbit` | `(axis, azimuth_time)` is `(azimuth_time, axis)`, `axis` is `"x", "y", "z"` |
-| `IW1/VV/attitude` | `conditions/attitude` | `q0` to `q3` are float32 |
-| `IW1/VV/dc_estimate` | `conditions/doppler_centroid` | adds `fine_dce_azimuth_start_time` and `fine_dce_azimuth_stop_time` |
-| `IW1/VV/gcp` | `conditions/gcp` | snake_case names, adds 2-D `azimuth_time_gcp` and `slant_range_time_gcp` |
-| none, `open_antenna_pattern` is not exposed | `conditions/antenna_pattern` | `(azimuth_time, count)` with 2-D `slant_range_time_ap`, adds `swath` |
+| `IW1/VV/attitude` | `conditions/attitude` | none |
+| `IW1/VV/dc_estimate` | `conditions/doppler_centroid` | none |
+| `IW1/VV/gcp` | `conditions/gcp` | snake_case names |
+| none | `conditions/antenna_pattern` | EOPF only |
 | `IW/VV/coordinate_conversion`, GRD only | `conditions/coordinate_conversion` | snake_case names |
 | `IW1/VV/azimuth_fm_rate` | none | only in `other_metadata` |
-| `IW1/VV/calibration` | `quality/calibration` | snake_case names, `(line, pixel)` is `(azimuth_time, slant_range_time\|ground_range)` |
+| `IW1/VV/calibration` | `quality/calibration` | snake_case names, `(line, pixel)` is `(azimuth_time, slant_range_time\|ground_range)` with `line` and `pixel` as coordinates |
 | `IW1/VV/noise_range` | `quality/noise_range` | as calibration |
-| `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | snake_case names, `(swath, line)` is `(polarization, azimuth_time, swath)` |
+| `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | snake_case names, `(swath, line)` is `(azimuth_time, swath)` |
 | none | `burst_timing` attrs | per-line valid samples |
 
-Replica, reference replica and terrain height are only in `other_metadata` in EOPF.
+All EOPF groups except orbit and attitude also stack the polarisations along
+`polarization`. Replica, reference replica and terrain height are only in
+`other_metadata` in EOPF.
 
 ## EOPF quirks
 
@@ -214,8 +216,10 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
    attitude variables are float32, where EOPF has float64 for the angular velocity and
    the angles: pitch, roll and yaw are derived from the quaternions.
 1. Done: gcp, `eopf_sentinel1.open_gcp` with snake_case names, 2-D annotated times,
-   quirk 1, and `line` and `pixel` as additional coordinates. It is the base of
-   `sentinel1.open_gcp_dataset`.
+   quirk 1, and `line` and `pixel` as additional coordinates. The range dimension comes
+   from `pixel` like in calibration: `ground_range` for GRD, where the annotated slant
+   range times vary along azimuth by up to 3 µs. It is the base of
+   `sentinel1.open_gcp_dataset`, so the xarray-sentinel GRD gcp uses `ground_range` too.
 1. Done: calibration, noise_range, `eopf_sentinel1.open_calibration` and
    `open_noise_range` with snake_case names, range coordinate from `pixel` as
    `image_slant_range_time + pixel / range_sampling_rate` for SLC and

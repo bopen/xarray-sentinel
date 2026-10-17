@@ -135,14 +135,15 @@ def open_gcp(annotation: dict[str, Any]) -> xr.Dataset:
         index = lines.index(point["line"]), pixels.index(point["pixel"])
         for name, tag in GCP_VARIABLES.items():
             grids[name][index] = point[tag]
-    # the annotated times of the first column and row, see quirk 1 in docs/DATATREE.md
+    range_name, range_values = range_coordinate(np.array(pixels), annotation)
     coords = {
+        # the annotated times of the first column, see quirk 1 in docs/DATATREE.md
         "azimuth_time": grids["azimuth_time_gcp"][:, 0],
-        "slant_range_time": grids["slant_range_time_gcp"][0],
+        range_name: range_values,
         "line": ("azimuth_time", lines),
-        "pixel": ("slant_range_time", pixels),
+        "pixel": (range_name, pixels),
     }
-    dims = ("azimuth_time", "slant_range_time")
+    dims = ("azimuth_time", range_name)
     data_vars = {name: (dims, grid) for name, grid in grids.items()}
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
@@ -188,14 +189,16 @@ def range_coordinate(
     image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
     projection = product_information["projection"]
     if projection == "Slant Range":
-        slant_range_time = (
-            image_information["slantRangeTime"]
-            + pixel / product_information["rangeSamplingRate"]
-        )
-        return "slant_range_time", slant_range_time
+        name = "slant_range_time"
+        start = image_information["slantRangeTime"]
+        step = 1 / product_information["rangeSamplingRate"]
     elif projection == "Ground Range":
-        return "ground_range", pixel * image_information["rangePixelSpacing"]
-    raise ValueError(f"unknown projection {projection!r}")
+        name = "ground_range"
+        start = 0.0
+        step = image_information["rangePixelSpacing"]
+    else:
+        raise ValueError(f"unknown projection {projection!r}")
+    return name, start + pixel * step
 
 
 def open_range_vectors(

@@ -100,7 +100,16 @@ def test_open_gcp() -> None:
     assert dict(res.sizes) == {"azimuth_time": 10, "slant_range_time": 21}
     assert res.azimuth_time_gcp.dtype == "datetime64[ns]"
     assert (res.azimuth_time == res.azimuth_time_gcp.isel(slant_range_time=0)).all()
-    assert (res.slant_range_time == res.slant_range_time_gcp.isel(azimuth_time=0)).all()
+    np.testing.assert_allclose(
+        res.slant_range_time.values,
+        res.slant_range_time_gcp.isel(azimuth_time=0).values,
+        rtol=1e-12,
+    )
+
+    res = eopf_sentinel1.open_gcp(esa_safe.parse_xml(GRD_IW_VV_annotation))
+
+    assert res.latitude.dims == ("azimuth_time", "ground_range")
+    assert res.slant_range_time_gcp.dims == ("azimuth_time", "ground_range")
 
 
 def test_range_coordinate() -> None:

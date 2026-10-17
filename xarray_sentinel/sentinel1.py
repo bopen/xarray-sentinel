@@ -331,7 +331,8 @@ def open_gcp_dataset(
         data_var.attrs.update(attrs)
     ds.attrs.update(attrs)
 
-    footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, ds)
+    range_coordinate = ds[ds.latitude.dims[1]]
+    footprint = get_footprint_linestring(ds.azimuth_time, range_coordinate, ds)
     geospatial_attrs = make_geospatial_attributes(footprint)
     ds.attrs.update(geospatial_attrs)
 
@@ -340,29 +341,23 @@ def open_gcp_dataset(
 
 def get_footprint_linestring(
     azimuth_time: xr.DataArray,
-    slant_range_time: xr.DataArray,
+    range_coordinate: xr.DataArray,
     gcp: xr.Dataset,
     method: xr.core.types.InterpOptions = "linear",
     kwargs: dict[str, Any] = {"fill_value": "extrapolate"},
 ) -> list[tuple[float, float]]:
     azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
-    slant_range_time_mm = [slant_range_time.min(), slant_range_time.max()]
+    range_coordinate_mm = [range_coordinate.min(), range_coordinate.max()]
 
     footprint = []
     for j, i in [(0, 0), (1, 0), (1, 1), (0, 1)]:
-        lat_array = gcp["latitude"].interp(
-            azimuth_time=azimuth_time_mm[j],
-            slant_range_time=slant_range_time_mm[i],
-            method=method,
-            kwargs=kwargs,
-        )
+        corner = {
+            azimuth_time.name: azimuth_time_mm[j],
+            range_coordinate.name: range_coordinate_mm[i],
+        }
+        lat_array = gcp["latitude"].interp(corner, method=method, kwargs=kwargs)
         lat = round(lat_array.item(), 6)
-        lon_array = gcp["longitude"].interp(
-            azimuth_time=azimuth_time_mm[j],
-            slant_range_time=slant_range_time_mm[i],
-            method=method,
-            kwargs=kwargs,
-        )
+        lon_array = gcp["longitude"].interp(corner, method=method, kwargs=kwargs)
         lon = round(lon_array.item(), 6)
         footprint.append((lon, lat))
 
