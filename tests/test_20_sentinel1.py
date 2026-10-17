@@ -523,7 +523,7 @@ def test_do_override_product_files() -> None:
 )
 def test_make_sentinel1_stac_item(safe: pathlib.Path, annotation: pathlib.Path) -> None:
     item = sentinel1.make_sentinel1_stac_item(
-        "test", safe / "manifest.safe", annotation
+        "test", safe / "manifest.safe", esa_safe.parse_xml(annotation)
     )
 
     validator = stac_validator.StacValidate()

@@ -161,6 +161,29 @@ def test_parse_tag_as_list() -> None:
     assert res == []
 
 
+def test_parse_xml() -> None:
+    res = esa_safe.parse_xml(ANNOTATION_PATH)
+
+    assert isinstance(res, dict)
+    assert "generalAnnotation" in res
+    assert res["swathTiming"] == esa_safe.parse_tag(ANNOTATION_PATH, "//swathTiming")
+
+
+def test_get_tag() -> None:
+    xml_dict = esa_safe.parse_xml(ANNOTATION_PATH)
+
+    res = esa_safe.get_tag(xml_dict, "generalAnnotation/productInformation")
+
+    assert res == esa_safe.parse_tag(ANNOTATION_PATH, "//productInformation")
+
+    res = esa_safe.get_tag(xml_dict, "swathTiming/burstList/burst")
+
+    assert res == esa_safe.parse_tag_as_list(ANNOTATION_PATH, "//burst")
+
+    with pytest.raises(KeyError):
+        esa_safe.get_tag(xml_dict, "generalAnnotation/dummy")
+
+
 def test_parse_annotation_filename() -> None:
     res = esa_safe.parse_annotation_filename(
         "s1b-iw1-slc-vv-20210401t052624-20210401t052649-026269-032297-004.xml"

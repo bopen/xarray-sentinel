@@ -1277,15 +1277,17 @@ def open_sentinel1_dataset(
 def make_sentinel1_stac_item(
     item_id: str,
     manifest_path: esa_safe.PathOrFileType,
-    annotation: esa_safe.PathOrFileType,
+    annotation: dict[str, Any],
     namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
 ) -> dict[str, Any]:
     if hasattr(manifest_path, "seek"):
         manifest_path.seek(0)
     manifest = ElementTree.parse(manifest_path).getroot()
 
-    product_information = esa_safe.parse_tag(annotation, "//productInformation")
-    image_information = esa_safe.parse_tag(annotation, "//imageInformation")
+    product_information = esa_safe.get_tag(
+        annotation, "generalAnnotation/productInformation"
+    )
+    image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
 
     coordinates = [
         [float(v) for v in token.split(",")]

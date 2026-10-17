@@ -1,6 +1,6 @@
 import pathlib
 
-from xarray_sentinel import eopf_metadata
+from xarray_sentinel import eopf_metadata, esa_safe
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
@@ -25,7 +25,7 @@ def test_to_snake_recursive() -> None:
 
 
 def test_build_other_metadata() -> None:
-    res = eopf_metadata.build_other_metadata(SLC_S3_VH_annotation)
+    res = eopf_metadata.build_other_metadata(esa_safe.parse_xml(SLC_S3_VH_annotation))
     expected_quality_information = {
         "product_quality_index": 0.0,
         "quality_data_list": [

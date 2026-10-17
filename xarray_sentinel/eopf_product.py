@@ -79,11 +79,13 @@ def open_datatree(
     for swath, pols in swath_pols.items():
         bursts: dict[str | None, dict[str, xr.Dataset]] = {}
         pol_datasets: dict[str, dict[str, xr.Dataset]] = {}
+        annotations = {}
         other_metadata = {}
         for pol in pols:
-            measurement, annotation = groups[f"{swath}/{pol}"][:2]
+            measurement_path, annotation_path = groups[f"{swath}/{pol}"][:2]
+            annotations[pol] = esa_safe.parse_xml(xml_files[annotation_path])
             pol_dataset = sentinel1.open_pol_dataset(
-                measurement, xml_files[annotation], fs=fs
+                measurement_path, xml_files[annotation_path], fs=fs
             )
             pol_dataset = conventions.update_attributes(pol_dataset)
             for burst_id, burst in split_bursts(pol_dataset).items():
@@ -96,13 +98,10 @@ def open_datatree(
                     pol_datasets.setdefault(eopf_group, {})[pol] = ds.drop_attrs(
                         deep=False
                     )
-            other_metadata[pol] = eopf_metadata.build_other_metadata(
-                xml_files[annotation]
-            )
+            other_metadata[pol] = eopf_metadata.build_other_metadata(annotations[pol])
 
-        first_annotation = groups[f"{swath}/{pols[0]}"][1]
         stac_discovery = sentinel1.make_sentinel1_stac_item(
-            "noid", manifest, xml_files[first_annotation]
+            "noid", manifest, annotations[pols[0]]
         )
         node_groups = {}
         for eopf_group, datasets in pol_datasets.items():

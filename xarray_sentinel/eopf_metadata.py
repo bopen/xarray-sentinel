@@ -4,8 +4,6 @@ from typing import Any
 
 import numpy as np
 
-from . import esa_safe
-
 
 # taken from pydantic.alias_generators, MIT license
 def to_snake(camel: str) -> str:
@@ -97,18 +95,13 @@ def build_general_annotation(general_annotation: dict[str, Any]) -> dict[str, An
     return general_annotation
 
 
-def build_other_metadata(annotation: esa_safe.PathOrFileType) -> dict[str, Any]:
+def build_other_metadata(annotation: dict[str, Any]) -> dict[str, Any]:
     warnings.warn("This is an unofficial, alpha converter", UserWarning)
-    quality_information = esa_safe.parse_tag(annotation, "//qualityInformation")
-    quality_information = filter_metadata_dict(quality_information)
-    general_annotation = esa_safe.parse_tag(annotation, "//generalAnnotation")
-    general_annotation = build_general_annotation(general_annotation)
-    image_information = esa_safe.parse_tag(annotation, "//imageAnnotation")
-    image_information = filter_metadata_dict(image_information)
-    swath_merging = esa_safe.parse_tag(annotation, "//swathMerging")
-    swath_merging = filter_metadata_dict(swath_merging)
-    swath_timing = esa_safe.parse_tag(annotation, "//swathTiming")
-    swath_timing = filter_metadata_dict(swath_timing)
+    quality_information = filter_metadata_dict(annotation["qualityInformation"])
+    general_annotation = build_general_annotation(annotation["generalAnnotation"])
+    image_information = filter_metadata_dict(annotation["imageAnnotation"])
+    swath_merging = filter_metadata_dict(annotation["swathMerging"])
+    swath_timing = filter_metadata_dict(annotation["swathTiming"])
 
     other_metadata = {
         "quality_information": quality_information,
