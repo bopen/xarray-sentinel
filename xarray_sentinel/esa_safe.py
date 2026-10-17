@@ -3,13 +3,13 @@ import importlib.resources
 import os
 import re
 from collections.abc import Mapping
-from typing import Any, TextIO
+from typing import IO, Any
 from xml.etree import ElementTree
 
 import xmlschema
 
 PathType = str | os.PathLike[str]
-PathOrFileType = PathType | TextIO
+PathOrFileType = PathType | IO[Any]
 
 
 SENTINEL1_NAMESPACES = {

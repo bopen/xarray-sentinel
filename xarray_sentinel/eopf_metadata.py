@@ -2,7 +2,6 @@ import re
 import warnings
 from typing import Any
 
-import fsspec
 import numpy as np
 
 from . import esa_safe
@@ -98,19 +97,18 @@ def build_general_annotation(general_annotation: dict[str, Any]) -> dict[str, An
     return general_annotation
 
 
-def build_other_metadata(annotation_urlpath: esa_safe.PathType) -> dict[str, Any]:
+def build_other_metadata(annotation: esa_safe.PathOrFileType) -> dict[str, Any]:
     warnings.warn("This is an unofficial, alpha converter", UserWarning)
-    with fsspec.open(annotation_urlpath) as fp:
-        quality_information = esa_safe.parse_tag(fp, "//qualityInformation")
-        quality_information = filter_metadata_dict(quality_information)
-        general_annotation = esa_safe.parse_tag(fp, "//generalAnnotation")
-        general_annotation = build_general_annotation(general_annotation)
-        image_information = esa_safe.parse_tag(fp, "//imageAnnotation")
-        image_information = filter_metadata_dict(image_information)
-        swath_merging = esa_safe.parse_tag(fp, "//swathMerging")
-        swath_merging = filter_metadata_dict(swath_merging)
-        swath_timing = esa_safe.parse_tag(fp, "//swathTiming")
-        swath_timing = filter_metadata_dict(swath_timing)
+    quality_information = esa_safe.parse_tag(annotation, "//qualityInformation")
+    quality_information = filter_metadata_dict(quality_information)
+    general_annotation = esa_safe.parse_tag(annotation, "//generalAnnotation")
+    general_annotation = build_general_annotation(general_annotation)
+    image_information = esa_safe.parse_tag(annotation, "//imageAnnotation")
+    image_information = filter_metadata_dict(image_information)
+    swath_merging = esa_safe.parse_tag(annotation, "//swathMerging")
+    swath_merging = filter_metadata_dict(swath_merging)
+    swath_timing = esa_safe.parse_tag(annotation, "//swathTiming")
+    swath_timing = filter_metadata_dict(swath_timing)
 
     other_metadata = {
         "quality_information": quality_information,

@@ -25,7 +25,7 @@ import pandas as pd
 import rasterio
 import xarray as xr
 
-from . import conventions, eopf_metadata, esa_safe
+from . import conventions, esa_safe
 
 SPEED_OF_LIGHT = 299_792_458  # m / s
 ONE_SECOND = np.timedelta64(1, "s")
@@ -1203,7 +1203,6 @@ def open_sentinel1_dataset(
     check_files_exist: bool = False,
     override_product_files: str | None = None,
     parse_geospatial_attrs: bool = True,
-    parse_eopf_metadata: bool = False,
     rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.Dataset:
     if drop_variables is not None:
@@ -1258,13 +1257,6 @@ def open_sentinel1_dataset(
                     gcp=gcp,
                     rasterio_chunks=rasterio_chunks,
                 )
-                if parse_eopf_metadata:
-                    ds.attrs["other_metadata"] = eopf_metadata.build_other_metadata(
-                        annotation
-                    )
-                    ds.attrs["stac_discovery"] = make_sentinel1_stac_item(
-                        "noid", manifest_path, annotation
-                    )
         elif group.count("/") == 2:
             _, _, metadata = group.split("/", 2)
             with fs.open(groups[group][0]) as file:
