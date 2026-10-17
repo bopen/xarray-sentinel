@@ -1,8 +1,8 @@
 import re
 import warnings
 from typing import Any
+from xml.etree import ElementTree
 
-import fsspec
 import numpy as np
 
 from . import esa_safe
@@ -98,19 +98,13 @@ def build_general_annotation(general_annotation: dict[str, Any]) -> dict[str, An
     return general_annotation
 
 
-def build_other_metadata(annotation_urlpath: esa_safe.PathType) -> dict[str, Any]:
+def build_other_metadata(annotation: dict[str, Any]) -> dict[str, Any]:
     warnings.warn("This is an unofficial, alpha converter", UserWarning)
-    with fsspec.open(annotation_urlpath) as fp:
-        quality_information = esa_safe.parse_tag(fp, "//qualityInformation")
-        quality_information = filter_metadata_dict(quality_information)
-        general_annotation = esa_safe.parse_tag(fp, "//generalAnnotation")
-        general_annotation = build_general_annotation(general_annotation)
-        image_information = esa_safe.parse_tag(fp, "//imageAnnotation")
-        image_information = filter_metadata_dict(image_information)
-        swath_merging = esa_safe.parse_tag(fp, "//swathMerging")
-        swath_merging = filter_metadata_dict(swath_merging)
-        swath_timing = esa_safe.parse_tag(fp, "//swathTiming")
-        swath_timing = filter_metadata_dict(swath_timing)
+    quality_information = filter_metadata_dict(annotation["qualityInformation"])
+    general_annotation = build_general_annotation(annotation["generalAnnotation"])
+    image_information = filter_metadata_dict(annotation["imageAnnotation"])
+    swath_merging = filter_metadata_dict(annotation["swathMerging"])
+    swath_timing = filter_metadata_dict(annotation["swathTiming"])
 
     other_metadata = {
         "quality_information": quality_information,
@@ -120,3 +114,109 @@ def build_other_metadata(annotation_urlpath: esa_safe.PathType) -> dict[str, Any
         "swath_merging": swath_merging,
     }
     return other_metadata
+
+
+def build_stac_discovery(
+    item_id: str,
+    manifest_path: esa_safe.PathOrFileType,
+    annotation: dict[str, Any],
+    namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
+) -> dict[str, Any]:
+    if hasattr(manifest_path, "seek"):
+        manifest_path.seek(0)
+    manifest = ElementTree.parse(manifest_path).getroot()
+
+    product_information = esa_safe.get_tag(
+        annotation, "generalAnnotation/productInformation"
+    )
+    image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
+
+    coordinates = [
+        [float(v) for v in token.split(",")]
+        for token in esa_safe.findtext(manifest, ".//gml:coordinates").split()
+    ]
+    coordinates += coordinates[:1]
+    product_timeliness = esa_safe.findtext(
+        manifest, ".//s1sarl1:productTimelinessCategory"
+    )
+    product_timeliness_map = {
+        "Fast-24h": {
+            "product:timeliness_category": "STC",
+            "product:timeliness": "PT24H",
+        },
+        "NRT-3h": {
+            "product:timeliness_category": "NRT",
+            "product:timeliness": "PT3H",
+        },
+    }
+
+    stac_item = {
+        "type": "Feature",
+        "stac_version": "1.1.0",
+        "stac_extensions": [
+            "https://stac-extensions.github.io/product/v0.1.0/schema.json",
+            "https://stac-extensions.github.io/processing/v1.2.0/schema.json",
+            "https://stac-extensions.github.io/sat/v1.0.0/schema.json",
+            "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+            "https://stac-extensions.github.io/sar/v1.2.0/schema.json",
+            "https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json",
+        ],
+        "id": item_id,
+        "properties": {
+            "datetime": None,
+            "start_datetime": esa_safe.findtext(manifest, ".//safe:startTime") + "Z",
+            "end_datetime": esa_safe.findtext(manifest, ".//safe:stopTime") + "Z",
+            "created": manifest.find(
+                ".//safe:processing", namespaces=namespaces
+            ).attrib["stop"]  # type: ignore
+            + "Z",
+            "platform": "sentinel-1"
+            + esa_safe.findtext(manifest, ".//safe:platform/safe:number").lower(),
+            "instruments": ["sar"],
+            "constellation": "sentinel-1",
+            "product:type": esa_safe.findtext(manifest, ".//s1sarl1:productType"),
+            "product:timeliness_category": product_timeliness_map[product_timeliness][
+                "product:timeliness_category"
+            ],
+            "product:timeliness": product_timeliness_map[product_timeliness][
+                "product:timeliness"
+            ],
+            "processing:software": manifest.find(
+                ".//safe:software", namespaces=namespaces
+            ).attrib,  # type: ignore
+            "sat:platform_international_designator": esa_safe.findtext(
+                manifest, ".//safe:nssdcIdentifier"
+            ),
+            "sat:absolute_orbit": int(
+                esa_safe.findall(manifest, ".//safe:orbitNumber")[0]
+            ),
+            "sat:relative_orbit": int(
+                esa_safe.findall(manifest, ".//safe:relativeOrbitNumber")[0]
+            ),
+            "sat:orbit_state": esa_safe.findtext(manifest, ".//s1:pass").lower(),
+            "sat:anx_datetime": esa_safe.findtext(manifest, ".//s1:ascendingNodeTime")
+            + "Z",
+            "view:incidence_angle": image_information["incidenceAngleMidSwath"],
+            "sar:polarizations": esa_safe.findall(
+                manifest, ".//s1sarl1:transmitterReceiverPolarisation"
+            ),
+            "sar:instrument_mode": esa_safe.findtext(
+                manifest, ".//s1sarl1:instrumentMode/s1sarl1:mode"
+            ),
+            "sar:frequency_band": "C",
+            "sar:center_frequency": product_information["radarFrequency"] / 1e9,
+            "sar:pixel_spacing_range": image_information["rangePixelSpacing"],
+            "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
+            "sar:observation_direction": "right",
+            "sar:beam_ids": esa_safe.findall(
+                manifest, ".//s1sarl1:instrumentMode/s1sarl1:swath"
+            ),
+            "eopf:datatake_id": esa_safe.findtext(
+                manifest, ".//s1sarl1:missionDataTakeID"
+            ),
+        },
+        "geometry": {"type": "Polygon", "coordinates": [coordinates]},
+        "links": [],
+        "assets": {},
+    }
+    return stac_item

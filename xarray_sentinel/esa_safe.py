@@ -3,13 +3,13 @@ import importlib.resources
 import os
 import re
 from collections.abc import Mapping
-from typing import Any, TextIO
+from typing import IO, Any
 from xml.etree import ElementTree
 
 import xmlschema
 
 PathType = str | os.PathLike[str]
-PathOrFileType = PathType | TextIO
+PathOrFileType = PathType | IO[Any]
 
 
 SENTINEL1_NAMESPACES = {
@@ -60,6 +60,8 @@ def parse_tag_as_list(
     validation: str = "skip",
 ) -> list[dict[str, Any]]:
     schema = cached_sentinel1_schemas(schema_type)
+    if hasattr(xml_path, "seek"):
+        xml_path.seek(0)
     xml_tree = ElementTree.parse(xml_path)
     tag: Any = schema.decode(xml_tree, query, validation=validation)
     if tag is None:
@@ -69,6 +71,27 @@ def parse_tag_as_list(
     tag_list: list[dict[str, Any]] = tag
     assert isinstance(tag_list, list), f"{type(tag_list)} is not list"
     return tag_list
+
+
+def parse_xml(
+    xml_path: PathOrFileType,
+    schema_type: str = "annotation",
+    validation: str = "skip",
+) -> dict[str, Any]:
+    schema = cached_sentinel1_schemas(schema_type)
+    if hasattr(xml_path, "seek"):
+        xml_path.seek(0)
+    xml_tree = ElementTree.parse(xml_path)
+    xml_dict: Any = schema.decode(xml_tree, validation=validation)
+    assert isinstance(xml_dict, dict), f"{type(xml_dict)} is not dict"
+    return xml_dict
+
+
+def get_tag(xml_dict: dict[str, Any], path: str) -> Any:
+    tag: Any = xml_dict
+    for name in path.split("/"):
+        tag = tag[name]
+    return tag
 
 
 def findtext(

@@ -16,7 +16,6 @@ import os
 import warnings
 from collections.abc import Sequence
 from typing import Any, TypeVar
-from xml.etree import ElementTree
 
 import fsspec
 import numpy as np
@@ -25,7 +24,7 @@ import pandas as pd
 import rasterio
 import xarray as xr
 
-from . import conventions, eopf_metadata, esa_safe
+from . import conventions, esa_safe
 
 SPEED_OF_LIGHT = 299_792_458  # m / s
 ONE_SECOND = np.timedelta64(1, "s")
@@ -1203,7 +1202,6 @@ def open_sentinel1_dataset(
     check_files_exist: bool = False,
     override_product_files: str | None = None,
     parse_geospatial_attrs: bool = True,
-    parse_eopf_metadata: bool = False,
     rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.Dataset:
     if drop_variables is not None:
@@ -1258,13 +1256,6 @@ def open_sentinel1_dataset(
                     gcp=gcp,
                     rasterio_chunks=rasterio_chunks,
                 )
-                if parse_eopf_metadata:
-                    ds.attrs["other_metadata"] = eopf_metadata.build_other_metadata(
-                        annotation
-                    )
-                    ds.attrs["stac_discovery"] = make_sentinel1_stac_item(
-                        "noid", manifest_path, annotation
-                    )
         elif group.count("/") == 2:
             _, _, metadata = group.split("/", 2)
             with fs.open(groups[group][0]) as file:
@@ -1280,105 +1271,3 @@ def open_sentinel1_dataset(
     conventions.update_attributes(ds, group=metadata)
 
     return ds
-
-
-def make_sentinel1_stac_item(
-    item_id: str,
-    manifest_path: esa_safe.PathOrFileType,
-    annotation: esa_safe.PathOrFileType,
-    namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
-) -> dict[str, Any]:
-    manifest = ElementTree.parse(manifest_path).getroot()
-
-    product_information = esa_safe.parse_tag(annotation, "//productInformation")
-    image_information = esa_safe.parse_tag(annotation, "//imageInformation")
-
-    coordinates = [
-        [float(v) for v in token.split(",")]
-        for token in esa_safe.findtext(manifest, ".//gml:coordinates").split()
-    ]
-    coordinates += coordinates[:1]
-    product_timeliness = esa_safe.findtext(
-        manifest, ".//s1sarl1:productTimelinessCategory"
-    )
-    product_timeliness_map = {
-        "Fast-24h": {
-            "product:timeliness_category": "STC",
-            "product:timeliness": "PT24H",
-        },
-        "NRT-3h": {
-            "product:timeliness_category": "NRT",
-            "product:timeliness": "PT3H",
-        },
-    }
-
-    stac_item = {
-        "type": "Feature",
-        "stac_version": "1.1.0",
-        "stac_extensions": [
-            "https://stac-extensions.github.io/product/v0.1.0/schema.json",
-            "https://stac-extensions.github.io/processing/v1.2.0/schema.json",
-            "https://stac-extensions.github.io/sat/v1.0.0/schema.json",
-            "https://stac-extensions.github.io/view/v1.0.0/schema.json",
-            "https://stac-extensions.github.io/sar/v1.2.0/schema.json",
-            "https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json",
-        ],
-        "id": item_id,
-        "properties": {
-            "datetime": None,
-            "start_datetime": esa_safe.findtext(manifest, ".//safe:startTime") + "Z",
-            "end_datetime": esa_safe.findtext(manifest, ".//safe:stopTime") + "Z",
-            "created": manifest.find(
-                ".//safe:processing", namespaces=namespaces
-            ).attrib["stop"]  # type: ignore
-            + "Z",
-            "platform": "sentinel-1"
-            + esa_safe.findtext(manifest, ".//safe:platform/safe:number").lower(),
-            "instruments": ["sar"],
-            "constellation": "sentinel-1",
-            "product:type": esa_safe.findtext(manifest, ".//s1sarl1:productType"),
-            "product:timeliness_category": product_timeliness_map[product_timeliness][
-                "product:timeliness_category"
-            ],
-            "product:timeliness": product_timeliness_map[product_timeliness][
-                "product:timeliness"
-            ],
-            "processing:software": manifest.find(
-                ".//safe:software", namespaces=namespaces
-            ).attrib,  # type: ignore
-            "sat:platform_international_designator": esa_safe.findtext(
-                manifest, ".//safe:nssdcIdentifier"
-            ),
-            "sat:absolute_orbit": int(
-                esa_safe.findall(manifest, ".//safe:orbitNumber")[0]
-            ),
-            "sat:relative_orbit": int(
-                esa_safe.findall(manifest, ".//safe:relativeOrbitNumber")[0]
-            ),
-            "sat:orbit_state": esa_safe.findtext(manifest, ".//s1:pass").lower(),
-            "sat:anx_datetime": esa_safe.findtext(manifest, ".//s1:ascendingNodeTime")
-            + "Z",
-            "view:incidence_angle": image_information["incidenceAngleMidSwath"],
-            "sar:polarizations": esa_safe.findall(
-                manifest, ".//s1sarl1:transmitterReceiverPolarisation"
-            ),
-            "sar:instrument_mode": esa_safe.findtext(
-                manifest, ".//s1sarl1:instrumentMode/s1sarl1:mode"
-            ),
-            "sar:frequency_band": "C",
-            "sar:center_frequency": product_information["radarFrequency"] / 1e9,
-            "sar:pixel_spacing_range": image_information["rangePixelSpacing"],
-            "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
-            "sar:observation_direction": "right",
-            "sar:beam_ids": esa_safe.findall(
-                manifest, ".//s1sarl1:instrumentMode/s1sarl1:swath"
-            ),
-            "eopf:datatake_id": esa_safe.findtext(
-                manifest, ".//s1sarl1:missionDataTakeID"
-            ),
-        },
-        "geometry": {"type": "Polygon", "coordinates": [coordinates]},
-        "links": [],
-        "assets": {},
-    }
-    return stac_item
