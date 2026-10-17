@@ -324,48 +324,13 @@ def is_clockwise(poly: list[tuple[float, float]]) -> bool:
 def open_gcp_dataset(
     annotation: esa_safe.PathOrFileType, attrs: dict[str, Any] = {}
 ) -> xr.Dataset:
-    geolocation_grid_points = esa_safe.parse_tag_as_list(
-        annotation, "//geolocationGridPoint"
-    )
-
-    azimuth_time = []
-    slant_range_time = []
-    line_set = set()
-    pixel_set = set()
-    for ggp in geolocation_grid_points:
-        if ggp["line"] not in line_set:
-            azimuth_time.append(np.datetime64(ggp["azimuthTime"], "ns"))
-            line_set.add(ggp["line"])
-        if ggp["pixel"] not in pixel_set:
-            slant_range_time.append(ggp["slantRangeTime"])
-            pixel_set.add(ggp["pixel"])
-    shape = (len(azimuth_time), len(slant_range_time))
-    dims = ("azimuth_time", "slant_range_time")
-    data_vars = {
-        "latitude": (dims, np.full(shape, np.nan), attrs),
-        "longitude": (dims, np.full(shape, np.nan), attrs),
-        "height": (dims, np.full(shape, np.nan), attrs),
-        "incidenceAngle": (dims, np.full(shape, np.nan), attrs),
-        "elevationAngle": (dims, np.full(shape, np.nan), attrs),
-    }
-    line = sorted(line_set)
-    pixel = sorted(pixel_set)
-    for ggp in geolocation_grid_points:
-        for var in data_vars:
-            j = line.index(ggp["line"])
-            i = pixel.index(ggp["pixel"])
-            data_vars[var][1][j, i] = ggp[var]
-
-    ds = xr.Dataset(
-        data_vars=data_vars,
-        coords={
-            "azimuth_time": azimuth_time,
-            "slant_range_time": slant_range_time,
-            "line": ("azimuth_time", line),
-            "pixel": ("slant_range_time", pixel),
-        },
-        attrs=attrs,
-    )
+    xml_dict = esa_safe.parse_xml(annotation)
+    ds = eopf_sentinel1.open_gcp(xml_dict)
+    ds = ds.drop_vars(["azimuth_time_gcp", "slant_range_time_gcp"])
+    ds = ds.rename(incidence_angle="incidenceAngle", elevation_angle="elevationAngle")
+    for data_var in ds.data_vars.values():
+        data_var.attrs.update(attrs)
+    ds.attrs.update(attrs)
 
     footprint = get_footprint_linestring(ds.azimuth_time, ds.slant_range_time, ds)
     geospatial_attrs = make_geospatial_attributes(footprint)

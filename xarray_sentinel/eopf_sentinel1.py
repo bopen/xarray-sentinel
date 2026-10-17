@@ -5,6 +5,16 @@ import xarray as xr
 
 from . import esa_safe
 
+GCP_VARIABLES = {
+    "latitude": "latitude",
+    "longitude": "longitude",
+    "height": "height",
+    "incidence_angle": "incidenceAngle",
+    "elevation_angle": "elevationAngle",
+    "azimuth_time_gcp": "azimuthTime",
+    "slant_range_time_gcp": "slantRangeTime",
+}
+
 
 def open_antenna_pattern(annotation: dict[str, Any]) -> xr.Dataset:
     patterns = esa_safe.get_tag(
@@ -32,6 +42,31 @@ def open_antenna_pattern(annotation: dict[str, Any]) -> xr.Dataset:
         azimuth_time = [np.datetime64(pattern["azimuthTime"], "ns")]
         pattern_datasets.append(pattern_dataset.expand_dims(azimuth_time=azimuth_time))
     return xr.concat(pattern_datasets, dim="azimuth_time", join="outer")
+
+
+def open_gcp(annotation: dict[str, Any]) -> xr.Dataset:
+    points = esa_safe.get_tag(
+        annotation, "geolocationGrid/geolocationGridPointList/geolocationGridPoint"
+    )
+    lines = sorted({point["line"] for point in points})
+    pixels = sorted({point["pixel"] for point in points})
+    shape = (len(lines), len(pixels))
+    grids = {name: np.full(shape, np.nan) for name in GCP_VARIABLES}
+    grids["azimuth_time_gcp"] = np.full(shape, np.datetime64("NaT", "ns"))
+    for point in points:
+        index = lines.index(point["line"]), pixels.index(point["pixel"])
+        for name, tag in GCP_VARIABLES.items():
+            grids[name][index] = point[tag]
+    # the annotated times of the first column and row, see quirk 1 in docs/DATATREE.md
+    coords = {
+        "azimuth_time": grids["azimuth_time_gcp"][:, 0],
+        "slant_range_time": grids["slant_range_time_gcp"][0],
+        "line": ("azimuth_time", lines),
+        "pixel": ("slant_range_time", pixels),
+    }
+    dims = ("azimuth_time", "slant_range_time")
+    data_vars = {name: (dims, grid) for name, grid in grids.items()}
+    return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
 def open_coordinate_conversion(annotation: dict[str, Any]) -> xr.Dataset | None:

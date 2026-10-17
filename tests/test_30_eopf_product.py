@@ -24,7 +24,7 @@ EOPF_SLC_IW_NODE = (
     / "S01SIWSLC_20260731T234807_0014_C050_C079_0116E8_IW3_258176.json"
 )
 
-# EOPF quirks we fix, see docs/DATATREE.md
+# EOPF quirks we fix and data we add, see docs/DATATREE.md
 EOPF_FIXES = {
     "conditions/doppler_centroid": {
         "fine_dce_azimuth_start_time": [
@@ -35,6 +35,10 @@ EOPF_FIXES = {
             ["polarization", "azimuth_time"],
             "datetime64[ns]",
         ],
+    },
+    "conditions/gcp": {
+        "line": [["azimuth_time"], "int64"],
+        "pixel": [["slant_range_time"], "int64"],
     },
 }
 EXPECTED_SLC_IW_STRUCTURE = {
@@ -126,7 +130,7 @@ def test_open_datatree_groups(
         "conditions/antenna_pattern",
         pytest.param("conditions/attitude", marks=PENDING),
         pytest.param("conditions/doppler_centroid", marks=PENDING),
-        pytest.param("conditions/gcp", marks=PENDING),
+        "conditions/gcp",
         pytest.param("conditions/orbit", marks=PENDING),
         pytest.param("quality/calibration", marks=PENDING),
         pytest.param("quality/noise_azimuth", marks=PENDING),

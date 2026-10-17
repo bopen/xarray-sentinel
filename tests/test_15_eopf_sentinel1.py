@@ -55,3 +55,12 @@ def test_open_coordinate_conversion() -> None:
     )
 
     assert res is None
+
+
+def test_open_gcp() -> None:
+    res = eopf_sentinel1.open_gcp(esa_safe.parse_xml(SLC_IW1_VV_annotation))
+
+    assert dict(res.sizes) == {"azimuth_time": 10, "slant_range_time": 21}
+    assert res.azimuth_time_gcp.dtype == "datetime64[ns]"
+    assert (res.azimuth_time == res.azimuth_time_gcp.isel(slant_range_time=0)).all()
+    assert (res.slant_range_time == res.slant_range_time_gcp.isel(azimuth_time=0)).all()

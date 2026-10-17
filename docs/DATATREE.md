@@ -167,8 +167,9 @@ What we do in each case follows the decisions above.
 ## Open points
 
 - `line` and `pixel` coordinates: CPM 2.7 has them, the CPM 3.0 sample does not. The
-  CPM 3.0 code drops them from calibration and noise but builds them for gcp. Check on a
-  CPM 3.0 conversion, step 11, until then omit them.
+  CPM 3.0 code drops them from calibration and noise but builds them for gcp. We keep
+  them in gcp, as additional data is safe. For the other groups check on a CPM 3.0
+  conversion, step 11, until then omit them.
 - `azimuth_fm_rate`, needed by sarsen: in EOPF it is only
   `other_metadata[pol]["general_annotation"]["azimuth_fm_rate_list"]`.
 - `zarr_conventions`, `spatial:bbox` and `proj:code` on the CPM 3.0 sample come from the
@@ -205,7 +206,9 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
      removes the marks of its groups.
 1. Done: node names, `eopf_product.make_product_name` tested on the examples above.
 1. orbit, attitude, doppler_centroid: from the existing openers, quirks 2 and 3.
-1. gcp: snake_case names, 2-D annotated times, quirk 1.
+1. Done: gcp, `eopf_sentinel1.open_gcp` with snake_case names, 2-D annotated times,
+   quirk 1, and `line` and `pixel` as additional coordinates. It is the base of
+   `sentinel1.open_gcp_dataset`.
 1. calibration, noise_range: snake_case names, range coordinate from `pixel` as
    `image_slant_range_time + pixel / range_sampling_rate` for SLC and
    `pixel * range_pixel_spacing` for GRD.
