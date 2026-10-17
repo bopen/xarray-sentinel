@@ -26,7 +26,6 @@ SLC_IW_NODE = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
 EXPECTED_SLC_IW_STRUCTURE = json.loads(
     (DATA_FOLDER / "eopf" / "S01SIWSLC_target.json").read_text()
 )
-PENDING = pytest.mark.xfail(strict=True, reason="EOPF converter not implemented yet")
 
 
 def datatree_structure(dt: xr.DataTree) -> dict[str, dict[str, list[Any]]]:
@@ -73,6 +72,11 @@ def test_open_datatree_grd() -> None:
     node = res["S01SIWGRD_20211223T051122_0025_B172_5371_039993"]
 
     assert "coordinate_conversion" in node["conditions"].children
+    assert node["measurements/grd"].dims == (
+        "polarization",
+        "azimuth_time",
+        "ground_range",
+    )
     for group in ["conditions/gcp", "quality/calibration", "quality/noise_range"]:
         assert "ground_range" in node[group].dims
 
@@ -103,6 +107,13 @@ def test_open_datatree_bursts() -> None:
     assert isinstance(slc, xr.DataArray)
     assert slc.dims == ("polarization", "azimuth_time", "slant_range_time")
     assert slc.polarization.values.tolist() == ["VH", "VV"]
+    assert slc.attrs == {"long_name": "digital number"}
+    assert slc.chunks is not None
+    assert {d: c[0] for d, c in zip(slc.dims, slc.chunks)} == {
+        "polarization": 1,
+        "azimuth_time": slc.sizes["azimuth_time"],
+        "slant_range_time": 4096,
+    }
     assert node["quality/calibration"].sizes["polarization"] == 2
     assert "polarization" not in node["conditions/orbit"].dims
 
@@ -113,23 +124,7 @@ def test_open_datatree_groups(
     assert slc_iw_node_structure.keys() == EXPECTED_SLC_IW_STRUCTURE.keys()
 
 
-@pytest.mark.parametrize(
-    "group",
-    [
-        ".",
-        "conditions",
-        "quality",
-        pytest.param("measurements", marks=PENDING),
-        "conditions/antenna_pattern",
-        "conditions/attitude",
-        "conditions/doppler_centroid",
-        "conditions/gcp",
-        "conditions/orbit",
-        "quality/calibration",
-        "quality/noise_azimuth",
-        "quality/noise_range",
-    ],
-)
+@pytest.mark.parametrize("group", sorted(EXPECTED_SLC_IW_STRUCTURE))
 def test_open_datatree_group_structure(
     slc_iw_node_structure: dict[str, dict[str, list[Any]]], group: str
 ) -> None:

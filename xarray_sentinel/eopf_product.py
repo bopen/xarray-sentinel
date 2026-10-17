@@ -62,14 +62,26 @@ ANNOTATION_GROUPS: dict[str, Callable[[dict[str, Any]], xr.Dataset | None]] = {
 }
 
 
-def split_bursts(pol_dataset: xr.Dataset) -> dict[str | None, xr.Dataset]:
-    if "number_of_bursts" not in pol_dataset.attrs:
-        return {None: pol_dataset}
+def split_measurements(
+    pol_dataset: xr.Dataset, name: str
+) -> dict[str | None, xr.Dataset]:
     bursts: dict[str | None, xr.Dataset] = {}
-    for burst_index in range(pol_dataset.attrs["number_of_bursts"]):
-        burst = sentinel1.crop_burst_dataset(pol_dataset, burst_index=burst_index)
-        bursts[str(burst.attrs.get("burst_id", burst_index))] = burst
-    return bursts
+    if "number_of_bursts" in pol_dataset.attrs:
+        for burst_index in range(pol_dataset.attrs["number_of_bursts"]):
+            burst = sentinel1.crop_burst_dataset(pol_dataset, burst_index=burst_index)
+            bursts[str(burst.attrs.get("burst_id", burst_index))] = burst
+        azimuth_chunk = -1
+    else:
+        bursts[None] = pol_dataset
+        azimuth_chunk = 4096
+    measurements = {}
+    for burst_id, burst in bursts.items():
+        measurement = burst.measurement.rename(name)
+        measurement.attrs = {"long_name": measurement.attrs["long_name"]}
+        # the CPM chunks, whole TOPS bursts along azimuth
+        chunks = {"azimuth_time": azimuth_chunk, measurement.dims[1]: 4096}
+        measurements[burst_id] = measurement.chunk(chunks).to_dataset()
+    return measurements
 
 
 def stack_polarizations(datasets: dict[str, xr.Dataset]) -> xr.Dataset:
@@ -129,8 +141,10 @@ def open_datatree(
                 measurement_path, xml_files[annotation_path], fs=fs
             )
             pol_dataset = conventions.update_attributes(pol_dataset)
-            for burst_id, burst in split_bursts(pol_dataset).items():
-                burst = burst.rename(measurement="slc").drop_attrs(deep=False)
+            measurement_name = common_attrs["product_type"].lower()
+            for burst_id, burst in split_measurements(
+                pol_dataset, measurement_name
+            ).items():
                 bursts.setdefault(burst_id, {})[pol] = burst
             for eopf_group, (
                 group,

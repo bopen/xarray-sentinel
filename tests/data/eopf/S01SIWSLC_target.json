@@ -59,6 +59,8 @@
   },
   "measurements": {
     "azimuth_time": [["azimuth_time"], "datetime64[ns]"],
+    "line": [["azimuth_time"], "int64"],
+    "pixel": [["slant_range_time"], "int64"],
     "polarization": [["polarization"], "<U2"],
     "slant_range_time": [["slant_range_time"], "float64"],
     "slc": [["polarization", "azimuth_time", "slant_range_time"], "complex64"]

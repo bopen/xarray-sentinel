@@ -125,7 +125,7 @@ Still served by the sample service: one node per polarisation, swath and burst, 
 
 | xarray-sentinel `group=` | EOPF | Differences |
 |---|---|---|
-| `IW1/VV`, `IW1/VV/<n>` | `measurements/slc`, `grd` | one node per burst instead of the swath image and burst crop, `measurement` is `slc` or `grd`, no `line`/`pixel`, product attrs move to the node |
+| `IW1/VV`, `IW1/VV/<n>` | `measurements/slc`, `grd` | one node per burst instead of the swath image and burst crop, `measurement` is `slc` or `grd`, product attrs move to the node |
 | `IW1/VV/orbit` | `conditions/orbit` | `(axis, azimuth_time)` is `(azimuth_time, axis)`, `axis` is `"x", "y", "z"` |
 | `IW1/VV/attitude` | `conditions/attitude` | none |
 | `IW1/VV/dc_estimate` | `conditions/doppler_centroid` | none |
@@ -175,7 +175,7 @@ What we do in each case follows the decisions above.
 
 - `line` and `pixel` coordinates: CPM 2.7 has them, the CPM 3.0 sample does not. The
   CPM 3.0 code drops them from calibration and noise but builds them for gcp. We keep
-  them in gcp, calibration and noise_range, as additional data is safe.
+  them in all groups that have them, as additional data is safe.
 - `azimuth_fm_rate`, needed by sarsen: in EOPF it is only
   `other_metadata[pol]["general_annotation"]["azimuth_fm_rate_list"]`.
 - `zarr_conventions`, `spatial:bbox` and `proj:code` on the CPM 3.0 sample come from the
@@ -241,9 +241,11 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
    with NaN along `count`. `eopf_sentinel1.open_coordinate_conversion` is the base of
    `sentinel1.open_coordinate_conversion_dataset`, `eopf_sentinel1.open_antenna_pattern`
    is EOPF only.
-1. measurements: split TOPS SLC by burst with `crop_burst_dataset` on one lazy array per
-   swath and polarisation, quirk 4. Rename to `slc` or `grd`, keep only `long_name`,
-   set the CPM chunks. SM and GRD as one image, WV per vignette.
+1. Done: measurements, `eopf_product.split_measurements` splits TOPS SLC by burst with
+   `crop_burst_dataset` on one lazy array per swath and polarisation, quirk 4. The
+   variable is `slc` or `grd` with only `long_name`, `line` and `pixel` as additional
+   coordinates and the CPM chunks. SM and GRD are one image. WV is not supported yet, as
+   xarray-sentinel finds one annotation per WV swath instead of one per vignette.
 1. Attributes, in three parts:
    1. `stac_discovery` of root and nodes following the CPM mapping keys
       `stac_discovery`, `stac_discovery_annotation` and
