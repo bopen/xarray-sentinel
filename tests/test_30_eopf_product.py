@@ -17,6 +17,7 @@ SLC_S3 = (
     DATA_FOLDER
     / "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE"
 )
+SLC_IW_NODE = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
 EOPF_SLC_IW_NODE = (
     DATA_FOLDER
     / "eopf"
@@ -53,17 +54,43 @@ def datatree_structure(dt: xr.DataTree) -> dict[str, dict[str, list[Any]]]:
     }
 
 
+@pytest.mark.parametrize(
+    "safe_name,expected",
+    [
+        [
+            "S1C_IW_SLC__1SDV_20260731T234807_20260731T234821_008794_0116E8_C079",
+            "S01SIWSLC_20260731T234807_0014_C050_C079_0116E8",
+        ],
+        [
+            "S1C_IW_SLC__1SDH_20260531T194042_20260531T194109_007902_01011D_EC26",
+            "S01SIWSLC_20260531T194042_0027_C045_EC26_01011D",
+        ],
+        [
+            "S1C_IW_GRDH_1SDV_20261017T111256_20261017T111323_009924_013C8F_ECF5",
+            "S01SIWGRD_20261017T111256_0027_C057_ECF5_013C8F",
+        ],
+    ],
+)
+def test_make_product_name(safe_name: str, expected: str) -> None:
+    assert eopf_product.make_product_name(safe_name) == expected
+
+
+def test_make_product_name_error() -> None:
+    with pytest.raises(ValueError):
+        eopf_product.make_product_name("S2A_MSIL1C_20210403T101021_N0300_R022_T33TUM")
+
+
 @pytest.fixture(scope="module")
 def slc_iw_node_structure() -> dict[str, dict[str, list[Any]]]:
     dt = eopf_product.open_datatree(SLC_IW, check_files_exist=True)
-    return datatree_structure(dt.children[f"{SLC_IW.stem}_IW1_0"])
+    return datatree_structure(dt.children[SLC_IW_NODE])
 
 
 def test_open_datatree(capsys: pytest.CaptureFixture[str]) -> None:
     res = eopf_product.open_datatree(SLC_S3, check_files_exist=True)
 
     assert isinstance(res, xr.DataTree)
-    assert list(res.children) == [f"{SLC_S3.stem}_S3"]
+    assert list(res.children) == ["S01SS3SLC_20210401T152855_0019_A213_6001_04638E"]
     assert capsys.readouterr().out == ""
 
 
@@ -72,7 +99,7 @@ def test_open_datatree_bursts() -> None:
 
     assert len(res.children) == 19
 
-    node = res[f"{SLC_IW.stem}_IW1_0"]
+    node = res[SLC_IW_NODE]
     slc = node["measurements/slc"]
 
     assert node.attrs["other_metadata"].keys() == {"VH", "VV"}

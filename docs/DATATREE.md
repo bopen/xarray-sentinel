@@ -84,7 +84,9 @@ S0{sat}S{mode}{type}_{start}_{duration:04}_{platform}{N:03}_{unique_id}_{datatak
 ```
 
 All fields come from the SAFE name, except `burst_id` from `swathTiming` and
-`N = (absolute_orbit - 73) // 175 + 1`, see quirk 5. WV appends `_{WVn}_{image_number}`.
+`N = (absolute_orbit - 73) // 175 + 1`, see quirk 5. `mode` is the beam for SM, e.g.
+`S01SS3SLC`. `burst_id` is the burst index from 0 before IPF 3.40. WV appends
+`_{WVn}_{image_number}`.
 
 | SAFE | EOPF CPM 3.0 node |
 |---|---|
@@ -181,14 +183,22 @@ What we do in each case follows the decisions above.
 One PR with tests per step. Step 1 comes first, steps 2 to 9 are independent and each
 adds converters to the step 1 registry, steps 10 and 11 come last.
 
-1. Skeleton and test harness. Rewrite `eopf_product.open_datatree` around a context per
-   swath and polarisation that parses the manifest and each XML once and opens each
-   measurement once. Build each group with a registry `{eopf_path: converter}`, one
-   node per swath and burst, stacking the per-polarisation results along
-   `polarization` except orbit and attitude. Move `parse_eopf_metadata` out of
-   `open_sentinel1_dataset`. Add a helper comparing node paths, variable names, dims
-   and dtypes, with fixtures of the CPM 3.0 sample structure.
-1. Node names: a function tested on the examples above.
+1. Done: skeleton and test harness.
+   - `eopf_product.open_datatree` reads each XML once and opens each measurement once.
+     It builds the groups from the `EOPF_GROUPS` registry
+     `{eopf_path: (group, opener)}`, one node per swath and burst, stacking
+     polarisations along `polarization` except orbit and attitude.
+   - `parse_eopf_metadata` is gone from `open_sentinel1_dataset`,
+     `make_sentinel1_stac_item` is now `eopf_metadata.build_stac_discovery`.
+   - `esa_safe.parse_xml` decodes a whole XML once, `esa_safe.get_tag` indexes it by
+     path. The annotation is decoded once for `build_other_metadata` and
+     `build_stac_discovery`, while the registry openers and `open_pol_dataset` still
+     parse their XML at every call. New converters take the `parse_xml` dict and use
+     `get_tag`.
+   - `tests/test_30_eopf_product.py` compares each group with the CPM 3.0 burst node in
+     `tests/data/eopf/`. Groups not converted yet are marked `PENDING`, each step
+     removes the marks of its groups.
+1. Done: node names, `eopf_product.make_product_name` tested on the examples above.
 1. orbit, attitude, doppler_centroid: from the existing openers, quirks 2 and 3.
 1. gcp: snake_case names, 2-D annotated times, quirk 1.
 1. calibration, noise_range: snake_case names, range coordinate from `pixel` as

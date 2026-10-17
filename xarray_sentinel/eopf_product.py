@@ -1,6 +1,8 @@
+import datetime
 import io
 import os
 import pathlib
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -19,6 +21,29 @@ EOPF_GROUPS: dict[str, tuple[str, Callable[..., xr.Dataset]]] = {
     "quality/noise_range": ("noise_range", sentinel1.open_noise_range_dataset),
 }
 POLARIZATION_INDEPENDENT_GROUPS = {"conditions/attitude", "conditions/orbit"}
+SAFE_NAME_RE = re.compile(
+    r"S(\d)(\w)_(\w{2})_(\w{3})\w_\w{4}_(\w{15})_(\w{15})_(\d{6})_(\w{6})_(\w{4})"
+)
+SAFE_TIME_FORMAT = "%Y%m%dT%H%M%S"
+
+
+def make_product_name(safe_name: str) -> str:
+    match = SAFE_NAME_RE.fullmatch(safe_name)
+    if match is None:
+        raise ValueError(f"cannot parse SAFE name {safe_name!r}")
+    sat, platform, mode, product_type, start, stop, orbit, datatake_id, unique_id = (
+        match.groups()
+    )
+    start_time = datetime.datetime.strptime(start, SAFE_TIME_FORMAT)
+    stop_time = datetime.datetime.strptime(stop, SAFE_TIME_FORMAT)
+    duration = (stop_time - start_time).seconds
+    # not the relative orbit, see quirk 5 in docs/DATATREE.md
+    cycle = (int(orbit) - 73) // 175 + 1
+    product_name = (
+        f"S0{sat}S{mode}{product_type}_{start}_{duration:04}_{platform}{cycle:03}"
+        f"_{unique_id}_{datatake_id}"
+    )
+    return product_name
 
 
 def split_bursts(pol_dataset: xr.Dataset) -> dict[str | None, xr.Dataset]:
@@ -74,7 +99,7 @@ def open_datatree(
             swath, _, pol = group.partition("/")
             swath_pols.setdefault(swath, []).append(pol)
 
-    product_name = pathlib.PurePosixPath(product_path).stem
+    product_name = make_product_name(pathlib.PurePosixPath(product_path).stem)
     dt = xr.DataTree()
     for swath, pols in swath_pols.items():
         bursts: dict[str | None, dict[str, xr.Dataset]] = {}
@@ -111,9 +136,9 @@ def open_datatree(
                 node_groups[eopf_group] = stack_polarizations(datasets)
 
         for burst_id, burst_pols in bursts.items():
-            node = f"{product_name}_{swath}"
+            node = product_name
             if burst_id is not None:
-                node += f"_{burst_id}"
+                node += f"_{swath}_{burst_id}"
             dt[node] = xr.Dataset(
                 attrs={
                     "other_metadata": other_metadata,
