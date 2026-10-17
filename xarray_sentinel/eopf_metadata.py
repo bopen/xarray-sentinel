@@ -143,9 +143,6 @@ def build_stac_discovery(
         annotation, "generalAnnotation/productInformation"
     )
     image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
-    processing_information = esa_safe.get_tag(
-        annotation, "imageAnnotation/processingInformation"
-    )
 
     if footprint is None:
         # the manifest footprint is in lat,lon order
@@ -215,7 +212,6 @@ def build_stac_discovery(
             manifest, ".//s1sarl1:instrumentMode/s1sarl1:swath"
         ),
         "eopf:datatake_id": esa_safe.findtext(manifest, ".//s1sarl1:missionDataTakeID"),
-        "eopf:instrument_mode": mode,
     }
     if relative_burst is not None:
         properties["sar:relative_burst"] = relative_burst
@@ -233,9 +229,5 @@ def build_stac_discovery(
         "properties": properties,
         "links": [],
         "assets": {},
-        "detectionPerformed": processing_information["detectionPerformed"],
-        "thermalNoiseCorrectionPerformed": processing_information[
-            "thermalNoiseCorrectionPerformed"
-        ],
     }
     return stac_item

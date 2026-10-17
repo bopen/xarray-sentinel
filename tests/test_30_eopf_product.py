@@ -149,6 +149,9 @@ def test_open_datatree_attrs() -> None:
     node = res.children["S01SIWSLC_20220414T102209_0027_A244_E677_051AA4_IW1_365915"]
     stac_discovery = node.attrs["stac_discovery"]
 
+    assert res.attrs == {
+        "other_metadata": {"eopf_category": "eocontainer", "title": "S01SIWSLC"}
+    }
     assert {
         key: attrs_structure(node.attrs[key]) for key in EXPECTED_SLC_IW_ATTRS
     } == EXPECTED_SLC_IW_ATTRS

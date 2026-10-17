@@ -196,4 +196,6 @@ def open_datatree(
             for eopf_group, ds in node_groups.items():
                 dt[f"{node}/{eopf_group}"] = ds
 
+    title = f"S01S{common_attrs['mode']}{common_attrs['product_type']}"
+    dt.attrs = {"other_metadata": {"eopf_category": "eocontainer", "title": title}}
     return dt

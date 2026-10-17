@@ -104,11 +104,11 @@ All fields come from the SAFE name, except `burst_id` from `swathTiming` and
 ### Attributes
 
 - root
-  - `stac_discovery`: STAC item from `manifest.safe`, one asset per node.
-  - `other_metadata`: `{"eopf_category": "eocontainer", "title": "S01SIWSLC"}`.
+  - `other_metadata`: `{"eopf_category": "eocontainer", "title": "S01SIWSLC"}`. The CPM
+    also has a root `stac_discovery`, we don't, see step 9.
 - node
   - `stac_discovery`: manifest and annotation properties, `sar:relative_burst`, burst
-    footprint as `geometry`, `detectionPerformed`, `thermalNoiseCorrectionPerformed`.
+    footprint as `geometry`.
   - `processing_history`: from the manifest `safe:processing`.
   - `other_metadata`: keyed by polarisation, each with `eopf_category: "eoproduct"`,
     `title`, `image_number`, `quality_information`, `general_annotation`,
@@ -182,8 +182,10 @@ What we do in each case follows the decisions above.
    - `sar:relative_burst` needs the SAR extension v1.3.1, the CPM declares v1.3.0.
    - the eopf extension URL does not exist, we use
      `https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json`.
-   - `detectionPerformed` and `thermalNoiseCorrectionPerformed` are strings, we use
-     bools, `links` points to a Zarr v2 `.zattrs.json`, we use none.
+   - `detectionPerformed` and `thermalNoiseCorrectionPerformed` are non-STAC top-level
+     keys, already in `other_metadata`, we drop them. `links` points to a Zarr v2
+     `.zattrs.json`, we use none.
+   - `eopf:instrument_mode` duplicates `sar:instrument_mode`, we drop it.
 
 ## Open points
 
@@ -268,7 +270,11 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
       `stac_discovery_annotation_manifest`, quirk 8. `geometry` is the node footprint
       interpolated from the GCPs, `sar:relative_burst` is set when the product has
       burst ids. The items validate against the declared STAC extensions.
-   1. root `stac_discovery` and `other_metadata`.
+   1. Done: root `other_metadata`, `{eopf_category: "eocontainer", title}` with
+      `eopf_category` used by the CPM tools to recognise the container. No root
+      `stac_discovery`: the CPM reads it from the manifest and merges its properties
+      into every node, then adds assets from the variable short names, which collide
+      across nodes, and its own software versions.
    1. node `other_metadata` extending `eopf_metadata.build_other_metadata`:
       `eopf_category`, `title`, `image_number`, `burst_timing` with the node's burst
       merged in, drop empty `swath_merging`, numeric lists instead of `$` strings,

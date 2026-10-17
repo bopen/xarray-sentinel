@@ -2,7 +2,6 @@
   "stac_discovery": {
     "assets": {},
     "bbox": "list",
-    "detectionPerformed": "bool",
     "geometry": {
       "coordinates": "list",
       "type": "str"
@@ -15,7 +14,6 @@
       "datetime": "str",
       "end_datetime": "str",
       "eopf:datatake_id": "str",
-      "eopf:instrument_mode": "str",
       "instruments": "list",
       "mission": "str",
       "platform": "str",
@@ -49,7 +47,6 @@
     },
     "stac_extensions": "list",
     "stac_version": "str",
-    "thermalNoiseCorrectionPerformed": "bool",
     "type": "str"
   }
 }
