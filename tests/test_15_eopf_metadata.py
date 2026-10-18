@@ -118,6 +118,19 @@ def test_build_other_metadata() -> None:
 
     assert res["quality_information"] == expected_quality_information
 
+    general_annotation = res["general_annotation"]
+    replica = general_annotation["replica_information_list"][0]["reference_replica"]
+    fm_rate = general_annotation["azimuth_fm_rate_list"][0]
+
+    assert all(isinstance(c, float) for c in replica["amplitude_coefficients"])
+    assert all(isinstance(c, float) for c in fm_rate["azimuth_fm_rate_polynomial"])
+    assert res["swath_timing"]["burst_list"] == []
+
+    res = eopf_metadata.build_other_metadata(esa_safe.parse_xml(SLC_IW1_VV_annotation))
+    burst = res["swath_timing"]["burst_list"][0]
+
+    assert all(isinstance(s, float) for s in burst["first_valid_sample"])
+
 
 @pytest.mark.parametrize(
     "safe,annotation",

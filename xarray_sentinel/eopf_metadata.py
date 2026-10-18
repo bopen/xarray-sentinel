@@ -45,17 +45,31 @@ def to_snake_recursive(
 
 
 def fix_lists(struct: Any) -> Any:
+    """Simplify the xmlschema decoding of a Sentinel-1 XML to plain values.
+
+    xmlschema writes attributes as "@name" keys and the text of an element with
+    attributes under "$". On top of that the Sentinel-1 schemas use two patterns:
+    arrays (floatArray, ... in s1-object-types.xsd) are strings of space separated
+    numbers with a count attribute, {"@count": 3, "$": "1 2 3"}, and lists like
+    burst_list hold the burst elements and a count, {"@count": 2, "burst": [...]}.
+
+    Drop the count attributes, replace an element with attributes by its value, an
+    array by a list of floats and a list by its items.
+    """
     fixed: Any
     if isinstance(struct, dict):
         fixed = {}
         for k, v in struct.items():
             if k == "@count":
                 continue
-            if k[-5:] == "_list":
-                try:
-                    fixed[k] = fix_lists(v[k[:-5]])
-                except Exception:
-                    fixed[k] = fix_lists(fix_lists(v))
+            # an element with attributes or an array: the dict becomes its value
+            elif k == "$":
+                values = (
+                    [float(value) for value in v.split()] if isinstance(v, str) else v
+                )
+                return values
+            elif k[-5:] == "_list":
+                fixed[k] = fix_lists(v.get(k[:-5], []))
             else:
                 fixed[k] = fix_lists(v)
     elif isinstance(struct, list):
@@ -71,30 +85,10 @@ def filter_metadata_dict(image_information: dict[str, Any]) -> dict[str, Any]:
     return image_information
 
 
-def build_azimuth_fm_rate_list(
-    azimuth_fm_rate_list: list[dict[str, Any] | list[Any]],
-) -> list[dict[str, Any] | list[Any]]:
-    azimuth_fm_rate_list_out: list[dict[str, Any] | list[Any]] = []
-    for item in azimuth_fm_rate_list:
-        azimuth_fm_rate_polynomial_str = item["azimuth_fm_rate_polynomial"]["$"]  # type: ignore
-        azimuth_fm_rate_list_out.append(
-            {
-                "azimuth_time": item["azimuth_time"],  # type: ignore
-                "azimuth_fm_rate_polynomial": np.fromstring(
-                    azimuth_fm_rate_polynomial_str, sep=" "
-                ).tolist(),
-            }
-        )
-    return azimuth_fm_rate_list_out
-
-
 def build_general_annotation(general_annotation: dict[str, Any]) -> dict[str, Any]:
     general_annotation = filter_metadata_dict(general_annotation)
     _ = general_annotation.pop("orbit_list")
     _ = general_annotation.pop("attitude_list")
-    general_annotation["azimuth_fm_rate_list"] = build_azimuth_fm_rate_list(
-        general_annotation["azimuth_fm_rate_list"]
-    )
     return general_annotation
 
 
