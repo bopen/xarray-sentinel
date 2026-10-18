@@ -34,11 +34,19 @@ def to_snake(camel: str) -> str:
     return snake.lower()
 
 
+# to_snake splits a letter followed by a digit, the EOPF names keep them together
+SNAKE_CASE_FIXES = {"t_0": "t0"}
+
+
 def to_snake_recursive(
     struct: dict[str, Any] | list[Any],
 ) -> dict[str, Any] | list[Any]:
     if isinstance(struct, dict):
-        struct = {to_snake(k): to_snake_recursive(v) for k, v in struct.items()}
+        snake_struct = {}
+        for k, v in struct.items():
+            key = to_snake(k)
+            snake_struct[SNAKE_CASE_FIXES.get(key, key)] = to_snake_recursive(v)
+        struct = snake_struct
     elif isinstance(struct, list):
         struct = [to_snake_recursive(v) for v in struct]
     return struct
@@ -92,21 +100,35 @@ def build_general_annotation(general_annotation: dict[str, Any]) -> dict[str, An
     return general_annotation
 
 
-def build_other_metadata(annotation: dict[str, Any]) -> dict[str, Any]:
+def make_product_type(mode: str, product_type: str) -> str:
+    return f"S01S{mode}{product_type}"
+
+
+def build_other_metadata(
+    annotation: dict[str, Any], title: str, burst_index: int | None = None
+) -> dict[str, Any]:
     warnings.warn("This is an unofficial, alpha converter", UserWarning)
     quality_information = filter_metadata_dict(annotation["qualityInformation"])
     general_annotation = build_general_annotation(annotation["generalAnnotation"])
     image_information = filter_metadata_dict(annotation["imageAnnotation"])
     swath_merging = filter_metadata_dict(annotation["swathMerging"])
-    swath_timing = filter_metadata_dict(annotation["swathTiming"])
+    burst_timing = filter_metadata_dict(annotation["swathTiming"])
+    bursts = burst_timing.pop("burst_list")
+    if burst_index is not None:
+        burst_timing |= bursts[burst_index]
+        _ = burst_timing.pop("byte_offset")
 
     other_metadata = {
+        "eopf_category": "eoproduct",
+        "title": title,
+        "image_number": annotation["adsHeader"]["imageNumber"],
         "quality_information": quality_information,
         "general_annotation": general_annotation,
         "image_annotation": image_information,
-        "swath_timing": swath_timing,
-        "swath_merging": swath_merging,
+        "burst_timing": burst_timing,
     }
+    if swath_merging["swath_merge_list"]:
+        other_metadata["swath_merging"] = swath_merging
     return other_metadata
 
 
@@ -174,7 +196,7 @@ def build_stac_discovery(
             {"name": facility.attrib["organisation"], "roles": ["producer"]},
         ],
         "constellation": "sentinel-1",
-        "product:type": f"S01S{mode}{product_type}",
+        "product:type": make_product_type(mode, product_type),
         "product:timeliness_category": timeliness_category,
         "product:timeliness": PRODUCT_TIMELINESS[timeliness_category],
         "processing:datetime": processing.attrib["stop"] + "Z",

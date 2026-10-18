@@ -264,7 +264,8 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
    xarray-sentinel finds one annotation per WV swath instead of one per vignette.
 1. Attributes, in four parts. `tests/data/eopf/S01SIWSLC_target_attrs.json` holds the
    key and type tree of the node attributes, the CPM 3.0 burst node with our deliberate
-   differences.
+   differences, with `other_metadata` of one polarisation and its annotation sections as
+   `dict` or `list` only, as their content depends on the IPF version.
    1. Done: node `stac_discovery`, `eopf_metadata.build_stac_discovery` following the
       CPM mapping keys `stac_discovery`, `stac_discovery_annotation` and
       `stac_discovery_annotation_manifest`, quirk 8. `geometry` is the node footprint
@@ -275,10 +276,11 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
       `stac_discovery`: the CPM reads it from the manifest and merges its properties
       into every node, then adds assets from the variable short names, which collide
       across nodes, and its own software versions.
-   1. node `other_metadata` extending `eopf_metadata.build_other_metadata`:
+   1. Done: node `other_metadata`, `eopf_metadata.build_other_metadata` with
       `eopf_category`, `title`, `image_number`, `burst_timing` with the node's burst
       merged in, drop empty `swath_merging`, numeric lists instead of `$` strings,
-      `t_0` as `t0`. We keep the CPM `DEPRECATED_ATTRS`.
+      `t_0` as `t0`. `title` is the product type from the manifest, as the annotation
+      mode of SM is the beam. We keep the CPM `DEPRECATED_ATTRS`.
    1. `processing_history`, by level from the manifest as in CPM 2.7, the CPM 3.0 one
       is a single `"Unknown"` entry.
 1. API and docs: `Sentinel1Backend.open_datatree` and `open_groups_as_dict`, README,

@@ -1,4 +1,33 @@
 {
+  "other_metadata": {
+    "burst_timing": {
+      "azimuth_anx_time": "float",
+      "azimuth_time": "str",
+      "burst_id": "int",
+      "first_valid_sample": "list",
+      "last_valid_sample": "list",
+      "lines_per_burst": "int",
+      "samples_per_burst": "int",
+      "sensing_time": "str"
+    },
+    "eopf_category": "str",
+    "general_annotation": {
+      "azimuth_fm_rate_list": "list",
+      "downlink_information_list": "list",
+      "noise_list": "list",
+      "product_information": "dict",
+      "raw_data_analysis_list": "list",
+      "replica_information_list": "list",
+      "terrain_height_list": "list"
+    },
+    "image_annotation": {
+      "image_information": "dict",
+      "processing_information": "dict"
+    },
+    "image_number": "str",
+    "quality_information": "dict",
+    "title": "str"
+  },
   "stac_discovery": {
     "assets": {},
     "bbox": "list",

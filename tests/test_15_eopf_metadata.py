@@ -37,8 +37,14 @@ GRD_IW_VV_annotation = (
 
 
 def test_to_snake_recursive() -> None:
-    metadata = {"qualityInformation": {"qualityDataList": [{"qualityData": 2}]}}
-    expected = {"quality_information": {"quality_data_list": [{"quality_data": 2}]}}
+    metadata = {
+        "qualityInformation": {"qualityDataList": [{"qualityData": 2}]},
+        "t0": 1,
+    }
+    expected = {
+        "quality_information": {"quality_data_list": [{"quality_data": 2}]},
+        "t0": 1,
+    }
 
     res = eopf_metadata.to_snake_recursive(metadata)
 
@@ -46,7 +52,9 @@ def test_to_snake_recursive() -> None:
 
 
 def test_build_other_metadata() -> None:
-    res = eopf_metadata.build_other_metadata(esa_safe.parse_xml(SLC_S3_VH_annotation))
+    res = eopf_metadata.build_other_metadata(
+        esa_safe.parse_xml(SLC_S3_VH_annotation), "S01SSMSLC"
+    )
     expected_quality_information = {
         "product_quality_index": 0.0,
         "quality_data_list": [
@@ -109,11 +117,13 @@ def test_build_other_metadata() -> None:
     }
 
     assert set(res) == {
+        "eopf_category",
+        "title",
+        "image_number",
         "quality_information",
         "general_annotation",
         "image_annotation",
-        "swath_timing",
-        "swath_merging",
+        "burst_timing",
     }
 
     assert res["quality_information"] == expected_quality_information
@@ -124,12 +134,17 @@ def test_build_other_metadata() -> None:
 
     assert all(isinstance(c, float) for c in replica["amplitude_coefficients"])
     assert all(isinstance(c, float) for c in fm_rate["azimuth_fm_rate_polynomial"])
-    assert res["swath_timing"]["burst_list"] == []
+    assert "t0" in fm_rate
+    assert "burst_list" not in res["burst_timing"]
 
-    res = eopf_metadata.build_other_metadata(esa_safe.parse_xml(SLC_IW1_VV_annotation))
-    burst = res["swath_timing"]["burst_list"][0]
+    res = eopf_metadata.build_other_metadata(
+        esa_safe.parse_xml(SLC_IW1_VV_annotation), "S01SIWSLC", burst_index=1
+    )
+    burst_timing = res["burst_timing"]
 
-    assert all(isinstance(s, float) for s in burst["first_valid_sample"])
+    assert all(isinstance(s, float) for s in burst_timing["first_valid_sample"])
+    assert "byte_offset" not in burst_timing
+    assert burst_timing["azimuth_time"] == "2021-04-01T05:26:26.966491"
 
 
 @pytest.mark.parametrize(
