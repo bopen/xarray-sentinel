@@ -72,10 +72,9 @@ def fix_lists(struct: Any) -> Any:
                 continue
             # an element with attributes or an array: the dict becomes its value
             elif k == "$":
-                values = (
-                    [float(value) for value in v.split()] if isinstance(v, str) else v
-                )
-                return values
+                if isinstance(v, str):
+                    v = [float(value) for value in v.split()]
+                return v
             elif k[-5:] == "_list":
                 fixed[k] = fix_lists(v.get(k[:-5], []))
             else:
