@@ -37,8 +37,14 @@ GRD_IW_VV_annotation = (
 
 
 def test_to_snake_recursive() -> None:
-    metadata = {"qualityInformation": {"qualityDataList": [{"qualityData": 2}]}}
-    expected = {"quality_information": {"quality_data_list": [{"quality_data": 2}]}}
+    metadata = {
+        "qualityInformation": {"qualityDataList": [{"qualityData": 2}]},
+        "t0": 1,
+    }
+    expected = {
+        "quality_information": {"quality_data_list": [{"quality_data": 2}]},
+        "t0": 1,
+    }
 
     res = eopf_metadata.to_snake_recursive(metadata)
 
@@ -46,7 +52,9 @@ def test_to_snake_recursive() -> None:
 
 
 def test_build_other_metadata() -> None:
-    res = eopf_metadata.build_other_metadata(esa_safe.parse_xml(SLC_S3_VH_annotation))
+    res = eopf_metadata.build_other_metadata(
+        esa_safe.parse_xml(SLC_S3_VH_annotation), "S01SSMSLC"
+    )
     expected_quality_information = {
         "product_quality_index": 0.0,
         "quality_data_list": [
@@ -109,14 +117,52 @@ def test_build_other_metadata() -> None:
     }
 
     assert set(res) == {
+        "eopf_category",
+        "title",
+        "image_number",
         "quality_information",
         "general_annotation",
         "image_annotation",
-        "swath_timing",
-        "swath_merging",
+        "burst_timing",
     }
 
     assert res["quality_information"] == expected_quality_information
+
+    general_annotation = res["general_annotation"]
+    replica = general_annotation["replica_information_list"][0]["reference_replica"]
+    fm_rate = general_annotation["azimuth_fm_rate_list"][0]
+
+    assert all(isinstance(c, float) for c in replica["amplitude_coefficients"])
+    assert all(isinstance(c, float) for c in fm_rate["azimuth_fm_rate_polynomial"])
+    assert "t0" in fm_rate
+    assert "burst_list" not in res["burst_timing"]
+
+    res = eopf_metadata.build_other_metadata(
+        esa_safe.parse_xml(SLC_IW1_VV_annotation), "S01SIWSLC", burst_index=1
+    )
+    burst_timing = res["burst_timing"]
+
+    assert all(isinstance(s, float) for s in burst_timing["first_valid_sample"])
+    assert "byte_offset" not in burst_timing
+    assert burst_timing["azimuth_time"] == "2021-04-01T05:26:26.966491"
+
+
+def test_build_processing_history() -> None:
+    res = eopf_metadata.build_processing_history(SLC_IW / "manifest.safe", SLC_IW.name)
+
+    assert set(res) == {
+        "Level-0 Product",
+        "Level-1 Intermediate SLC Product",
+        "Level-1 Product",
+    }
+    (product,) = res["Level-1 Product"]
+    assert product["outputs"] == [SLC_IW.name]
+    (intermediate,) = res["Level-1 Intermediate SLC Product"]
+    assert product["inputs"] == intermediate["outputs"]
+    assert len(intermediate["adfs"]) == 3
+    assert res["Level-0 Product"][-1]["facility"] == "PAC1"
+    times = [entry["time"] for entry in res["Level-0 Product"]]
+    assert times == sorted(times)
 
 
 @pytest.mark.parametrize(

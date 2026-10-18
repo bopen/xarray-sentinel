@@ -1,7 +1,6 @@
 import datetime
 import io
 import os
-import pathlib
 import re
 from collections.abc import Callable
 from typing import Any
@@ -127,13 +126,16 @@ def open_datatree(
             swath, _, pol = group.partition("/")
             swath_pols.setdefault(swath, []).append(pol)
 
-    product_name = make_product_name(pathlib.PurePosixPath(product_path).stem)
+    safe_name, _ = os.path.splitext(os.path.basename(product_path))
+    product_name = make_product_name(safe_name)
+    title = eopf_metadata.make_product_type(
+        common_attrs["mode"], common_attrs["product_type"]
+    )
     dt = xr.DataTree()
     for swath, pols in swath_pols.items():
         bursts: dict[str | None, dict[str, xr.Dataset]] = {}
         pol_datasets: dict[str, dict[str, xr.Dataset]] = {}
         annotations = {}
-        other_metadata = {}
         for pol in pols:
             measurement_path, annotation_path = groups[f"{swath}/{pol}"][:2]
             annotations[pol] = esa_safe.parse_xml(xml_files[annotation_path])
@@ -160,7 +162,6 @@ def open_datatree(
                 converted = converter(annotations[pol])
                 if converted is not None:
                     pol_datasets.setdefault(eopf_group, {})[pol] = converted
-            other_metadata[pol] = eopf_metadata.build_other_metadata(annotations[pol])
 
         annotation = annotations[pols[0]]
         burst_list = esa_safe.get_tag(annotation, "swathTiming/burstList")
@@ -173,7 +174,7 @@ def open_datatree(
             else:
                 node_groups[eopf_group] = stack_polarizations(datasets)
 
-        for burst_id, burst_pols in bursts.items():
+        for burst_index, (burst_id, burst_pols) in enumerate(bursts.items()):
             node = product_name
             if burst_id is not None:
                 node += f"_{swath}_{burst_id}"
@@ -186,6 +187,12 @@ def open_datatree(
             stac_discovery = eopf_metadata.build_stac_discovery(
                 node, manifest, annotation, footprint, relative_burst
             )
+            node_burst_index = None if burst_id is None else burst_index
+            other_metadata = {}
+            for pol in pols:
+                other_metadata[pol] = eopf_metadata.build_other_metadata(
+                    annotations[pol], title, node_burst_index
+                )
             dt[node] = xr.Dataset(
                 attrs={
                     "other_metadata": other_metadata,
@@ -196,4 +203,5 @@ def open_datatree(
             for eopf_group, ds in node_groups.items():
                 dt[f"{node}/{eopf_group}"] = ds
 
+    dt.attrs = {"other_metadata": {"eopf_category": "eocontainer", "title": title}}
     return dt

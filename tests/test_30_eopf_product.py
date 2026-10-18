@@ -45,10 +45,13 @@ def datatree_structure(dt: xr.DataTree) -> dict[str, dict[str, list[Any]]]:
     }
 
 
-def attrs_structure(value: Any) -> Any:
-    if isinstance(value, dict):
-        return {key: attrs_structure(item) for key, item in value.items()}
-    return type(value).__name__
+def attrs_structure(value: Any, target: Any) -> Any:
+    if not (isinstance(value, dict) and isinstance(target, dict)):
+        return type(value).__name__
+    structure = {}
+    for key, item in value.items():
+        structure[key] = attrs_structure(item, target.get(key))
+    return structure
 
 
 @pytest.mark.parametrize(
@@ -149,8 +152,16 @@ def test_open_datatree_attrs() -> None:
     node = res.children["S01SIWSLC_20220414T102209_0027_A244_E677_051AA4_IW1_365915"]
     stac_discovery = node.attrs["stac_discovery"]
 
-    assert {
-        key: attrs_structure(node.attrs[key]) for key in EXPECTED_SLC_IW_ATTRS
-    } == EXPECTED_SLC_IW_ATTRS
+    assert res.attrs == {
+        "other_metadata": {"eopf_category": "eocontainer", "title": "S01SIWSLC"}
+    }
+    assert list(node.attrs["other_metadata"]) == ["HH"]
+
+    # other_metadata of one polarisation
+    node_attrs = dict(node.attrs) | {
+        "other_metadata": node.attrs["other_metadata"]["HH"]
+    }
+
+    assert attrs_structure(node_attrs, EXPECTED_SLC_IW_ATTRS) == EXPECTED_SLC_IW_ATTRS
     assert stac_discovery["id"] == node.name
     assert stac_discovery["properties"]["sar:relative_burst"] == 365915
