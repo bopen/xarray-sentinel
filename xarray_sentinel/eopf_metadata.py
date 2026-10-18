@@ -1,9 +1,8 @@
+import datetime
 import re
 import warnings
 from typing import Any
 from xml.etree import ElementTree
-
-import numpy as np
 
 from . import esa_safe
 
@@ -169,8 +168,10 @@ def build_stac_discovery(
         footprint.append(footprint[0])
     lons, lats = zip(*footprint)
 
-    start_time = np.datetime64(esa_safe.findtext(manifest, ".//safe:startTime"), "us")
-    stop_time = np.datetime64(esa_safe.findtext(manifest, ".//safe:stopTime"), "us")
+    start = esa_safe.findtext(manifest, ".//safe:startTime")
+    stop = esa_safe.findtext(manifest, ".//safe:stopTime")
+    start_time = datetime.datetime.fromisoformat(start)
+    stop_time = datetime.datetime.fromisoformat(stop)
     middle_time = start_time + (stop_time - start_time) // 2
     processing = manifest.find(".//safe:processing", namespaces=namespaces)
     facility = manifest.find(".//safe:processing/safe:facility", namespaces=namespaces)
@@ -184,9 +185,9 @@ def build_stac_discovery(
 
     properties = {
         "mission": "copernicus",
-        "datetime": np.datetime_as_string(middle_time) + "Z",
-        "start_datetime": np.datetime_as_string(start_time) + "Z",
-        "end_datetime": np.datetime_as_string(stop_time) + "Z",
+        "datetime": middle_time.isoformat(timespec="microseconds") + "Z",
+        "start_datetime": start + "Z",
+        "end_datetime": stop + "Z",
         "created": processing.attrib["stop"] + "Z",
         "platform": "sentinel-1"
         + esa_safe.findtext(manifest, ".//safe:platform/safe:number").lower(),

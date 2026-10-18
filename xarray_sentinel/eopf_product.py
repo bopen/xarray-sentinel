@@ -1,7 +1,6 @@
 import datetime
 import io
 import os
-import pathlib
 import re
 from collections.abc import Callable
 from typing import Any
@@ -127,7 +126,8 @@ def open_datatree(
             swath, _, pol = group.partition("/")
             swath_pols.setdefault(swath, []).append(pol)
 
-    product_name = make_product_name(pathlib.PurePosixPath(product_path).stem)
+    safe_name, _ = os.path.splitext(os.path.basename(product_path))
+    product_name = make_product_name(safe_name)
     title = eopf_metadata.make_product_type(
         common_attrs["mode"], common_attrs["product_type"]
     )
