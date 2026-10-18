@@ -147,6 +147,24 @@ def test_build_other_metadata() -> None:
     assert burst_timing["azimuth_time"] == "2021-04-01T05:26:26.966491"
 
 
+def test_build_processing_history() -> None:
+    res = eopf_metadata.build_processing_history(SLC_IW / "manifest.safe", SLC_IW.name)
+
+    assert set(res) == {
+        "Level-0 Product",
+        "Level-1 Intermediate SLC Product",
+        "Level-1 Product",
+    }
+    (product,) = res["Level-1 Product"]
+    assert product["outputs"] == [SLC_IW.name]
+    (intermediate,) = res["Level-1 Intermediate SLC Product"]
+    assert product["inputs"] == intermediate["outputs"]
+    assert len(intermediate["adfs"]) == 3
+    assert res["Level-0 Product"][-1]["facility"] == "PAC1"
+    times = [entry["time"] for entry in res["Level-0 Product"]]
+    assert times == sorted(times)
+
+
 @pytest.mark.parametrize(
     "safe,annotation",
     [

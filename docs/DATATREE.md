@@ -109,7 +109,7 @@ All fields come from the SAFE name, except `burst_id` from `swathTiming` and
 - node
   - `stac_discovery`: manifest and annotation properties, `sar:relative_burst`, burst
     footprint as `geometry`.
-  - `processing_history`: from the manifest `safe:processing`.
+  - `processing_history`: from the manifest `safe:processing`, not set for now.
   - `other_metadata`: keyed by polarisation, each with `eopf_category: "eoproduct"`,
     `title`, `image_number`, `quality_information`, `general_annotation`,
     `image_annotation` and `burst_timing`. `burst_timing` holds the node's burst entry of
@@ -186,6 +186,10 @@ What we do in each case follows the decisions above.
      keys, already in `other_metadata`, we drop them. `links` points to a Zarr v2
      `.zattrs.json`, we use none.
    - `eopf:instrument_mode` duplicates `sar:instrument_mode`, we drop it.
+1. `processing_history` is a single `"Unknown"` entry with no time, inputs or outputs:
+   `ToProcessingHistory` tests lxml attributes with `"name" in node`, which checks
+   the children. We walk the manifest as CPM 2.7 did, without its own conversion entry,
+   but don't set it yet.
 
 ## Open points
 
@@ -281,8 +285,10 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
       merged in, drop empty `swath_merging`, numeric lists instead of `$` strings,
       `t_0` as `t0`. `title` is the product type from the manifest, as the annotation
       mode of SM is the beam. We keep the CPM `DEPRECATED_ATTRS`.
-   1. `processing_history`, by level from the manifest as in CPM 2.7, the CPM 3.0 one
-      is a single `"Unknown"` entry.
+   1. Done, not connected: node `processing_history`,
+      `eopf_metadata.build_processing_history`, quirk 9, entries keyed by output level
+      from the resource roles and sorted by time, AUX resources as `adfs` and not
+      walked. `open_datatree` does not set it for now.
 1. API and docs: `Sentinel1Backend.open_datatree` and `open_groups_as_dict`, README,
    this file.
 1. Validation: convert one or two full SAFE products with CPM 3.0 in a throwaway

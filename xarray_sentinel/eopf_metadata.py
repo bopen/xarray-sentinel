@@ -247,3 +247,55 @@ def build_stac_discovery(
         "assets": {},
     }
     return stac_item
+
+
+ROLE_LEVELS = {"Raw Data": "Level-0 Product"}
+
+
+def build_processing_history(
+    manifest_path: esa_safe.PathOrFileType,
+    safe_name: str,
+    namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
+) -> dict[str, list[dict[str, Any]]]:
+    """Group the processing steps of the manifest by output level, as CPM 2.7."""
+    if hasattr(manifest_path, "seek"):
+        manifest_path.seek(0)
+    manifest = ElementTree.parse(manifest_path).getroot()
+
+    processing_history: dict[str, list[dict[str, Any]]] = {}
+    processing = manifest.find(".//safe:processing", namespaces)
+    assert processing is not None
+    stack = [(processing, "Level-1 Product", safe_name)]
+    while stack:
+        processing, level, output = stack.pop()
+        facility = processing.find("safe:facility", namespaces)
+        software = processing.find("safe:facility/safe:software", namespaces)
+        facility_name = "Unknown"
+        if facility is not None:
+            parts = [facility.get("organisation"), facility.get("name")]
+            facility_name = "-".join(part for part in parts if part)
+        software_attrs = {} if software is None else software.attrib
+        entry: dict[str, Any] = {
+            "processor": software_attrs.get("name", "Unknown"),
+            "version": software_attrs.get("version", "Unknown"),
+            "facility": facility_name,
+            "time": processing.attrib["stop"] + "Z",
+            "inputs": [],
+            "outputs": [output],
+        }
+        adfs = []
+        for resource in processing.findall("safe:resource", namespaces):
+            name, role = resource.attrib["name"], resource.attrib["role"]
+            if "AUX" in name:
+                adfs.append(name)
+                continue
+            entry["inputs"].append(name)
+            for child in resource.findall("safe:processing", namespaces):
+                stack.append((child, ROLE_LEVELS.get(role, role), name))
+        if adfs:
+            entry["adfs"] = adfs
+        processing_history.setdefault(level, []).append(entry)
+
+    for entries in processing_history.values():
+        entries.sort(key=lambda entry: entry["time"])
+    return processing_history
