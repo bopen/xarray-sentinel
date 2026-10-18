@@ -43,9 +43,10 @@ def to_snake_recursive(
 ) -> dict[str, Any] | list[Any]:
     if isinstance(struct, dict):
         snake_struct = {}
-        for k, v in struct.items():
-            key = to_snake(k)
-            snake_struct[SNAKE_CASE_FIXES.get(key, key)] = to_snake_recursive(v)
+        for key, value in struct.items():
+            snake_key = to_snake(key)
+            snake_key = SNAKE_CASE_FIXES.get(snake_key, snake_key)
+            snake_struct[snake_key] = to_snake_recursive(value)
         struct = snake_struct
     elif isinstance(struct, list):
         struct = [to_snake_recursive(v) for v in struct]
@@ -67,18 +68,18 @@ def fix_lists(struct: Any) -> Any:
     fixed: Any
     if isinstance(struct, dict):
         fixed = {}
-        for k, v in struct.items():
-            if k == "@count":
+        for key, value in struct.items():
+            if key == "@count":
                 continue
             # an element with attributes or an array: the dict becomes its value
-            elif k == "$":
-                if isinstance(v, str):
-                    v = [float(value) for value in v.split()]
-                return v
-            elif k[-5:] == "_list":
-                fixed[k] = fix_lists(v.get(k[:-5], []))
+            elif key == "$":
+                if isinstance(value, str):
+                    value = [float(v) for v in value.split()]
+                return value
+            elif key[-5:] == "_list":
+                fixed[key] = fix_lists(value.get(key[:-5], []))
             else:
-                fixed[k] = fix_lists(v)
+                fixed[key] = fix_lists(value)
     elif isinstance(struct, list):
         fixed = [fix_lists(v) for v in struct]
     else:
