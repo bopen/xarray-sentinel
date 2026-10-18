@@ -213,7 +213,8 @@ What we do in each case follows the decisions above.
 ## Plan
 
 One PR with tests per step. Step 1 comes first, steps 2 to 9 are independent and each
-adds converters to the step 1 registry, steps 10 and 11 come last.
+adds converters to the step 1 registry, steps 10 and 11 come last, step 12 can be
+done at any time.
 
 1. Done: skeleton and test harness.
    - `eopf_product.open_datatree` reads each XML once and opens each measurement once.
@@ -295,3 +296,15 @@ adds converters to the step 1 registry, steps 10 and 11 come last.
    environment (the test SAFEs lack the `support/*.xsd` the CPM needs), compare
    structure exactly and values within tolerance, list the deviations due to the
    quirks. Optionally open our Zarr output with `xarray-eopf`.
+1. Parse once: decode each XML once and pass the result down.
+   - Manifest: `build_stac_discovery` and `build_processing_history` take the parsed
+     `ElementTree` root instead of the path, now `build_stac_discovery` parses the
+     manifest again for every node.
+   - Annotation, calibration and noise: `open_pol_dataset` and the `sentinel1`
+     openers of calibration, noise, replicas and `azimuth_fm_rate` still decode the
+     whole XML at every `parse_tag` or `parse_tag_as_list` call, the wrappers of the
+     `eopf_sentinel1` bases call `parse_xml` once per call. Switch them to the
+     `parse_xml` dict and `get_tag`.
+   - Then `open_datatree` keeps the parsed dicts instead of `BytesIO`, the manifest
+     keeps its `BytesIO` for `parse_manifest_sentinel1` until the manifest XSD
+     decode in [Open points](#open-points) is settled.

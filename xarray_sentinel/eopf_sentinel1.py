@@ -1,3 +1,17 @@
+"""Convert the Sentinel-1 SAFE XML files to the datasets of the EOPF layout.
+
+References
+----------
+  - Sentinel-1 documents:
+    https://sentiwiki.copernicus.eu/web/s1-documents
+  - Sentinel-1 Product Specification 3/16/3 14 November 2025 S1-RS-MDA-52-7441 documenting IPF 4.00
+    https://sentiwiki.copernicus.eu/__attachments/a_8ed8a4b44eb1585570c8ce755c81f47149b5710b878272ab3b40e9cfa2c9e046/S1-RS-MDA-52-7441-Sentinel-1-Product-Specification-2025-3.16.3.pdf
+  - EOPF CPM 3.0, the SAFE to Zarr converter that defines the target layout, see docs/DATATREE.md
+    https://pypi.org/project/eopf/3.0.0/
+  - Sentinel-1 L1 and L2 Zarr product format of the EOPF S1 L12 reference processor
+    https://s1.pages.eopf.copernicus.eu/s1-l12-rp/main/pfs/product_format_overview.html
+"""
+
 import warnings
 from typing import Any
 
