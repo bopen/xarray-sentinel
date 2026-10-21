@@ -167,4 +167,5 @@ __version__ = "{version}"
 [tool.uv]
 # Wait before upgrading to the newest versions to avoid
 # regressions and supply-chain attacks
-exclude-newer = "7 days"
+exclude-newer = "1 week"
+exclude-newer-package = {certifi = false}
