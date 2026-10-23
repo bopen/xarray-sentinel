@@ -420,11 +420,11 @@ Attributes: ...
 
 ```
 
-### EOPF DataTree
+### Experimental EOPF DataTree
 
 The whole product can also be opened as an [`xarray.DataTree`](https://docs.xarray.dev/en/stable/user-guide/data-structures.html#datatree)
 with the layout of the ESA EOPF products: one node per swath and burst for TOPS SLC,
-and one node for SM and GRD.
+and one node for SM and GRD. The layout is experimental and may change.
 
 ```python
 dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")

@@ -48,6 +48,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         rasterio_chunks: dict[str, int] | None = None,
         **kwargs: Any,
     ) -> xr.DataTree:
+        """Open a SAFE product as an experimental EOPF-layout DataTree."""
         if drop_variables is not None:
             warnings.warn("'drop_variables' is currently ignored")
         datatree = eopf_product.open_datatree(
@@ -72,6 +73,7 @@ class Sentinel1Backend(xr.backends.common.BackendEntrypoint):
         rasterio_chunks: dict[str, int] | None = None,
         **kwargs: Any,
     ) -> dict[str, xr.Dataset]:
+        """Open the experimental EOPF-layout groups as a dictionary."""
         datatree = self.open_datatree(
             filename_or_obj,
             drop_variables=drop_variables,

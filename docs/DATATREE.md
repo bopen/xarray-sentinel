@@ -1,4 +1,6 @@
-# Sentinel-1 SAFE as an EOPF DataTree
+# Sentinel-1 SAFE as an EOPF DataTree (experimental)
+
+The layout and API may change.
 
 Goal: open a Sentinel-1 L1 SAFE product as an `xr.DataTree` with the layout of the
 ESA EOPF Zarr products.

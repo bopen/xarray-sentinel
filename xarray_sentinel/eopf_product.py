@@ -97,6 +97,7 @@ def open_datatree(
     override_product_files: str | None = None,
     rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.DataTree:
+    """Open a SAFE product as an experimental EOPF-layout DataTree."""
     fs, manifest_path = sentinel1.get_fs_path(product_urlpath, fs, storage_options)
     product_path = os.path.dirname(manifest_path)
     manifest = io.BytesIO(fs.cat_file(manifest_path))
