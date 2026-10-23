@@ -130,11 +130,12 @@ def build_other_metadata(
 
 
 PRODUCT_TIMELINESS = {"Fast-24h": "PT24H", "NRT-3h": "PT3H"}
+# the view extension requires at least one view: field, only the annotation has one
+STAC_VIEW_EXTENSION = "https://stac-extensions.github.io/view/v1.1.0/schema.json"
 STAC_EXTENSIONS = [
     "https://cs-si.github.io/eopf-stac-extension/v1.2.0/schema.json",
     "https://stac-extensions.github.io/product/v1.0.0/schema.json",
     "https://stac-extensions.github.io/sat/v1.1.0/schema.json",
-    "https://stac-extensions.github.io/view/v1.1.0/schema.json",
     "https://stac-extensions.github.io/processing/v1.2.0/schema.json",
     "https://stac-extensions.github.io/sar/v1.3.1/schema.json",
 ]
@@ -143,19 +144,15 @@ STAC_EXTENSIONS = [
 def build_stac_discovery(
     item_id: str,
     manifest_path: esa_safe.PathOrFileType,
-    annotation: dict[str, Any],
+    annotation: dict[str, Any] | None = None,
     footprint: list[tuple[float, float]] | None = None,
     relative_burst: int | None = None,
     namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
 ) -> dict[str, Any]:
+    """Return a STAC item, the product level one from the manifest when annotation is None."""
     if hasattr(manifest_path, "seek"):
         manifest_path.seek(0)
     manifest = ElementTree.parse(manifest_path).getroot()
-
-    product_information = esa_safe.get_tag(
-        annotation, "generalAnnotation/productInformation"
-    )
-    image_information = esa_safe.get_tag(annotation, "imageAnnotation/imageInformation")
 
     if footprint is None:
         # the manifest footprint is in lat,lon order
@@ -181,7 +178,22 @@ def build_stac_discovery(
         manifest, ".//s1sarl1:productTimelinessCategory"
     )
 
-    properties = {
+    stac_item: dict[str, Any] = {
+        "type": "Feature",
+        "stac_version": "1.1.0",
+        "stac_extensions": list(STAC_EXTENSIONS),
+        "id": item_id,
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[list(point) for point in footprint]],
+        },
+        "bbox": [min(lons), min(lats), max(lons), max(lats)],
+        "properties": {},
+        "links": [],
+        "assets": {},
+    }
+
+    properties: dict[str, Any] = {
         "mission": "copernicus",
         "datetime": middle_time.isoformat(timespec="microseconds") + "Z",
         "start_datetime": start + "Z",
@@ -213,38 +225,35 @@ def build_stac_discovery(
         "sat:orbit_state": esa_safe.findtext(manifest, ".//s1:pass").lower(),
         "sat:anx_datetime": esa_safe.findtext(manifest, ".//s1:ascendingNodeTime")
         + "Z",
-        "view:incidence_angle": image_information["incidenceAngleMidSwath"],
         "sar:polarizations": esa_safe.findall(
             manifest, ".//s1sarl1:transmitterReceiverPolarisation"
         ),
         "sar:instrument_mode": mode,
         "sar:frequency_band": "C",
-        "sar:center_frequency": product_information["radarFrequency"] / 1e9,
-        "sar:pixel_spacing_range": image_information["rangePixelSpacing"],
-        "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
         "sar:observation_direction": "right",
         "sar:beam_ids": esa_safe.findall(
             manifest, ".//s1sarl1:instrumentMode/s1sarl1:swath"
         ),
         "eopf:datatake_id": esa_safe.findtext(manifest, ".//s1sarl1:missionDataTakeID"),
     }
+    if annotation is not None:
+        product_information = esa_safe.get_tag(
+            annotation, "generalAnnotation/productInformation"
+        )
+        image_information = esa_safe.get_tag(
+            annotation, "imageAnnotation/imageInformation"
+        )
+        properties |= {
+            "view:incidence_angle": image_information["incidenceAngleMidSwath"],
+            "sar:center_frequency": product_information["radarFrequency"] / 1e9,
+            "sar:pixel_spacing_range": image_information["rangePixelSpacing"],
+            "sar:pixel_spacing_azimuth": image_information["azimuthPixelSpacing"],
+        }
+        stac_item["stac_extensions"].append(STAC_VIEW_EXTENSION)
     if relative_burst is not None:
         properties["sar:relative_burst"] = relative_burst
 
-    stac_item = {
-        "type": "Feature",
-        "stac_version": "1.1.0",
-        "stac_extensions": STAC_EXTENSIONS,
-        "id": item_id,
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [[list(point) for point in footprint]],
-        },
-        "bbox": [min(lons), min(lats), max(lons), max(lats)],
-        "properties": properties,
-        "links": [],
-        "assets": {},
-    }
+    stac_item["properties"] = properties
     return stac_item
 
 

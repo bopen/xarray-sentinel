@@ -431,8 +431,9 @@ dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
 slc = dt["S01SIWSLC_20260731T234807_0014_C050_C079_0116E8_IW3_258176/measurements/slc"]
 ```
 
-Polarisations are stacked along `polarization`, and every node carries the
-`stac_discovery` and `other_metadata` attributes. `xr.open_groups` returns the same
+Polarisations are stacked along `polarization`. The root carries the product level
+`stac_discovery` and `other_metadata` attributes, and every node its own
+`stac_discovery` and `other_metadata`. `xr.open_groups` returns the same
 groups as a dictionary of `Dataset`s. See
 [DATATREE.md](https://github.com/bopen/xarray-sentinel/blob/main/docs/DATATREE.md)
 for the layout and the deliberate differences from EOPF.
@@ -447,6 +448,9 @@ The same tree can be written to a Zarr store with the `xarray-sentinel` command:
 
 The source may be any local or *fsspec* URL path.
 Like the layout, the converter is experimental and may change.
+
+`xarray-sentinel info S1A_IW_SLC__1SDV_....SAFE` prints the product level STAC
+metadata instead of converting.
 
 ### Advanced data access via fsspec
 

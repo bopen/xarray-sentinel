@@ -190,3 +190,18 @@ def test_build_stac_discovery(safe: pathlib.Path, annotation: pathlib.Path) -> N
         item["properties"]["end_datetime"],
     )
     assert start < item["properties"]["datetime"] < end
+
+
+def test_build_root_stac_discovery() -> None:
+    item = eopf_metadata.build_stac_discovery("test", SLC_IW / "manifest.safe")
+
+    validator = stac_validator.StacValidate()
+    result = validator.validate_dict(item)
+
+    assert result, validator.message
+    assert item["assets"] == {}
+    assert "sar:relative_burst" not in item["properties"]
+    assert "view:incidence_angle" not in item["properties"]
+    assert item["stac_extensions"] == eopf_metadata.STAC_EXTENSIONS
+    assert item["properties"]["sar:instrument_mode"] == "IW"
+    assert item["properties"]["sar:polarizations"] == ["VV", "VH"]

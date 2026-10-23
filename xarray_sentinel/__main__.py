@@ -1,4 +1,5 @@
 import importlib.metadata
+import json
 
 import typer
 import xarray as xr
@@ -45,8 +46,12 @@ def convert(
 
 
 @app.command()
-def info() -> None:
-    pass
+def info(
+    source: str = typer.Argument(..., help="Path to the Sentinel-1 SAFE product."),
+) -> None:
+    """Print the STAC metadata of the EOPF product."""
+    datatree = xr.open_datatree(source, engine="sentinel-1")
+    typer.echo(json.dumps(datatree.attrs["stac_discovery"], indent=2))
 
 
 if __name__ == "__main__":

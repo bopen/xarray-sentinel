@@ -129,6 +129,7 @@ def open_datatree(
 
     safe_name, _ = os.path.splitext(os.path.basename(product_path))
     product_name = make_product_name(safe_name)
+    root_stac_discovery = eopf_metadata.build_stac_discovery(product_name, manifest)
     title = eopf_metadata.make_product_type(
         common_attrs["mode"], common_attrs["product_type"]
     )
@@ -207,5 +208,8 @@ def open_datatree(
             for eopf_group, ds in node_groups.items():
                 dt[f"{node}/{eopf_group}"] = ds
 
-    dt.attrs = {"other_metadata": {"eopf_category": "eocontainer", "title": title}}
+    dt.attrs = {
+        "other_metadata": {"eopf_category": "eocontainer", "title": title},
+        "stac_discovery": root_stac_discovery,
+    }
     return dt

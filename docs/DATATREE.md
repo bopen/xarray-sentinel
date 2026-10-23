@@ -106,8 +106,9 @@ All fields come from the SAFE name, except `burst_id` from `swathTiming` and
 ### Attributes
 
 - root
-  - `other_metadata`: `{"eopf_category": "eocontainer", "title": "S01SIWSLC"}`. The CPM
-    also has a root `stac_discovery`, we don't, see step 9.
+  - `other_metadata`: `{"eopf_category": "eocontainer", "title": "S01SIWSLC"}`.
+  - `stac_discovery`: the product level item from the manifest, with the product
+    footprint as `geometry` and the product name as `id`.
 - node
   - `stac_discovery`: manifest and annotation properties, `sar:relative_burst`, burst
     footprint as `geometry`.
@@ -279,10 +280,11 @@ done at any time.
       interpolated from the GCPs, `sar:relative_burst` is set when the product has
       burst ids. The items validate against the declared STAC extensions.
    1. Done: root `other_metadata`, `{eopf_category: "eocontainer", title}` with
-      `eopf_category` used by the CPM tools to recognise the container. No root
-      `stac_discovery`: the CPM reads it from the manifest and merges its properties
-      into every node, then adds assets from the variable short names, which collide
-      across nodes, and its own software versions.
+      `eopf_category` used by the CPM tools to recognise the container, and root
+      `stac_discovery`, `build_stac_discovery` without the annotation: the product
+      footprint and the manifest properties, no `assets` as the CPM ones are per
+      variable short name and collide across nodes, and no `view` extension as the
+      incidence angle comes from the annotation.
    1. Done: node `other_metadata`, `eopf_metadata.build_other_metadata` with
       `eopf_category`, `title`, `image_number`, `burst_timing` with the node's burst
       merged in, drop empty `swath_merging`, numeric lists instead of `$` strings,

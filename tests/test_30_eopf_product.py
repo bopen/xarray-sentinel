@@ -151,10 +151,17 @@ def test_open_datatree_attrs() -> None:
     res = eopf_product.open_datatree(SLC_IW_V340, check_files_exist=True)
     node = res.children["S01SIWSLC_20220414T102209_0027_A244_E677_051AA4_IW1_365915"]
     stac_discovery = node.attrs["stac_discovery"]
+    root_stac_discovery = res.attrs["stac_discovery"]
 
-    assert res.attrs == {
-        "other_metadata": {"eopf_category": "eocontainer", "title": "S01SIWSLC"}
+    assert res.attrs["other_metadata"] == {
+        "eopf_category": "eocontainer",
+        "title": "S01SIWSLC",
     }
+    assert (
+        root_stac_discovery["id"] == "S01SIWSLC_20220414T102209_0027_A244_E677_051AA4"
+    )
+    assert root_stac_discovery["assets"] == {}
+    assert "sar:relative_burst" not in root_stac_discovery["properties"]
     assert list(node.attrs["other_metadata"]) == ["HH"]
 
     # other_metadata of one polarisation
