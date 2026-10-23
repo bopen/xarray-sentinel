@@ -95,13 +95,15 @@ S0{sat}S{mode}{type}_{start}_{duration:04}_{platform}{N:03}_{unique_id}_{datatak
 All fields come from the SAFE name, except `burst_id` from `swathTiming` and
 `N = (absolute_orbit - 73) // 175 + 1`, see quirk 5. `mode` is the beam for SM, e.g.
 `S01SS3SLC`. `burst_id` is the burst index from 0 before IPF 3.40. WV appends
-`_{WVn}_{image_number}`.
+`_{WVn}_{image_number}`. The `_COG` suffix of the COG products is not part of the node
+name.
 
 | SAFE | EOPF CPM 3.0 node |
 |---|---|
 | `S1C_IW_SLC__1SDV_20260731T234807_20260731T234821_008794_0116E8_C079` | `S01SIWSLC_20260731T234807_0014_C050_C079_0116E8_IW3_258176` |
 | `S1C_IW_SLC__1SDH_20260531T194042_20260531T194109_007902_01011D_EC26` | `S01SIWSLC_20260531T194042_0027_C045_EC26_01011D_IW1_64850` |
 | `S1C_IW_GRDH_1SDV_20261017T111256_20261017T111323_009924_013C8F_ECF5` | `S01SIWGRD_20261017T111256_0027_C057_ECF5_013C8F` |
+| `S1D_IW_GRDH_1SDV_20261023T173456_20261023T173521_005145_009C11_F2F3_COG` | `S01SIWGRD_20261023T173456_0025_D029_F2F3_009C11` |
 
 ### Attributes
 

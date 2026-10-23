@@ -18,7 +18,8 @@ SAFE_TIME_FORMAT = "%Y%m%dT%H%M%S"
 
 
 def make_product_name(safe_name: str) -> str:
-    match = SAFE_NAME_RE.fullmatch(safe_name)
+    # COG products append "_COG" to the standard SAFE name
+    match = SAFE_NAME_RE.fullmatch(safe_name.removesuffix("_COG"))
     if match is None:
         raise ValueError(f"cannot parse SAFE name {safe_name!r}")
     sat, platform, mode, product_type, start, stop, orbit, datatake_id, unique_id = (

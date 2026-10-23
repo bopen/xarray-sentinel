@@ -69,6 +69,10 @@ def attrs_structure(value: Any, target: Any) -> Any:
             "S1C_IW_GRDH_1SDV_20261017T111256_20261017T111323_009924_013C8F_ECF5",
             "S01SIWGRD_20261017T111256_0027_C057_ECF5_013C8F",
         ],
+        [
+            "S1D_IW_GRDH_1SDV_20261023T173456_20261023T173521_005145_009C11_F2F3_COG",
+            "S01SIWGRD_20261023T173456_0025_D029_F2F3_009C11",
+        ],
     ],
 )
 def test_make_product_name(safe_name: str, expected: str) -> None:
