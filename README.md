@@ -437,6 +437,17 @@ groups as a dictionary of `Dataset`s. See
 [DATATREE.md](https://github.com/bopen/xarray-sentinel/blob/main/docs/DATATREE.md)
 for the layout and the deliberate differences from EOPF.
 
+### Converting a SAFE product to EOPF Zarr (experimental)
+
+The same tree can be written to a Zarr store with the `xarray-sentinel` command:
+
+```shell
+    xarray-sentinel convert S1A_IW_SLC__1SDV_....SAFE product.zarr
+```
+
+The source may be any local or *fsspec* URL path.
+Like the layout, the converter is experimental and may change.
+
 ### Advanced data access via fsspec
 
 **Metadata is read through *fsspec* on any filesystem. Measurement data, instead, can

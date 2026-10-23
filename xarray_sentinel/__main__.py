@@ -1,8 +1,7 @@
 import importlib.metadata
 
 import typer
-
-import xarray_sentinel.reformat
+import xarray as xr
 
 app = typer.Typer(
     add_completion=False,
@@ -31,15 +30,18 @@ def main(
 
 
 @app.command()
-def convert(source: str, target: str) -> None:
-    groups = {
-        "IW/VV": "IW/VV",
-        "IW/VH": "IW/VH",
-    }
+def convert(
+    source: str = typer.Argument(..., help="Path to the Sentinel-1 SAFE product."),
+    target: str = typer.Argument(..., help="Path to the output EOPF Zarr product."),
+) -> None:
+    """Convert a Sentinel-1 SAFE product to an EOPF Zarr product."""
     import distributed
 
     distributed.Client(processes=True)  # type: ignore
-    xarray_sentinel.reformat.to_group_zarr(source, target, groups=groups)
+    datatree = xr.open_datatree(
+        source, engine="sentinel-1", rasterio_chunks={"y": 2048}
+    )
+    datatree.to_zarr(target, mode="w")
 
 
 @app.command()
