@@ -90,7 +90,6 @@ repository = "https://github.com/bopen/xarray-sentinel"
 branch = true
 
 [tool.deptry.per_rule_ignores]
-# used by xarray, jupyter or fsspec without being imported
 DEP002 = ["jupyterlab", "jupyterlab-execute-time", "numcodecs", "rioxarray", "s3fs", "scipy", "zarr"]
 
 [tool.mypy]
