@@ -1,24 +1,19 @@
 requires-python = ">=3.11"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 revision = 3
@@ -668,16 +663,28 @@ dependencies = [
   {name = "numpy", version = "2.5.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
 ]
 name = "cftime"
-sdist = {url = "https://files.pythonhosted.org/packages/16/6c/a441b7760eff421d7165fafbe124dd8babb34461aa1574dce5628e80137f/cftime-1.6.6.tar.gz", hash = "sha256:7b2716b3dce97ba1740189c424ce97bd6f8e65391b7fe323c6f0f817f6a8ad56", size = 380802, upload-time = "2026-09-28T19:26:47.659Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/4f/bb/64c8afb966ca9482ef7961b606bfe8615f7948e7ea70e737159f9a940064/cftime-1.6.6.1.tar.gz", hash = "sha256:3eff428a229169c2632c093b554e36dd5277dacc0f7aae8ad73ce6a93304d58d", size = 381552, upload-time = "2026-10-14T18:50:47.589Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "1.6.6"
+version = "1.6.6.1"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/ef/d4/8dfd6eb487869d3e1032721d4d5dcb294a9d2fe767475e4f2bf7b0c6fc26/cftime-1.6.6-cp311-abi3-macosx_10_9_x86_64.whl", hash = "sha256:7a3e80e48b8cdb61a6f46b135e79e669ffd56ca586bafdb834ffb2cceeb81e6c", size = 549426, upload-time = "2026-09-28T19:26:37.905Z"},
-  {url = "https://files.pythonhosted.org/packages/8a/7e/d4d8e1aa5b3083ef387c6c6a4d2e4fe7445d1d0bfbe6ebc52eeea0fbe674/cftime-1.6.6-cp311-abi3-macosx_11_0_arm64.whl", hash = "sha256:6aa8944676baa3f2a05c0663723d29a99cbd5bd573588207b48ed9129520e893", size = 543496, upload-time = "2026-09-28T19:26:39.9Z"},
-  {url = "https://files.pythonhosted.org/packages/b4/aa/e2e5c07f57233d171a0506153d2f50dc3d09e9f6273b2a578f76379d1526/cftime-1.6.6-cp311-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:59a2c7821642b62c18e71ea67f84ce13ec2bb51ce7ee348cf0a3c50d55fd91cb", size = 1672639, upload-time = "2026-09-28T19:26:41.765Z"},
-  {url = "https://files.pythonhosted.org/packages/a5/cc/916e9fcb206176f9e9535079b8217e2f158e61ded73afbd2fe1a2a8682a6/cftime-1.6.6-cp311-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:81c62149a7c614491596d8f897f2026c1dc23f2a4695b2b27871cc9c50084e94", size = 1641425, upload-time = "2026-09-28T19:26:43.437Z"},
-  {url = "https://files.pythonhosted.org/packages/8c/5c/2e0ec08350739e9b000b24ff413788838c5f8a47392418464e03497cb4b4/cftime-1.6.6-cp311-abi3-win_amd64.whl", hash = "sha256:5f8aeb9410d0124df40c272d9c13dc761a2e9d1e96f44695804a38472a136c67", size = 512693, upload-time = "2026-09-28T19:26:44.827Z"},
-  {url = "https://files.pythonhosted.org/packages/f3/55/f4e24f5734578fa6952674c319519481174ec6d7e8a3eae83f067b56da3d/cftime-1.6.6-cp311-abi3-win_arm64.whl", hash = "sha256:0d1a6bcfa29bf05f14460e4aedac2b210acdb50a038e5e8e16486a7eead06a3b", size = 494572, upload-time = "2026-09-28T19:26:46.25Z"}
+  {url = "https://files.pythonhosted.org/packages/dd/28/0239c934ddcf555ba718c1b971aa8e241a241f80c92bead219eefd76b82c/cftime-1.6.6.1-cp311-abi3-macosx_10_9_x86_64.whl", hash = "sha256:dd42f26a5ec493ac6ffe83eabc173625d2954cc6993de150ef60bab7599dc10e", size = 549727, upload-time = "2026-10-14T18:50:18.032Z"},
+  {url = "https://files.pythonhosted.org/packages/e3/98/2906f59bb8fb11dd47133fcf40d1d01c2e7a00f5f00701a80cfb6cc1f498/cftime-1.6.6.1-cp311-abi3-macosx_11_0_arm64.whl", hash = "sha256:6afab9967fe9635eb16569cd670619a7beed09bbea7982f9c6f61001d06c62a1", size = 543813, upload-time = "2026-10-14T18:50:19.916Z"},
+  {url = "https://files.pythonhosted.org/packages/a1/f5/84eb544579f55452df65a47bcc86147deaddf0e568725987bc69a1bc4cf6/cftime-1.6.6.1-cp311-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:92566dd8c3213b824f8b2e86904efa7f0d8db6a51017cc5ad365b1d20b579617", size = 1673835, upload-time = "2026-10-14T18:50:21.438Z"},
+  {url = "https://files.pythonhosted.org/packages/dd/29/563ff54069998e89cd74e410e862017131690e4f595a06820172335a9c1b/cftime-1.6.6.1-cp311-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:2d1e68e14537e16db8d3a48c95aa617556247d3f8e6e3a864eca302427dc1e4c", size = 1642106, upload-time = "2026-10-14T18:50:23.441Z"},
+  {url = "https://files.pythonhosted.org/packages/a8/3a/ad6e96204d85ea6abf3721393ec2e830e025854b51402cfc081a670b61f5/cftime-1.6.6.1-cp311-abi3-win_amd64.whl", hash = "sha256:e4ed505118cbffec8ca6b59636f283d55df1675a3f092bc2d276f917a04af68a", size = 512994, upload-time = "2026-10-14T18:50:25.098Z"},
+  {url = "https://files.pythonhosted.org/packages/c4/c5/a5eb6e8b11d8b603af51827c9afb42598d0eda1a2cbd5c0190e31f701348/cftime-1.6.6.1-cp311-abi3-win_arm64.whl", hash = "sha256:f0cf93b58005e8dd012d2c7c10428d405b1afb19384d12de66782fad46df2b39", size = 499638, upload-time = "2026-10-14T18:50:26.658Z"},
+  {url = "https://files.pythonhosted.org/packages/07/27/4c26fe755c40132d63819e47184776eee0a325b7ebda060145260d3894ce/cftime-1.6.6.1-cp314-cp314t-macosx_10_15_x86_64.whl", hash = "sha256:bf4d9d496388b9ef9f07d7bd00f7a760e10afbb32ba458ed1f066a0ddbba8b76", size = 591739, upload-time = "2026-10-14T18:50:28.156Z"},
+  {url = "https://files.pythonhosted.org/packages/c3/d4/ff91b37a9bf4c10dde675d9748fba62f5aabdaa955031edf4d5e133bb06a/cftime-1.6.6.1-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:56b8d18ad8a447f81becdccdda4ff81f345284631901fbac00915dbcbbe89ad3", size = 571795, upload-time = "2026-10-14T18:50:29.668Z"},
+  {url = "https://files.pythonhosted.org/packages/07/c8/77e4c9fcf450212f284bea92901f0a0b80903a25abb0dfb09d4d8dc73137/cftime-1.6.6.1-cp314-cp314t-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:6b58a66c3bbb8a6cd19f62bf8590c847b68fd6c24f3d3e86f5380562c8477334", size = 1859851, upload-time = "2026-10-14T18:50:31.165Z"},
+  {url = "https://files.pythonhosted.org/packages/35/68/1bf5d9bf4e42e442cf7082b1c4ff8cf5475a676912ba9427a3b90726b9ec/cftime-1.6.6.1-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:75429951bf4ead72e93e82b9d91a5ffec9733b1d9f1d3c51c278613dbe7e7422", size = 1847054, upload-time = "2026-10-14T18:50:32.872Z"},
+  {url = "https://files.pythonhosted.org/packages/bc/f9/ca501cc52e9201ed7a8d430cbab43f00472476300112cde4079dc35344dc/cftime-1.6.6.1-cp314-cp314t-win_amd64.whl", hash = "sha256:9451036dcd59a54f1d055eba2bbbbe3ecdb8a6a7f98f800b33d80ea1084a56cb", size = 562424, upload-time = "2026-10-14T18:50:34.365Z"},
+  {url = "https://files.pythonhosted.org/packages/f9/61/db3cd3561e803c6b7882ef1477adaf20413e195d46fdab52191f47ac14a0/cftime-1.6.6.1-cp314-cp314t-win_arm64.whl", hash = "sha256:a97fb973634e160b087ac06f1f3db6cbf193a3afdad32f05cdf8a7c2d612c3cd", size = 524809, upload-time = "2026-10-14T18:50:36.066Z"},
+  {url = "https://files.pythonhosted.org/packages/7b/d8/a43fd99827e442764cd215d03d0074c81dae1306af7c100de671f21c609c/cftime-1.6.6.1-cp315-cp315t-macosx_10_15_x86_64.whl", hash = "sha256:03273be53472a16b55bf1e600cb3984ccc607f465afc3d1a9cf02a7300c828be", size = 591357, upload-time = "2026-10-14T18:50:38.124Z"},
+  {url = "https://files.pythonhosted.org/packages/04/71/ece2ad6e34595b1ba9b67cae3cf1304681923beb04acac08e860e27340de/cftime-1.6.6.1-cp315-cp315t-macosx_11_0_arm64.whl", hash = "sha256:6084bc378ade5bea34e138506091af70bb484ce529d9c9df19ea1fe9067a3877", size = 571038, upload-time = "2026-10-14T18:50:39.611Z"},
+  {url = "https://files.pythonhosted.org/packages/a5/7b/710cc81ee938719996fb68f705ae323524e8c0d4972846c83d3ace74b2e8/cftime-1.6.6.1-cp315-cp315t-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ac0c0b6e8bdd8526e9ed92f1f97da608aa4c0af8599dfe4c121c286b7dbe141f", size = 1852086, upload-time = "2026-10-14T18:50:41.069Z"},
+  {url = "https://files.pythonhosted.org/packages/cf/ab/11631d2e98f5012b57d9fd79aa3e4d24fbda8e963d8f54af5f0304bad752/cftime-1.6.6.1-cp315-cp315t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b1687424178d22958699be91353529d55aadfba5032e3fb53ce68d5512ea3a6c", size = 1845490, upload-time = "2026-10-14T18:50:43.058Z"},
+  {url = "https://files.pythonhosted.org/packages/b5/4c/7de0c5bb091f03cd225f9ceaafcc2fc06ddec9d4744a072fed7f849c182e/cftime-1.6.6.1-cp315-cp315t-win_amd64.whl", hash = "sha256:c6ae3b2777165b9de172c79378712078a39e1cb4701731ddaba985c86cc36bc8", size = 560874, upload-time = "2026-10-14T18:50:44.484Z"},
+  {url = "https://files.pythonhosted.org/packages/76/2f/4c3be0e5bea3384e9236e3ba627a35c27da79b3613b45f1587ac6be66f8a/cftime-1.6.6.1-cp315-cp315t-win_arm64.whl", hash = "sha256:235130e4186cad92b2f68f454bae730f8ebdc5880bcf4800d2678878891f02cb", size = 523688, upload-time = "2026-10-14T18:50:46.175Z"}
 ]
 
 [[package]]
@@ -905,13 +912,11 @@ dependencies = [
 ]
 name = "contourpy"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/58/01/1253e6698a07380cd31a736d248a3f2a50a7c88779a1813da27503cadc2a/contourpy-1.3.3.tar.gz", hash = "sha256:083e12155b210502d0bca491432bb04d56dc3432f95a979b429f2848c3dbe880", size = 13466174, upload-time = "2025-07-26T12:03:12.549Z"}
@@ -997,16 +1002,13 @@ dependencies = [
 ]
 name = "contourpy"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -1354,11 +1356,11 @@ wheels = [
 
 [[package]]
 name = "filelock"
-sdist = {url = "https://files.pythonhosted.org/packages/35/c8/1d457d9150ff948f2ce6ada7715e0eeebbe5d3b58a45271a1e222474bcd3/filelock-4.1.1.tar.gz", hash = "sha256:7ba0927482c5a814b0a7f391d029ccdb8010f576f0a74c0dcde1811e8bc4c1b6", size = 563430, upload-time = "2026-10-11T16:11:54.373Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/f4/a9/1af41b37c3279712b22cdc63aac78a52432202b6fe1f9666a2a3d2831fb4/filelock-4.2.0.tar.gz", hash = "sha256:7a60906c75227cf04d0c273afadc8219400f11aeb13cc69591d4f6cdc6c8036e", size = 569667, upload-time = "2026-10-14T20:57:13.11Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "4.1.1"
+version = "4.2.0"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/d7/8b/f837f52905395ba4510fe61f753c24833fb0a9c76e21267bb9f828b664a9/filelock-4.1.1-py3-none-any.whl", hash = "sha256:3f4a557945a7b0f95efeb1f432267affe5d45ac8ddde2aed1b97ebb62382c089", size = 132460, upload-time = "2026-10-11T16:11:52.753Z"}
+  {url = "https://files.pythonhosted.org/packages/8e/a3/9bc26acff301fe1aaea1cc3d82a1d57e0a34df3e1cadbfa91ac2dbcdde5c/filelock-4.2.0-py3-none-any.whl", hash = "sha256:2ff5690882e8cdb00ef31fb3d01a3094c29f30985426c59495afb1733f3b7238", size = 135032, upload-time = "2026-10-14T20:57:11.349Z"}
 ]
 
 [[package]]
@@ -3017,29 +3019,38 @@ dependencies = [
   {name = "certifi"},
   {name = "cftime"},
   {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
-  {name = "numpy", version = "2.5.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"}
+  {name = "numpy", version = "2.5.4", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
+  {name = "packaging"}
 ]
 name = "netcdf4"
-sdist = {url = "https://files.pythonhosted.org/packages/34/b6/0370bb3af66a12098da06dc5843f3b349b7c83ccbdf7306e7afa6248b533/netcdf4-1.7.4.tar.gz", hash = "sha256:cdbfdc92d6f4d7192ca8506c9b3d4c1d9892969ff28d8e8e1fc97ca08bf12164", size = 838352, upload-time = "2026-01-05T02:27:38.593Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/ca/ef/0f29ed79ddc6dfcdacc03e03c9b5d29c615384353e1f05ee8d2391c62e2b/netcdf4-1.7.5.tar.gz", hash = "sha256:1fb34cff123893145b690f390b02305b31db1872983229443ef2c9c1ed9e99c8", size = 848901, upload-time = "2026-10-15T14:47:48.731Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "1.7.4"
+version = "1.7.5"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/38/de/38ed7e1956943d28e8ea74161e97c3a00fb98d6d08943b4fd21bae32c240/netcdf4-1.7.4-cp311-abi3-macosx_13_0_x86_64.whl", hash = "sha256:dec70e809cc65b04ebe95113ee9c85ba46a51c3a37c058d2b2b0cadc4d3052d8", size = 23427499, upload-time = "2026-01-05T02:27:06.568Z"},
-  {url = "https://files.pythonhosted.org/packages/e5/70/2f73c133b71709c412bc81d8b721e28dc6237ba9d7dad861b7bfbb70408a/netcdf4-1.7.4-cp311-abi3-macosx_14_0_arm64.whl", hash = "sha256:75cf59100f0775bc4d6b9d4aca7cbabd12e2b8cf3b9a4fb16d810b92743a315a", size = 22847667, upload-time = "2026-01-05T02:27:09.421Z"},
-  {url = "https://files.pythonhosted.org/packages/77/ce/43a3c0c41a6e2e940d87feea79d29aa88302211ac122604838f8a5a48de6/netcdf4-1.7.4-cp311-abi3-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ddfc7e9d261125c74708119440c85ea288b5fee41db676d2ba1ce9be11f96932", size = 10274769, upload-time = "2026-01-05T21:31:19.243Z"},
-  {url = "https://files.pythonhosted.org/packages/7b/7a/a8d32501bb95ecff342004a674720164f95ad616f269450b3bc13dc88ae3/netcdf4-1.7.4-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a72c9f58767779ec14cb7451c3b56bdd8fdc027a792fac2062b14e090c5617f3", size = 10123122, upload-time = "2026-01-05T21:31:22.773Z"},
-  {url = "https://files.pythonhosted.org/packages/18/68/e89b4fa9242e59326c849c39ce0f49eb68499603c639405a8449900a4f15/netcdf4-1.7.4-cp311-abi3-win_amd64.whl", hash = "sha256:9476e1f23161ae5159cd1548c50c8a37922e77d76583e247133f256ef7b825fc", size = 21299637, upload-time = "2026-01-05T02:27:11.856Z"},
-  {url = "https://files.pythonhosted.org/packages/6c/fc/edd41a3607241027aa4533e7f18e0cd647e74dde10a63274c65350f59967/netcdf4-1.7.4-cp311-abi3-win_arm64.whl", hash = "sha256:876ad9d58f09c98741c066c726164c45a098a58fb90e5fac9e74de4bb8a793fd", size = 2386377, upload-time = "2026-01-05T02:27:13.808Z"},
-  {url = "https://files.pythonhosted.org/packages/f1/3e/1e83534ba68459bc5ae39df46fa71003984df58aabf31f7dcd6e22ecddb0/netcdf4-1.7.4-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:56688c03444fffe0d0c7512cb45245e650389cd841c955b30e4552fa681c4cd9", size = 10519821, upload-time = "2026-01-05T02:27:15.413Z"},
-  {url = "https://files.pythonhosted.org/packages/c0/8c/a15d6fe97f81d6d5202b17838a9a298b5955b3e9971e20609195112829b5/netcdf4-1.7.4-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7ecf471ba8a6ddb2200121949bedfa0095db228822f38227d5da680694a38358", size = 10371133, upload-time = "2026-01-05T02:27:17.224Z"},
-  {url = "https://files.pythonhosted.org/packages/d8/2b/684b15dd4791f8be295b2f6fa97377bbc07a768478a63b7d3c4951712e36/netcdf4-1.7.4-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a5841de0735e8e4875b367c668e81d334287858d64dd9f3e3e2261e808c84922", size = 10395635, upload-time = "2026-01-05T02:27:19.655Z"},
-  {url = "https://files.pythonhosted.org/packages/37/dc/44d21524cf1b1c64254f92e22395a7a10f70c18f3a13a18ac9db258760f7/netcdf4-1.7.4-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:86fac03a8c5b250d57866e7d98918a64742e4b0de1681c5c86bac5726bab8aee", size = 10237725, upload-time = "2026-01-05T02:27:22.298Z"},
-  {url = "https://files.pythonhosted.org/packages/d4/9d/c3ddf54296ad8f18f02f77f23452bdb0971aece1b87e84bab9d734bf72cc/netcdf4-1.7.4-cp314-cp314t-macosx_13_0_x86_64.whl", hash = "sha256:ad083d260301b5add74b1669c75ab0df03bdf986decfcc092cb45eec2615b5f1", size = 23515258, upload-time = "2026-01-05T02:27:24.837Z"},
-  {url = "https://files.pythonhosted.org/packages/dd/44/bc0346e995d436d03fab682b7fbd2a9adcf0db6a05790b8f24853bf08170/netcdf4-1.7.4-cp314-cp314t-macosx_14_0_arm64.whl", hash = "sha256:7f22014092cc9da3f056b0368e2e38c42afd5725c87ad4843eb2f467e16dd4f6", size = 22910171, upload-time = "2026-01-05T02:27:27.166Z"},
-  {url = "https://files.pythonhosted.org/packages/30/6b/f9bc3f43c55e2dac72ee9f98d77860789bdd5d50c29adf164a6bdb303078/netcdf4-1.7.4-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:224a15434c165a5e0225e5831f591edf62533044b1ce62fdfee815195bbd077d", size = 10567579, upload-time = "2026-01-05T02:27:29.382Z"},
-  {url = "https://files.pythonhosted.org/packages/6d/d5/e7685c66b7f011c73cd746127f986358a26c642a4e4a1aa5ab51481b6586/netcdf4-1.7.4-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:31a2318305de6831a18df25ad0df9f03b6d68666af0356d4f6057d66c02ffeb6", size = 10255032, upload-time = "2026-01-05T02:27:31.744Z"},
-  {url = "https://files.pythonhosted.org/packages/a6/14/7506738bb6c8bc373b01e5af8f3b727f83f4f496c6b108490ea2609dc2cf/netcdf4-1.7.4-cp314-cp314t-win_amd64.whl", hash = "sha256:6c4a0aa9446c3a616ef3be015b629dc6173643f8b09546de26a4e40e272cd1ed", size = 22289653, upload-time = "2026-01-05T02:27:34.294Z"},
-  {url = "https://files.pythonhosted.org/packages/af/2e/39d5e9179c543f2e6e149a65908f83afd9b6d64379a90789b323111761db/netcdf4-1.7.4-cp314-cp314t-win_arm64.whl", hash = "sha256:034220887d48da032cb2db5958f69759dbb04eb33e279ec6390571d4aea734fe", size = 2531682, upload-time = "2026-01-05T02:27:37.062Z"}
+  {url = "https://files.pythonhosted.org/packages/46/09/dec13f449e1b16abbb1f496b305e9151b887b5b543b7c52d10a3c20e20c2/netcdf4-1.7.5-cp311-abi3-macosx_15_0_arm64.whl", hash = "sha256:e53d6dc8c21d198e7c0769dc95e11c92b7b18511e99d93600a39d9cbb75f9e30", size = 10310068, upload-time = "2026-10-15T14:46:45.436Z"},
+  {url = "https://files.pythonhosted.org/packages/8d/d0/8979c976cfbd1d06f4ce272b5045915d346cb9a4f4e5d0e41e66131d7f05/netcdf4-1.7.5-cp311-abi3-macosx_15_0_x86_64.whl", hash = "sha256:5aa35bf798d701548c10deb4b00d42ab3ca5b240547e3b014450fba1fffd7b5a", size = 11052722, upload-time = "2026-10-15T14:46:48.166Z"},
+  {url = "https://files.pythonhosted.org/packages/b2/70/e9b74f9f9808e6ff4f86ff50e3e82778c816db955893830dc46928f09fbb/netcdf4-1.7.5-cp311-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:4eb7accc1bba740acfb5540c0eae25cc5668f21b59ed5f477a135ad206b4be2e", size = 10679081, upload-time = "2026-10-15T14:46:50.605Z"},
+  {url = "https://files.pythonhosted.org/packages/74/a5/258a9991720d51d1529731f267a64a75f24ef4dfa5f9150b598e10e710d3/netcdf4-1.7.5-cp311-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:db66e36288b4baf5b813a0b3b6528a70c95051b66a51aa9c29d0019832f3e321", size = 10553547, upload-time = "2026-10-15T14:46:52.952Z"},
+  {url = "https://files.pythonhosted.org/packages/ac/e4/86ce433ee2cb2cda3dac526ea48fda93d143af951527a21c6dd3621e1128/netcdf4-1.7.5-cp311-cp311-win_amd64.whl", hash = "sha256:ec665b355cecbe33a984cfa01218a8095110fc6a25ad1e771f9007ff475c2898", size = 22465761, upload-time = "2026-10-15T14:46:56.068Z"},
+  {url = "https://files.pythonhosted.org/packages/fc/2f/39b2f11d82d8379abd9e9cf5b61fdab6f03cc21a34a39bb45341a596d59a/netcdf4-1.7.5-cp311-cp311-win_arm64.whl", hash = "sha256:2668ea54e9419bc25919809a2ec66c7c18ed5200f0e14454834e851fbfa6938b", size = 2827653, upload-time = "2026-10-15T14:46:58.473Z"},
+  {url = "https://files.pythonhosted.org/packages/3e/1e/762d40cfeb51957e9ff36ccc5a96e3e5dd4a495963d509f3d876765a552a/netcdf4-1.7.5-cp312-cp312-win_amd64.whl", hash = "sha256:b18aad5f45507f729dbc790c78b9331aee687835a9f3d2631b0576c640f11fa8", size = 22442933, upload-time = "2026-10-15T14:47:01.455Z"},
+  {url = "https://files.pythonhosted.org/packages/2f/89/40b5633bade7c627dface45b7fac2c085d184ad0aef81a6f79efbac64ac7/netcdf4-1.7.5-cp312-cp312-win_arm64.whl", hash = "sha256:dfde593aedfa067bf6dc068de9fcaa94a2fa2b14455024391135d035948ffd88", size = 2807288, upload-time = "2026-10-15T14:47:03.871Z"},
+  {url = "https://files.pythonhosted.org/packages/b4/78/df90705c99ef213bee5e066357ac3040918b62446dba6327fc6313f50ae2/netcdf4-1.7.5-cp313-cp313-win_amd64.whl", hash = "sha256:a1bfdecf05638206f169eb95aa7ab4a05888a9a67ceab6a14f4d75116c35755c", size = 22442816, upload-time = "2026-10-15T14:47:06.688Z"},
+  {url = "https://files.pythonhosted.org/packages/9a/b3/b9bac35c012d2f0ddc4c1bc2e3a4bb5ec94107917dfc844696f6409345af/netcdf4-1.7.5-cp313-cp313-win_arm64.whl", hash = "sha256:c681bdbfac91404a50defedec32bb475c78851339feeda85f2c57bbfefd5e40d", size = 2807363, upload-time = "2026-10-15T14:47:09.213Z"},
+  {url = "https://files.pythonhosted.org/packages/c0/db/ba230a42e242d78d6da85bd97016050716f872cb4c5db56e9818fe8d3d98/netcdf4-1.7.5-cp314-cp314-win_amd64.whl", hash = "sha256:dec42ade5d3b53ee9780408b428ad00fcb61729f2755902e851319e3f2709841", size = 23347188, upload-time = "2026-10-15T14:47:11.857Z"},
+  {url = "https://files.pythonhosted.org/packages/59/d8/abb4058e2224d8c6d900b7a7af2064b7020fd0d96a57c674a4dd4be5bab5/netcdf4-1.7.5-cp314-cp314-win_arm64.whl", hash = "sha256:75b62caa0e13525550cd5ef84c40eb507d9f5ec7bf82cc647619e75c5152e1eb", size = 2923514, upload-time = "2026-10-15T14:47:14.841Z"},
+  {url = "https://files.pythonhosted.org/packages/af/5c/a6ed4d516fb8ec189ed52c0f95d2ebc95e3391b25d8da6f9fc8ab97e6a96/netcdf4-1.7.5-cp314-cp314t-macosx_15_0_arm64.whl", hash = "sha256:dc88f1043bc604fb7c2d6b05c72f8cf3354262875141449f3ac39cf64f1bb086", size = 10396425, upload-time = "2026-10-15T14:47:17.095Z"},
+  {url = "https://files.pythonhosted.org/packages/ba/2a/d034e305123960e8209f74a01d181c47700006d4af594e1d340eaefb4e0c/netcdf4-1.7.5-cp314-cp314t-macosx_15_0_x86_64.whl", hash = "sha256:d3e614fdbc5382aa857f0e6561678beaa9abd1519b283d53f4d1948a79dd9185", size = 11139606, upload-time = "2026-10-15T14:47:20.241Z"},
+  {url = "https://files.pythonhosted.org/packages/a6/f1/51a0f7d0d4c07f7d1ba8e726aef62f15a43825498ebdf7502ae8db1a13a6/netcdf4-1.7.5-cp314-cp314t-win_amd64.whl", hash = "sha256:9379b9e0a21f4989e41282ed417ae1205712382bf0bf0935e16e27a1edb818c6", size = 23373651, upload-time = "2026-10-15T14:47:23.81Z"},
+  {url = "https://files.pythonhosted.org/packages/4a/bd/f02594b09feb403f5f33742aa5a963eca4b6aecbb64d665440d771405ace/netcdf4-1.7.5-cp314-cp314t-win_arm64.whl", hash = "sha256:a9e3776c76fa6dedd3d2fe046a20544e622338f13b0d7a03f980998d151dfffa", size = 2946491, upload-time = "2026-10-15T14:47:26.144Z"},
+  {url = "https://files.pythonhosted.org/packages/9c/ef/37bd6ae38ef302ab77dbe542c1d0083d6d64b1e39f67f6ce884e723f9ab3/netcdf4-1.7.5-cp315-cp315-win_amd64.whl", hash = "sha256:f5e4dd5323afabe9c73e9f8f882265e3a28de45b25db9cba14e08fc0f2fa3544", size = 23346055, upload-time = "2026-10-15T14:47:28.882Z"},
+  {url = "https://files.pythonhosted.org/packages/5a/c0/8cf075750e3b131c57d22befb0b3a592fb96849833a37b8e64c2fedb1a86/netcdf4-1.7.5-cp315-cp315-win_arm64.whl", hash = "sha256:922eea505165ef1605adc4f6047637fad7250b21660d7ff8266887d922d48f52", size = 2922313, upload-time = "2026-10-15T14:47:31.19Z"},
+  {url = "https://files.pythonhosted.org/packages/b8/6d/b68f5f3b8a0d8d886d3de3bc6bf00e7bca805c031ee71f3ed1dbdb00151a/netcdf4-1.7.5-cp315-cp315t-macosx_15_0_arm64.whl", hash = "sha256:767de111c4162a3e09ec0bcad076858d8c761f45df6db92c63700e02e47478cf", size = 10395053, upload-time = "2026-10-15T14:47:33.153Z"},
+  {url = "https://files.pythonhosted.org/packages/1c/1c/0fb386a233133eb606b4c916a04a22028e2c638c7dd2585a9f54391290dc/netcdf4-1.7.5-cp315-cp315t-macosx_15_0_x86_64.whl", hash = "sha256:bd6702164fabeb963b498a1b5602f25315db33c5aca91b45117eccc6ef8b7e93", size = 11138325, upload-time = "2026-10-15T14:47:35.782Z"},
+  {url = "https://files.pythonhosted.org/packages/bc/33/2c116002392765ab33e0190594f594c12f5eb0a3207d0d8ac35428a92942/netcdf4-1.7.5-cp315-cp315t-manylinux_2_28_aarch64.whl", hash = "sha256:94a0881737056cba6567e84a3a4360c3e247a860a5de1921fba7a116e3575dbb", size = 11095729, upload-time = "2026-10-15T14:47:38.473Z"},
+  {url = "https://files.pythonhosted.org/packages/e0/65/a53b21581f60a582667679371c7e1cda6f8e382523e1b76f071bf6f091bf/netcdf4-1.7.5-cp315-cp315t-manylinux_2_28_x86_64.whl", hash = "sha256:743de01bfecfe89a14c89f37e7f7919ae988a2692e738e5e98004217aeaccffa", size = 10869976, upload-time = "2026-10-15T14:47:41.47Z"},
+  {url = "https://files.pythonhosted.org/packages/94/a2/c29c58473ff45d892e7f15c0f7ed57e9418ccdcc6fdfa7f41ce9ec170ac8/netcdf4-1.7.5-cp315-cp315t-win_amd64.whl", hash = "sha256:3405f0cd57fa89881a364e90f7ada81fde0a073f443f66e9da8f0eda8873349b", size = 23372265, upload-time = "2026-10-15T14:47:44.975Z"},
+  {url = "https://files.pythonhosted.org/packages/30/43/3f146cfff0da67baf957ef7f65002a234845321cdfe77ec31c5730950b4e/netcdf4-1.7.5-cp315-cp315t-win_arm64.whl", hash = "sha256:f262d6c0e7fd535e6ef92b18674240c74f3a25e573c048a4d0586c0f74014d5e", size = 2945186, upload-time = "2026-10-15T14:47:47.261Z"}
 ]
 
 [[package]]
@@ -3070,13 +3081,11 @@ dependencies = [
 ]
 name = "numcodecs"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/44/bd/8a391e7c356366224734efd24da929cc4796fff468bfb179fe1af6548535/numcodecs-0.16.5.tar.gz", hash = "sha256:0d0fb60852f84c0bd9543cc4d2ab9eefd37fc8efcc410acd4777e62a1d300318", size = 6276387, upload-time = "2025-11-21T02:49:48.986Z"}
@@ -3112,16 +3121,13 @@ dependencies = [
 ]
 name = "numcodecs"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -3154,13 +3160,11 @@ wheels = [
 [[package]]
 name = "numpy"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/d0/ad/fed0499ce6a338d2a03ebae59cd15093910c8875328855781952abf6c2fe/numpy-2.4.6.tar.gz", hash = "sha256:f3a3570c4a2a16746ac2c31a7c7c7b0c186b95ce902e33db6f28094ed7387dda", size = 20735807, upload-time = "2026-05-18T23:37:14.07Z"}
@@ -3243,16 +3247,13 @@ wheels = [
 [[package]]
 name = "numpy"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -3568,20 +3569,20 @@ wheels = [
 
 [[package]]
 name = "platformdirs"
-sdist = {url = "https://files.pythonhosted.org/packages/80/a8/66d45abadff219e36e2a824181b8f6a67e7ed4572934d6252c71c29d5731/platformdirs-4.13.0.tar.gz", hash = "sha256:1aa0b0d3f224c1f07c295121e312a5a24a180d6ae5a8425ea1784b3e3863e9c0", size = 61094, upload-time = "2026-10-11T02:05:24.109Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/da/91/4a03cfdb03314cfca262921797fff04ff4054bd86a160aed76eddf8aa12b/platformdirs-4.13.3.tar.gz", hash = "sha256:5e567f664eb087ab8521c0179cd8d1bd60857d271136567a39719e28e2d383ce", size = 61559, upload-time = "2026-10-16T01:16:16.573Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "4.13.0"
+version = "4.13.3"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/8d/15/1633010b26e88e872c93b67c0b6c5e174fb74cb6fb5c1472b4d51d4a8f22/platformdirs-4.13.0-py3-none-any.whl", hash = "sha256:3dbcf4cd708f21cf876c4eaa90e58412bc4f033d87143f41b1493ff77c25b7e1", size = 32724, upload-time = "2026-10-11T02:05:22.776Z"}
+  {url = "https://files.pythonhosted.org/packages/45/b8/fd1af06b079af236f5423f7c1821264419cc8f6b4803f79353acbb8bfa53/platformdirs-4.13.3-py3-none-any.whl", hash = "sha256:f6ad7f447f24f8a3b82cce5976387428bff894a0eca6c3488f4a17f153c130c4", size = 32762, upload-time = "2026-10-16T01:16:15.051Z"}
 ]
 
 [[package]]
 name = "pluggy"
-sdist = {url = "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz", hash = "sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3", size = 69412, upload-time = "2025-05-15T12:30:07.975Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/bf/db/7fc19e6f2dc92a966727031389fc2e08b558f0f25eb7403c1119ad4713cd/pluggy-1.7.0.tar.gz", hash = "sha256:d1eaa46ebb595891b860ab086b4d09c8588af65ebd4361b8e8f4bb8920b90ba8", size = 123304, upload-time = "2026-10-15T09:50:58.343Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "1.6.0"
+version = "1.7.0"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl", hash = "sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746", size = 20538, upload-time = "2025-05-15T12:30:06.134Z"}
+  {url = "https://files.pythonhosted.org/packages/40/9e/2b38731e0fc536806f16490e1a12d7f0dc2a1235aa8cc07bcc75416a7daa/pluggy-1.7.0-py3-none-any.whl", hash = "sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec", size = 27082, upload-time = "2026-10-15T09:50:56.808Z"}
 ]
 
 [[package]]
@@ -3848,13 +3849,11 @@ dependencies = [
 ]
 name = "pyproj"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/04/90/67bd7260b4ea9b8b20b4f58afef6c223ecb3abf368eb4ec5bc2cdef81b49/pyproj-3.7.2.tar.gz", hash = "sha256:39a0cf1ecc7e282d1d30f36594ebd55c9fae1fda8a2622cee5d100430628f88c", size = 226279, upload-time = "2025-08-14T12:05:42.18Z"}
@@ -3923,16 +3922,13 @@ dependencies = [
 ]
 name = "pyproj"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -4043,11 +4039,11 @@ dependencies = [
   {name = "filelock"}
 ]
 name = "python-discovery"
-sdist = {url = "https://files.pythonhosted.org/packages/b0/73/54993df8fc57e906dc9b7e01d1d9b0b2d3eb0ce3190639e33dccb12853f7/python_discovery-1.6.2.tar.gz", hash = "sha256:cd1738ca1d37c86ef9d0b654dd46fcee1e41c97c6add12575e8501ced39afdb4", size = 86921, upload-time = "2026-10-10T01:24:27.912Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/fc/54/fad125f5c48f7821644ee6f223ebfcedc4e23597c1a16eeb13d33aa4a91a/python_discovery-1.6.3.tar.gz", hash = "sha256:a62b301d96cf5489cb96ab023b32e068421867fdd5df2e42eece877869047fa2", size = 88998, upload-time = "2026-10-16T03:54:29.507Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "1.6.2"
+version = "1.6.3"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/61/3b/50ed32583bfffa737df67d33b9c15d7b25df232c55ab606d059f610ef6ca/python_discovery-1.6.2-py3-none-any.whl", hash = "sha256:f0c697f95a3aaec4174a6e5e58f5885e25768684bafc76f1afde384709ebdcf2", size = 38912, upload-time = "2026-10-10T01:24:26.721Z"}
+  {url = "https://files.pythonhosted.org/packages/de/ec/643826e4d69b7bdce4213f221e8f5ed06d0a9dd69fa9b33342578d2cc8c8/python_discovery-1.6.3-py3-none-any.whl", hash = "sha256:cb7654125e3dcb594269a6feb56ac693f1f13b7c654493a93eba72dc22d18034", size = 39386, upload-time = "2026-10-16T03:54:28.237Z"}
 ]
 
 [[package]]
@@ -4061,22 +4057,24 @@ wheels = [
 
 [[package]]
 name = "pywinpty"
-sdist = {url = "https://files.pythonhosted.org/packages/a9/ef/2d27f30c59a67be7025b2d7858c8c2d282b74d66544b2384730b82de74fd/pywinpty-3.0.5.tar.gz", hash = "sha256:61db0db063de9865adbea66db294628f8577f608d9764a4c7d3384eeacc4e81b", size = 16223484, upload-time = "2026-06-11T00:11:58.93Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/1c/73/6bc452ae57820feb8bb6d993ecd91e24643d8f9a05409e8f83c56c852f04/pywinpty-3.1.0.tar.gz", hash = "sha256:14595b68054d61f2f1e90cc2b30be47be201de200ae1851c433d8cded101bce0", size = 16224208, upload-time = "2026-10-15T17:31:05.352Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "3.0.5"
+version = "3.1.0"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/b0/5c/31feb3dd82d1b33ae0bd09ca601edb993d9da1b7f0226b3336d4b4c39e1e/pywinpty-3.0.5-cp311-cp311-win_amd64.whl", hash = "sha256:af7a8720c78776ddd6259b71dd567944f766a6cd67f8d2887fbc4973967bacda", size = 2092466, upload-time = "2026-06-10T23:44:24.453Z"},
-  {url = "https://files.pythonhosted.org/packages/ee/fe/fe23e2229ffec0c10190cef5964f5c9b2dba179d23b69ae537b7ea90bcab/pywinpty-3.0.5-cp311-cp311-win_arm64.whl", hash = "sha256:c2406f54f699eab75953fb75ce805f2ae55a33a957cd070890abd454fb4b7680", size = 818395, upload-time = "2026-06-10T23:41:56.93Z"},
-  {url = "https://files.pythonhosted.org/packages/45/34/942cc95ca4e26489875aa8a95192766247a687379ec29543eebe73ec945f/pywinpty-3.0.5-cp312-cp312-win_amd64.whl", hash = "sha256:d62946adf14b15b54c0b8d785f93fe18b04da23f4ad59e2e8c4612646e9abd23", size = 2090915, upload-time = "2026-06-10T23:43:14.98Z"},
-  {url = "https://files.pythonhosted.org/packages/6a/70/5b9053004844139ea8bd86209c57ade12b134b2782f383a095784c8531ec/pywinpty-3.0.5-cp312-cp312-win_arm64.whl", hash = "sha256:e9391c05fbfa7a992a97e831fc6849887b4014a614192e3d984a7ca59592b376", size = 815934, upload-time = "2026-06-10T23:41:42.384Z"},
-  {url = "https://files.pythonhosted.org/packages/b9/f4/2a464b9893cceb3b3f416356e94fdc3e1bca9476993927e4e6d99fe95382/pywinpty-3.0.5-cp313-cp313-win_amd64.whl", hash = "sha256:48db1b0ad9d0a1b81dcaaa7163a99a7808deaceb0c1b2344716dc1fc090c3c4c", size = 2090471, upload-time = "2026-06-10T23:42:11.071Z"},
-  {url = "https://files.pythonhosted.org/packages/3c/2c/a138491a0afbdb50eb79395577bd326d4b0fbde7209417d1a8087ff2493a/pywinpty-3.0.5-cp313-cp313-win_arm64.whl", hash = "sha256:2c6008fb2d3774b48693b2fcb7f2cc317ade9dc581289a964ffeeaf81307c9b5", size = 815518, upload-time = "2026-06-10T23:42:02.363Z"},
-  {url = "https://files.pythonhosted.org/packages/6f/15/54400049a380582acd1282665c70fcf11e0bd3713679aca78e24c3aae738/pywinpty-3.0.5-cp313-cp313t-win_amd64.whl", hash = "sha256:22ce1b780d89821cc52daf6eac0708af22d93d000ce9c7c07e37489db8594598", size = 2089920, upload-time = "2026-06-10T23:44:13.395Z"},
-  {url = "https://files.pythonhosted.org/packages/94/0c/6f24f3c0799f502259b24bdf841a99ad2b0d59df5c2525b4e2a286d14be2/pywinpty-3.0.5-cp313-cp313t-win_arm64.whl", hash = "sha256:9c2919a81bc5cfb09b86fc5a002112b2de95ca4304a07413cbeeb746a1307a5c", size = 814520, upload-time = "2026-06-10T23:43:28.588Z"},
-  {url = "https://files.pythonhosted.org/packages/e9/23/f3cd1b1e5fc56517f54452c49f92049e7dd9ffc8a63de22a495581f50d04/pywinpty-3.0.5-cp314-cp314-win_amd64.whl", hash = "sha256:03bb3c16d691d9242267201830bcd0e64a9b663170e9042bc84b210da9de15ac", size = 2090663, upload-time = "2026-06-10T23:43:59.845Z"},
-  {url = "https://files.pythonhosted.org/packages/9d/dd/96d6cbfc6d9ddab5c1c2f92c26545ae8997446a2ba7ee2024cd43c81f49b/pywinpty-3.0.5-cp314-cp314-win_arm64.whl", hash = "sha256:89c5c6ef08997a3b4b277b214a35fe15cab4dd6d119f0140aa71df5b1168fdbc", size = 815700, upload-time = "2026-06-10T23:40:50.001Z"},
-  {url = "https://files.pythonhosted.org/packages/30/36/d98087bce0acaa4cce7f196103cfa7be3f63ce65f52473bb3e38784ae5d9/pywinpty-3.0.5-cp314-cp314t-win_amd64.whl", hash = "sha256:7b566165e0c5fdd6abe167a5ac8b954be6a843eb55a85946576d6bc1dea03d6d", size = 2090093, upload-time = "2026-06-10T23:40:58.933Z"},
-  {url = "https://files.pythonhosted.org/packages/57/fd/fe2b0db922ba052ce3976a08f3fc05d0c05047c8b4ebb6102e832b8ef563/pywinpty-3.0.5-cp314-cp314t-win_arm64.whl", hash = "sha256:24366280a8aa677323da87bec729cb3ea3b35367386cece0978bdc6e4695c690", size = 814517, upload-time = "2026-06-10T23:42:34.946Z"}
+  {url = "https://files.pythonhosted.org/packages/ee/49/d78b094428f10f3365dc9ef48c32e0bb336b2e03c8ab3f786ac5c2ccff99/pywinpty-3.1.0-cp311-cp311-win_amd64.whl", hash = "sha256:7ed683c7e4f31d92084d062478bf4aa9066a983c92700cb6ac6e4d5ca218723c", size = 2108312, upload-time = "2026-10-15T17:32:12.202Z"},
+  {url = "https://files.pythonhosted.org/packages/57/dd/fd3617b3af749ba66227d280e637474f49ce8acbceb87a7ee8e55858bd8b/pywinpty-3.1.0-cp311-cp311-win_arm64.whl", hash = "sha256:6cf46443732493e78efb130ac525df117e49db493eee1fc98ba9db70be410c96", size = 832952, upload-time = "2026-10-15T17:35:01.463Z"},
+  {url = "https://files.pythonhosted.org/packages/4f/89/ac7ce4b13b3131c1344c3af4053d70219e92d4c8e35b7182a9365432f7a3/pywinpty-3.1.0-cp312-cp312-win_amd64.whl", hash = "sha256:df249a2d942cbeef71f736119e96d246ea968fe9723dd25e8e439ba81814f85e", size = 2105451, upload-time = "2026-10-15T17:32:18.07Z"},
+  {url = "https://files.pythonhosted.org/packages/9e/db/957d5f4d64239720d01839c86f1c9c52aab0dbd4c25767889904bcda7d63/pywinpty-3.1.0-cp312-cp312-win_arm64.whl", hash = "sha256:31c9928935046abe20475392493b5074b3d966ea85c63cc83e939fb54cd9edfe", size = 830609, upload-time = "2026-10-15T17:31:39.836Z"},
+  {url = "https://files.pythonhosted.org/packages/3e/0b/fc29cd8d1db4b17fb83074cb763568728a5f21a80e91a481a967e2482f67/pywinpty-3.1.0-cp313-cp313-win_amd64.whl", hash = "sha256:cc51bc690f58a969eab7dcc8d070321187ed47d5f076edc3b4a56076b38831f3", size = 2104975, upload-time = "2026-10-15T17:32:02.183Z"},
+  {url = "https://files.pythonhosted.org/packages/ef/e8/c6146bf22daaf9a6457902a99caa5da386d1ba3e82622fa2acc8b2d4e921/pywinpty-3.1.0-cp313-cp313-win_arm64.whl", hash = "sha256:3670cd05447e56836301620e92dfdd3ef40408cfb59f2ce6290c66c9986b53ef", size = 830306, upload-time = "2026-10-15T17:32:43.981Z"},
+  {url = "https://files.pythonhosted.org/packages/87/6a/0c049de9e2d7d6b637aa36ee3825e643d5dba0a4890881652a6685bbaead/pywinpty-3.1.0-cp314-cp314-win_amd64.whl", hash = "sha256:d01178e9391366bc3325b4c49068cfce95d10d416f6ade62140b274741bc11e0", size = 2104626, upload-time = "2026-10-15T17:33:11.188Z"},
+  {url = "https://files.pythonhosted.org/packages/0e/6a/bafc3af2a864d9b681dc6dfcf46cf5de0b070276c9a0baec30c1201e88be/pywinpty-3.1.0-cp314-cp314-win_arm64.whl", hash = "sha256:44918ef8bc408fbf52f54db9b8c33370aee0a59cee76b071a4b4f41ad5ed89c8", size = 830193, upload-time = "2026-10-15T17:32:03.924Z"},
+  {url = "https://files.pythonhosted.org/packages/16/8c/e3a2921b39cbf9e27c67787996bdd99ba0acdf0d3f4c3a12b71e7e19a482/pywinpty-3.1.0-cp314-cp314t-win_amd64.whl", hash = "sha256:08afc428ec8765f2b8b9a9954727e1dafbefcb5912acc65952007779449650a1", size = 2104740, upload-time = "2026-10-15T17:32:31.808Z"},
+  {url = "https://files.pythonhosted.org/packages/42/5a/4155005f0879ae4f348567abd175bd68902e8b036e39d86e50a025f7a5b9/pywinpty-3.1.0-cp314-cp314t-win_arm64.whl", hash = "sha256:98f00e50639e9edb740eb6eedd6c0ab82959f9633029db59363d06973d00ac0d", size = 830142, upload-time = "2026-10-15T17:31:49.185Z"},
+  {url = "https://files.pythonhosted.org/packages/47/e8/26d10fc6c02628fc6052f820bad0a55531ba7d937f0952233bcbaaba85b9/pywinpty-3.1.0-cp315-cp315-win_amd64.whl", hash = "sha256:188923081eea840c15f37c54a29ad6871b04fddf8fbf1c4acf317d0e27bd9cac", size = 2104930, upload-time = "2026-10-15T17:33:07.069Z"},
+  {url = "https://files.pythonhosted.org/packages/d2/f4/1b91263807eaf5a98b4c00b3c144576e3d4bd8e093d40e447013c3745334/pywinpty-3.1.0-cp315-cp315-win_arm64.whl", hash = "sha256:714e8aa138bc61dcfd26c139d8cb8e7b954ea5c09c98bb014ab9b1f5741e289c", size = 830450, upload-time = "2026-10-15T17:32:55.051Z"},
+  {url = "https://files.pythonhosted.org/packages/e9/4a/6d9048716dbf969b31ffacbf8a0a0ff944196807957826601cdc995b4afa/pywinpty-3.1.0-cp315-cp315t-win_amd64.whl", hash = "sha256:c08a2e5fa7a62f31b5965f0be1b92c67394cd5f75dc0a033d45fadc597f0640d", size = 2105086, upload-time = "2026-10-15T17:38:04.937Z"},
+  {url = "https://files.pythonhosted.org/packages/a6/19/dece20a98f989c0eb8e35a2300e0357b98a1e8b5e3ea0149fad62ed16c12/pywinpty-3.1.0-cp315-cp315t-win_arm64.whl", hash = "sha256:751d0c727d0e81a246aba722cf0dcb2155fd6bc7b82574b1432f81256157ec73", size = 830443, upload-time = "2026-10-15T17:31:43.136Z"}
 ]
 
 [[package]]
@@ -4211,13 +4209,11 @@ dependencies = [
 ]
 name = "rasterio"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/ec/fa/fce8dc9f09e5bc6520b6fc1b4ecfa510af9ca06eb42ad7bdff9c9b8989d0/rasterio-1.4.4.tar.gz", hash = "sha256:c95424e2c7f009b8f7df1095d645c52895cd332c0c2e1b4c2e073ea28b930320", size = 445004, upload-time = "2025-12-12T18:01:08.971Z"}
@@ -4273,16 +4269,13 @@ dependencies = [
 ]
 name = "rasterio"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -4413,13 +4406,11 @@ dependencies = [
 ]
 name = "rioxarray"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/3d/8e/fe4e87460f8c62d8d5c683e09f19fbde5d9cfcfd0342d02df1f452999b5d/rioxarray-0.19.0.tar.gz", hash = "sha256:7819a0036fd874c8c8e280447cbbe43d8dc72fc4a14ac7852a665b1bdb7d4b04", size = 54600, upload-time = "2025-04-21T17:46:54.183Z"}
@@ -4439,16 +4430,13 @@ dependencies = [
 ]
 name = "rioxarray"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -4623,13 +4611,11 @@ dependencies = [
 ]
 name = "scipy"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/7a/97/5a3609c4f8d58b039179648e62dd220f89864f56f7357f5d4f45c29eb2cc/scipy-1.17.1.tar.gz", hash = "sha256:95d8e012d8cb8816c226aef832200b1d45109ed4464303e997c5b13122b297c0", size = 30573822, upload-time = "2026-02-23T00:26:24.851Z"}
@@ -4704,16 +4690,13 @@ dependencies = [
 ]
 name = "scipy"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -4906,8 +4889,7 @@ wheels = [
 [[package]]
 name = "soupsieve"
 resolution-markers = [
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -4921,20 +4903,16 @@ wheels = [
 [[package]]
 name = "soupsieve"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -4967,13 +4945,11 @@ dependencies = [
 ]
 name = "sphinx"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/42/50/a8c6ccc36d5eacdfd7913ddccd15a9cee03ecafc5ee2bc40e1f168d85022/sphinx-9.0.4.tar.gz", hash = "sha256:594ef59d042972abbc581d8baa577404abe4e6c3b04ef61bd7fc2acbd51f3fa3", size = 8710502, upload-time = "2025-12-04T07:45:27.343Z"}
@@ -5005,16 +4981,13 @@ dependencies = [
 ]
 name = "sphinx"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
@@ -5341,11 +5314,11 @@ dependencies = [
   {name = "python-discovery"}
 ]
 name = "virtualenv"
-sdist = {url = "https://files.pythonhosted.org/packages/dc/3f/935cf1757643381fb7f7cc98197b4bc119223d9c2cf37dc3b03ad2a4455f/virtualenv-21.14.7.tar.gz", hash = "sha256:5f427d56f39eb7e7447d641dd4b7ab1e9c92793f498f35f26da2e4972c5546ae", size = 5471741, upload-time = "2026-10-12T01:27:31.842Z"}
+sdist = {url = "https://files.pythonhosted.org/packages/0b/6a/fbdeea5c07d5674139639d42a97a41d26e9b9b8cb2a1265fa936f655ee20/virtualenv-21.14.8.tar.gz", hash = "sha256:394e45ed610ceffb5018e1a179e3a8012c02fd87fe792ab4aae67ce5e7e3afbd", size = 5474561, upload-time = "2026-10-16T00:09:09.672Z"}
 source = {registry = "https://pypi.org/simple"}
-version = "21.14.7"
+version = "21.14.8"
 wheels = [
-  {url = "https://files.pythonhosted.org/packages/52/5b/799c3e5b8e04d5fa1c9b61a4c1f5079603e747205c7311b92abd30283df5/virtualenv-21.14.7-py3-none-any.whl", hash = "sha256:3769219a308c5d2f093e7729621ad12a6346b5767a7ec4338414e2a0fb0c526b", size = 5487587, upload-time = "2026-10-12T01:27:29.37Z"}
+  {url = "https://files.pythonhosted.org/packages/14/01/cd63b97dd556293e1c74d76053936d9cef11a28eac605c735ae9f0ee324f/virtualenv-21.14.8-py3-none-any.whl", hash = "sha256:d2a347fdbc1a65e33c2c5e84dc767b4a3538a25749536a752744d4fe1f71c37a", size = 5487606, upload-time = "2026-10-16T00:09:07.441Z"}
 ]
 
 [[package]]
@@ -5755,13 +5728,11 @@ dependencies = [
 ]
 name = "zarr"
 resolution-markers = [
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
   "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version < '3.11.5' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version < '3.11.5' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
 sdist = {url = "https://files.pythonhosted.org/packages/31/5a/b8a0cf39a14c770c30bd1f2d120c54000c8cd9e84e8e79f38d9a7ce58071/zarr-3.1.6.tar.gz", hash = "sha256:d95e72cbea4b90e9a70679468b8266400331756232576ae2b43400ac5108d0eb", size = 386531, upload-time = "2026-03-23T17:25:18.748Z"}
@@ -5783,16 +5754,13 @@ dependencies = [
 ]
 name = "zarr"
 resolution-markers = [
-  "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.15' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
   "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version == '3.14.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version == '3.14.*' and platform_machine != 'ARM64' and sys_platform == 'win32'",
   "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
   "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine == 'ARM64' and sys_platform == 'win32'",
-  "python_full_version >= '3.12' and python_full_version < '3.14' and platform_machine != 'ARM64' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
   "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
 ]
