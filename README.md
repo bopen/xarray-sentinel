@@ -420,6 +420,23 @@ Attributes: ...
 
 ```
 
+### EOPF DataTree
+
+The whole product can also be opened as an [`xarray.DataTree`](https://docs.xarray.dev/en/stable/user-guide/data-structures.html#datatree)
+with the layout of the ESA EOPF products: one node per swath and burst for TOPS SLC,
+and one node for SM and GRD.
+
+```python
+dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
+slc = dt["S01SIWSLC_20260731T234807_0014_C050_C079_0116E8_IW3_258176/measurements/slc"]
+```
+
+Polarisations are stacked along `polarization`, and every node carries the
+`stac_discovery` and `other_metadata` attributes. `xr.open_groups` returns the same
+groups as a dictionary of `Dataset`s. See
+[DATATREE.md](https://github.com/bopen/xarray-sentinel/blob/main/docs/DATATREE.md)
+for the layout and the deliberate differences from EOPF.
+
 ### Advanced data access via fsspec
 
 **Metadata is read through *fsspec* on any filesystem. Measurement data, instead, can

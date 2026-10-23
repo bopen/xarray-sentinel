@@ -95,7 +95,7 @@ def open_datatree(
     storage_options: dict[str, Any] | None = None,
     check_files_exist: bool = False,
     override_product_files: str | None = None,
-    **kwargs: Any,
+    rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.DataTree:
     fs, manifest_path = sentinel1.get_fs_path(product_urlpath, fs, storage_options)
     product_path = os.path.dirname(manifest_path)
@@ -140,7 +140,10 @@ def open_datatree(
             measurement_path, annotation_path = groups[f"{swath}/{pol}"][:2]
             annotations[pol] = esa_safe.parse_xml(xml_files[annotation_path])
             pol_dataset = sentinel1.open_pol_dataset(
-                measurement_path, xml_files[annotation_path], fs=fs
+                measurement_path,
+                xml_files[annotation_path],
+                fs=fs,
+                rasterio_chunks=rasterio_chunks,
             )
             pol_dataset = conventions.update_attributes(pol_dataset)
             measurement_name = common_attrs["product_type"].lower()

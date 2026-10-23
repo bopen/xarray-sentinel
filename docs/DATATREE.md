@@ -290,8 +290,8 @@ done at any time.
       `eopf_metadata.build_processing_history`, quirk 9, entries keyed by output level
       from the resource roles and sorted by time, AUX resources as `adfs` and not
       walked. `open_datatree` does not set it for now.
-1. API and docs: `Sentinel1Backend.open_datatree` and `open_groups_as_dict`, README,
-   this file.
+1. Done: API and docs: `Sentinel1Backend.open_datatree` and
+   `open_groups_as_dict`, README, this file.
 1. Validation: convert one or two full SAFE products with CPM 3.0 in a throwaway
    environment (the test SAFEs lack the `support/*.xsd` the CPM needs), compare
    structure exactly and values within tolerance, list the deviations due to the
