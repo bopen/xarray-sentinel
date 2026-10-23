@@ -1,5 +1,6 @@
 import json
 import pathlib
+import warnings
 from typing import Any
 
 import pytest
@@ -54,34 +55,126 @@ def attrs_structure(value: Any, target: Any) -> Any:
     return structure
 
 
+S3_SAFE_NAME = "S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001"
+S3_COMMON_ATTRS = {
+    "family_name": "SENTINEL-1",
+    "number": "A",
+    "mode": "SM",
+    "swaths": ["S3"],
+    "orbit_number": 37258,
+    "mission_data_take_id": "287630",
+    "product_type": "SLC",
+    "start_time": "2021-04-01T15:28:55.1",
+    "stop_time": "2021-04-01T15:29:14.9",
+}
+
+
 @pytest.mark.parametrize(
-    "safe_name,expected",
+    "safe_name,common_attrs,expected",
     [
         [
             "S1C_IW_SLC__1SDV_20260731T234807_20260731T234821_008794_0116E8_C079",
+            {
+                "family_name": "SENTINEL-1",
+                "number": "C",
+                "mode": "IW",
+                "swaths": ["IW1", "IW2", "IW3"],
+                "orbit_number": 8794,
+                "mission_data_take_id": "71400",
+                "product_type": "SLC",
+                "start_time": "2026-07-31T23:48:07.875379",
+                "stop_time": "2026-07-31T23:48:21.123456",
+            },
             "S01SIWSLC_20260731T234807_0014_C050_C079_0116E8",
         ],
         [
             "S1C_IW_SLC__1SDH_20260531T194042_20260531T194109_007902_01011D_EC26",
+            {
+                "family_name": "SENTINEL-1",
+                "number": "C",
+                "mode": "IW",
+                "swaths": ["IW1", "IW2", "IW3"],
+                "orbit_number": 7902,
+                "mission_data_take_id": "65821",
+                "product_type": "SLC",
+                "start_time": "2026-05-31T19:40:42.5",
+                "stop_time": "2026-05-31T19:41:09.5",
+            },
             "S01SIWSLC_20260531T194042_0027_C045_EC26_01011D",
         ],
         [
             "S1C_IW_GRDH_1SDV_20261017T111256_20261017T111323_009924_013C8F_ECF5",
+            {
+                "family_name": "SENTINEL-1",
+                "number": "C",
+                "mode": "IW",
+                "swaths": ["IW"],
+                "orbit_number": 9924,
+                "mission_data_take_id": "81039",
+                "product_type": "GRD",
+                "start_time": "2026-10-17T11:12:56.1",
+                "stop_time": "2026-10-17T11:13:23.9",
+            },
             "S01SIWGRD_20261017T111256_0027_C057_ECF5_013C8F",
         ],
         [
             "S1D_IW_GRDH_1SDV_20261023T173456_20261023T173521_005145_009C11_F2F3_COG",
+            {
+                "family_name": "SENTINEL-1",
+                "number": "D",
+                "mode": "IW",
+                "swaths": ["IW"],
+                "orbit_number": 5145,
+                "mission_data_take_id": "39953",
+                "product_type": "GRD",
+                "start_time": "2026-10-23T17:34:56.1",
+                "stop_time": "2026-10-23T17:35:21.9",
+            },
             "S01SIWGRD_20261023T173456_0025_D029_F2F3_009C11",
+        ],
+        [
+            S3_SAFE_NAME,
+            S3_COMMON_ATTRS,
+            "S01SS3SLC_20210401T152855_0019_A213_6001_04638E",
         ],
     ],
 )
-def test_make_product_name(safe_name: str, expected: str) -> None:
-    assert eopf_product.make_product_name(safe_name) == expected
+def test_make_product_name(
+    safe_name: str, common_attrs: dict[str, Any], expected: str
+) -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        product_name = eopf_product.make_product_name(safe_name, common_attrs)
+
+    assert product_name == expected
 
 
-def test_make_product_name_error() -> None:
-    with pytest.raises(ValueError):
-        eopf_product.make_product_name("S2A_MSIL1C_20210403T101021_N0300_R022_T33TUM")
+def test_make_product_name_mismatch() -> None:
+    common_attrs = S3_COMMON_ATTRS | {"number": "B"}
+
+    with pytest.warns(UserWarning, match="differs from the manifest"):
+        product_name = eopf_product.make_product_name(S3_SAFE_NAME, common_attrs)
+
+    assert product_name == "S01SS3SLC_20210401T152855_0019_B213_6001_04638E"
+
+
+def test_make_product_name_duration() -> None:
+    # the duration of the SAFE name wins over the manifest one
+    common_attrs = S3_COMMON_ATTRS | {"stop_time": "2021-04-01T15:29:44.9"}
+
+    with pytest.warns(UserWarning, match="differs from the manifest"):
+        product_name = eopf_product.make_product_name(S3_SAFE_NAME, common_attrs)
+
+    assert product_name == "S01SS3SLC_20210401T152855_0019_A213_6001_04638E"
+
+
+def test_make_product_name_unparsable() -> None:
+    with pytest.warns(UserWarning, match="cannot parse SAFE name"):
+        product_name = eopf_product.make_product_name(
+            "S1A_S3_SLC_1SDV", S3_COMMON_ATTRS
+        )
+
+    assert product_name == "S01SS3SLC_20210401T152855_0019_A213_UNKN_04638E"
 
 
 def test_open_datatree_grd() -> None:

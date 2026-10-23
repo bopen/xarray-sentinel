@@ -92,11 +92,19 @@ other types 4096 x 4096.
 S0{sat}S{mode}{type}_{start}_{duration:04}_{platform}{N:03}_{unique_id}_{datatake_id}[_{swath}_{burst_id}]
 ```
 
-All fields come from the SAFE name, except `burst_id` from `swathTiming` and
-`N = (absolute_orbit - 73) // 175 + 1`, see quirk 5. `mode` is the beam for SM, e.g.
-`S01SS3SLC`. `burst_id` is the burst index from 0 before IPF 3.40. WV appends
-`_{WVn}_{image_number}`. The `_COG` suffix of the COG products is not part of the node
-name.
+The values come from the manifest: `start` is `safe:startTime` truncated to seconds, the
+mission digit is the last digit of `safe:platform/safe:familyName`, `platform` is
+`safe:platform/safe:number` and `datatake_id` is `missionDataTakeID` as 6-digit hex.
+`mode` is the beam for SM, e.g. `S01SS3SLC`, from the single `swaths` entry.
+`N = (absolute_orbit - 73) // 175 + 1`, see quirk 5, `burst_id` is the burst index from
+0 before IPF 3.40 and WV appends `_{WVn}_{image_number}`.
+
+The SAFE name is parsed as well, `unique_id` (the CRC) and `duration` come from it:
+the manifest has no unique id and a microsecond precision duration. A name that
+disagrees with the manifest or cannot be parsed warns, the manifest wins for the fields
+it has, `unique_id` is `UNKN` when it cannot be read and the duration falls back to the
+difference of the truncated `safe:startTime` and `safe:stopTime`. The `_COG` suffix of
+the COG products is dropped.
 
 | SAFE | EOPF CPM 3.0 node |
 |---|---|

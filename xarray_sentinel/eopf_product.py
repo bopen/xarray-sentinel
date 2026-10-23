@@ -2,6 +2,7 @@ import datetime
 import io
 import os
 import re
+import warnings
 from collections.abc import Callable
 from typing import Any
 
@@ -12,27 +13,88 @@ from . import conventions, eopf_metadata, eopf_sentinel1, esa_safe, sentinel1
 
 POLARIZATION_INDEPENDENT_GROUPS = {"conditions/attitude", "conditions/orbit"}
 SAFE_NAME_RE = re.compile(
-    r"S(\d)(\w)_(\w{2})_(\w{3})\w_\w{4}_(\w{15})_(\w{15})_(\d{6})_(\w{6})_(\w{4})"
+    r"S(?P<sat>\d)(?P<platform>\w)_(?P<mode>\w{2})_(?P<product_type>\w{3})\w"
+    r"_\w{4}_(?P<start>\d{8}T\d{6})_(?P<stop>\d{8}T\d{6})_(?P<orbit>\d{6})"
+    r"_(?P<datatake_id>\w{6})_(?P<unique_id>\w{4})(?:_COG)?"
 )
 SAFE_TIME_FORMAT = "%Y%m%dT%H%M%S"
+UNKNOWN_UNIQUE_ID = "UNKN"
 
 
-def make_product_name(safe_name: str) -> str:
-    # COG products append "_COG" to the standard SAFE name
-    match = SAFE_NAME_RE.fullmatch(safe_name.removesuffix("_COG"))
+def make_product_name(safe_name: str, common_attrs: dict[str, Any]) -> str:
+    """Return the EOPF product name.
+
+    The values come from the manifest, the SAFE name is parsed to warn about an
+    inconsistent or unparsable name. The unique id and the duration come from the SAFE
+    name, as the manifest has no unique id and a microsecond precision duration.
+    """
+    match = SAFE_NAME_RE.fullmatch(safe_name)
+    name_values: dict[str, str] = {}
     if match is None:
-        raise ValueError(f"cannot parse SAFE name {safe_name!r}")
-    sat, platform, mode, product_type, start, stop, orbit, datatake_id, unique_id = (
-        match.groups()
-    )
-    start_time = datetime.datetime.strptime(start, SAFE_TIME_FORMAT)
-    stop_time = datetime.datetime.strptime(stop, SAFE_TIME_FORMAT)
-    duration = (stop_time - start_time).seconds
+        warnings.warn(f"cannot parse SAFE name {safe_name!r}, using the manifest")
+    else:
+        name_values = match.groupdict()
+
+    start_time = datetime.datetime.fromisoformat(common_attrs["start_time"])
+    stop_time = datetime.datetime.fromisoformat(common_attrs["stop_time"])
+    # the SAFE name times are truncated to seconds
+    start_time = start_time.replace(microsecond=0)
+    stop_time = stop_time.replace(microsecond=0)
+    start = start_time.strftime(SAFE_TIME_FORMAT)
+    stop = stop_time.strftime(SAFE_TIME_FORMAT)
+    if name_values:
+        # the duration of the SAFE name takes precedence, as in the CPM
+        name_start_time = datetime.datetime.strptime(
+            name_values["start"], SAFE_TIME_FORMAT
+        )
+        name_stop_time = datetime.datetime.strptime(
+            name_values["stop"], SAFE_TIME_FORMAT
+        )
+        duration = (name_stop_time - name_start_time).seconds
+    else:
+        duration = (stop_time - start_time).seconds
     # not the relative orbit, see quirk 5 in docs/DATATREE.md
-    cycle = (int(orbit) - 73) // 175 + 1
+    cycle = (common_attrs["orbit_number"] - 73) // 175 + 1
+    sat = common_attrs["family_name"].removeprefix("SENTINEL-")
+    # the SAFE name uses the beam, e.g. S3, instead of SM
+    mode = common_attrs["mode"]
+    if mode == "SM":
+        mode = common_attrs["swaths"][0]
+    platform = common_attrs["number"]
+    product_type = common_attrs["product_type"]
+    datatake_id = f"{int(common_attrs['mission_data_take_id']):06X}"
+    values = {
+        "sat": sat,
+        "platform": platform,
+        "mode": mode,
+        "product_type": product_type,
+        "start": start,
+        "stop": stop,
+        "orbit": f"{common_attrs['orbit_number']:06d}",
+        "datatake_id": datatake_id,
+    }
+
+    differences = {}
+    for field, value in values.items():
+        name_value = name_values.get(field)
+        if name_value is not None and name_value != value:
+            differences[field] = (name_value, value)
+    if differences:
+        warnings.warn(
+            f"SAFE name {safe_name!r} differs from the manifest, using the manifest:"
+            f" {differences}"
+        )
+
+    unique_id = name_values.get("unique_id")
+    if unique_id is None:
+        warnings.warn(
+            f"no unique id in SAFE name {safe_name!r}, using {UNKNOWN_UNIQUE_ID!r}"
+        )
+        unique_id = UNKNOWN_UNIQUE_ID
+
     product_name = (
-        f"S0{sat}S{mode}{product_type}_{start}_{duration:04}_{platform}{cycle:03}"
-        f"_{unique_id}_{datatake_id}"
+        f"S0{sat}S{mode}{product_type}"
+        f"_{start}_{duration:04}_{platform}{cycle:03}_{unique_id}_{datatake_id}"
     )
     return product_name
 
@@ -129,7 +191,7 @@ def open_datatree(
             swath_pols.setdefault(swath, []).append(pol)
 
     safe_name, _ = os.path.splitext(os.path.basename(product_path))
-    product_name = make_product_name(safe_name)
+    product_name = make_product_name(safe_name, common_attrs)
     root_stac_discovery = eopf_metadata.build_stac_discovery(product_name, manifest)
     title = eopf_metadata.make_product_type(
         common_attrs["mode"], common_attrs["product_type"]
