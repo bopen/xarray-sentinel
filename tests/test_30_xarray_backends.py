@@ -227,3 +227,46 @@ def test_open_calibration_dataset() -> None:
 
     assert isinstance(res, xr.Dataset)
     assert set(res.sizes) == {"line", "pixel"}
+
+
+def test_open_datatree() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    node = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
+    res = xr.open_datatree(product_path, engine="sentinel-1", check_files_exist=True)
+
+    assert isinstance(res, xr.DataTree)
+    assert "/" in res.groups
+    assert f"/{node}/measurements" in res.groups
+    assert set(res[f"/{node}/measurements"].sizes) == {
+        "polarization",
+        "azimuth_time",
+        "slant_range_time",
+    }
+    assert "stac_discovery" in res[f"/{node}"].attrs
+    assert res.attrs["other_metadata"]["eopf_category"] == "eocontainer"
+
+    res = xr.open_datatree(product_path, check_files_exist=True)
+
+    assert isinstance(res, xr.DataTree)
+
+
+def test_open_groups() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_IW_SLC__1SDV_20210401T052622_20210401T052650_026269_032297_EFA4.SAFE"
+    )
+    node = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
+    res = xr.open_groups(product_path, engine="sentinel-1", check_files_exist=True)
+
+    assert isinstance(res, dict)
+    assert "/" in res
+    assert f"/{node}/measurements" in res
+    assert isinstance(res[f"/{node}/measurements"], xr.Dataset)
+    assert "polarization" in res[f"/{node}/measurements"].sizes
+
+    res = xr.open_groups(product_path, check_files_exist=True)
+
+    assert isinstance(res, dict)

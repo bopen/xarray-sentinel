@@ -1,6 +1,5 @@
 import datetime
 import re
-import warnings
 from typing import Any
 from xml.etree import ElementTree
 
@@ -106,7 +105,6 @@ def make_product_type(mode: str, product_type: str) -> str:
 def build_other_metadata(
     annotation: dict[str, Any], title: str, burst_index: int | None = None
 ) -> dict[str, Any]:
-    warnings.warn("This is an unofficial, alpha converter", UserWarning)
     quality_information = filter_metadata_dict(annotation["qualityInformation"])
     general_annotation = build_general_annotation(annotation["generalAnnotation"])
     image_information = filter_metadata_dict(annotation["imageAnnotation"])
