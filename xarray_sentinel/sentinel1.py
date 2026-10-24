@@ -647,6 +647,7 @@ def open_pol_dataset(
         raise ValueError(f"unknown projection {product_information['projection']}")
 
     arr = open_rasterio_dataarray(measurement, fs, rasterio_chunks)
+    close = arr.close
 
     preferred_chunks = arr.encoding["preferred_chunks"]
     # clear the encoding as many GeoTIFF details are incompatible with the CF conventions
@@ -672,7 +673,9 @@ def open_pol_dataset(
 
     arr.attrs.update(attrs)
 
-    return xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
+    ds = xr.Dataset(attrs=attrs, data_vars={"measurement": arr})
+    ds.set_close(close)
+    return ds
 
 
 def find_bursts_index(

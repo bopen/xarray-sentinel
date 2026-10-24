@@ -197,6 +197,7 @@ def open_datatree(
         common_attrs["mode"], common_attrs["product_type"]
     )
     dt = xr.DataTree()
+    closers = []
     for swath, pols in swath_pols.items():
         bursts: dict[str | None, dict[str, xr.Dataset]] = {}
         pol_datasets: dict[str, dict[str, xr.Dataset]] = {}
@@ -210,6 +211,7 @@ def open_datatree(
                 fs=fs,
                 rasterio_chunks=rasterio_chunks,
             )
+            closers.append(pol_dataset.close)
             pol_dataset = conventions.update_attributes(pol_dataset)
             measurement_name = common_attrs["product_type"].lower()
             for burst_id, burst in split_measurements(
@@ -275,4 +277,10 @@ def open_datatree(
         "other_metadata": {"eopf_category": "eocontainer", "title": title},
         "stac_discovery": root_stac_discovery,
     }
+
+    def close() -> None:
+        for closer in closers:
+            closer()
+
+    dt.set_close(close)
     return dt
