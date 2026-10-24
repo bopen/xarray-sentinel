@@ -1,3 +1,6 @@
+# benchmarks
+benchmarks/output/
+
 # setuptools-scm
 version.py
 
