@@ -1,8 +1,15 @@
 import importlib.metadata
 import json
+import warnings
+from typing import Any
 
 import typer
 import xarray as xr
+
+try:
+    from zarr.errors import ZarrUserWarning
+except ImportError:  # zarr < 3.1.2
+    ZarrUserWarning = UserWarning  # type: ignore
 
 app = typer.Typer(
     add_completion=False,
@@ -39,10 +46,12 @@ def convert(
     import distributed
 
     distributed.Client(processes=True)  # type: ignore
-    with xr.open_datatree(
-        source, engine="sentinel-1", rasterio_chunks={"y": 2048}
-    ) as datatree:
-        datatree.to_zarr(target, mode="w")
+    kwargs: dict[str, Any] = {"rasterio_chunks": {"y": 2048}}
+    with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
+        with warnings.catch_warnings():
+            # the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
+            warnings.simplefilter("ignore", ZarrUserWarning)
+            datatree.to_zarr(target, mode="w")
 
 
 @app.command()

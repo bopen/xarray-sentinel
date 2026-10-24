@@ -90,7 +90,7 @@ repository = "https://github.com/bopen/xarray-sentinel"
 branch = true
 
 [tool.deptry.per_rule_ignores]
-DEP002 = ["jupyterlab", "jupyterlab-execute-time", "numcodecs", "rioxarray", "s3fs", "scipy", "zarr"]
+DEP002 = ["jupyterlab", "jupyterlab-execute-time", "numcodecs", "rioxarray", "s3fs", "scipy"]
 
 [tool.mypy]
 strict = true
@@ -143,6 +143,8 @@ ignore = [
   "SIM102",
   # flake8-simplify: explicit if/else blocks are kept
   "SIM108",
+  # flake8-simplify: nested with statements are kept
+  "SIM117",
   # ruff: unused unpacked variables keep their descriptive name
   "RUF059"
 ]
