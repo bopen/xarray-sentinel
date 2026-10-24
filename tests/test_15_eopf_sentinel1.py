@@ -44,6 +44,22 @@ GRD_IW_2_VV_noise = (
     / "calibration"
     / "noise-s1b-iw-grd-vv-20211223t051122-20211223t051147-030148-039993-001.xml"
 )
+GRD_IW_3 = (
+    DATA_FOLDER
+    / "S1C_IW_GRDH_1SDH_20261001T085007_20261001T085036_009689_0134B6_D9A1.SAFE"
+)
+# trimmed to the first antenna pattern of each sub-swath
+GRD_IW_3_HH_annotation = (
+    GRD_IW_3
+    / "annotation"
+    / "s1c-iw-grd-hh-20261001t085007-20261001t085036-009689-0134b6-001.xml"
+)
+# trimmed to the noise range vectors 0, 2 and 3, one per pixel pattern
+GRD_IW_3_HH_noise = (
+    GRD_IW_3_HH_annotation.parent
+    / "calibration"
+    / "noise-s1c-iw-grd-hh-20261001t085007-20261001t085036-009689-0134b6-001.xml"
+)
 
 
 def test_open_antenna_pattern() -> None:
@@ -165,6 +181,27 @@ def test_open_noise_range() -> None:
 
     assert dict(res.sizes) == {"azimuth_time": 10, "slant_range_time": 542}
     assert res.noise_range_lut.dtype == "float32"
+    assert res.pixel.dims == ("slant_range_time",)
+
+    res = eopf_sentinel1.open_noise_range(
+        esa_safe.parse_xml(GRD_IW_2_VV_noise, "noise"),
+        esa_safe.parse_xml(GRD_IW_2_VV_annotation),
+    )
+
+    assert dict(res.sizes) == {"azimuth_time": 27, "ground_range": 657}
+    assert res.pixel.dims == ("azimuth_time", "ground_range")
+    assert (res.pixel.values >= 0).all()
+
+    res = eopf_sentinel1.open_noise_range(
+        esa_safe.parse_xml(GRD_IW_3_HH_noise, "noise"),
+        esa_safe.parse_xml(GRD_IW_3_HH_annotation),
+    )
+
+    assert dict(res.sizes) == {"azimuth_time": 3, "ground_range": 644}
+    assert res.pixel.dims == ("azimuth_time", "ground_range")
+    assert res.pixel.values[:, 221].tolist() == [8840, 8808, 8808]
+    assert res.pixel.values[:, -1].tolist() == [-1, 25567, 25567]
+    assert np.isnan(res.noise_range_lut.values[0, -1])
 
 
 def test_azimuth_time_coordinate() -> None:
