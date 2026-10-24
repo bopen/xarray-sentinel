@@ -5,11 +5,15 @@ from typing import Any
 
 import typer
 import xarray as xr
+import zarr
 
 try:
     from zarr.errors import ZarrUserWarning
 except ImportError:  # zarr < 3.1.2
     ZarrUserWarning = UserWarning  # type: ignore
+
+# the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
+warnings.filterwarnings("ignore", category=ZarrUserWarning)
 
 app = typer.Typer(
     add_completion=False,
@@ -48,10 +52,8 @@ def convert(
     kwargs: dict[str, Any] = {"rasterio_chunks": {"y": 2048}}
     with distributed.Client():  # type: ignore
         with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
-            with warnings.catch_warnings():
-                # the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
-                warnings.simplefilter("ignore", ZarrUserWarning)
-                datatree.to_zarr(target, mode="w")
+            datatree.to_zarr(target, mode="w", consolidated=False)
+            zarr.consolidate_metadata(target)
 
 
 @app.command()
