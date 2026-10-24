@@ -216,32 +216,45 @@ def range_coordinate(
     return name, start + pixel * step
 
 
+def stack_vectors(arrays: list[np.ndarray], fill_value: Any) -> np.ndarray:
+    """Stack 1-D arrays, padding the shorter ones at the end with ``fill_value``."""
+    size = max(a.size for a in arrays)
+    stacked = np.full((len(arrays), size), fill_value, arrays[0].dtype)
+    for index, array in enumerate(arrays):
+        stacked[index, : array.size] = array
+    return stacked
+
+
 def open_range_vectors(
     vectors: list[dict[str, Any]],
     variables: dict[str, str],
     annotation: dict[str, Any],
 ) -> xr.Dataset:
-    pixel = np.fromstring(vectors[0]["pixel"]["$"], dtype=int, sep=" ")
-    for vector in vectors:
-        if not np.array_equal(
-            np.fromstring(vector["pixel"]["$"], dtype=int, sep=" "), pixel
-        ):
-            raise ValueError("Unable to organise vectors in a regular line-pixel grid")
-    range_name, range_values = range_coordinate(pixel, annotation)
+    """Open the vectors on a 1-D range grid for SLC and a 2-D pixel grid for GRD.
+
+    The GRD vectors change their pixels at the sub-swath boundaries, which move in
+    azimuth, so the shorter vectors are padded with NaN and pixel -1.
+    """
+    pixels = [np.fromstring(v["pixel"]["$"], dtype=int, sep=" ") for v in vectors]
+    pixel = stack_vectors(pixels, -1)
+    range_name, range_values = range_coordinate(pixel[0], annotation)
     dims = ("azimuth_time", range_name)
-    data_vars = {
-        name: (
-            dims,
-            [np.fromstring(v[tag]["$"], dtype=np.float32, sep=" ") for v in vectors],
-        )
-        for name, tag in variables.items()
-    }
-    coords = {
+    coords: dict[str, Any] = {
         "azimuth_time": [np.datetime64(v["azimuthTime"], "ns") for v in vectors],
-        range_name: range_values,
-        "line": ("azimuth_time", [v["line"] for v in vectors]),
-        "pixel": (range_name, pixel),
     }
+    if range_name == "ground_range":
+        pixel_coordinate: tuple[Any, np.ndarray] = (dims, pixel)
+    else:
+        if (pixel != pixel[0]).any():
+            raise ValueError("Unable to organise vectors in a regular line-pixel grid")
+        coords[range_name] = range_values
+        pixel_coordinate = (range_name, pixel[0])
+    coords["line"] = ("azimuth_time", [v["line"] for v in vectors])
+    coords["pixel"] = pixel_coordinate
+    data_vars: dict[str, Any] = {}
+    for name, tag in variables.items():
+        values = [np.fromstring(v[tag]["$"], np.float32, sep=" ") for v in vectors]
+        data_vars[name] = (dims, stack_vectors(values, np.nan))
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
 
