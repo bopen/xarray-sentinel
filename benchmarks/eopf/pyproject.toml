@@ -1,0 +1,9 @@
+[project]
+dependencies = ["defusedxml", "eopf[parallel]==3.0.0"]
+name = "eopf-benchmark"
+requires-python = ">=3.13"
+version = "0"
+
+[tool.uv]
+exclude-newer = "1 week"
+package = false
