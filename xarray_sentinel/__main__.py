@@ -39,10 +39,10 @@ def convert(
     import distributed
 
     distributed.Client(processes=True)  # type: ignore
-    datatree = xr.open_datatree(
+    with xr.open_datatree(
         source, engine="sentinel-1", rasterio_chunks={"y": 2048}
-    )
-    datatree.to_zarr(target, mode="w")
+    ) as datatree:
+        datatree.to_zarr(target, mode="w")
 
 
 @app.command()
@@ -50,8 +50,8 @@ def info(
     source: str = typer.Argument(..., help="Path to the Sentinel-1 SAFE product."),
 ) -> None:
     """Print the STAC metadata of the EOPF product."""
-    datatree = xr.open_datatree(source, engine="sentinel-1")
-    typer.echo(json.dumps(datatree.attrs["stac_discovery"], indent=2))
+    with xr.open_datatree(source, engine="sentinel-1") as datatree:
+        typer.echo(json.dumps(datatree.attrs["stac_discovery"], indent=2))
 
 
 if __name__ == "__main__":
