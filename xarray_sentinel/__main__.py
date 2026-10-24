@@ -45,13 +45,13 @@ def convert(
     """Convert a Sentinel-1 SAFE product to an EOPF Zarr product."""
     import distributed
 
-    distributed.Client(processes=True)  # type: ignore
     kwargs: dict[str, Any] = {"rasterio_chunks": {"y": 2048}}
-    with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
-        with warnings.catch_warnings():
-            # the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
-            warnings.simplefilter("ignore", ZarrUserWarning)
-            datatree.to_zarr(target, mode="w")
+    with distributed.Client():  # type: ignore
+        with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
+            with warnings.catch_warnings():
+                # the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
+                warnings.simplefilter("ignore", ZarrUserWarning)
+                datatree.to_zarr(target, mode="w")
 
 
 @app.command()

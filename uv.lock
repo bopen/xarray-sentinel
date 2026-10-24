@@ -515,6 +515,64 @@ css = [
 
 [[package]]
 dependencies = [
+  {name = "contourpy", version = "1.3.3", source = {registry = "https://pypi.org/simple"}},
+  {name = "jinja2"},
+  {name = "narwhals"},
+  {name = "numpy", version = "2.4.6", source = {registry = "https://pypi.org/simple"}},
+  {name = "packaging"},
+  {name = "pillow"},
+  {name = "pyyaml"},
+  {name = "tornado", marker = "sys_platform != 'emscripten'"},
+  {name = "xyzservices"}
+]
+name = "bokeh"
+resolution-markers = [
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'win32'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.11.5' and python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'win32'",
+  "python_full_version < '3.11.5' and sys_platform == 'emscripten'",
+  "python_full_version < '3.11.5' and sys_platform != 'emscripten' and sys_platform != 'win32'"
+]
+sdist = {url = "https://files.pythonhosted.org/packages/dd/6f/262b649ad2fdd5ed23341452eebfa669a73b0e0c739a369204d02ee2e201/bokeh-3.9.2.tar.gz", hash = "sha256:5be30d105b329d7d2ab1cb92f51e6bd44e23f0fe21ab8d49594b220b2ab11632", size = 5751825, upload-time = "2026-07-25T16:57:56.207Z"}
+source = {registry = "https://pypi.org/simple"}
+version = "3.9.2"
+wheels = [
+  {url = "https://files.pythonhosted.org/packages/ca/0c/06a99ee998b1babf95074376cbf6ede5a86af726b12cbf47c4b84fa2803a/bokeh-3.9.2-py3-none-any.whl", hash = "sha256:448e07d5ee78231f5bdece3be020024bb98696c0d6b127e0e2df0b8ba8fa9765", size = 6409477, upload-time = "2026-07-25T16:57:54.62Z"}
+]
+
+[[package]]
+dependencies = [
+  {name = "jinja2"},
+  {name = "narwhals"},
+  {name = "numpy", version = "2.5.4", source = {registry = "https://pypi.org/simple"}},
+  {name = "packaging"},
+  {name = "pillow"},
+  {name = "pyyaml"},
+  {name = "tornado", marker = "sys_platform != 'emscripten'"},
+  {name = "xyzservices"}
+]
+name = "bokeh"
+resolution-markers = [
+  "python_full_version >= '3.15' and sys_platform == 'win32'",
+  "python_full_version >= '3.15' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'win32'",
+  "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
+  "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
+  "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'"
+]
+sdist = {url = "https://files.pythonhosted.org/packages/04/ab/19f33e7442fe2f09378bdafa95d088a1ed0dd078ea1f3d676c28d3cf2ed7/bokeh-3.10.1.tar.gz", hash = "sha256:e1dc21c4fa02f793b7c6acb2b439311924f46912b1d1ae1c7b058f8245b54fe8", size = 6053211, upload-time = "2026-10-13T16:53:00.445Z"}
+source = {registry = "https://pypi.org/simple"}
+version = "3.10.1"
+wheels = [
+  {url = "https://files.pythonhosted.org/packages/4e/9c/aaf2f11e31a75f0fffc79659ad7f0be01f39bb018bbc83c2a8a02657589e/bokeh-3.10.1-py3-none-any.whl", hash = "sha256:d73412b6317f70df0ffe6796956af609617523dfdfbc624d4f7f496cd09e8101", size = 6721259, upload-time = "2026-10-13T16:52:58.309Z"}
+]
+
+[[package]]
+dependencies = [
   {name = "jmespath"},
   {name = "python-dateutil"},
   {name = "urllib3"}
@@ -2980,6 +3038,15 @@ source = {registry = "https://pypi.org/simple"}
 version = "5.1.0"
 wheels = [
   {url = "https://files.pythonhosted.org/packages/09/dc/f3dfb7488b770f3f67e6545085bf2abea5172e88f57b8ad25ef860ca704c/myst_parser-5.1.0-py3-none-any.whl", hash = "sha256:9c91c52b3cdb4d94a6506e4fab4e2f296c7623a0da0dcbe6de1565c3dad67a8a", size = 85817, upload-time = "2026-05-13T09:38:17.904Z"}
+]
+
+[[package]]
+name = "narwhals"
+sdist = {url = "https://files.pythonhosted.org/packages/bf/21/f64d6b2dbea7bf3f8c38cdc786dcc6ef012ca3d173ad208c782c9a7bedf6/narwhals-2.27.1.tar.gz", hash = "sha256:aed93076a3ea42d9c32c88e4eb5ea422a21937011cbe1f480f9572a523c82094", size = 735013, upload-time = "2026-10-10T06:52:18.113Z"}
+source = {registry = "https://pypi.org/simple"}
+version = "2.27.1"
+wheels = [
+  {url = "https://files.pythonhosted.org/packages/d1/89/5d4c86da1130d9059681e5b6cd7645df5c10279a6a079c5c37dcb2cc6f3f/narwhals-2.27.1-py3-none-any.whl", hash = "sha256:d057df13f5852b8e157596e82eb5e955fad267425df5e420e0ee9863da483b31", size = 483211, upload-time = "2026-10-10T06:52:16.32Z"}
 ]
 
 [[package]]
@@ -5536,6 +5603,8 @@ wheels = [
 
 [[package]]
 dependencies = [
+  {name = "bokeh", version = "3.9.2", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version < '3.12'"},
+  {name = "bokeh", version = "3.10.1", source = {registry = "https://pypi.org/simple"}, marker = "python_full_version >= '3.12'"},
   {name = "dask"},
   {name = "distributed"},
   {name = "fsspec"},
@@ -5579,6 +5648,7 @@ dev = [
 [package.metadata]
 provides-extras = ["lab"]
 requires-dist = [
+  {name = "bokeh", specifier = ">=3.9.2"},
   {name = "dask", specifier = ">=2024.6"},
   {name = "distributed", specifier = ">=2024.6"},
   {name = "fsspec", specifier = ">=2024.1"},
@@ -5633,6 +5703,15 @@ source = {registry = "https://pypi.org/simple"}
 version = "4.3.2"
 wheels = [
   {url = "https://files.pythonhosted.org/packages/5c/fb/8be39dc47b0ed9bbc80f384906eed87fa974c9b377a7a430118c3b405550/xmlschema-4.3.2-py3-none-any.whl", hash = "sha256:cf5c970a30f6ebcb3da35260e694704cc0b6794d8ace46125bb2a95e38ed9307", size = 504613, upload-time = "2026-06-30T06:11:47.462Z"}
+]
+
+[[package]]
+name = "xyzservices"
+sdist = {url = "https://files.pythonhosted.org/packages/c4/bd/b75d5c2312caec607ec995200fa1eb8453225fd869947ec743919c279544/xyzservices-2026.9.1.tar.gz", hash = "sha256:8d1a39bf6b192940cc5db5264eeefc1b20dd184f8b83b1303b078743744f5943", size = 1134047, upload-time = "2026-09-04T10:35:41.399Z"}
+source = {registry = "https://pypi.org/simple"}
+version = "2026.9.1"
+wheels = [
+  {url = "https://files.pythonhosted.org/packages/a8/71/9219fe65ef32bddc0b5d14e1d98dfefe9d2c9c1b1d1e93efca1f29fcbd4d/xyzservices-2026.9.1-py3-none-any.whl", hash = "sha256:af4fddac0f1fa5f7951834e2c58e10109e722be548cb1fe4f1a8e8b18cef4c09", size = 98829, upload-time = "2026-09-04T10:35:40.08Z"}
 ]
 
 [[package]]
