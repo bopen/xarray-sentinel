@@ -1,0 +1,32 @@
+# Benchmark configuration, run with:
+#
+# python benchmarks/run.py benchmarks/config.toml
+#
+# Relative paths are relative to this file.
+
+# environment of the tools, holding the CDSE S3 credentials, see .env.in
+env_file = "../.env"
+# operations to run on every product, see OPERATIONS in run.py:
+# convert         remote SAFE to local Zarr, both tools
+# convert-staged  download the SAFE first, then convert to local Zarr, eopf only
+operations = ["convert", "convert-staged"]
+# SAFE products, paths or URLs, comment out the ones to skip
+products = [
+  # EW GRDM, ~0.2 GB
+  "s3://eodata/Sentinel-1/SAR/EW_GRDM_1S/2025/06/01/S1A_EW_GRDM_1SDH_20250601T030553_20250601T030617_059447_07611C_01A6.SAFE",
+  # IW GRDH, ~1.7 GB
+  "s3://eodata/Sentinel-1/SAR/IW_GRDH_1S/2025/06/01/S1A_IW_GRDH_1SDH_20250601T094604_20250601T094629_059451_076142_6700.SAFE",
+  # IW SLC, ~7.5 GB
+  "s3://eodata/Sentinel-1/SAR/IW_SLC__1S/2025/06/01/S1A_IW_SLC__1SDH_20250601T094628_20250601T094655_059451_076142_77C5.SAFE"
+]
+# number of times each operation is run on each product
+repeat = 1
+# the outputs are written to <target>/<operation>/<tool>/<product>.zarr
+target = "output"
+# tools to run, an operation skips the tools that do not support it
+tools = ["xarray-sentinel", "eopf"]
+
+# Dask cluster of eopf
+[eopf]
+n_workers = 2
+threads_per_worker = 2

@@ -1,8 +1,19 @@
 import importlib.metadata
 import json
+import warnings
+from typing import Any
 
 import typer
 import xarray as xr
+import zarr
+
+try:
+    from zarr.errors import ZarrUserWarning
+except ImportError:  # zarr < 3.1.2
+    ZarrUserWarning = UserWarning  # type: ignore
+
+# the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
+warnings.filterwarnings("ignore", category=ZarrUserWarning)
 
 app = typer.Typer(
     add_completion=False,
@@ -38,11 +49,11 @@ def convert(
     """Convert a Sentinel-1 SAFE product to an EOPF Zarr product."""
     import distributed
 
-    distributed.Client(processes=True)  # type: ignore
-    with xr.open_datatree(
-        source, engine="sentinel-1", rasterio_chunks={"y": 2048}
-    ) as datatree:
-        datatree.to_zarr(target, mode="w")
+    kwargs: dict[str, Any] = {"rasterio_chunks": {"y": 2048}}
+    with distributed.Client():  # type: ignore
+        with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
+            datatree.to_zarr(target, mode="w", consolidated=False)
+            zarr.consolidate_metadata(target)
 
 
 @app.command()
