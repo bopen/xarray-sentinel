@@ -6,6 +6,7 @@ import warnings
 from collections.abc import Callable
 from typing import Any
 
+import dask
 import fsspec
 import xarray as xr
 
@@ -202,12 +203,11 @@ def open_datatree(
         check_files_exist=check_files_exist,
         fs=fs,
     )
-    xml_files = {
-        path: io.BytesIO(fs.cat_file(path))
-        for paths in groups.values()
-        for path in paths
-        if path.endswith(".xml")
-    }
+    # NOTE: an XML file is listed in several groups, e.g. the annotation in each metadata
+    # group, fetch each one once
+    xml_paths = sorted({p for ps in groups.values() for p in ps if p.endswith(".xml")})
+    contents = dask.compute(*[dask.delayed(fs.cat_file)(p) for p in xml_paths])  # type: ignore
+    xml_files = {p: io.BytesIO(c) for p, c in zip(xml_paths, contents)}
 
     swath_pols: dict[str, list[str]] = {}
     for group in groups:
