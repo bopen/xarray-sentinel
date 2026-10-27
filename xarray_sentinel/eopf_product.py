@@ -151,6 +151,32 @@ def stack_polarizations(datasets: dict[str, xr.Dataset]) -> xr.Dataset:
     return stacked.assign_coords(polarization=list(datasets))
 
 
+def open_manifest(
+    product_urlpath: esa_safe.PathType,
+    fs: fsspec.AbstractFileSystem | None = None,
+    storage_options: dict[str, Any] | None = None,
+) -> tuple[fsspec.AbstractFileSystem, str, io.BytesIO, str]:
+    """Return the filesystem, the product path, the manifest and the product name."""
+    fs, manifest_path = sentinel1.get_fs_path(product_urlpath, fs, storage_options)
+    product_path = os.path.dirname(manifest_path)
+    manifest = io.BytesIO(fs.cat_file(manifest_path))
+    common_attrs, _ = esa_safe.parse_manifest_sentinel1(manifest)
+    safe_name, _ = os.path.splitext(os.path.basename(product_path))
+    product_name = make_product_name(safe_name, common_attrs)
+    return fs, product_path, manifest, product_name
+
+
+def open_stac_item(
+    product_urlpath: esa_safe.PathType,
+    *,
+    fs: fsspec.AbstractFileSystem | None = None,
+    storage_options: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return the product STAC item, reading only the manifest."""
+    _, _, manifest, product_name = open_manifest(product_urlpath, fs, storage_options)
+    return eopf_metadata.build_stac_discovery(product_name, manifest)
+
+
 def open_datatree(
     product_urlpath: esa_safe.PathType,
     *,
@@ -161,10 +187,9 @@ def open_datatree(
     rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.DataTree:
     """Open a SAFE product as an experimental EOPF-layout DataTree."""
-    fs, manifest_path = sentinel1.get_fs_path(product_urlpath, fs, storage_options)
-    product_path = os.path.dirname(manifest_path)
-    manifest = io.BytesIO(fs.cat_file(manifest_path))
-
+    fs, product_path, manifest, product_name = open_manifest(
+        product_urlpath, fs, storage_options
+    )
     common_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     if override_product_files:
         product_files = sentinel1.do_override_product_files(
@@ -190,8 +215,6 @@ def open_datatree(
             swath, _, pol = group.partition("/")
             swath_pols.setdefault(swath, []).append(pol)
 
-    safe_name, _ = os.path.splitext(os.path.basename(product_path))
-    product_name = make_product_name(safe_name, common_attrs)
     root_stac_discovery = eopf_metadata.build_stac_discovery(product_name, manifest)
     title = eopf_metadata.make_product_type(
         common_attrs["mode"], common_attrs["product_type"]
