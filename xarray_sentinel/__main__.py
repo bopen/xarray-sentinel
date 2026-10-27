@@ -47,13 +47,10 @@ def convert(
     target: str = typer.Argument(..., help="Path to the output EOPF Zarr product."),
 ) -> None:
     """Convert a Sentinel-1 SAFE product to an EOPF Zarr product."""
-    import distributed
-
     kwargs: dict[str, Any] = {"rasterio_chunks": {"y": 2048}}
-    with distributed.Client():  # type: ignore
-        with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
-            datatree.to_zarr(target, mode="w", consolidated=False)
-            zarr.consolidate_metadata(target)
+    with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
+        datatree.to_zarr(target, mode="w", consolidated=False)
+        zarr.consolidate_metadata(target)
 
 
 @app.command()

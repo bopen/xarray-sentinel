@@ -36,9 +36,7 @@ classifiers = [
 # NOTE: some dependencies are not explicitly imported in the code, but we
 # rely on the packages being installed or we need to set minimum versions
 dependencies = [
-  "bokeh>=3.9.2",
   "dask>=2024.6",
-  "distributed>=2024.6",
   "fsspec>=2024.1",
   "numcodecs>=0.15.1",
   "numpy>=1.24",
@@ -91,7 +89,7 @@ repository = "https://github.com/bopen/xarray-sentinel"
 branch = true
 
 [tool.deptry.per_rule_ignores]
-DEP002 = ["bokeh", "jupyterlab", "jupyterlab-execute-time", "numcodecs", "rioxarray", "s3fs", "scipy"]
+DEP002 = ["jupyterlab", "jupyterlab-execute-time", "numcodecs", "rioxarray", "s3fs", "scipy"]
 
 [tool.mypy]
 strict = true
@@ -101,7 +99,6 @@ ignore_missing_imports = true
 module = [
   "cfchecker",
   "dask",
-  "distributed",
   "fsspec",
   "pydantic",
   "pydantic.alias_generators",
