@@ -7,6 +7,8 @@ import typer
 import xarray as xr
 import zarr
 
+from . import eopf_product
+
 try:
     from zarr.errors import ZarrUserWarning
 except ImportError:  # zarr < 3.1.2
@@ -47,13 +49,10 @@ def convert(
     target: str = typer.Argument(..., help="Path to the output EOPF Zarr product."),
 ) -> None:
     """Convert a Sentinel-1 SAFE product to an EOPF Zarr product."""
-    import distributed
-
     kwargs: dict[str, Any] = {"rasterio_chunks": {"y": 2048}}
-    with distributed.Client():  # type: ignore
-        with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
-            datatree.to_zarr(target, mode="w", consolidated=False)
-            zarr.consolidate_metadata(target)
+    with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
+        datatree.to_zarr(target, mode="w", consolidated=False)
+        zarr.consolidate_metadata(target)
 
 
 @app.command()
@@ -61,8 +60,8 @@ def info(
     source: str = typer.Argument(..., help="Path to the Sentinel-1 SAFE product."),
 ) -> None:
     """Print the STAC metadata of the EOPF product."""
-    with xr.open_datatree(source, engine="sentinel-1") as datatree:
-        typer.echo(json.dumps(datatree.attrs["stac_discovery"], indent=2))
+    stac_item = eopf_product.open_stac_item(source)
+    typer.echo(json.dumps(stac_item, indent=2))
 
 
 if __name__ == "__main__":
