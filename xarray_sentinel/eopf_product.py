@@ -127,6 +127,12 @@ ANNOTATION_GROUPS: dict[str, Callable[[dict[str, Any]], xr.Dataset | None]] = {
 # uint16 from the TIFF to the Zarr as in EOPF. The fill value lets xarray decode them to
 # float32 as rioxarray does, 0 is the no-data value of the GRD border, as the EOPF Zarr fill_value.
 MEASUREMENT_ENCODINGS = {"grd": {"_FillValue": 0}}
+# the CPM chunk size of the measurements
+CHUNK_SIZE = 4096
+# the chunks to read the measurement TIFFs with: the COG in the CPM chunks, made of whole
+# tiles, the strip TIFFs of the SLC and GRD in full lines, a GET each with GTIFF_DIRECT_IO
+TILE_READ_CHUNKS = {"y": CHUNK_SIZE, "x": CHUNK_SIZE}
+STRIP_READ_CHUNKS = {"y": 128}
 
 
 def split_measurements(
@@ -140,14 +146,14 @@ def split_measurements(
         azimuth_chunk = -1
     else:
         bursts[None] = pol_dataset
-        azimuth_chunk = 4096
+        azimuth_chunk = CHUNK_SIZE
     measurements = {}
     for burst_id, burst in bursts.items():
         measurement = burst.measurement.rename(name)
         measurement.attrs = {"long_name": measurement.attrs["long_name"]}
         measurement.encoding.update(MEASUREMENT_ENCODINGS.get(name, {}))
         # the CPM chunks, whole TOPS bursts along azimuth
-        chunks = {"azimuth_time": azimuth_chunk, measurement.dims[1]: 4096}
+        chunks = {"azimuth_time": azimuth_chunk, measurement.dims[1]: CHUNK_SIZE}
         measurements[burst_id] = measurement.chunk(chunks).to_dataset()
     return measurements
 
@@ -192,7 +198,11 @@ def open_datatree(
     override_product_files: str | None = None,
     rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.DataTree:
-    """Open a SAFE product as an experimental EOPF-layout DataTree."""
+    """Open a SAFE product as an experimental EOPF-layout DataTree.
+
+    The measurement TIFFs are read in ``rasterio_chunks``, by default
+    ``TILE_READ_CHUNKS`` for the COG products and ``STRIP_READ_CHUNKS`` for the others.
+    """
     fs, product_path, manifest, product_name = open_manifest(
         product_urlpath, fs, storage_options
     )
@@ -213,6 +223,12 @@ def open_datatree(
     xml_paths = sorted({p for ps in groups.values() for p in ps if p.endswith(".xml")})
     contents = dask.compute(*[dask.delayed(fs.cat_file)(p) for p in xml_paths])  # type: ignore
     xml_files = {p: io.BytesIO(c) for p, c in zip(xml_paths, contents)}
+
+    if rasterio_chunks is None:
+        if esa_safe.is_cog_product(manifest):
+            rasterio_chunks = TILE_READ_CHUNKS
+        else:
+            rasterio_chunks = STRIP_READ_CHUNKS
 
     swath_pols: dict[str, list[str]] = {}
     for group in groups:

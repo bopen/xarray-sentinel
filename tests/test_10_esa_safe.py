@@ -226,6 +226,24 @@ def test_parse_manifest_sentinel1(product_id: str, expected: dict[str, Any]) -> 
     assert res_attrs == expected
 
 
+def test_is_cog_product(tmp_path: pathlib.Path) -> None:
+    manifest_path = (
+        DATA_FOLDER
+        / "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8.SAFE"
+        / "manifest.safe"
+    )
+    # the top processing step of the CDSE GRD COG products
+    cog_manifest_path = tmp_path / "manifest.safe"
+    cog_manifest_path.write_text(
+        manifest_path.read_text().replace(
+            'name="GRD Post Processing"', 'name="COG Conversion"', 1
+        )
+    )
+
+    assert not esa_safe.is_cog_product(manifest_path)
+    assert esa_safe.is_cog_product(cog_manifest_path)
+
+
 def test_make_stac_item() -> None:
     attrs = SENTINEL1_ATTRIBUTES[
         "S1B_IW_GRDH_1SDV_20210401T052623_20210401T052648_026269_032297_ECC8"

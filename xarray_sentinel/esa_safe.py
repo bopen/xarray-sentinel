@@ -201,6 +201,21 @@ def parse_manifest_sentinel1(
     return attributes, files
 
 
+def is_cog_product(
+    manifest_path: PathOrFileType,
+    namespaces: dict[str, str] = SENTINEL1_NAMESPACES,
+) -> bool:
+    """Return whether the measurements are COG, as in the CDSE GRD COG products.
+
+    The manifest has no COG product type, the CDSE conversion adds a processing step.
+    """
+    if hasattr(manifest_path, "seek"):
+        manifest_path.seek(0)
+    manifest = ElementTree.parse(manifest_path).getroot()
+    query = ".//safe:processing[@name='COG Conversion']"
+    return manifest.find(query, namespaces) is not None
+
+
 # DEPRECATED
 def make_stac_item(attrs: Mapping[str, Any]) -> dict[str, Any]:
     assert attrs["family_name"] == "SENTINEL-1"

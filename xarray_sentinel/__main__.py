@@ -1,7 +1,6 @@
 import importlib.metadata
 import json
 import warnings
-from typing import Any
 
 import typer
 import xarray as xr
@@ -49,8 +48,7 @@ def convert(
     target: str = typer.Argument(..., help="Path to the output EOPF Zarr product."),
 ) -> None:
     """Convert a Sentinel-1 SAFE product to an EOPF Zarr product."""
-    kwargs: dict[str, Any] = {"rasterio_chunks": {"y": 2048}}
-    with xr.open_datatree(source, engine="sentinel-1", **kwargs) as datatree:
+    with xr.open_datatree(source, engine="sentinel-1") as datatree:
         datatree.to_zarr(target, mode="w", consolidated=False)
         zarr.consolidate_metadata(target)
 

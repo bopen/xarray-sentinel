@@ -1,5 +1,6 @@
 import json
 import pathlib
+import shutil
 import warnings
 from typing import Any
 
@@ -7,7 +8,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from xarray_sentinel import eopf_product
+from xarray_sentinel import eopf_product, sentinel1
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
@@ -212,6 +213,37 @@ def test_open_datatree_grd_encoding(tmp_path: pathlib.Path) -> None:
     assert decoded.grd.dtype == "float32"
     assert decoded.grd.values[0, 0, 0] == 65535
     xr.testing.assert_equal(decoded.grd, grd.astype("float32").where(grd != 0))
+
+
+def test_open_datatree_read_chunks(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # the test GRD as a CDSE COG product, only the manifest tells
+    grd_cog = tmp_path / f"{GRD_IW_2.stem}_COG.SAFE"
+    shutil.copytree(GRD_IW_2, grd_cog)
+    manifest_path = grd_cog / "manifest.safe"
+    manifest_path.write_text(
+        manifest_path.read_text().replace(
+            'name="GRD Post Processing"', 'name="COG Conversion"', 1
+        )
+    )
+    calls = []
+    open_pol_dataset = sentinel1.open_pol_dataset
+
+    def spy_open_pol_dataset(*args: Any, **kwargs: Any) -> xr.Dataset:
+        calls.append(kwargs["rasterio_chunks"])
+        return open_pol_dataset(*args, **kwargs)
+
+    monkeypatch.setattr(sentinel1, "open_pol_dataset", spy_open_pol_dataset)
+
+    # only the VV measurement is in the test product
+    eopf_product.open_datatree(GRD_IW_2, check_files_exist=True)
+    eopf_product.open_datatree(grd_cog, check_files_exist=True)
+    eopf_product.open_datatree(
+        GRD_IW_2, check_files_exist=True, rasterio_chunks={"y": 32}
+    )
+
+    assert calls == [{"y": 128}, {"y": 4096, "x": 4096}, {"y": 32}]
 
 
 @pytest.fixture(scope="module")
