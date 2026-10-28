@@ -503,7 +503,9 @@ def open_rasterio_dataarray(
     # fsspec needs rasterio >= 1.3.0, but we allow earlier rasterio versions for local files
     if fs is None or isinstance(fs, fsspec.implementations.local.LocalFileSystem):
         try:
-            arr = xr.open_dataarray(measurement, engine="rasterio", chunks=chunks)
+            arr = xr.open_dataarray(
+                measurement, engine="rasterio", chunks=chunks, lock=False
+            )
         except rasterio.RasterioIOError as ex:
             if "No such file" in str(ex):
                 raise FileNotFoundError(str(ex)) from ex
@@ -514,7 +516,7 @@ def open_rasterio_dataarray(
         #   to hope that rasterio remote protocols works with fsspec urlpaths
         maybe_rasterio_urlpath = fs.unstrip_protocol(measurement)
         arr = xr.open_dataarray(
-            maybe_rasterio_urlpath, engine="rasterio", chunks=chunks
+            maybe_rasterio_urlpath, engine="rasterio", chunks=chunks, lock=False
         )
     return arr
 
