@@ -498,14 +498,13 @@ def find_available_groups(
 def open_rasterio_dataarray(
     measurement: esa_safe.PathOrFileType,
     fs: fsspec.AbstractFileSystem | None,
-    chunks: dict[str, int] | None,
+    **kwargs: Any,
 ) -> xr.DataArray:
+    kwargs = {"lock": False} | kwargs
     # fsspec needs rasterio >= 1.3.0, but we allow earlier rasterio versions for local files
     if fs is None or isinstance(fs, fsspec.implementations.local.LocalFileSystem):
         try:
-            arr = xr.open_dataarray(
-                measurement, engine="rasterio", chunks=chunks, lock=False
-            )
+            arr = xr.open_dataarray(measurement, engine="rasterio", **kwargs)
         except rasterio.RasterioIOError as ex:
             if "No such file" in str(ex):
                 raise FileNotFoundError(str(ex)) from ex
@@ -515,9 +514,7 @@ def open_rasterio_dataarray(
         #   full fsspec support via `fs.open(measurement)` is now broken and we fall back
         #   to hope that rasterio remote protocols works with fsspec urlpaths
         maybe_rasterio_urlpath = fs.unstrip_protocol(measurement)
-        arr = xr.open_dataarray(
-            maybe_rasterio_urlpath, engine="rasterio", chunks=chunks, lock=False
-        )
+        arr = xr.open_dataarray(maybe_rasterio_urlpath, engine="rasterio", **kwargs)
     return arr
 
 
@@ -542,6 +539,7 @@ def open_pol_dataset(
     attrs: dict[str, Any] = {},
     gcp: xr.Dataset | None = None,
     rasterio_chunks: dict[str, int] | None = None,
+    mask_and_scale: bool = True,
 ) -> xr.Dataset:
     product_information = esa_safe.parse_tag(annotation, "//productInformation")
     image_information = esa_safe.parse_tag(annotation, "//imageInformation")
@@ -648,7 +646,9 @@ def open_pol_dataset(
     else:
         raise ValueError(f"unknown projection {product_information['projection']}")
 
-    arr = open_rasterio_dataarray(measurement, fs, rasterio_chunks)
+    arr = open_rasterio_dataarray(
+        measurement, fs, chunks=rasterio_chunks, mask_and_scale=mask_and_scale
+    )
     close = arr.close
 
     preferred_chunks = arr.encoding["preferred_chunks"]

@@ -123,6 +123,10 @@ ANNOTATION_GROUPS: dict[str, Callable[[dict[str, Any]], xr.Dataset | None]] = {
     "conditions/gcp": eopf_sentinel1.open_gcp,
     "conditions/orbit": eopf_sentinel1.open_orbit,
 }
+# the measurements are opened without mask_and_scale, so the GRD digital numbers stay
+# uint16 from the TIFF to the Zarr as in EOPF. The fill value lets xarray decode them to
+# float32 as rioxarray does, 0 is the no-data value of the GRD border, as the EOPF Zarr fill_value.
+MEASUREMENT_ENCODINGS = {"grd": {"_FillValue": 0}}
 
 
 def split_measurements(
@@ -141,6 +145,7 @@ def split_measurements(
     for burst_id, burst in bursts.items():
         measurement = burst.measurement.rename(name)
         measurement.attrs = {"long_name": measurement.attrs["long_name"]}
+        measurement.encoding.update(MEASUREMENT_ENCODINGS.get(name, {}))
         # the CPM chunks, whole TOPS bursts along azimuth
         chunks = {"azimuth_time": azimuth_chunk, measurement.dims[1]: 4096}
         measurements[burst_id] = measurement.chunk(chunks).to_dataset()
@@ -233,6 +238,7 @@ def open_datatree(
                 xml_files[annotation_path],
                 fs=fs,
                 rasterio_chunks=rasterio_chunks,
+                mask_and_scale=False,
             )
             closers.append(pol_dataset.close)
             pol_dataset = conventions.update_attributes(pol_dataset)

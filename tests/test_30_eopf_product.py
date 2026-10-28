@@ -3,6 +3,7 @@ import pathlib
 import warnings
 from typing import Any
 
+import numpy as np
 import pytest
 import xarray as xr
 
@@ -192,6 +193,25 @@ def test_open_datatree_grd() -> None:
     )
     for group in ["conditions/gcp", "quality/calibration", "quality/noise_range"]:
         assert "ground_range" in node[group].dims
+
+
+def test_open_datatree_grd_encoding(tmp_path: pathlib.Path) -> None:
+    res = eopf_product.open_datatree(GRD_IW_2, check_files_exist=True)
+    node = res["S01SIWGRD_20211223T051122_0025_B172_5371_039993"]
+    measurements = node["measurements"].to_dataset()
+    grd = measurements.grd.isel(azimuth_time=slice(2), ground_range=slice(3)).load()
+    assert grd.dtype == "uint16"
+    grd[0, 0, 0] = 65535
+
+    grd.to_dataset().to_zarr(tmp_path / "grd.zarr", consolidated=False)
+
+    raw = xr.open_zarr(tmp_path / "grd.zarr", consolidated=False, mask_and_scale=False)
+    assert raw.grd.dtype == "uint16"
+    np.testing.assert_array_equal(raw.grd.values, grd.values)
+    decoded = xr.open_zarr(tmp_path / "grd.zarr", consolidated=False)
+    assert decoded.grd.dtype == "float32"
+    assert decoded.grd.values[0, 0, 0] == 65535
+    xr.testing.assert_equal(decoded.grd, grd.astype("float32").where(grd != 0))
 
 
 @pytest.fixture(scope="module")

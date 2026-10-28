@@ -81,7 +81,9 @@ Other product types, from the CPM code and not yet checked on samples:
 - SM SLC: one node, the measurement is not split.
 - WV SLC: one node per vignette.
 - GRD: one node, range dimension `ground_range`, measurement `grd` uint16, plus
-  `conditions/coordinate_conversion`.
+  `conditions/coordinate_conversion`. We add `_FillValue` 0, the no-data value of the
+  border, so xarray decodes `grd` to float32 with the border as NaN, EOPF has the Zarr
+  `fill_value` 0 but no `_FillValue`.
 
 Chunks, from the CPM mapping: TOPS SLC `{azimuth_time: whole burst, slant_range_time: 4096}`,
 other types 4096 x 4096.
