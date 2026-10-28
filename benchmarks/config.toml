@@ -4,7 +4,8 @@
 #
 # Relative paths are relative to this file.
 
-# environment of the tools, holding the CDSE S3 credentials, see .env.in
+# environment of the tools, holding the CDSE S3 credentials, see .env.in, the GDAL
+# options are passed to xarray-sentinel only, eopf runs with the GDAL defaults
 env_file = "../.env"
 # operations to run on every product, see OPERATIONS in run.py:
 # convert         remote SAFE to local Zarr, both tools
@@ -12,12 +13,14 @@ env_file = "../.env"
 operations = ["convert", "convert-staged"]
 # SAFE products, paths or URLs, comment out the ones to skip
 products = [
-  # EW GRDM, ~0.2 GB
-  "s3://eodata/Sentinel-1/SAR/EW_GRDM_1S/2025/06/01/S1A_EW_GRDM_1SDH_20250601T030553_20250601T030617_059447_07611C_01A6.SAFE",
-  # IW GRDH, ~1.7 GB
-  "s3://eodata/Sentinel-1/SAR/IW_GRDH_1S/2025/06/01/S1A_IW_GRDH_1SDH_20250601T094604_20250601T094629_059451_076142_6700.SAFE",
-  # IW SLC, ~7.5 GB
-  "s3://eodata/Sentinel-1/SAR/IW_SLC__1S/2025/06/01/S1A_IW_SLC__1SDH_20250601T094628_20250601T094655_059451_076142_77C5.SAFE"
+  # EW GRDM over the Faroe Islands, ~0.3 GB
+  "s3://eodata/Sentinel-1/SAR/EW_GRDM_1S/2026/10/20/S1C_EW_GRDM_1SDH_20261020T070839_20261020T070915_009965_013DEA_057B.SAFE",
+  # IW GRDH over Rome, ~1.8 GB
+  "s3://eodata/Sentinel-1/SAR/IW_GRDH_1S/2026/10/22/S1C_IW_GRDH_1SDV_20261022T051912_20261022T051937_009993_013EED_B8E3.SAFE",
+  # IW GRDH over Rome as COG, same data as the GRDH, ~1.1 GB
+  "s3://eodata/Sentinel-1/SAR/IW_GRDH_1S-COG/2026/10/22/S1C_IW_GRDH_1SDV_20261022T051912_20261022T051937_009993_013EED_050F_COG.SAFE",
+  # IW SLC over Rome, same area as the GRDH, ~8.7 GB
+  "s3://eodata/Sentinel-1/SAR/IW_SLC__1S/2026/10/22/S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A.SAFE"
 ]
 # number of times each operation is run on each product
 repeat = 1
@@ -25,8 +28,3 @@ repeat = 1
 target = "output"
 # tools to run, an operation skips the tools that do not support it
 tools = ["xarray-sentinel", "eopf"]
-
-# Dask cluster of eopf
-[eopf]
-n_workers = 2
-threads_per_worker = 2

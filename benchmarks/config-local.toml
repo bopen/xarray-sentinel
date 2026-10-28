@@ -1,0 +1,27 @@
+# Benchmark configuration of the local SAFE products, run with:
+#
+# python benchmarks/run.py benchmarks/config-local.toml --label <hostname>-local
+#
+# The products of config.toml, downloaded to benchmarks/data.
+# Relative paths are relative to this file.
+
+# same environment as config.toml, see .env.in
+env_file = "../.env"
+# operations to run on every product, see OPERATIONS in run.py:
+# convert         local SAFE to local Zarr, both tools
+operations = ["convert"]
+# SAFE products, paths or URLs, comment out the ones to skip
+products = [
+  # EW GRDM over the Faroe Islands, ~0.3 GB
+  "data/S1C_EW_GRDM_1SDH_20261020T070839_20261020T070915_009965_013DEA_057B.SAFE",
+  # IW GRDH over Rome, ~1.8 GB
+  "data/S1C_IW_GRDH_1SDV_20261022T051912_20261022T051937_009993_013EED_B8E3.SAFE",
+  # IW SLC over Rome, same area as the GRDH, ~8.7 GB
+  "data/S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A.SAFE"
+]
+# number of times each operation is run on each product
+repeat = 1
+# the outputs are written to <target>/<operation>/<tool>/<product>.zarr
+target = "output/local"
+# tools to run, an operation skips the tools that do not support it
+tools = ["xarray-sentinel", "eopf"]

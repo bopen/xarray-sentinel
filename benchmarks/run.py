@@ -17,7 +17,6 @@ import shutil
 import socket
 import subprocess
 import sys
-import tempfile
 import time
 import tomllib
 from pathlib import Path
@@ -25,43 +24,25 @@ from typing import Any
 
 BENCHMARKS = Path(__file__).resolve().parent
 TOOLS = ["xarray-sentinel", "eopf"]
+# the GDAL configuration options, the S3 read controls of .env.in are tuned for
+# xarray-sentinel, the other tools run with the GDAL defaults
+GDAL_PREFIXES = ("GDAL_", "CPL_", "VSI_", "GTIFF_")
+GDAL_TOOLS = {"xarray-sentinel"}
 
 # the CLI arguments of each tool supporting the operation
 OPERATIONS = {
     "convert": {
         "xarray-sentinel": ["convert", "{source}", "{target}"],
-        "eopf": ["convert", "{source}", "{target}", "--use-dask-config"],
+        "eopf": ["convert", "{source}", "{target}"],
     },
     "convert-staged": {
-        "eopf": [
-            "convert",
-            "{source}",
-            "{target}",
-            "--use-dask-config",
-            "--stage-source",
-        ],
+        "eopf": ["convert", "{source}", "{target}", "--stage-source"],
     },
 }
 
-EOPF_TOML = """\
-[logging]
-level = "INFO"
-dask_level = "WARNING"
 
-[dask_context]
-cluster_type = "local"
-
-[dask_context.cluster_config]
-n_workers = {n_workers}
-threads_per_worker = {threads_per_worker}
-processes = true
-"""
-
-
-def tool_command(tool: str, *args: str, env_file: Path | None = None) -> list[str]:
+def tool_command(tool: str, *args: str) -> list[str]:
     uv_run = ["uv", "run", "--frozen"]
-    if env_file is not None:
-        uv_run += ["--env-file", str(env_file)]
     if tool == "xarray-sentinel":
         uv_run += ["--extra", "lab", "--project", str(BENCHMARKS.parent)]
     else:
@@ -80,12 +61,29 @@ def host_info() -> dict[str, Any]:
     }
 
 
-def dask_environ() -> dict[str, str]:
+def read_env_file(path: Path) -> dict[str, str]:
     environ = {}
-    for key, value in os.environ.items():
-        if key.startswith(("DASK_", "EOPF_")):
-            environ[key] = value
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            key, _, value = line.partition("=")
+            environ[key.strip()] = value.strip().strip("'\"")
     return environ
+
+
+def tool_environ(tool: str, env_file: Path | None) -> dict[str, str]:
+    environ = dict(os.environ)
+    if env_file is not None:
+        environ.update(read_env_file(env_file))
+    if tool not in GDAL_TOOLS:
+        environ = {k: v for k, v in environ.items() if not k.startswith(GDAL_PREFIXES)}
+    return environ
+
+
+def recorded_environ(environ: dict[str, str]) -> dict[str, str]:
+    # the settings of the run, not the credentials
+    prefixes = ("DASK_", "EOPF_", *GDAL_PREFIXES)
+    return {k: v for k, v in environ.items() if k.startswith(prefixes)}
 
 
 def measure(command: list[str], env: dict[str, str]) -> dict[str, Any]:
@@ -118,19 +116,15 @@ def run(
     operation: str,
     source: str,
     target: str,
-    config_folder: str,
     env_file: Path | None,
 ) -> dict[str, Any]:
     is_local = "://" not in target
     if is_local and Path(target).exists():
         shutil.rmtree(target)
-    env = dict(os.environ)
-    if tool == "eopf":
-        env["EOPF_CONFIGURATION_FOLDER"] = config_folder
     args = [
         arg.format(source=source, target=target) for arg in OPERATIONS[operation][tool]
     ]
-    result = measure(tool_command(tool, *args, env_file=env_file), env)
+    result = measure(tool_command(tool, *args), tool_environ(tool, env_file))
     if is_local and Path(target).exists():
         result["output_size"] = directory_size(Path(target))
     return result
@@ -148,13 +142,16 @@ def load_config(path: Path) -> dict[str, Any]:
         if tool not in TOOLS:
             raise ValueError(f"unknown tool {tool!r}, use: {TOOLS}")
     # relative paths are relative to the configuration file
+    config["products"] = [
+        product if "://" in product else str(path.parent / product)
+        for product in config["products"]
+    ]
     target = config.get("target", "output")
     if "://" not in target:
         config["target"] = str(path.parent / target)
     if "env_file" in config:
         config["env_file"] = path.parent / config["env_file"]
     config.setdefault("repeat", 1)
-    config.setdefault("eopf", {})
     return config
 
 
@@ -165,58 +162,49 @@ def main() -> None:
     args = parser.parse_args()
     config = load_config(args.config.resolve())
     env_file = config.get("env_file")
-    n_workers = config["eopf"].get("n_workers", 2)
-    threads_per_worker = config["eopf"].get("threads_per_worker", 2)
 
     versions = {}
     for tool in config["tools"]:
-        command = tool_command(tool, "--version", env_file=env_file)
-        output = subprocess.run(command, capture_output=True)
+        command = tool_command(tool, "--version")
+        output = subprocess.run(
+            command, capture_output=True, env=tool_environ(tool, env_file)
+        )
         versions[tool] = output.stdout.decode().strip()
 
     results = BENCHMARKS / "results" / f"{args.label}.jsonl"
     results.parent.mkdir(exist_ok=True)
-    with tempfile.TemporaryDirectory() as config_folder:
-        eopf_toml = EOPF_TOML.format(
-            n_workers=n_workers, threads_per_worker=threads_per_worker
-        )
-        (Path(config_folder) / "eopf.toml").write_text(eopf_toml)
-        for repeat in range(config["repeat"]):
-            for source in config["products"]:
-                name = Path(source.rstrip("/")).name.removesuffix(".SAFE")
-                for operation in config["operations"]:
-                    for tool in config["tools"]:
-                        if tool not in OPERATIONS[operation]:
-                            continue
-                        target = f"{config['target'].rstrip('/')}/{operation}/{tool}/{name}.zarr"
-                        result = run(
-                            tool, operation, source, target, config_folder, env_file
-                        )
-                        record = {
-                            "timestamp": datetime.datetime.now(
-                                datetime.UTC
-                            ).isoformat(),
-                            "label": args.label,
-                            "tool": tool,
-                            "version": versions[tool],
-                            "operation": operation,
-                            "source": source,
-                            "target": target,
-                            "n_workers": n_workers,
-                            "threads_per_worker": threads_per_worker,
-                            "repeat": repeat,
-                            **result,
-                            "environ": dask_environ(),
-                            "host": host_info(),
-                        }
-                        with results.open("a") as file:
-                            file.write(json.dumps(record) + "\n")
-                        status = "failed" if result["returncode"] else "ok"
-                        print(
-                            f"{operation} {tool} {name} #{repeat}: "
-                            f"{result['wall_time']:.1f}s {status}",
-                            flush=True,
-                        )
+    for repeat in range(config["repeat"]):
+        for source in config["products"]:
+            name = Path(source.rstrip("/")).name.removesuffix(".SAFE")
+            for operation in config["operations"]:
+                for tool in config["tools"]:
+                    if tool not in OPERATIONS[operation]:
+                        continue
+                    target = (
+                        f"{config['target'].rstrip('/')}/{operation}/{tool}/{name}.zarr"
+                    )
+                    result = run(tool, operation, source, target, env_file)
+                    record = {
+                        "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
+                        "label": args.label,
+                        "tool": tool,
+                        "version": versions[tool],
+                        "operation": operation,
+                        "source": source,
+                        "target": target,
+                        "repeat": repeat,
+                        **result,
+                        "environ": recorded_environ(tool_environ(tool, env_file)),
+                        "host": host_info(),
+                    }
+                    with results.open("a") as file:
+                        file.write(json.dumps(record) + "\n")
+                    status = "failed" if result["returncode"] else "ok"
+                    print(
+                        f"{operation} {tool} {name} #{repeat}: "
+                        f"{result['wall_time']:.1f}s {status}",
+                        flush=True,
+                    )
 
 
 if __name__ == "__main__":

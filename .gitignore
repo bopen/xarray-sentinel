@@ -1,4 +1,5 @@
 # project specific
+benchmarks/data/
 benchmarks/output/
 
 # generated
