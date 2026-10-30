@@ -2,7 +2,10 @@
 #
 # python benchmarks/run.py benchmarks/config-local.toml --label <hostname>-local
 #
-# The products of config.toml, downloaded to benchmarks/data.
+# The products of config.toml, download them to benchmarks/data with:
+#
+# python benchmarks/download.py benchmarks/config.toml
+#
 # Relative paths are relative to this file.
 
 # same environment as config.toml, see .env.in
@@ -16,6 +19,8 @@ products = [
   "data/S1C_EW_GRDM_1SDH_20261020T070839_20261020T070915_009965_013DEA_057B.SAFE",
   # IW GRDH over Rome, ~1.8 GB
   "data/S1C_IW_GRDH_1SDV_20261022T051912_20261022T051937_009993_013EED_B8E3.SAFE",
+  # IW GRDH over Rome as COG, same data as the GRDH, ~1.1 GB
+  "data/S1C_IW_GRDH_1SDV_20261022T051912_20261022T051937_009993_013EED_050F_COG.SAFE",
   # IW SLC over Rome, same area as the GRDH, ~8.7 GB
   "data/S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A.SAFE"
 ]
