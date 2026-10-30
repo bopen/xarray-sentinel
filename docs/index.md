@@ -7,6 +7,7 @@ Easily access and explore the SAR data products of the Copernicus Sentinel-1 sat
 :maxdepth: 2
 
 README.md
+whats-new.md
 API Reference <_api/xarray_sentinel/index>
 ```
 
