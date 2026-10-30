@@ -6,6 +6,10 @@ Run with any Python 3.11+, the tools run in their own uv environments:
 
 The products, the operations and the tools are selected in the configuration file.
 Each run appends a JSON record to ``benchmarks/results/<label>.jsonl``.
+
+With ``--profile DIR`` the xarray-sentinel runs are profiled with pyinstrument on the
+synchronous dask scheduler, so all the work is sampled but the times are not
+comparable. View the sessions written to DIR with ``pyinstrument --load FILE``.
 """
 
 import argparse
@@ -31,6 +35,9 @@ GDAL_TOOLS = {"xarray-sentinel"}
 
 # the CLI arguments of each tool supporting the operation
 OPERATIONS = {
+    "info": {
+        "xarray-sentinel": ["info", "{source}"],
+    },
     "convert": {
         "xarray-sentinel": ["convert", "{source}", "{target}"],
         "eopf": ["convert", "{source}", "{target}"],
@@ -41,13 +48,18 @@ OPERATIONS = {
 }
 
 
-def tool_command(tool: str, *args: str) -> list[str]:
+def tool_command(tool: str, *args: str, profile: Path | None = None) -> list[str]:
     uv_run = ["uv", "run", "--frozen"]
     if tool == "xarray-sentinel":
         uv_run += ["--extra", "lab", "--project", str(BENCHMARKS.parent)]
     else:
         uv_run += ["--project", str(BENCHMARKS / "eopf")]
-    return [*uv_run, tool, *args]
+    executable = [tool]
+    if profile is not None:
+        session = f"{profile}.pyisession"
+        module = tool.replace("-", "_")
+        executable = ["pyinstrument", "-r", "session", "-o", session, "-m", module]
+    return [*uv_run, *executable, *args]
 
 
 def host_info() -> dict[str, Any]:
@@ -117,16 +129,25 @@ def run(
     source: str,
     target: str,
     env_file: Path | None,
+    profile_folder: Path | None = None,
 ) -> dict[str, Any]:
     is_local = "://" not in target
     if is_local and Path(target).exists():
         shutil.rmtree(target)
+    environ = tool_environ(tool, env_file)
+    profile = None
+    if profile_folder is not None and tool == "xarray-sentinel":
+        environ["DASK_SCHEDULER"] = "synchronous"
+        scheme = source.rpartition("://")[0] or "file"
+        profile = profile_folder / f"{operation}-{scheme}-{Path(target).stem}"
     args = [
         arg.format(source=source, target=target) for arg in OPERATIONS[operation][tool]
     ]
-    result = measure(tool_command(tool, *args), tool_environ(tool, env_file))
+    result = measure(tool_command(tool, *args, profile=profile), environ)
     if is_local and Path(target).exists():
         result["output_size"] = directory_size(Path(target))
+    if profile is not None:
+        result["profile"] = f"{profile}.pyisession"
     return result
 
 
@@ -159,8 +180,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("config", type=Path, help="TOML configuration file")
     parser.add_argument("--label", default=socket.gethostname(), help="setup name")
+    parser.add_argument("--profile", type=Path, help="folder of the profiles")
     args = parser.parse_args()
     config = load_config(args.config.resolve())
+    if args.profile is not None:
+        args.profile.mkdir(parents=True, exist_ok=True)
     env_file = config.get("env_file")
 
     versions = {}
@@ -183,7 +207,9 @@ def main() -> None:
                     target = (
                         f"{config['target'].rstrip('/')}/{operation}/{tool}/{name}.zarr"
                     )
-                    result = run(tool, operation, source, target, env_file)
+                    result = run(
+                        tool, operation, source, target, env_file, args.profile
+                    )
                     record = {
                         "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
                         "label": args.label,
