@@ -269,6 +269,20 @@ def test_open_datatree_wv() -> None:
         eopf_product.open_datatree(SLC_WV)
 
 
+def test_open_stac_item() -> None:
+    res = eopf_product.open_stac_item(SLC_S3)
+
+    assert res["id"] == "S01SS3SLC_20210401T152855_0019_A213_6001_04638E"
+    datatree = eopf_product.open_datatree(SLC_S3, check_files_exist=True)
+    assert res == datatree.attrs["stac_discovery"]
+
+    # the WV test product has only the manifest
+    res = eopf_product.open_stac_item(SLC_WV)
+
+    assert res["id"] == "S01SWVSLC_20210403T083025_0867_B150_D542_032390"
+    assert res["properties"]["sar:instrument_mode"] == "WV"
+
+
 def test_open_datatree_bursts() -> None:
     res = eopf_product.open_datatree(SLC_IW, check_files_exist=True)
 
