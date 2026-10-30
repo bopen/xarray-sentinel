@@ -15,6 +15,8 @@ except ImportError:  # zarr < 3.1.2
 
 # the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
 warnings.filterwarnings("ignore", category=ZarrUserWarning)
+# and fixed length strings as well, zarr 3.1 warns about them
+warnings.filterwarnings("ignore", message="The data type .* Zarr V3 specification")
 
 app = typer.Typer(
     add_completion=False,
