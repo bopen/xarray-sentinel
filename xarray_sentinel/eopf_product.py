@@ -207,6 +207,8 @@ def open_datatree(
         product_urlpath, fs, storage_options
     )
     common_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
+    if common_attrs["mode"] == "WV":
+        raise ValueError("WV products are not supported by the EOPF DataTree yet")
     if override_product_files:
         product_files = sentinel1.do_override_product_files(
             override_product_files, product_files

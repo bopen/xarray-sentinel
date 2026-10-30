@@ -986,6 +986,9 @@ def open_sentinel1_dataset(
             f"Invalid group {group!r}, please select one of the following groups:"
             f"\n{list(groups.keys())}"
         )
+    # NOTE: the groups map to a single vignette out of the many of a WV swath
+    if group != "" and common_attrs["mode"] == "WV":
+        raise ValueError("WV products are not supported yet, only the root group")
 
     metadata = ""
 

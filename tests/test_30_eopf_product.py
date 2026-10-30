@@ -28,6 +28,10 @@ SLC_IW_V340 = (
     DATA_FOLDER
     / "S1A_IW_SLC__1SDH_20220414T102209_20220414T102236_042768_051AA4_E677.SAFE"
 )
+SLC_WV = (
+    DATA_FOLDER
+    / "S1B_WV_SLC__1SSV_20210403T083025_20210403T084452_026300_032390_D542.SAFE"
+)
 SLC_IW_NODE = "S01SIWSLC_20210401T052622_0028_B150_EFA4_032297_IW1_0"
 # the CPM 3.0 burst node with our deliberate differences, see docs/DATATREE.md
 EXPECTED_SLC_IW_STRUCTURE = json.loads(
@@ -258,6 +262,11 @@ def test_open_datatree(capsys: pytest.CaptureFixture[str]) -> None:
     assert isinstance(res, xr.DataTree)
     assert list(res.children) == ["S01SS3SLC_20210401T152855_0019_A213_6001_04638E"]
     assert capsys.readouterr().out == ""
+
+
+def test_open_datatree_wv() -> None:
+    with pytest.raises(ValueError, match="WV products"):
+        eopf_product.open_datatree(SLC_WV)
 
 
 def test_open_datatree_bursts() -> None:

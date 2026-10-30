@@ -80,6 +80,20 @@ def test_open_dataset_root() -> None:
         xr.open_dataset("")
 
 
+def test_open_dataset_wv() -> None:
+    product_path = (
+        DATA_FOLDER
+        / "S1B_WV_SLC__1SSV_20210403T083025_20210403T084452_026300_032390_D542.SAFE"
+    )
+    res = xr.open_dataset(product_path, engine="sentinel-1")
+
+    assert res.attrs["mode"] == "WV"
+
+    for group in ["WV1", "WV1/VV", "WV1/VV/orbit"]:
+        with pytest.raises(ValueError, match="WV products"):
+            xr.open_dataset(product_path, engine="sentinel-1", group=group)
+
+
 @pytest.mark.parametrize("product_path,swath_pol", SENTINEL1_SLC_PRODUCTS)
 def test_open_dataset_polarisation_slc(
     product_path: esa_safe.PathType,
