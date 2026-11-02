@@ -211,9 +211,10 @@ What we do in each case follows the decisions above.
    from the first by up to 30 pixels (1.2 km), and a padded pixel gives a `ground_range`
    of 1.7e11 m. We keep `ground_range` as a dimension without coordinate and a 2-D
    `pixel` coordinate, padded with -1.
-1. The `polarization` labels of the IW SLC are swapped: the data of all the groups are
-   stacked as VH, VV and labelled `["VV", "VH"]`, so the `VH` measurement holds the VV
-   TIFF. The EW GRD labels are right. We label the data with their own polarisation.
+1. The `polarization` labels of the VV and VH products are swapped, seen in the IW SLC
+   and the StripMap GRD: the data of all the groups are stacked as VH, VV and labelled
+   `["VV", "VH"]`, so the `VH` measurement holds the VV TIFF. The HH and HV labels of
+   the EW GRDs are right. We label the data with their own polarisation.
 1. Doppler centroid `azimuth_time` of all the swaths is the one of the first swath:
    IW2 and IW3 are 7.2 ms and 2.5 ms off their annotation, while their polynomials are
    their own. We use the annotation of the swath.
@@ -332,7 +333,11 @@ done at any time.
      `S1C_EW_GRDM_1SDH_20261020T070234_20261020T070339_009965_013DEA_83FA`, whose CDSE
      COG product converts to the same values. CPM 3.0 fails on the COG products, as it
      cannot parse the `_COG` SAFE names.
-   - StripMap: to do, the products have an empty `noiseAzimuthVectorList`.
+   - Done for StripMap GRD:
+     `S1C_S3_GRDH_1SDV_20261031T150107_20261031T150128_010130_014383_B806` has an empty
+     `noiseAzimuthVectorList`, so neither EOPF nor we have `quality/noise_azimuth`.
+     Same results as the EW GRDs plus quirk 11, the COG product converts to the same
+     values.
    - Done for SLC: `S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A`
      has the same 28 nodes and groups and the same `slc` data in every burst. The shared
      variables are equal or within float32 rounding except quirks 1, 2, 3, 4, 6, 11 and
