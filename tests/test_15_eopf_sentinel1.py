@@ -234,6 +234,7 @@ def test_open_noise_azimuth() -> None:
         esa_safe.parse_xml(SLC_IW1_VV_annotation),
     )
 
+    assert isinstance(res, xr.Dataset)
     assert res.noise_azimuth_lut.dims == ("azimuth_time", "swath")
     assert res.noise_azimuth_lut.dtype == "float32"
     assert res.swath.values.tolist() == ["IW1"]
@@ -244,6 +245,7 @@ def test_open_noise_azimuth() -> None:
         esa_safe.parse_xml(GRD_IW_2_VV_annotation),
     )
 
+    assert isinstance(res, xr.Dataset)
     assert res.swath.values.tolist() == ["IW1", "IW2", "IW3"]
     assert res.first_range_sample.values.tolist() == [0, 8890, 17701]
     assert res.noise_azimuth_lut.count("azimuth_time").values.tolist() == [
@@ -252,3 +254,11 @@ def test_open_noise_azimuth() -> None:
         1686,
     ]
     assert res.indexes["azimuth_time"].is_monotonic_increasing
+
+    # the StripMap noise files have an empty list
+    res = eopf_sentinel1.open_noise_azimuth(
+        {"noiseAzimuthVectorList": {"@count": 0}},
+        esa_safe.parse_xml(SLC_IW1_VV_annotation),
+    )
+
+    assert res is None

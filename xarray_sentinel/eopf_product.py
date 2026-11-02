@@ -101,7 +101,7 @@ def make_product_name(safe_name: str, common_attrs: dict[str, Any]) -> str:
 
 
 QUALITY_GROUPS: dict[
-    str, tuple[str, str, Callable[[dict[str, Any], dict[str, Any]], xr.Dataset]]
+    str, tuple[str, str, Callable[[dict[str, Any], dict[str, Any]], xr.Dataset | None]]
 ] = {
     "quality/calibration": (
         "calibration",
@@ -274,7 +274,8 @@ def open_datatree(
                     xml_path = groups[f"{swath}/{pol}/{group}"][0]
                     xml_dict = esa_safe.parse_xml(xml_files[xml_path], schema_type)
                     quality = open_quality(xml_dict, annotations[pol])
-                    pol_datasets.setdefault(eopf_group, {})[pol] = quality
+                    if quality is not None:
+                        pol_datasets.setdefault(eopf_group, {})[pol] = quality
             for eopf_group, converter in ANNOTATION_GROUPS.items():
                 converted = converter(annotations[pol])
                 if converted is not None:

@@ -292,8 +292,14 @@ def azimuth_time_coordinate(line: np.ndarray, annotation: dict[str, Any]) -> np.
     return azimuth_time.take(line)
 
 
-def open_noise_azimuth(noise: dict[str, Any], annotation: dict[str, Any]) -> xr.Dataset:
-    vectors = esa_safe.get_tag(noise, "noiseAzimuthVectorList/noiseAzimuthVector")
+def open_noise_azimuth(
+    noise: dict[str, Any], annotation: dict[str, Any]
+) -> xr.Dataset | None:
+    vector_list = esa_safe.get_tag(noise, "noiseAzimuthVectorList")
+    # e.g. the StripMap products, EOPF has no noise_azimuth group then
+    if "noiseAzimuthVector" not in vector_list:
+        return None
+    vectors = vector_list["noiseAzimuthVector"]
     vector_datasets = []
     for vector in vectors:
         line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")
