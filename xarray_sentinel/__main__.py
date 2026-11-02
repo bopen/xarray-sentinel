@@ -45,7 +45,7 @@ def main(
 
 
 @app.command()
-def convert(
+def to_eopf_zarr(
     source: str = typer.Argument(..., help="Path to the Sentinel-1 SAFE product."),
     target: str = typer.Argument(..., help="Path to the output EOPF Zarr product."),
 ) -> None:

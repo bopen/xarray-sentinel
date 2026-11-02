@@ -33,7 +33,7 @@ def test_version() -> None:
 def test_help() -> None:
     res = runner.invoke(__main__.app, [])
 
-    assert "convert" in res.output
+    assert "to-eopf-zarr" in res.output
     assert "info" in res.output
 
 
@@ -50,7 +50,7 @@ def test_info() -> None:
     assert json.loads(res.stdout)["properties"]["sar:instrument_mode"] == "WV"
 
 
-def test_convert(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_to_eopf_zarr(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
     open_datatree = xr.open_datatree
 
     # the test products miss some files and the command has no option to skip them
@@ -60,7 +60,7 @@ def test_convert(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setattr(xr, "open_datatree", open_available_files)
     target = tmp_path / "product.zarr"
 
-    res = runner.invoke(__main__.app, ["convert", str(GRD_IW), str(target)])
+    res = runner.invoke(__main__.app, ["to-eopf-zarr", str(GRD_IW), str(target)])
 
     assert res.exit_code == 0
     # consolidated=True fails if the metadata are not consolidated
@@ -72,10 +72,10 @@ def test_convert(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> Non
     assert grd.encoding["preferred_chunks"]["azimuth_time"] == 4096
 
 
-def test_convert_wv(tmp_path: pathlib.Path) -> None:
+def test_to_eopf_zarr_wv(tmp_path: pathlib.Path) -> None:
     target = tmp_path / "product.zarr"
 
-    res = runner.invoke(__main__.app, ["convert", str(SLC_WV), str(target)])
+    res = runner.invoke(__main__.app, ["to-eopf-zarr", str(SLC_WV), str(target)])
 
     assert res.exit_code != 0
     assert isinstance(res.exception, ValueError)

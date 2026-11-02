@@ -5,7 +5,7 @@
 - Add the experimental EOPF DataTree: `xr.open_datatree(..., engine="sentinel-1")` and
   `xr.open_groups` open a SAFE product with the layout of the ESA EOPF CPM 3.0 products.
   WV products are not supported yet.
-- Add the `xarray-sentinel` command line: `convert` writes the EOPF DataTree of a SAFE
+- Add the `xarray-sentinel` command line: `to-eopf-zarr` writes the EOPF DataTree of a SAFE
   product to Zarr and `info` prints its STAC metadata, reading only the manifest.
 - Support the CDSE GRD COG products in the EOPF DataTree, reading them in whole tiles.
 - Read the measurements without the global rasterio lock, so dask reads them in parallel.

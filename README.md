@@ -443,7 +443,7 @@ for the layout and the deliberate differences from EOPF.
 The same tree can be written to a Zarr store with the `xarray-sentinel` command:
 
 ```shell
-    xarray-sentinel convert S1A_IW_SLC__1SDV_....SAFE product.zarr
+    xarray-sentinel to-eopf-zarr S1A_IW_SLC__1SDV_....SAFE product.zarr
 ```
 
 The source may be any local or *fsspec* URL path.

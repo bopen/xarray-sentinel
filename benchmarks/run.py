@@ -39,7 +39,7 @@ OPERATIONS = {
         "xarray-sentinel": ["info", "{source}"],
     },
     "convert": {
-        "xarray-sentinel": ["convert", "{source}", "{target}"],
+        "xarray-sentinel": ["to-eopf-zarr", "{source}", "{target}"],
         "eopf": ["convert", "{source}", "{target}"],
     },
     "convert-staged": {
