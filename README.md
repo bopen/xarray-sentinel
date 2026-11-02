@@ -30,7 +30,7 @@ with the following functionalities:
   measurements on other filesystems, such as `zip` or chained caching filesystems,
   are currently broken (see [#127](https://github.com/bopen/xarray-sentinel/issues/127))
 - supports larger-than-memory and distributed data access via [*Dask*](https://dask.org) and
-  [*rioxarray*](https://corteva.github.io/rioxarray) /
+  [*rioxarray*](https://vylor.github.io/rioxarray/) /
   [*rasterio*](https://rasterio.readthedocs.io) / [*GDAL*](https://gdal.org)
 - provides a few helpers for simple operations involving metadata like
   cropping individual bursts out of IW SLC swaths,
