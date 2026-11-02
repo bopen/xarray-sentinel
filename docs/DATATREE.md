@@ -148,7 +148,7 @@ Still served by the sample service: one node per polarisation, swath and burst, 
 | none | `conditions/antenna_pattern` | EOPF only |
 | `IW/VV/coordinate_conversion`, GRD only | `conditions/coordinate_conversion` | snake_case names |
 | `IW1/VV/azimuth_fm_rate` | none | only in `other_metadata` |
-| `IW1/VV/calibration` | `quality/calibration` | snake_case names, `(line, pixel)` is `(azimuth_time, slant_range_time\|ground_range)` with `line` and `pixel` as coordinates |
+| `IW1/VV/calibration` | `quality/calibration` | snake_case names, `(line, pixel)` is `(azimuth_time, slant_range_time\|ground_range)` with `line` and `pixel` as coordinates, GRD `pixel` is 2-D, see quirk 10 |
 | `IW1/VV/noise_range` | `quality/noise_range` | as calibration |
 | `IW1/VV/noise_azimuth` | `quality/noise_azimuth` | snake_case names, `(swath, line)` is `(azimuth_time, swath)` with `line` as coordinate |
 | none | `burst_timing` attrs | per-line valid samples |
@@ -176,10 +176,10 @@ What we do in each case follows the decisions above.
 1. The name token `N` applies the S1A relative orbit formula to all platforms: S1C
    absolute orbit 7902 gives `045`, `sat:relative_orbit` is 31. It is an identifier, so
    we reproduce it.
-1. `noise_azimuth`, from reading the code, not checked on data: times come from the
-   linear grid of quirk 1, all swath columns share the `azimuth_time` of the last swath
-   (GRD has several), blocks of a swath are concatenated keeping the first and last
-   line and sample of the first block only. We use the burst-aware times of the
+1. `noise_azimuth`: blocks of a swath are concatenated keeping the first and last line
+   and sample of the first block only, the EW GRD has 5 entries for its 21 blocks. From
+   reading the code, not checked on data: times come from the linear grid of quirk 1 and
+   all swath columns share the `azimuth_time` of the last swath (GRD has several). We use the burst-aware times of the
    measurement grid and keep one `swath` entry per block, aligned on their lines, with
    its own first and last line and sample: a swath label repeats when it has several
    blocks.
@@ -205,6 +205,18 @@ What we do in each case follows the decisions above.
    `ToProcessingHistory` tests lxml attributes with `"name" in node`, which checks
    the children. We walk the manifest as CPM 2.7 did, without its own conversion entry,
    but don't set it yet.
+1. GRD `calibration` and `noise_range` `ground_range` is `pixel * range_pixel_spacing`
+   of the first vector, while GRD vectors change their pixels at the sub-swath
+   boundaries, which move in azimuth. In the EW GRD 28 of 38 noise range vectors differ
+   from the first by up to 30 pixels (1.2 km), and a padded pixel gives a `ground_range`
+   of 1.7e11 m. We keep `ground_range` as a dimension without coordinate and a 2-D
+   `pixel` coordinate, padded with -1.
+1. The `polarization` labels of the IW SLC are swapped: the data of all the groups are
+   stacked as VH, VV and labelled `["VV", "VH"]`, so the `VH` measurement holds the VV
+   TIFF. The EW GRD labels are right. We label the data with their own polarisation.
+1. Doppler centroid `azimuth_time` of all the swaths is the one of the first swath:
+   IW2 and IW3 are 7.2 ms and 2.5 ms off their annotation, while their polynomials are
+   their own. We use the annotation of the swath.
 
 ## Open points
 
@@ -261,8 +273,8 @@ done at any time.
    `sentinel1.open_gcp_dataset`, so the xarray-sentinel GRD gcp uses `ground_range` too.
 1. Done: calibration, noise_range, `eopf_sentinel1.open_calibration` and
    `open_noise_range` with snake_case names, range coordinate from `pixel` as
-   `image_slant_range_time + pixel / range_sampling_rate` for SLC and
-   `pixel * range_pixel_spacing` for GRD, `line` and `pixel` as additional coordinates.
+   `image_slant_range_time + pixel / range_sampling_rate` for SLC and none for GRD,
+   quirk 10, `line` and `pixel` as additional coordinates.
    They need the annotation for the range coordinate while the `sentinel1` openers only
    get their own file, so these are EOPF only and the `sentinel1` openers keep their
    code.
@@ -312,6 +324,19 @@ done at any time.
    environment (the test SAFEs lack the `support/*.xsd` the CPM needs), compare
    structure exactly and values within tolerance, list the deviations due to the
    quirks. Optionally open our Zarr output with `xarray-eopf`.
+   - Done for GRD: `S1C_EW_GRDM_1SDH_20261020T070839_20261020T070915_009965_013DEA_057B`
+     converted with `eopf` 3.0.0 has the same node and groups. The shared variables are
+     equal or within float32 rounding, at most 5e-8 relative, except quirks 1, 2, 3, 6
+     and 10. We add the `line`, `pixel` and `coordinate_conversion/degree` coordinates
+     and store the attitude angles and angular velocity as float32. Same results for
+     `S1C_EW_GRDM_1SDH_20261020T070234_20261020T070339_009965_013DEA_83FA`, whose CDSE
+     COG product converts to the same values. CPM 3.0 fails on the COG products, as it
+     cannot parse the `_COG` SAFE names.
+   - StripMap: to do, the products have an empty `noiseAzimuthVectorList`.
+   - Done for SLC: `S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A`
+     has the same 28 nodes and groups and the same `slc` data in every burst. The shared
+     variables are equal or within float32 rounding except quirks 1, 2, 3, 4, 6, 11 and
+     12, with the same additions and dtypes as GRD.
 1. Parse once: decode each XML once and pass the result down.
    - Manifest: `build_stac_discovery` and `build_processing_history` take the parsed
      `ElementTree` root instead of the path, now `build_stac_discovery` parses the
