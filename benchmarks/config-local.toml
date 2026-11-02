@@ -15,14 +15,24 @@ env_file = "../.env"
 operations = ["convert"]
 # SAFE products, paths or URLs, comment out the ones to skip
 products = [
-  # EW GRDM over the Faroe Islands, ~0.3 GB
-  "data/S1C_EW_GRDM_1SDH_20261020T070839_20261020T070915_009965_013DEA_057B.SAFE",
+  # EW GRDM north of Svalbard, ~0.5 GB
+  "data/S1C_EW_GRDM_1SDH_20261020T070234_20261020T070339_009965_013DEA_83FA.SAFE",
+  # EW GRDM north of Svalbard as COG, same data as the GRDM, ~0.3 GB
+  "data/S1C_EW_GRDM_1SDH_20261020T070234_20261020T070339_009965_013DEA_E0DE_COG.SAFE",
+  # EW SLC north of Svalbard, same acquisition as the GRDM, ~7.9 GB
+  # "data/S1C_EW_SLC__1SDH_20261020T070234_20261020T070340_009965_013DEA_0C2D.SAFE",
   # IW GRDH over Rome, ~1.8 GB
   "data/S1C_IW_GRDH_1SDV_20261022T051912_20261022T051937_009993_013EED_B8E3.SAFE",
   # IW GRDH over Rome as COG, same data as the GRDH, ~1.1 GB
   "data/S1C_IW_GRDH_1SDV_20261022T051912_20261022T051937_009993_013EED_050F_COG.SAFE",
   # IW SLC over Rome, same area as the GRDH, ~8.7 GB
-  "data/S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A.SAFE"
+  "data/S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A.SAFE",
+  # SM S3 SLC over the Marquesas Islands, same acquisition as the GRDH, ~6.0 GB
+  # "data/S1C_S3_SLC__1SDV_20261031T150107_20261031T150128_010130_014383_2924.SAFE",
+  # SM S3 GRDH over the Marquesas Islands, ~0.4 GB
+  "data/S1C_S3_GRDH_1SDV_20261031T150107_20261031T150128_010130_014383_B806.SAFE",
+  # SM S3 GRDH over the Marquesas Islands as COG, same data as the GRDH, ~0.2 GB
+  "data/S1C_S3_GRDH_1SDV_20261031T150107_20261031T150128_010130_014383_987F_COG.SAFE"
 ]
 # number of times each operation is run on each product
 repeat = 1
