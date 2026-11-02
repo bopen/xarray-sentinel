@@ -1,4 +1,4 @@
-"""Convert the Sentinel-1 SAFE XML files to the datasets of the EOPF layout.
+"""Convert the Sentinel-1 SAFE XML files to the datasets of the EOPF 1.0.0 DataTree.
 
 References
 ----------

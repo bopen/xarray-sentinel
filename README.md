@@ -420,11 +420,13 @@ Attributes: ...
 
 ```
 
-### Experimental EOPF DataTree
+### EOPF 1.0.0 DataTree (beta)
 
 The whole product can also be opened as an [`xarray.DataTree`](https://docs.xarray.dev/en/stable/user-guide/data-structures.html#datatree)
-with the layout of the ESA EOPF products: one node per swath and burst for TOPS SLC,
-and one node for SM and GRD. The layout is experimental and may change.
+with the layout of the ESA EOPF 1.0.0 products, the format written by the EOPF CPM 3.0
+converter: one node per swath and burst for TOPS SLC, and one node for SM and GRD. The
+CPM 2.8 products have no format version and a different layout. The layout is in beta
+and changes only to follow the EOPF format.
 
 ```python
 dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
@@ -438,7 +440,7 @@ groups as a dictionary of `Dataset`s. See
 [DATATREE.md](https://github.com/bopen/xarray-sentinel/blob/main/docs/DATATREE.md)
 for the layout and the deliberate differences from EOPF.
 
-### Converting a SAFE product to EOPF Zarr (experimental)
+### Converting a SAFE product to EOPF 1.0.0 Zarr (beta)
 
 The same tree can be written to a Zarr store with the `xarray-sentinel` command:
 
@@ -447,7 +449,7 @@ The same tree can be written to a Zarr store with the `xarray-sentinel` command:
 ```
 
 The source may be any local or *fsspec* URL path.
-Like the layout, the converter is experimental and may change.
+Like the layout, the converter is in beta.
 
 `xarray-sentinel info S1A_IW_SLC__1SDV_....SAFE` prints the product level STAC
 metadata instead of converting.

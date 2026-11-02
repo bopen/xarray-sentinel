@@ -265,7 +265,7 @@ def build_processing_history(
     safe_name: str,
     namespaces: dict[str, str] = esa_safe.SENTINEL1_NAMESPACES,
 ) -> dict[str, list[dict[str, Any]]]:
-    """Group the processing steps of the manifest by output level, as CPM 2.7."""
+    """Group the processing steps of the manifest by output level, as CPM 2.8."""
     if hasattr(manifest_path, "seek"):
         manifest_path.seek(0)
     manifest = ElementTree.parse(manifest_path).getroot()

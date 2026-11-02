@@ -1,9 +1,11 @@
-# Sentinel-1 SAFE as an EOPF DataTree (experimental)
+# Sentinel-1 SAFE as an EOPF 1.0.0 DataTree (beta)
 
-The layout and API may change.
+The layout is the EOPF product format 1.0.0, written by CPM 3.0 and validated in the
+[Plan](#plan). It changes only to follow the EOPF format, see [What's new](whats-new.md).
 
 Goal: open a Sentinel-1 L1 SAFE product as an `xr.DataTree` with the layout of the
-ESA EOPF Zarr products.
+ESA EOPF 1.0.0 Zarr products. The CPM 2.8 products have no format version and a
+different layout, see [Previous layout: CPM 2.8](#previous-layout-cpm-28).
 
 ```python
 dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
@@ -35,7 +37,7 @@ dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
   - node names: `eopf/store/mapping_manager.py`
 - CPM 3.0 sample: `S1C_IW_SLC__1SDV_20260731T234807_20260731T234821_008794_0116E8_C079`
   in the `sentinel-1-l1-slc-zarr3` collection of https://stac.core.eopf.eodc.eu
-- CPM 2.7 samples, the previous layout: collections `sentinel-1-l1-slc` and
+- CPM 2.8 samples, the previous layout: collections `sentinel-1-l1-slc` and
   `sentinel-1-l1-grd` of the same STAC.
 
 ## Target layout
@@ -130,7 +132,7 @@ the COG products is dropped.
     `image_annotation` and `burst_timing`. `burst_timing` holds the node's burst entry of
     `swathTiming`, including the per-line `first_valid_sample` and `last_valid_sample`.
 
-### Previous layout: CPM 2.7
+### Previous layout: CPM 2.8
 
 Still served by the sample service: one node per polarisation, swath and burst, named
 `..._{POL}_{swath}_{burst_id}`, with `line` and `pixel` coordinates, a
@@ -203,7 +205,7 @@ What we do in each case follows the decisions above.
    - `eopf:instrument_mode` duplicates `sar:instrument_mode`, we drop it.
 1. `processing_history` is a single `"Unknown"` entry with no time, inputs or outputs:
    `ToProcessingHistory` tests lxml attributes with `"name" in node`, which checks
-   the children. We walk the manifest as CPM 2.7 did, without its own conversion entry,
+   the children. We walk the manifest as CPM 2.8 did, without its own conversion entry,
    but don't set it yet.
 1. GRD `calibration` and `noise_range` `ground_range` is `pixel * range_pixel_spacing`
    of the first vector, while GRD vectors change their pixels at the sub-swath
@@ -221,7 +223,7 @@ What we do in each case follows the decisions above.
 
 ## Open points
 
-- `line` and `pixel` coordinates: CPM 2.7 has them, the CPM 3.0 sample does not. The
+- `line` and `pixel` coordinates: CPM 2.8 has them, the CPM 3.0 sample does not. The
   CPM 3.0 code drops them from calibration and noise but builds them for gcp. We keep
   them in all groups that have them, as additional data is safe.
 - `azimuth_fm_rate`, needed by sarsen: in EOPF it is only
