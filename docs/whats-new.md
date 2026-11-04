@@ -2,31 +2,50 @@
 
 ## v0.9.7 (2026-11-04)
 
-- Add the EOPF DataTree, in beta: `xr.open_datatree(..., engine="sentinel-1")` and
-  `xr.open_groups` open a SAFE product with the layout of the ESA EOPF products, the
-  format written by the EOPF CPM 3.0. WV products are not supported yet.
-- Add the `xarray-sentinel` command line: `to-eopf-zarr` converts a SAFE product to EOPF
-  Zarr and `info` prints its STAC metadata, reading only the manifest.
-- Support the CDSE GRD COG products in the EOPF DataTree, reading them in whole tiles.
-- Read the measurements without the global rasterio lock, so dask reads them in parallel.
+The first release with the EOPF DataTree, in beta, the `xarray-sentinel` command line
+and a lot of performance improvements.
+
+### New features
+
+- Open a SAFE product as an EOPF `DataTree` with
+  `xr.open_datatree(..., engine="sentinel-1")`. The layout is the one written by the EOPF
+  CPM 3.0, see [DATATREE.md](DATATREE.md). WV products are not supported yet.
+- Carry the product level `stac_discovery` and `other_metadata` attributes on the root,
+  and `stac_discovery`, `other_metadata` and `processing_history` on every product node,
+  with an `xarray-sentinel` entry in the processing history.
+- Convert a SAFE product to EOPF Zarr and print its STAC metadata with the new
+  `xarray-sentinel` command: `to-eopf-zarr` writes the Zarr store, `info` prints the
+  product level STAC item.
 - Add the `slant_range_to_ground_range` function.
-- Use the `ground_range` dimension instead of `slant_range_time` in the GRD `gcp` group
-  and add the `azimuth_time_gcp` and `slant_range_time_gcp` variables to all `gcp` groups.
-- Accept `ground_range` in `get_footprint_linestring` for GRD products and round the
-  footprint coordinates to 6 decimals.
-- Add the `swath` dimension to `noise_azimuth` and keep all the noise vectors instead of
-  only the first one, with their first and last lines and samples.
-- Store the `attitude` variables and the `dc_estimate` polynomials as `float32`.
-- Add the `fine_dce_azimuth_start_time` and `fine_dce_azimuth_stop_time` variables to
-  `dc_estimate`.
-- Fix `data_dc_rms_error_above_threshold` in `dc_estimate`: it is now the boolean flag
-  instead of a copy of `data_dc_rms_error`.
-- Raise an error when opening the groups of WV products, that returned a single vignette
-  out of the many of a swath. The root group can still be opened.
-- Fix `reformat.to_group_zarr` for SLC products.
-- Let xarray choose the `azimuth_time` units when writing the measurements, instead of
-  forcing microseconds.
-- Remove the alpha `parse_eopf_metadata` option and `sentinel1.make_sentinel1_stac_item`.
+- Store the GRD measurements in the EOPF Zarr as `uint16` with the CPM chunks.
+
+### Performance
+
+- Read the measurements without the global rasterio lock, so dask reads them in
+  parallel.
+- Fetch each XML file once when opening the EOPF DataTree.
+- Read only the manifest to print the STAC metadata with `info`.
+
+### Breaking changes
+
 - Drop support for Python 3.10: only Python >= 3.11 is supported.
+- The `noise_azimuth` group gains a `swath` dimension and holds all the vectors, where
+  it kept only the first one, on `line`.
+- The `gcp` group of the GRD products has a `ground_range` dimension instead of
+  `slant_range_time`.
+- Opening a non-root group of a WV product raises a `ValueError`, where it returned a
+  single vignette out of the many of a swath. The root group can still be opened.
+- `to_zarr` writes the `azimuth_time` coordinates with the units chosen by xarray,
+  usually `nanoseconds`, instead of forcing `microseconds`.
 - Add `typer` and `zarr` to the required dependencies and raise the minimum `dask` to
   2024.6.
+
+### Bug fixes
+
+- `data_dc_rms_error_above_threshold` in `dc_estimate` held a copy of
+  `data_dc_rms_error`; it is now the boolean flag from the annotation.
+
+### Documentation
+
+- Add [DATATREE.md](DATATREE.md) with the EOPF layout and the deliberate differences
+  from EOPF, and rewrite CONTRIBUTING.md for uv.
