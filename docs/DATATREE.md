@@ -1,11 +1,11 @@
-# Sentinel-1 SAFE as an EOPF 1.0.0 DataTree (beta)
+# Sentinel-1 SAFE as an EOPF DataTree (beta)
 
-The layout is the EOPF product format 1.0.0, written by CPM 3.0 and validated in the
-[Plan](#plan). It changes only to follow the EOPF format, see [What's new](whats-new.md).
+The layout is the one written by the EOPF CPM 3.0 and validated in the [Plan](#plan). It
+changes only to follow the EOPF format, see [What's new](whats-new.md).
 
 Goal: open a Sentinel-1 L1 SAFE product as an `xr.DataTree` with the layout of the
-ESA EOPF 1.0.0 Zarr products. The CPM 2.8 products have no format version and a
-different layout, see [Previous layout: CPM 2.8](#previous-layout-cpm-28).
+ESA EOPF Zarr products. The CPM 2.8 products have a different layout, see
+[Previous layout: CPM 2.8](#previous-layout-cpm-28).
 
 ```python
 dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")

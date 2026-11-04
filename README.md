@@ -1,23 +1,28 @@
 # xarray-sentinel
 
-Easily access and explore the SAR data products of the
-[Copernicus Sentinel-1 satellite mission](https://sentiwiki.copernicus.eu/web/sentinel-1)
-in Python.
+Read [Copernicus Sentinel-1](https://sentiwiki.copernicus.eu/web/sentinel-1) SAFE
+products in Xarray as the new EOPF DataTrees or as the classic xarray-sentinel Datasets.
+Convert them to EOPF Zarr with one command: `xarray-sentinel to-eopf-zarr`.
 
 This Open Source project is sponsored by B-Open - <https://www.bopen.eu>.
 
 ## Features
 
-*xarray-sentinel* is a Python library and [*Xarray*](https://xarray.pydata.org) backend
-with the following functionalities:
+*xarray-sentinel* is a Python library, an [*Xarray*](https://xarray.pydata.org) backend
+and a command line tool with the following functionalities:
 
+- opens a whole SAFE product in Xarray as an EOPF `DataTree`, the layout of the new ESA
+  Zarr products
+- converts a SAFE product to EOPF Zarr with the `xarray-sentinel` command
+- opens every group of a SAFE product as a classic Xarray `Dataset` that follows the SAFE
+  structure
 - supports the following data products as [distributed by ESA](https://browser.dataspace.copernicus.eu/):
   - Sentinel-1 Ground Range Detected (GRD):
     - Stripmap (SM)
     - Interferometric Wide Swath (IW)
     - Extra Wide Swath (EW)
   - Sentinel-1 Single Look Complex (SLC) SM/IW/EW
-- creates ready-to-use *Xarray* `Dataset`s that map the data
+- creates ready-to-use *Xarray* `DataTree`s and `Dataset`s that map the data
   lazily and efficiently in terms of both memory usage and disk / network access
 - reads all SAR imagery data: GRD images, SLC swaths and SLC bursts
 - reads several metadata elements:
@@ -42,7 +47,7 @@ Overall, the software is in the **beta** phase and the usual caveats apply.
 
 ## Install
 
-The easiest way to install *xarray-sentinel* is via *pip*:
+*xarray-sentinel* needs Python 3.11 or later. The easiest way to install it is via *pip*:
 
 ```shell
     pip install xarray-sentinel
@@ -54,13 +59,61 @@ If you have `uv` installed the simplest way to test the library is to start an `
     uvx --with xarray-sentinel ipython
 ```
 
+and to run the `xarray-sentinel` command without installing it:
+
+```shell
+    uvx xarray-sentinel --help
+```
+
 ## Usage
 
 The SAR data products of the Copernicus Sentinel-1 satellite mission are distributed in
 the SAFE format, composed of a few raster data files in TIFF and several metadata files in XML.
-The aim of *xarray-sentinel* is to provide a developer-friendly Python interface to all data and
-several metadata elements as Xarray `Dataset`s to enable easy processing of SAR data
-into value-added products.
+*xarray-sentinel* opens them in two ways: as an EOPF `DataTree`, with the layout of
+the new ESA Zarr products, or as classic `Dataset`s that follow the SAFE structure group
+by group.
+
+### EOPF DataTree (beta)
+
+`xr.open_datatree` opens the whole product as an [`xarray.DataTree`](https://docs.xarray.dev/en/stable/user-guide/data-structures.html#datatree)
+with the layout of the ESA EOPF products, the format written by the EOPF CPM 3.0
+converter: one node per swath and burst for TOPS SLC, and one node for SM and GRD.
+The layout is in beta and changes only to follow the EOPF format.
+
+```python
+dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
+slc = dt["S01SIWSLC_20260731T234807_0014_C050_C079_0116E8_IW3_258176/measurements/slc"]
+```
+
+Polarisations are stacked along `polarization`. The root carries the product level
+`stac_discovery` and `other_metadata` attributes, and every node its own
+`stac_discovery` and `other_metadata`.
+WV products are not supported yet and raise an error. See
+[DATATREE.md](https://github.com/bopen/xarray-sentinel/blob/main/docs/DATATREE.md)
+for the layout and the deliberate differences from EOPF.
+
+### The `xarray-sentinel` command (beta)
+
+`to-eopf-zarr` converts a SAFE product to an EOPF Zarr store,
+replacing the target if it exists, and `info` prints the product level STAC
+metadata reading only the manifest:
+
+```shell
+    xarray-sentinel to-eopf-zarr S1A_IW_SLC__1SDV_....SAFE product.zarr
+    xarray-sentinel info S1A_IW_SLC__1SDV_....SAFE
+```
+
+The source may be any local or *fsspec* URL path. Reading from the Copernicus Data
+Space Ecosystem S3 store needs *s3fs* and the `.env` file
+with your [CDSE S3 credentials](https://eodata-s3keysmanager.dataspace.copernicus.eu/panel/s3-credentials) as described [here](https://github.com/bopen/xarray-sentinel/blob/main/.env.in):
+
+```shell
+    uvx --with s3fs --env-file .env xarray-sentinel to-eopf-zarr \
+        s3://eodata/Sentinel-1/SAR/IW_SLC__1S/2026/10/22/S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A.SAFE \
+        product.zarr
+```
+
+### Classic Datasets by group
 
 Due to the inherent complexity and redundancy of the SAFE format *xarray-sentinel*
 maps it to a tree of *groups* where every *group* may be opened as a `Dataset`,
@@ -71,7 +124,7 @@ In the `notebooks` folder you
 can also find notebooks, one for each supported product, that allow you to explore the
 data in more detail using the xarray-sentinel functions.
 
-### The root dataset
+#### The root dataset
 
 For example, let's explore the Sentinel-1 SLC Stripmap product in the local folder
 `tests/data/S1A_S3_SLC__1SDV_20210401T152855_20210401T152914_037258_04638E_6001.SAFE`.
@@ -108,7 +161,7 @@ on the product and a description of the tree structure of the data.
 The `group` attribute contains the name of the current group and the `subgroups` attribute shows
 the names of all available groups below this one.
 
-### Measurements datasets
+#### Measurements datasets
 
 To open any subgroup, pass its name with the `group` keyword to `xr.open_dataset`.
 Measurements are read by selecting the swath and polarization, for example `group="S3/VH"`:
@@ -154,7 +207,7 @@ in seconds associated with the image pixel.
 Since Sentinel-1 IPF version 3.40, a unique identifier for bursts has been added to the SLC product metadata.
 For these products, the list of the burst ids is stored in the `burst_ids` dataset attribute.
 
-### Metadata datasets
+#### Metadata datasets
 
 Every swath and polarization group, such as `/S3/VH`, holds the `measurement` variable plus the
 following metadata subgroups:
@@ -419,40 +472,6 @@ Attributes: ...
     long_name:                           gamma
 
 ```
-
-### EOPF 1.0.0 DataTree (beta)
-
-The whole product can also be opened as an [`xarray.DataTree`](https://docs.xarray.dev/en/stable/user-guide/data-structures.html#datatree)
-with the layout of the ESA EOPF 1.0.0 products, the format written by the EOPF CPM 3.0
-converter: one node per swath and burst for TOPS SLC, and one node for SM and GRD. The
-CPM 2.8 products have no format version and a different layout. The layout is in beta
-and changes only to follow the EOPF format.
-
-```python
-dt = xr.open_datatree("S1A_IW_SLC__1SDV_....SAFE", engine="sentinel-1")
-slc = dt["S01SIWSLC_20260731T234807_0014_C050_C079_0116E8_IW3_258176/measurements/slc"]
-```
-
-Polarisations are stacked along `polarization`. The root carries the product level
-`stac_discovery` and `other_metadata` attributes, and every node its own
-`stac_discovery` and `other_metadata`. `xr.open_groups` returns the same
-groups as a dictionary of `Dataset`s. See
-[DATATREE.md](https://github.com/bopen/xarray-sentinel/blob/main/docs/DATATREE.md)
-for the layout and the deliberate differences from EOPF.
-
-### Converting a SAFE product to EOPF 1.0.0 Zarr (beta)
-
-The same tree can be written to a Zarr store with the `xarray-sentinel` command:
-
-```shell
-    xarray-sentinel to-eopf-zarr S1A_IW_SLC__1SDV_....SAFE product.zarr
-```
-
-The source may be any local or *fsspec* URL path.
-Like the layout, the converter is in beta.
-
-`xarray-sentinel info S1A_IW_SLC__1SDV_....SAFE` prints the product level STAC
-metadata instead of converting.
 
 ### Advanced data access via fsspec
 

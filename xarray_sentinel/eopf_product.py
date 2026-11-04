@@ -198,7 +198,7 @@ def open_datatree(
     override_product_files: str | None = None,
     rasterio_chunks: dict[str, int] | None = None,
 ) -> xr.DataTree:
-    """Open a SAFE product as an EOPF 1.0.0 DataTree.
+    """Open a SAFE product as an EOPF DataTree.
 
     The measurement TIFFs are read in ``rasterio_chunks``, by default
     ``TILE_READ_CHUNKS`` for the COG products and ``STRIP_READ_CHUNKS`` for the others.
@@ -208,7 +208,7 @@ def open_datatree(
     )
     common_attrs, product_files = esa_safe.parse_manifest_sentinel1(manifest)
     if common_attrs["mode"] == "WV":
-        raise ValueError("WV products are not supported by the EOPF 1.0.0 DataTree yet")
+        raise ValueError("WV products are not supported by the EOPF DataTree yet")
     if override_product_files:
         product_files = sentinel1.do_override_product_files(
             override_product_files, product_files
