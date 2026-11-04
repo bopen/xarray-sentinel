@@ -1,6 +1,6 @@
 # What's new
 
-## v0.9.7 (unreleased)
+## v0.9.7 (2026-11-04)
 
 - Add the EOPF DataTree, in beta: `xr.open_datatree(..., engine="sentinel-1")` and
   `xr.open_groups` open a SAFE product with the layout of the ESA EOPF products, the
