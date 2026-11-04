@@ -306,4 +306,6 @@ def build_processing_history(
 
     for entries in processing_history.values():
         entries.sort(key=lambda entry: entry["time"])
-    return processing_history
+    # from the lowest level up, as the CPM extends the last level
+    levels = sorted(processing_history.items(), key=lambda item: item[1][0]["time"])
+    return dict(levels)

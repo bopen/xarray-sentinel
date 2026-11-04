@@ -10,7 +10,14 @@ import dask
 import fsspec
 import xarray as xr
 
-from . import conventions, eopf_metadata, eopf_sentinel1, esa_safe, sentinel1
+from . import (
+    __version__,
+    conventions,
+    eopf_metadata,
+    eopf_sentinel1,
+    esa_safe,
+    sentinel1,
+)
 
 POLARIZATION_INDEPENDENT_GROUPS = {"conditions/attitude", "conditions/orbit"}
 SAFE_NAME_RE = re.compile(
@@ -19,6 +26,7 @@ SAFE_NAME_RE = re.compile(
     r"_(?P<datatake_id>\w{6})_(?P<unique_id>\w{4})(?:_COG)?"
 )
 SAFE_TIME_FORMAT = "%Y%m%dT%H%M%S"
+HISTORY_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 UNKNOWN_UNIQUE_ID = "UNKN"
 
 
@@ -238,6 +246,19 @@ def open_datatree(
             swath, _, pol = group.partition("/")
             swath_pols.setdefault(swath, []).append(pol)
 
+    safe_name = os.path.basename(product_path)
+    processing_history = eopf_metadata.build_processing_history(manifest, safe_name)
+    # NOTE: as the entry CPM 3.0 adds on conversion, but drops on the S01 product nodes
+    processing_history["Level-1 Product"].append(
+        {
+            "processor": "xarray-sentinel",
+            "version": __version__,
+            "facility": "Unknown",
+            "time": datetime.datetime.now(datetime.UTC).strftime(HISTORY_TIME_FORMAT),
+            "inputs": [safe_name],
+            "outputs": [product_name],
+        }
+    )
     root_stac_discovery = eopf_metadata.build_stac_discovery(product_name, manifest)
     title = eopf_metadata.make_product_type(
         common_attrs["mode"], common_attrs["product_type"]
@@ -314,6 +335,7 @@ def open_datatree(
             dt[node] = xr.Dataset(
                 attrs={
                     "other_metadata": other_metadata,
+                    "processing_history": processing_history,
                     "stac_discovery": stac_discovery,
                 }
             )

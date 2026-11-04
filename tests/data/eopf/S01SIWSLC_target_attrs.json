@@ -28,6 +28,11 @@
     "quality_information": "dict",
     "title": "str"
   },
+  "processing_history": {
+    "Level-0 Product": "list",
+    "Level-1 Intermediate SLC Product": "list",
+    "Level-1 Product": "list"
+  },
   "stac_discovery": {
     "assets": {},
     "bbox": "list",

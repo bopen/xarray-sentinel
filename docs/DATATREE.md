@@ -126,7 +126,9 @@ the COG products is dropped.
 - node
   - `stac_discovery`: manifest and annotation properties, `sar:relative_burst`, burst
     footprint as `geometry`.
-  - `processing_history`: from the manifest `safe:processing`, not set for now.
+  - `processing_history`: from the manifest `safe:processing`, keyed by output level from
+    the lowest, plus an `xarray-sentinel` entry at the opening time, the same on every
+    node.
   - `other_metadata`: keyed by polarisation, each with `eopf_category: "eoproduct"`,
     `title`, `image_number`, `quality_information`, `general_annotation`,
     `image_annotation` and `burst_timing`. `burst_timing` holds the node's burst entry of
@@ -205,8 +207,9 @@ What we do in each case follows the decisions above.
    - `eopf:instrument_mode` duplicates `sar:instrument_mode`, we drop it.
 1. `processing_history` is a single `"Unknown"` entry with no time, inputs or outputs:
    `ToProcessingHistory` tests lxml attributes with `"name" in node`, which checks
-   the children. We walk the manifest as CPM 2.8 did, without its own conversion entry,
-   but don't set it yet.
+   the children. Its `EOPF-CPM` conversion entry is dropped too, as `extend_history`
+   walks only the `eoproduct` nodes and the S01 product nodes are `unknown`. We walk the
+   manifest as CPM 2.8 did and add our own `xarray-sentinel` entry.
 1. GRD `calibration` and `noise_range` `ground_range` is `pixel * range_pixel_spacing`
    of the first vector, while GRD vectors change their pixels at the sub-swath
    boundaries, which move in azimuth. In the EW GRD 28 of 38 noise range vectors differ
@@ -317,10 +320,10 @@ done at any time.
       merged in, drop empty `swath_merging`, numeric lists instead of `$` strings,
       `t_0` as `t0`. `title` is the product type from the manifest, as the annotation
       mode of SM is the beam. We keep the CPM `DEPRECATED_ATTRS`.
-   1. Done, not connected: node `processing_history`,
-      `eopf_metadata.build_processing_history`, quirk 9, entries keyed by output level
-      from the resource roles and sorted by time, AUX resources as `adfs` and not
-      walked. `open_datatree` does not set it for now.
+   1. Done: node `processing_history`, `eopf_metadata.build_processing_history`, quirk
+      9, entries keyed by output level from the resource roles and sorted by time, AUX
+      resources as `adfs` and not walked. `open_datatree` adds the `xarray-sentinel`
+      entry to the `Level-1 Product`.
 1. Done: API and docs: `Sentinel1Backend.open_datatree` and
    `open_groups_as_dict`, README, this file.
 1. Validation: convert one or two full SAFE products with CPM 3.0 in a throwaway

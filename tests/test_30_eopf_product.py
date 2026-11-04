@@ -344,3 +344,12 @@ def test_open_datatree_attrs() -> None:
     assert attrs_structure(node_attrs, EXPECTED_SLC_IW_ATTRS) == EXPECTED_SLC_IW_ATTRS
     assert stac_discovery["id"] == node.name
     assert stac_discovery["properties"]["sar:relative_burst"] == 365915
+
+    product, opening = node.attrs["processing_history"]["Level-1 Product"]
+
+    assert product["outputs"] == [SLC_IW_V340.name]
+    assert opening["processor"] == "xarray-sentinel"
+    assert opening["inputs"] == product["outputs"]
+    assert opening["outputs"] == [root_stac_discovery["id"]]
+    assert opening["time"] > product["time"]
+    assert "processing_history" not in res.attrs

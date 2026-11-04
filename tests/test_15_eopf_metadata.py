@@ -150,11 +150,11 @@ def test_build_other_metadata() -> None:
 def test_build_processing_history() -> None:
     res = eopf_metadata.build_processing_history(SLC_IW / "manifest.safe", SLC_IW.name)
 
-    assert set(res) == {
+    assert list(res) == [
         "Level-0 Product",
         "Level-1 Intermediate SLC Product",
         "Level-1 Product",
-    }
+    ]
     (product,) = res["Level-1 Product"]
     assert product["outputs"] == [SLC_IW.name]
     (intermediate,) = res["Level-1 Intermediate SLC Product"]
