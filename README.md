@@ -109,7 +109,7 @@ with your [CDSE S3 credentials](https://eodata-s3keysmanager.dataspace.copernicu
 
 ```shell
     uvx --with s3fs --env-file .env xarray-sentinel to-eopf-zarr \
-        s3://eodata/Sentinel-1/SAR/IW_SLC__1S/2026/10/22/S1C_IW_SLC__1SDV_20261022T051910_20261022T051938_009993_013EED_456A.SAFE \
+        s3://eodata/Sentinel-1/SAR/IW_SLC__1S/2026/10/29/S1C_IW_SLC__1SDV_20261029T051055_20261029T051123_010095_014269_D7D7.SAFE \
         product.zarr
 ```
 
