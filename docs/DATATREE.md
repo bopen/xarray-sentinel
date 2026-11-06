@@ -181,9 +181,10 @@ What we do in each case follows the decisions above.
    absolute orbit 7902 gives `045`, `sat:relative_orbit` is 31. It is an identifier, so
    we reproduce it.
 1. `noise_azimuth`: blocks of a swath are concatenated keeping the first and last line
-   and sample of the first block only, the EW GRD has 5 entries for its 21 blocks. From
-   reading the code, not checked on data: times come from the linear grid of quirk 1 and
-   all swath columns share the `azimuth_time` of the last swath (GRD has several). We use the burst-aware times of the
+   and sample of the first block only, the EW GRD has 5 entries for its 21 blocks. Times
+   are off as the linear grid of quirk 1, up to 378 ms in the EW SLC. From reading the
+   code, not checked on data: all swath columns share the `azimuth_time` of the last
+   swath (GRD has several). We use the burst-aware times of the
    measurement grid and keep one `swath` entry per block, aligned on their lines, with
    its own first and last line and sample: a swath label repeats when it has several
    blocks.
@@ -349,6 +350,14 @@ done at any time.
      has the same 28 nodes and groups and the same `slc` data in every burst. The shared
      variables are equal or within float32 rounding except quirks 1, 2, 3, 4, 6, 11 and
      12, with the same additions and dtypes as GRD.
+   - Done for EW SLC: `S1C_EW_SLC__1SDH_20261020T070234_20261020T070340_009965_013DEA_0C2D`
+     has the same 1249 nodes and groups, 104 bursts, and the same `slc` data in every
+     burst. Same results as the IW SLC except quirk 11, the HH and HV labels are right.
+   - Done for StripMap SLC:
+     `S1C_S3_SLC__1SDV_20261031T150107_20261031T150128_010130_014383_2924` has the same 12
+     nodes and groups and the same `slc` data, no `quality/noise_azimuth` as the StripMap
+     GRD. The shared variables are equal or within float32 rounding except quirks 1, 2, 3
+     and 11, with the same additions and dtypes as GRD.
 1. Parse once: decode each XML once and pass the result down.
    - Manifest: `build_stac_discovery` and `build_processing_history` take the parsed
      `ElementTree` root instead of the path, now `build_stac_discovery` parses the
