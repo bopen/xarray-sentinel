@@ -1,5 +1,6 @@
 import json
 import pathlib
+import sys
 from typing import Any
 
 import pytest
@@ -70,6 +71,20 @@ def test_to_eopf_zarr(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -
     assert grd.dtype == "float32"
     assert grd.encoding["preferred_chunks"]["ground_range"] == 4096
     assert grd.encoding["preferred_chunks"]["azimuth_time"] == 4096
+
+
+def test_to_eopf_zarr_without_zarr(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # a None entry in sys.modules makes `import zarr` raise ModuleNotFoundError
+    monkeypatch.setitem(sys.modules, "zarr", None)
+    target = tmp_path / "product.zarr"
+
+    res = runner.invoke(__main__.app, ["to-eopf-zarr", str(GRD_IW), str(target)])
+
+    assert res.exit_code == 1
+    assert "xarray-sentinel[zarr]" in res.output
+    assert not target.exists()
 
 
 def test_to_eopf_zarr_wv(tmp_path: pathlib.Path) -> None:

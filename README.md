@@ -53,6 +53,9 @@ Overall, the software is in the **beta** phase and the usual caveats apply.
     pip install xarray-sentinel
 ```
 
+The optional extras are `zarr`, needed by the `to-eopf-zarr` command, and `s3`, to read
+products from S3 object stores, e.g. `pip install "xarray-sentinel[zarr,s3]"`.
+
 If you have `uv` installed the simplest way to test the library is to start an `ipython` session with:
 
 ```shell
@@ -96,19 +99,20 @@ for the layout and the deliberate differences from EOPF.
 
 `to-eopf-zarr` converts a SAFE product to an EOPF Zarr store,
 replacing the target if it exists, and `info` prints the product level STAC
-metadata reading only the manifest:
+metadata reading only the manifest.
+`to-eopf-zarr` needs the `zarr` extra, i.e. `pip install "xarray-sentinel[zarr]"`:
 
 ```shell
-    xarray-sentinel to-eopf-zarr S1A_IW_SLC__1SDV_....SAFE product.zarr
-    xarray-sentinel info S1A_IW_SLC__1SDV_....SAFE
+    uvx 'xarray-sentinel[zarr]' to-eopf-zarr S1A_IW_SLC__1SDV_....SAFE product.zarr
+    uvx xarray-sentinel info S1A_IW_SLC__1SDV_....SAFE
 ```
 
 The source may be any local or *fsspec* URL path. Reading from the Copernicus Data
-Space Ecosystem S3 store needs *s3fs* and the `.env` file
+Space Ecosystem S3 store needs the `s3` extra and the `.env` file
 with your [CDSE S3 credentials](https://eodata-s3keysmanager.dataspace.copernicus.eu/panel/s3-credentials) as described [here](https://github.com/bopen/xarray-sentinel/blob/main/.env.in):
 
 ```shell
-    uvx --with s3fs --env-file .env xarray-sentinel to-eopf-zarr \
+    uvx --env-file .env 'xarray-sentinel[zarr,s3]' to-eopf-zarr \
         s3://eodata/Sentinel-1/SAR/IW_SLC__1S/2026/10/29/S1C_IW_SLC__1SDV_20261029T051055_20261029T051123_010095_014269_D7D7.SAFE \
         product.zarr
 ```

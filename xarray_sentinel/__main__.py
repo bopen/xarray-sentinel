@@ -4,19 +4,8 @@ import warnings
 
 import typer
 import xarray as xr
-import zarr
 
 from . import eopf_product
-
-try:
-    from zarr.errors import ZarrUserWarning
-except ImportError:  # zarr < 3.1.2
-    ZarrUserWarning = UserWarning  # type: ignore
-
-# the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
-warnings.filterwarnings("ignore", category=ZarrUserWarning)
-# and fixed length strings as well, zarr 3.1 warns about them
-warnings.filterwarnings("ignore", message="The data type .* Zarr V3 specification")
 
 app = typer.Typer(
     add_completion=False,
@@ -50,6 +39,28 @@ def to_eopf_zarr(
     target: str = typer.Argument(..., help="Path to the output EOPF Zarr product."),
 ) -> None:
     """Convert a Sentinel-1 SAFE product to an EOPF Zarr product."""
+    try:
+        import zarr
+    except ModuleNotFoundError:
+        typer.echo(
+            "to-eopf-zarr needs the 'zarr' extra, install it with:\n"
+            "  pip install 'xarray-sentinel[zarr]'\n"
+            "or run the command with:\n"
+            "  uvx 'xarray-sentinel[zarr]' to-eopf-zarr SOURCE TARGET",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        from zarr.errors import ZarrUserWarning
+    except ImportError:  # zarr < 3.1.2
+        ZarrUserWarning = UserWarning  # type: ignore
+
+    # the EOPF products have consolidated metadata, not yet in the Zarr 3 spec
+    warnings.filterwarnings("ignore", category=ZarrUserWarning)
+    # and fixed length strings as well, zarr 3.1 warns about them
+    warnings.filterwarnings("ignore", message="The data type .* Zarr V3 specification")
+
     with xr.open_datatree(source, engine="sentinel-1") as datatree:
         datatree.to_zarr(target, mode="w", consolidated=False)
         zarr.consolidate_metadata(target)
