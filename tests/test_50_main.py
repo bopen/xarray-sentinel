@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 import xarray as xr
-from typer.testing import CliRunner
+from click.testing import CliRunner
 
 from xarray_sentinel import __main__
 

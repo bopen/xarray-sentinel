@@ -1,4 +1,6 @@
 import pathlib
+import sys
+from typing import Any
 
 import numpy as np
 import pytest
@@ -196,6 +198,66 @@ def test_get_footprint_linestring() -> None:
     polygon = shapely.geometry.Polygon(res)
     assert polygon.is_valid
     assert shapely.geometry.polygon.orient(polygon, 1) == polygon
+
+
+# expected values computed with the scipy based xarray interp
+@pytest.mark.parametrize(
+    "product_path,group,burst_index,expected_linestring",
+    [
+        # the swath and the burst end after the last GCP, the corners are extrapolated
+        (
+            SLC_IW,
+            "IW1/VH",
+            None,
+            [
+                (11.268696, 47.240516),
+                (10.87614, 45.732642),
+                (12.043975, 45.579089),
+                (12.42647, 47.091989),
+                (11.268696, 47.240516),
+            ],
+        ),
+        (
+            SLC_IW,
+            "IW1/VH",
+            8,
+            [
+                (10.929666, 45.916838),
+                (10.87614, 45.732642),
+                (12.043975, 45.579089),
+                (12.093126, 45.764267),
+                (10.929666, 45.916838),
+            ],
+        ),
+        (
+            GRD_IW,
+            "IW/VV",
+            None,
+            [
+                (9.101054, 47.510703),
+                (8.769623, 46.012142),
+                (12.052242, 45.612951),
+                (12.432666, 47.117012),
+                (9.101054, 47.510703),
+            ],
+        ),
+    ],
+)
+def test_get_footprint_linestring_extrapolate(
+    product_path: pathlib.Path,
+    group: str,
+    burst_index: int | None,
+    expected_linestring: list[tuple[float, float]],
+) -> None:
+    ds = sentinel1.open_sentinel1_dataset(product_path, group=group)
+    if burst_index is not None:
+        ds = sentinel1.crop_burst_dataset(ds, burst_index=burst_index)
+    gcp_ds = sentinel1.open_sentinel1_dataset(product_path, group=f"{group}/gcp")
+    range_coordinate = ds[gcp_ds.latitude.dims[1]]
+
+    res = sentinel1.get_footprint_linestring(ds.azimuth_time, range_coordinate, gcp_ds)
+
+    assert res == expected_linestring
 
 
 def test_open_attitude_dataset() -> None:
@@ -501,6 +563,134 @@ def test_ground_range_to_slant_range_time() -> None:
     )
 
     assert isinstance(res, xr.DataArray)
+
+
+def test_calibrate_amplitude_lut_nodes() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+    burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
+    cal_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH/calibration")
+    # sigmaNought is not constant and it is interpolated
+    calibration_lut = cal_ds["sigmaNought"]
+    ones = xr.ones_like(burst_ds.measurement, dtype=np.complex64)
+
+    res = sentinel1.calibrate_amplitude(ones, calibration_lut)
+
+    assert res.chunks is not None
+    assert res.dtype == np.complex64
+    # on the LUT nodes the interpolated calibration is the LUT value
+    on_nodes = res.isel(
+        azimuth_time=res.line.isin(calibration_lut.line),
+        slant_range_time=res.pixel.isin(calibration_lut.pixel),
+    )
+    expected = calibration_lut.sel(line=on_nodes.line, pixel=on_nodes.pixel)
+    assert on_nodes.size > 1000
+    np.testing.assert_allclose(1 / on_nodes.real, expected, rtol=1e-6)
+
+
+def test_without_scipy(monkeypatch: pytest.MonkeyPatch) -> None:
+    def interp(*args: Any, **kwargs: Any) -> None:
+        raise AssertionError("DataArray.interp called")
+
+    # the functions that need scipy fail with a clear error
+    monkeypatch.setitem(sys.modules, "scipy", None)
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+    burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
+    cal_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH/calibration")
+    digital_number = burst_ds.measurement[:200, :300]
+    cc_ds = sentinel1.open_sentinel1_dataset(
+        GRD_IW, group="IW/VV/coordinate_conversion"
+    )
+    grd_ds = sentinel1.open_sentinel1_dataset(GRD_IW, group="IW/VV")
+
+    with pytest.raises(ImportError, match=r"pip install 'xarray-sentinel\[scipy\]'"):
+        sentinel1.calibrate_amplitude(digital_number, cal_ds["sigmaNought"])
+    with pytest.raises(ImportError, match="ground_range_to_slant_range_time needs"):
+        sentinel1.ground_range_to_slant_range_time(
+            grd_ds.azimuth_time, grd_ds.ground_range, cc_ds
+        )
+    with pytest.raises(ImportError, match="slant_range_time_to_ground_range needs"):
+        sentinel1.slant_range_time_to_ground_range(
+            grd_ds.azimuth_time, grd_ds.ground_range * 0.0, cc_ds
+        )
+    with pytest.raises(ImportError, match="with method='nearest'"):
+        sentinel1.get_footprint_linestring(
+            swath_ds.azimuth_time,
+            swath_ds.slant_range_time,
+            sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH/gcp"),
+            method="nearest",
+        )
+
+    # opening the products and calibrating with the constant betaNought do not interp
+    monkeypatch.setattr(xr.DataArray, "interp", interp)
+
+    swath_ds = sentinel1.open_sentinel1_dataset(SLC_IW, group="IW1/VH")
+    burst_ds = sentinel1.crop_burst_dataset(swath_ds, burst_index=8)
+    grd_ds = sentinel1.open_sentinel1_dataset(GRD_IW, group="IW/VV")
+
+    assert "geospatial_bounds" in swath_ds.attrs
+    assert "geospatial_bounds" in burst_ds.attrs
+    assert "geospatial_bounds" in grd_ds.attrs
+
+    res = sentinel1.calibrate_intensity(
+        burst_ds.measurement[:200, :300], cal_ds["betaNought"]
+    )
+
+    assert res.dtype == np.float32
+
+
+def test_ground_range_slant_range_time_roundtrip() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(GRD_IW, group="IW/VV")
+    swath = swath_ds.measurement[:1000, :1000]
+    cc_ds = sentinel1.open_sentinel1_dataset(
+        GRD_IW, group="IW/VV/coordinate_conversion"
+    )
+    slant_range_time = sentinel1.ground_range_to_slant_range_time(
+        swath.azimuth_time, swath.ground_range, cc_ds
+    )
+
+    assert not slant_range_time.isnull().any()
+
+    ground_range = sentinel1.slant_range_time_to_ground_range(
+        swath.azimuth_time, slant_range_time, cc_ds
+    )
+
+    assert not ground_range.isnull().any()
+    # the two polynomials are not exact inverses, but are good to a few centimetres
+    assert abs(ground_range - swath.ground_range).max() < 0.1
+
+
+def test_ground_range_slant_range_time_dask() -> None:
+    swath_ds = sentinel1.open_sentinel1_dataset(GRD_IW, group="IW/VV")
+    cc_ds = sentinel1.open_sentinel1_dataset(
+        GRD_IW, group="IW/VV/coordinate_conversion"
+    )
+    # 2D chunked arrays, as the geocoded acquisition coordinates in sarsen
+    shape = (swath_ds.azimuth_time.size, 50)
+    azimuth_time = xr.DataArray(
+        np.broadcast_to(swath_ds.azimuth_time.values[:, None], shape), dims=("y", "x")
+    )
+    ground_range = xr.DataArray(
+        np.broadcast_to(swath_ds.ground_range.values[None, :50], shape), dims=("y", "x")
+    )
+    expected = sentinel1.ground_range_to_slant_range_time(
+        azimuth_time, ground_range, cc_ds
+    )
+
+    res = sentinel1.ground_range_to_slant_range_time(
+        azimuth_time.chunk(1000), ground_range.chunk(1000), cc_ds
+    )
+
+    assert res.chunks is not None
+    xr.testing.assert_allclose(res.compute(), expected)
+
+    expected = sentinel1.slant_range_time_to_ground_range(azimuth_time, res, cc_ds)
+
+    res = sentinel1.slant_range_time_to_ground_range(
+        azimuth_time.chunk(1000), res, cc_ds
+    )
+
+    assert res.chunks is not None
+    xr.testing.assert_allclose(res.compute(), expected)
 
 
 def test_do_override_product_files() -> None:

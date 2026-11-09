@@ -1,55 +1,41 @@
-import importlib.metadata
 import json
 import warnings
 
-import typer
+import click
 import xarray as xr
 
 from . import eopf_product
 
-app = typer.Typer(
-    add_completion=False,
-    no_args_is_help=True,
-)
 
-
-def version_callback(value: bool) -> None:
-    if value:
-        version = importlib.metadata.version("xarray-sentinel")
-        typer.echo(f"xarray-sentinel, version {version}")
-        raise typer.Exit()
-
-
-@app.callback()
-def main(
-    version: bool = typer.Option(
-        False,
-        "--version",
-        callback=version_callback,
-        is_eager=True,
-        help="Show the version and exit.",
-    ),
-) -> None:
+@click.group("xarray-sentinel")
+@click.version_option(package_name="xarray-sentinel", prog_name="xarray-sentinel")
+def app() -> None:
     pass
 
 
-@app.command()
-def to_eopf_zarr(
-    source: str = typer.Argument(..., help="Path to the Sentinel-1 SAFE product."),
-    target: str = typer.Argument(..., help="Path to the output EOPF Zarr product."),
-) -> None:
-    """Convert a Sentinel-1 SAFE product to an EOPF Zarr product."""
+@app.command("to-eopf-zarr")
+@click.argument("source")
+@click.argument("target")
+def to_eopf_zarr(source: str, target: str) -> None:
+    """Convert a SAFE product to EOPF Zarr.
+
+    Convert the Sentinel-1 SAFE product SOURCE to the EOPF Zarr product TARGET,
+    replacing TARGET if it exists.
+
+    \b
+    Arguments:
+      SOURCE  Path or fsspec URL of the Sentinel-1 SAFE product.
+      TARGET  Path or fsspec URL of the output EOPF Zarr product.
+    """  # noqa: D301 click needs the backspace in "\b" to keep the lines
     try:
         import zarr
     except ModuleNotFoundError:
-        typer.echo(
+        raise click.ClickException(
             "to-eopf-zarr needs the 'zarr' extra, install it with:\n"
             "  pip install 'xarray-sentinel[zarr]'\n"
             "or run the command with:\n"
-            "  uvx 'xarray-sentinel[zarr]' to-eopf-zarr SOURCE TARGET",
-            err=True,
+            "  uvx 'xarray-sentinel[zarr]' to-eopf-zarr SOURCE TARGET"
         )
-        raise typer.Exit(code=1)
 
     try:
         from zarr.errors import ZarrUserWarning
@@ -67,12 +53,19 @@ def to_eopf_zarr(
 
 
 @app.command()
-def info(
-    source: str = typer.Argument(..., help="Path to the Sentinel-1 SAFE product."),
-) -> None:
-    """Print the STAC metadata of the EOPF product."""
+@click.argument("source")
+def info(source: str) -> None:
+    """Print the STAC metadata of a SAFE product.
+
+    Print the product level STAC item of the Sentinel-1 SAFE product SOURCE,
+    reading only the manifest.
+
+    \b
+    Arguments:
+      SOURCE  Path or fsspec URL of the Sentinel-1 SAFE product.
+    """  # noqa: D301 click needs the backspace in "\b" to keep the lines
     stac_item = eopf_product.open_stac_item(source)
-    typer.echo(json.dumps(stac_item, indent=2))
+    click.echo(json.dumps(stac_item, indent=2))
 
 
 if __name__ == "__main__":
