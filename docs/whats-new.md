@@ -7,6 +7,7 @@ Fewer required dependencies: opening the products needs neither `scipy` nor `zar
 ### New features
 
 - Add the `s3` extra to read the products from S3 object stores.
+- Run the tests on Windows as well as on Linux in the CI: Windows is a tested platform.
 
 ### Breaking changes
 
