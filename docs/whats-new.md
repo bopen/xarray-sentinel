@@ -25,6 +25,11 @@ Fewer required dependencies: opening the products needs neither `scipy` nor `zar
   `xarray-sentinel` command: the commands and their arguments are the same, the help
   and the errors are plain text.
 
+### Bug fixes
+
+- Join the paths inside a product with `/` on Windows too: opening zipped products
+  failed with a `FileNotFoundError`, as did products on other non local file systems.
+
 ## v0.9.7 (2026-11-04)
 
 The first release with the EOPF DataTree, in beta, the `xarray-sentinel` command line
