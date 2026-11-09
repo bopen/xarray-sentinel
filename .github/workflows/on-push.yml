@@ -70,6 +70,20 @@ jobs:
       shell: bash
       run: make unit-tests COV_REPORT=xml
 
+  test-on-macos:
+    needs: [check-code, run-unit-tests, check-typing]
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        version: 0.13.7
+        enable-cache: true
+    - name: Run unit tests
+      run: make unit-tests COV_REPORT=xml
+
   test-minimum-python:
     needs: [check-code, run-unit-tests, check-typing]
     runs-on: ubuntu-latest
@@ -101,7 +115,7 @@ jobs:
       run: make test-minimum-versions
 
   build-docs:
-    needs: [test-on-windows, test-minimum-python, test-minimum-versions]
+    needs: [test-on-windows, test-on-macos, test-minimum-python, test-minimum-versions]
     runs-on: ubuntu-latest
 
     steps:
@@ -115,7 +129,7 @@ jobs:
       run: make build-docs
 
   build-distribution:
-    needs: [test-on-windows, test-minimum-python, test-minimum-versions]
+    needs: [test-on-windows, test-on-macos, test-minimum-python, test-minimum-versions]
     runs-on: ubuntu-latest
 
     steps:
