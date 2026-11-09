@@ -1,6 +1,6 @@
 import datetime
 import io
-import os
+import posixpath
 import re
 import warnings
 from collections.abc import Callable
@@ -178,10 +178,10 @@ def open_manifest(
 ) -> tuple[fsspec.AbstractFileSystem, str, io.BytesIO, str]:
     """Return the filesystem, the product path, the manifest and the product name."""
     fs, manifest_path = sentinel1.get_fs_path(product_urlpath, fs, storage_options)
-    product_path = os.path.dirname(manifest_path)
+    product_path = posixpath.dirname(manifest_path)
     manifest = io.BytesIO(fs.cat_file(manifest_path))
     common_attrs, _ = esa_safe.parse_manifest_sentinel1(manifest)
-    safe_name, _ = os.path.splitext(os.path.basename(product_path))
+    safe_name, _ = posixpath.splitext(posixpath.basename(product_path))
     product_name = make_product_name(safe_name, common_attrs)
     return fs, product_path, manifest, product_name
 
@@ -246,7 +246,7 @@ def open_datatree(
             swath, _, pol = group.partition("/")
             swath_pols.setdefault(swath, []).append(pol)
 
-    safe_name = os.path.basename(product_path)
+    safe_name = posixpath.basename(product_path)
     processing_history = eopf_metadata.build_processing_history(manifest, safe_name)
     # NOTE: as the entry CPM 3.0 adds on conversion, but drops on the S01 product nodes
     processing_history["Level-1 Product"].append(

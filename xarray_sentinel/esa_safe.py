@@ -1,6 +1,7 @@
 import functools
 import importlib.resources
 import os
+import posixpath
 import re
 from collections.abc import Mapping
 from typing import IO, Any
@@ -121,7 +122,7 @@ def findall(
 
 def parse_annotation_filename(name: str) -> tuple[str, str, str, str]:
     match = re.match(
-        r"([a-z-]*)s1[abcd]-([^-]*)-[^-]*-([^-]*)-([\dt]*)-", os.path.basename(name)
+        r"([a-z-]*)s1[abcd]-([^-]*)-[^-]*-([^-]*)-([\dt]*)-", posixpath.basename(name)
     )
     if match is None:
         raise ValueError(f"cannot parse name {name!r}")
@@ -192,7 +193,7 @@ def parse_manifest_sentinel1(
         if location_tag is not None:
             file_href = location_tag.attrib["href"]
             try:
-                description = parse_annotation_filename(os.path.basename(file_href))
+                description = parse_annotation_filename(posixpath.basename(file_href))
             except ValueError:
                 continue
             file_type = file_tag.attrib["repID"]

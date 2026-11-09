@@ -78,11 +78,11 @@ GRD_IW_VV_noise = (
 def test_get_fs_path() -> None:
     fs, path = sentinel1.get_fs_path(str(SLC_IW))
 
-    assert path == str((SLC_IW / "manifest.safe").absolute())
+    assert path == (SLC_IW / "manifest.safe").absolute().as_posix()
 
     fs, path = sentinel1.get_fs_path(SLC_IW, fs)
 
-    assert path == str(SLC_IW / "manifest.safe")
+    assert path == f"{SLC_IW}/manifest.safe"
 
     with pytest.raises(TypeError):
         sentinel1.get_fs_path("*", fs=fs, storage_options={})

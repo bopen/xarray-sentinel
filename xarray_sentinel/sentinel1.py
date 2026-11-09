@@ -12,7 +12,7 @@ References
 
 from __future__ import annotations
 
-import os
+import posixpath
 import warnings
 from collections.abc import Sequence
 from typing import Any, TypeVar
@@ -54,7 +54,7 @@ def get_fs_path(
         path = str(urlpath_or_path)
 
     if fs.isdir(path):
-        path = os.path.join(path, "manifest.safe")
+        path = posixpath.join(path, "manifest.safe")
 
     return fs, path
 
@@ -512,7 +512,7 @@ def find_available_groups(
     groups: dict[str, list[str]] = {}
     for path, (type, _, swath, polarization, _) in product_files.items():
         swath_pol_group = f"{swath}/{polarization}".upper()
-        abspath = os.path.join(product_path, os.path.normpath(path))
+        abspath = posixpath.join(product_path, posixpath.normpath(path))
         if check_files_exist:
             if not fs.exists(abspath):
                 continue
@@ -992,8 +992,8 @@ def do_override_product_files(
     overridden_product_files = {}
     for path, description in product_files.items():
         type, prefix, swath, polarization, date = description
-        ext = os.path.splitext(path)[1]
-        dirname = os.path.dirname(path)
+        ext = posixpath.splitext(path)[1]
+        dirname = posixpath.dirname(path)
         overridden_path = template.format(**locals())
         overridden_product_files[overridden_path] = description
     return overridden_product_files
@@ -1015,7 +1015,7 @@ def open_sentinel1_dataset(
         warnings.warn("'drop_variables' is currently ignored")
 
     fs, manifest_path = get_fs_path(product_urlpath, fs, storage_options)
-    product_path = os.path.dirname(manifest_path)
+    product_path = posixpath.dirname(manifest_path)
 
     with fs.open(manifest_path) as file:
         common_attrs, product_files = esa_safe.parse_manifest_sentinel1(file)

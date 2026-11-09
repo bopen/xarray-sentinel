@@ -1,4 +1,5 @@
 import pathlib
+import sys
 
 import pytest
 import xarray as xr
@@ -62,9 +63,12 @@ def test_open_dataset_root() -> None:
         assert attr_name in res.attrs
         assert res.attrs[attr_name] == COMMON_ATTRIBUTES[attr_name]
 
-    res = xr.open_dataset(product_path)
+    # xarray<=2026.09.0 can't guess the engine of a directory on Windows,
+    # fixed in https://github.com/pydata/xarray/pull/11802
+    if sys.platform != "win32":
+        res = xr.open_dataset(product_path)
 
-    assert isinstance(res, xr.Dataset)
+        assert isinstance(res, xr.Dataset)
 
     product_path = product_path / "manifest.safe"
 
@@ -77,7 +81,7 @@ def test_open_dataset_root() -> None:
     assert isinstance(res, xr.Dataset)
 
     with pytest.raises((ValueError, FileNotFoundError)):
-        xr.open_dataset("")
+        xr.open_dataset("non-existing-file")
 
 
 def test_open_dataset_wv() -> None:
@@ -262,9 +266,12 @@ def test_open_datatree() -> None:
     assert "stac_discovery" in res[f"/{node}"].attrs
     assert res.attrs["other_metadata"]["eopf_category"] == "eocontainer"
 
-    res = xr.open_datatree(product_path, check_files_exist=True)
+    # xarray<=2026.09.0 can't guess the engine of a directory on Windows,
+    # fixed in https://github.com/pydata/xarray/pull/11802
+    if sys.platform != "win32":
+        res = xr.open_datatree(product_path, check_files_exist=True)
 
-    assert isinstance(res, xr.DataTree)
+        assert isinstance(res, xr.DataTree)
 
 
 def test_open_groups() -> None:
@@ -281,6 +288,9 @@ def test_open_groups() -> None:
     assert isinstance(res[f"/{node}/measurements"], xr.Dataset)
     assert "polarization" in res[f"/{node}/measurements"].sizes
 
-    res = xr.open_groups(product_path, check_files_exist=True)
+    # xarray<=2026.09.0 can't guess the engine of a directory on Windows,
+    # fixed in https://github.com/pydata/xarray/pull/11802
+    if sys.platform != "win32":
+        res = xr.open_groups(product_path, check_files_exist=True)
 
-    assert isinstance(res, dict)
+        assert isinstance(res, dict)
