@@ -19,6 +19,9 @@ Fewer required dependencies: opening the products needs neither `scipy` nor `zar
   command: `uvx 'xarray-sentinel[zarr]' to-eopf-zarr ...`.
 - Remove the `lab` extra: `pip install "xarray-sentinel[lab]"` no longer works, use
   `make lab` from a source checkout.
+- Replace `typer` with `click`, already required by `dask` and `rasterio`, for the
+  `xarray-sentinel` command: the commands and their arguments are the same, the help
+  and the errors are plain text.
 
 ## v0.9.7 (2026-11-04)
 

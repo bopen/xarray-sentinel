@@ -43,13 +43,13 @@ classifiers = [
 # NOTE: some dependencies are not explicitly imported in the code, but we
 # rely on the packages being installed or we need to set minimum versions
 dependencies = [
+  "click>=8.1",
   "dask>=2024.6",
   "fsspec>=2024.1",
   "numpy>=1.24",
   "pandas>=2.1",
   "rasterio>=1.3.5",
   "rioxarray>=0.18",
-  "typer>=0.26.7",
   "xarray>=2024.10",
   "xmlschema>=3.4"
 ]
