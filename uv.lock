@@ -5547,8 +5547,6 @@ dependencies = [
     { name = "rioxarray", version = "0.19.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "rioxarray", version = "0.23.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.12.*'" },
     { name = "rioxarray", version = "0.24.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
-    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
-    { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "typer" },
     { name = "xarray" },
     { name = "xmlschema" },
@@ -5557,6 +5555,10 @@ dependencies = [
 [package.optional-dependencies]
 s3 = [
     { name = "s3fs" },
+]
+scipy = [
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
 ]
 zarr = [
     { name = "numcodecs", version = "0.16.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
@@ -5580,7 +5582,7 @@ dev = [
     { name = "shapely" },
     { name = "sphinx-autoapi" },
     { name = "stac-valid" },
-    { name = "xarray-sentinel", extra = ["zarr"] },
+    { name = "xarray-sentinel", extra = ["scipy", "zarr"] },
 ]
 lab = [
     { name = "jupyterlab" },
@@ -5599,13 +5601,13 @@ requires-dist = [
     { name = "rasterio", specifier = ">=1.3.5" },
     { name = "rioxarray", specifier = ">=0.18" },
     { name = "s3fs", marker = "extra == 's3'", specifier = ">=2026.4.0" },
-    { name = "scipy", specifier = ">=1.10" },
+    { name = "scipy", marker = "extra == 'scipy'", specifier = ">=1.10" },
     { name = "typer", specifier = ">=0.26.7" },
     { name = "xarray", specifier = ">=2024.10" },
     { name = "xmlschema", specifier = ">=3.4" },
     { name = "zarr", marker = "extra == 'zarr'", specifier = ">=2.18.7" },
 ]
-provides-extras = ["s3", "zarr"]
+provides-extras = ["s3", "scipy", "zarr"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -5622,7 +5624,7 @@ dev = [
     { name = "shapely", specifier = ">=2.1" },
     { name = "sphinx-autoapi", specifier = ">=3.6.0" },
     { name = "stac-valid", specifier = ">=4.2.1" },
-    { name = "xarray-sentinel", extras = ["zarr"] },
+    { name = "xarray-sentinel", extras = ["scipy", "zarr"] },
 ]
 lab = [
     { name = "jupyterlab", specifier = ">=4.5.7" },

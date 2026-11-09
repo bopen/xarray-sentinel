@@ -339,6 +339,42 @@ def open_gcp_dataset(
     return ds
 
 
+def check_scipy(name: str) -> None:
+    # xarray interp needs scipy
+    try:
+        import scipy  # type: ignore  # noqa: F401
+    except ImportError:
+        raise ImportError(
+            f"{name} needs scipy, install it with: pip install 'xarray-sentinel[scipy]'"
+        )
+
+
+def interp1d_extrapolate(
+    x: npt.ArrayLike, xp: npt.NDArray[np.float64], fp: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
+    """Interpolate linearly ``fp`` defined on the sorted ``xp`` at the scalar ``x``.
+
+    Interpolate along the last axis of ``fp``, outside ``xp`` extrapolate the first
+    and the last segment, as ``scipy.interpolate.interp1d(fill_value="extrapolate")``.
+    """
+    i = np.clip(np.searchsorted(xp, x), 1, xp.size - 1)
+    slope = (fp[..., i] - fp[..., i - 1]) / (xp[i] - xp[i - 1])
+    return slope * (x - xp[i - 1]) + fp[..., i - 1]  # type: ignore
+
+
+def interp_corner(data: xr.DataArray, azimuth_time: Any, range_value: Any) -> float:
+    """Interpolate linearly the GCP grid ``data`` at a corner, extrapolating outside."""
+    azimuth_dim, range_dim = data.dims
+    # azimuth times as nanoseconds from the first GCP
+    t0 = data[azimuth_dim].values[0]
+    xp = (data[azimuth_dim].values - t0) / np.timedelta64(1, "ns")
+    x = (np.asarray(azimuth_time) - t0) / np.timedelta64(1, "ns")
+    # along azimuth: one value per range column, then along range
+    profile = interp1d_extrapolate(x, xp, data.values.astype(np.float64).T)
+    range_xp = data[range_dim].values.astype(np.float64)
+    return float(interp1d_extrapolate(np.asarray(range_value), range_xp, profile))
+
+
 def get_footprint_linestring(
     azimuth_time: xr.DataArray,
     range_coordinate: xr.DataArray,
@@ -348,6 +384,10 @@ def get_footprint_linestring(
 ) -> list[tuple[float, float]]:
     azimuth_time_mm = [azimuth_time.min(), azimuth_time.max()]
     range_coordinate_mm = [range_coordinate.min(), range_coordinate.max()]
+    # the default, called when opening the products, does not need scipy
+    use_scipy = method != "linear" or kwargs != {"fill_value": "extrapolate"}
+    if use_scipy:
+        check_scipy(f"get_footprint_linestring with {method=} and {kwargs=}")
 
     footprint = []
     for j, i in [(0, 0), (1, 0), (1, 1), (0, 1)]:
@@ -355,11 +395,18 @@ def get_footprint_linestring(
             azimuth_time.name: azimuth_time_mm[j],
             range_coordinate.name: range_coordinate_mm[i],
         }
-        lat_array = gcp["latitude"].interp(corner, method=method, kwargs=kwargs)
-        lat = round(lat_array.item(), 6)
-        lon_array = gcp["longitude"].interp(corner, method=method, kwargs=kwargs)
-        lon = round(lon_array.item(), 6)
-        footprint.append((lon, lat))
+        if use_scipy:
+            lat_array = gcp["latitude"].interp(corner, method=method, kwargs=kwargs)
+            lon_array = gcp["longitude"].interp(corner, method=method, kwargs=kwargs)
+            lat, lon = lat_array.item(), lon_array.item()
+        else:
+            lat = interp_corner(
+                gcp["latitude"], azimuth_time_mm[j], range_coordinate_mm[i]
+            )
+            lon = interp_corner(
+                gcp["longitude"], azimuth_time_mm[j], range_coordinate_mm[i]
+            )
+        footprint.append((round(lon, 6), round(lat, 6)))
 
     # check that the poly as the correct orientation
     if is_clockwise(footprint):
@@ -810,6 +857,8 @@ def calibrate_amplitude(
     if np.allclose(calibration_lut_mean, calibration_lut, **kwargs):
         calibration: xr.DataArray = calibration_lut_mean.astype(np.float32)
     else:
+        # a constant LUT, as betaNought usually is, does not need scipy
+        check_scipy("calibrate_amplitude with a non constant calibration LUT")
         calibration = calibration_lut.interp(
             line=digital_number.line,
             pixel=digital_number.pixel,
@@ -873,6 +922,7 @@ def slant_range_to_ground_range(
     :param coordinate_conversion: coordinate conversion dataset.
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
     """
+    check_scipy("slant_range_to_ground_range")
     sr0 = coordinate_conversion.sr0.interp(azimuth_time=azimuth_time)
     srgrCoefficients = coordinate_conversion.srgrCoefficients.interp(
         azimuth_time=azimuth_time,
@@ -894,6 +944,7 @@ def slant_range_time_to_ground_range(
     :param coordinate_conversion: coordinate conversion dataset.
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
     """
+    check_scipy("slant_range_time_to_ground_range")
     slant_range = SPEED_OF_LIGHT / 2.0 * slant_range_time
     return slant_range_to_ground_range(azimuth_time, slant_range, coordinate_conversion)
 
@@ -910,6 +961,7 @@ def ground_range_to_slant_range_time(
     :param coordinate_conversion: coordinate conversion dataset.
     The coordinate conversion dataset can be opened using the measurement sub-groub `coordinate_conversion`
     """
+    check_scipy("ground_range_to_slant_range_time")
     assert (coordinate_conversion.gr0 == 0.0).all()
     grsrCoefficients = coordinate_conversion.grsrCoefficients.interp(
         azimuth_time=azimuth_time,

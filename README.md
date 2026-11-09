@@ -53,8 +53,10 @@ Overall, the software is in the **beta** phase and the usual caveats apply.
     pip install xarray-sentinel
 ```
 
-The optional extras are `zarr`, needed by the `to-eopf-zarr` command, and `s3`, to read
-products from S3 object stores, e.g. `pip install "xarray-sentinel[zarr,s3]"`.
+The optional extras are `zarr`, needed by the `to-eopf-zarr` command, `s3`, to read
+products from S3 object stores, and `scipy`, needed by the calibration with a non
+constant LUT and the slant / ground range conversions,
+e.g. `pip install "xarray-sentinel[zarr,s3,scipy]"`.
 
 If you have `uv` installed the simplest way to test the library is to start an `ipython` session with:
 
@@ -447,6 +449,8 @@ Attributes: ...
 ### Calibration
 
 *xarray-sentinel* provides helper functions to calibrate the data using the calibration metadata.
+Interpolating a non constant calibration LUT, as `sigmaNought` and `gamma`, needs the
+`scipy` extra, while the usually constant `betaNought` does not.
 You can compute the gamma intensity for part of the Stripmap image above with:
 
 ```python
