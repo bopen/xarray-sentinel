@@ -1,5 +1,25 @@
 # What's new
 
+## v0.9.8 (unreleased)
+
+Fewer required dependencies: opening the products needs neither `scipy` nor `zarr`.
+
+### New features
+
+- Add the `s3` extra to read the products from S3 object stores.
+
+### Breaking changes
+
+- Move `scipy` to the new `scipy` extra. `calibrate_amplitude` and
+  `calibrate_intensity` with a non constant calibration LUT, as `sigmaNought` and
+  `gamma`, and the slant / ground range conversions need it and raise an `ImportError`
+  without it. Opening the products and calibrating with the usually constant
+  `betaNought` do not need it.
+- Move `zarr` and `numcodecs` to the new `zarr` extra, needed by the `to-eopf-zarr`
+  command: `uvx 'xarray-sentinel[zarr]' to-eopf-zarr ...`.
+- Remove the `lab` extra: `pip install "xarray-sentinel[lab]"` no longer works, use
+  `make lab` from a source checkout.
+
 ## v0.9.7 (2026-11-04)
 
 The first release with the EOPF DataTree, in beta, the `xarray-sentinel` command line
