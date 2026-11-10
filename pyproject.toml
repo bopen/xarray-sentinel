@@ -113,6 +113,11 @@ module = [
   "stac_validator"
 ]
 
+[tool.pytest.ini_options]
+markers = [
+  "natwork: mark test as requiring access to the internet"
+]
+
 [tool.ruff]
 # Same as Black.
 indent-width = 4
