@@ -1,6 +1,7 @@
 import json
 import pathlib
 import shutil
+import sys
 import warnings
 from typing import Any
 
@@ -9,6 +10,8 @@ import pytest
 import xarray as xr
 
 from xarray_sentinel import eopf_product, sentinel1
+
+IS_32_BIT = sys.maxsize == 0x7FFFFFFF
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
@@ -312,6 +315,7 @@ def test_open_datatree_groups(
     assert slc_iw_node_structure.keys() == EXPECTED_SLC_IW_STRUCTURE.keys()
 
 
+@pytest.mark.xfail(IS_32_BIT, reason="int32 instead of int64 on 32bit architectures.")
 @pytest.mark.parametrize("group", sorted(EXPECTED_SLC_IW_STRUCTURE))
 def test_open_datatree_group_structure(
     slc_iw_node_structure: dict[str, dict[str, list[Any]]], group: str
