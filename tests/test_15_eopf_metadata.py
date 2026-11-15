@@ -34,6 +34,12 @@ GRD_IW_VV_annotation = (
     / "annotation"
     / "s1b-iw-grd-vv-20210401t052623-20210401t052648-026269-032297-001.xml"
 )
+# local copies of the STAC schemas stored at their URL path, to validate offline
+STAC_SCHEMAS = DATA_FOLDER / "stac_schemas"
+STAC_SCHEMA_MAP = {
+    f"https://{path.relative_to(STAC_SCHEMAS).as_posix()}": str(path)
+    for path in STAC_SCHEMAS.rglob("*.json")
+}
 
 
 def test_to_snake_recursive() -> None:
@@ -165,7 +171,6 @@ def test_build_processing_history() -> None:
     assert times == sorted(times)
 
 
-@pytest.mark.network
 @pytest.mark.parametrize(
     "safe,annotation",
     [
@@ -179,7 +184,7 @@ def test_build_stac_discovery(safe: pathlib.Path, annotation: pathlib.Path) -> N
         "test", safe / "manifest.safe", esa_safe.parse_xml(annotation)
     )
 
-    validator = stac_validator.StacValidate()
+    validator = stac_validator.StacValidate(schema_map=STAC_SCHEMA_MAP)
     result = validator.validate_dict(item)
 
     assert result, validator.message
@@ -193,11 +198,10 @@ def test_build_stac_discovery(safe: pathlib.Path, annotation: pathlib.Path) -> N
     assert start < item["properties"]["datetime"] < end
 
 
-@pytest.mark.network
 def test_build_root_stac_discovery() -> None:
     item = eopf_metadata.build_stac_discovery("test", SLC_IW / "manifest.safe")
 
-    validator = stac_validator.StacValidate()
+    validator = stac_validator.StacValidate(schema_map=STAC_SCHEMA_MAP)
     result = validator.validate_dict(item)
 
     assert result, validator.message

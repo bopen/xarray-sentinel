@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://stac-extensions.github.io/product/v1.0.0/schema.json",
+  "title": "Product Extension",
+  "description": "STAC Product Extension for STAC Items and STAC Collections.",
+  "type": "object",
+  "required": [
+    "stac_extensions"
+  ],
+  "properties": {
+    "stac_extensions": {
+      "type": "array",
+      "contains": {
+        "const": "https://stac-extensions.github.io/product/v1.0.0/schema.json"
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$comment": "This is the schema for STAC Items. Remove this object if this extension only applies to Collections.",
+      "type": "object",
+      "required": [
+        "type",
+        "properties",
+        "assets"
+      ],
+      "properties": {
+        "type": {
+          "const": "Feature"
+        },
+        "properties": {
+          "$ref": "#/definitions/fields"
+        },
+        "assets": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/fields"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "This is the schema for STAC Collections.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "Collection"
+        },
+        "item_assets": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/fields"
+          }
+        },
+        "assets": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/fields"
+          }
+        },
+        "summaries": {
+          "type": "object",
+          "properties": {
+            "product:type": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/json_schema"
+                },
+                {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "#/definitions/product:type"
+                  }
+                }
+              ]
+            },
+            "product:timeliness": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/json_schema"
+                },
+                {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "#/definitions/product:timeliness"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$ref": "#/definitions/fields"
+        }
+      ]
+    }
+  ],
+  "definitions": {
+    "fields": {
+      "type": "object",
+      "dependencies": {
+        "product:timeliness_category": [
+          "product:timeliness"
+        ]
+      },
+      "properties": {
+        "product:type": {
+          "$ref": "#/definitions/product:type"
+        },
+        "product:timeliness": {
+          "$ref": "#/definitions/product:timeliness"
+        },
+        "product:timeliness_category": {
+          "$ref": "#/definitions/product:timeliness_category"
+        },
+        "product:acquisition_type": {
+          "$ref": "#/definitions/product:acquisition_type"
+        }
+      },
+      "patternProperties": {
+        "^(?!product:)": {}
+      },
+      "additionalProperties": false
+    },
+    "product:type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "product:timeliness": {
+      "type": "string",
+      "format": "duration"
+    },
+    "product:timeliness_category": {
+      "type": "string",
+      "minLength": 1
+    },
+    "product:acquisition_type": {
+      "type": "string",
+      "enum": [
+        "nominal",
+        "calibration",
+        "other"
+      ]
+    },
+    "json_schema": {
+      "$comment": "JSON Schema",
+      "type": "object"
+    }
+  }
+}
