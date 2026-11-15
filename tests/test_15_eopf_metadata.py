@@ -165,6 +165,7 @@ def test_build_processing_history() -> None:
     assert times == sorted(times)
 
 
+@pytest.mark.network
 @pytest.mark.parametrize(
     "safe,annotation",
     [
@@ -192,6 +193,7 @@ def test_build_stac_discovery(safe: pathlib.Path, annotation: pathlib.Path) -> N
     assert start < item["properties"]["datetime"] < end
 
 
+@pytest.mark.network
 def test_build_root_stac_discovery() -> None:
     item = eopf_metadata.build_stac_discovery("test", SLC_IW / "manifest.safe")
 
