@@ -1,0 +1,308 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://stac-extensions.github.io/sar/v1.3.1/schema.json",
+  "title": "SAR Extension",
+  "description": "STAC SAR Extension for STAC Items and STAC Collections.",
+  "type": "object",
+  "required": [
+    "stac_extensions"
+  ],
+  "properties": {
+    "stac_extensions": {
+      "type": "array",
+      "contains": {
+        "const": "https://stac-extensions.github.io/sar/v1.3.1/schema.json"
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$comment": "This is the schema for STAC Items. Remove this object if this extension only applies to Collections.",
+      "type": "object",
+      "required": [
+        "type",
+        "properties",
+        "assets"
+      ],
+      "properties": {
+        "type": {
+          "const": "Feature"
+        },
+        "properties": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/fields"
+            },
+            {
+              "$ref": "#/definitions/sar_polarizations_unique_in_props"
+            }
+          ]
+        },
+        "assets": {
+          "$comment": "This validates the fields in Item Assets, but does not require them.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/fields"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "This is the schema for STAC Collections.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "Collection"
+        }
+      },
+      "anyOf": [
+        {
+          "$comment": "This is the schema for the top-level fields in a Collection. Remove this if this extension does not define top-level fields for Collections.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/fields"
+            },
+            {
+              "$ref": "#/definitions/sar_polarizations_unique_in_props"
+            }
+          ]
+        },
+        {
+          "$comment": "This validates the fields in Collection Assets, but does not require them.",
+          "required": [
+            "assets"
+          ],
+          "properties": {
+            "assets": {
+              "type": "object",
+              "not": {
+                "additionalProperties": {
+                  "not": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/require_any_field"
+                      },
+                      {
+                        "$ref": "#/definitions/fields"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "This is the schema for the fields in Item Asset Definitions. It doesn't require any fields.",
+          "required": [
+            "item_assets"
+          ],
+          "properties": {
+            "item_assets": {
+              "type": "object",
+              "not": {
+                "additionalProperties": {
+                  "not": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/require_any_field"
+                      },
+                      {
+                        "$ref": "#/definitions/fields"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "This is the schema for the fields in Summaries. By default, only checks the existence of the properties, but not the schema of the summaries.",
+          "required": [
+            "summaries"
+          ],
+          "properties": {
+            "summaries": {
+              "$ref": "#/definitions/require_any_field"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "definitions": {
+    "require_any_field": {
+      "$comment": "Please list all fields here so that we can force the existence of one of them in other parts of the schemas.",
+      "anyOf": [
+        {"required": ["sar:instrument_mode"]},
+        {"required": ["sar:frequency_band"]},
+        {"required": ["sar:center_frequency"]},
+        {"required": ["sar:bandwidth"]},
+        {"required": ["sar:polarizations"]},
+        {"required": ["sar:product_type"]},
+        {"required": ["sar:resolution_range"]},
+        {"required": ["sar:resolution_azimuth"]},
+        {"required": ["sar:pixel_spacing_range"]},
+        {"required": ["sar:pixel_spacing_azimuth"]},
+        {"required": ["sar:looks_range"]},
+        {"required": ["sar:looks_azimuth"]},
+        {"required": ["sar:looks_equivalent_number"]},
+        {"required": ["sar:observation_direction"]},
+        {"required": ["sar:relative_burst"]},
+        {"required": ["sar:beam_ids"]}
+      ]
+    },
+    "fields": {
+      "$comment": "Add your new fields here. Don't require them here, do that above in the item schema.",
+      "type": "object",
+      "properties": {
+        "sar:instrument_mode": {
+          "title": "Instrument Mode",
+          "type": "string",
+          "examples": [
+            "WV"
+          ],
+          "minLength": 1
+        },
+        "sar:frequency_band": {
+          "title": "Frequency Band",
+          "type": "string",
+          "enum": [
+            "P",
+            "L",
+            "S",
+            "C",
+            "X",
+            "Ku",
+            "K",
+            "Ka"
+          ]
+        },
+        "sar:center_frequency": {
+          "title": "Center Frequency (GHz)",
+          "type": "number",
+          "minimumExclusive": 0
+        },
+        "sar:bandwidth": {
+          "title": "Range Bandwidth (GHz)",
+          "type": "number",
+          "minimumExclusive": 0
+        },
+        "sar:polarizations": {
+          "$ref": "#/definitions/sar_polarizations"
+        },
+        "sar:product_type": {
+          "title": "Product type",
+          "type": "string",
+          "minLength": 1,
+          "examples": [
+            "SSC",
+            "MGD",
+            "SGC"
+          ]
+        },
+        "sar:resolution_range": {
+          "title": "Resolution range (m)",
+          "type": "number",
+          "minimum": 0
+        },
+        "sar:resolution_azimuth": {
+          "title": "Resolution azimuth (m)",
+          "type": "number",
+          "minimum": 0
+        },
+        "sar:pixel_spacing_range": {
+          "title": "Pixel spacing range (m)",
+          "type": "number",
+          "minimum": 0
+        },
+        "sar:pixel_spacing_azimuth": {
+          "title": "Pixel spacing azimuth (m)",
+          "type": "number",
+          "minimum": 0
+        },
+        "sar:looks_range": {
+          "title": "Looks range",
+          "type": "integer",
+          "minimum": 0
+        },
+        "sar:looks_azimuth": {
+          "title": "Looks azimuth",
+          "type": "integer",
+          "minimum": 0
+        },
+        "sar:looks_equivalent_number": {
+          "title": "Equivalent number of looks (ENL)",
+          "type": "number",
+          "minimum": 0
+        },
+        "sar:observation_direction": {
+          "title": "Antenna pointing direction",
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "sar:relative_burst": {
+          "title": "Relative burst number",
+          "type": "integer",
+          "minimum": 1
+        },
+        "sar:beam_ids": {
+          "title": "Beam identifiers",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "patternProperties": {
+        "^(?!sar:)": {
+          "$comment": "Do not allow unspecified fields prefixed with sar:"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sar_polarizations": {
+      "title": "Polarizations",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "HH",
+          "VV",
+          "HV",
+          "VH",
+          "LH",
+          "LV",
+          "RH",
+          "RV",
+          "CH",
+          "CV"
+        ]
+      }
+    },
+    "sar_polarizations_unique_in_props": {
+      "type": "object",
+      "properties": {
+        "sar:polarizations": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/sar_polarizations"
+            },
+            {
+              "type": "array",
+              "uniqueItems": true
+            }
+          ]
+        }
+      }
+    }
+  }
+}
