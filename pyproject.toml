@@ -116,7 +116,7 @@ module = [
 
 [tool.pytest.ini_options]
 markers = [
-  "natwork: mark test as requiring access to the internet"
+  "network: mark test as requiring access to the internet"
 ]
 
 [tool.ruff]
