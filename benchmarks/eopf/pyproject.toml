@@ -5,5 +5,5 @@ requires-python = ">=3.13"
 version = "0"
 
 [tool.uv]
-exclude-newer = "1 week"
+exclude-newer = "4 days"
 package = false
