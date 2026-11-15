@@ -3,7 +3,7 @@
   "conditions": {},
   "conditions/antenna_pattern": {
     "azimuth_time": [["azimuth_time"], "datetime64[ns]"],
-    "count": [["count"], "int64"],
+    "count": [["count"], "int32"],
     "elevation_angle": [["polarization", "azimuth_time", "count"], "float32"],
     "incidence_angle": [["polarization", "azimuth_time", "count"], "float32"],
     "polarization": [["polarization"], "<U2"],
@@ -30,7 +30,7 @@
     "data_dc_polynomial": [["polarization", "azimuth_time", "degree"], "float32"],
     "data_dc_rms_error": [["polarization", "azimuth_time"], "float64"],
     "data_dc_rms_error_above_threshold": [["polarization", "azimuth_time"], "bool"],
-    "degree": [["degree"], "int64"],
+    "degree": [["degree"], "int32"],
     "fine_dce_azimuth_start_time": [["polarization", "azimuth_time"], "datetime64[ns]"],
     "fine_dce_azimuth_stop_time": [["polarization", "azimuth_time"], "datetime64[ns]"],
     "geometry_dc_polynomial": [["polarization", "azimuth_time", "degree"], "float32"],
@@ -44,9 +44,9 @@
     "height": [["polarization", "azimuth_time", "slant_range_time"], "float64"],
     "incidence_angle": [["polarization", "azimuth_time", "slant_range_time"], "float64"],
     "latitude": [["polarization", "azimuth_time", "slant_range_time"], "float64"],
-    "line": [["azimuth_time"], "int64"],
+    "line": [["azimuth_time"], "int32"],
     "longitude": [["polarization", "azimuth_time", "slant_range_time"], "float64"],
-    "pixel": [["slant_range_time"], "int64"],
+    "pixel": [["slant_range_time"], "int32"],
     "polarization": [["polarization"], "<U2"],
     "slant_range_time": [["slant_range_time"], "float64"],
     "slant_range_time_gcp": [["polarization", "azimuth_time", "slant_range_time"], "float64"]
@@ -59,8 +59,8 @@
   },
   "measurements": {
     "azimuth_time": [["azimuth_time"], "datetime64[ns]"],
-    "line": [["azimuth_time"], "int64"],
-    "pixel": [["slant_range_time"], "int64"],
+    "line": [["azimuth_time"], "int32"],
+    "pixel": [["slant_range_time"], "int32"],
     "polarization": [["polarization"], "<U2"],
     "slant_range_time": [["slant_range_time"], "float64"],
     "slc": [["polarization", "azimuth_time", "slant_range_time"], "complex64"]
@@ -71,28 +71,28 @@
     "beta_nought": [["polarization", "azimuth_time", "slant_range_time"], "float32"],
     "dn": [["polarization", "azimuth_time", "slant_range_time"], "float32"],
     "gamma": [["polarization", "azimuth_time", "slant_range_time"], "float32"],
-    "line": [["azimuth_time"], "int64"],
-    "pixel": [["slant_range_time"], "int64"],
+    "line": [["azimuth_time"], "int32"],
+    "pixel": [["slant_range_time"], "int32"],
     "polarization": [["polarization"], "<U2"],
     "sigma_nought": [["polarization", "azimuth_time", "slant_range_time"], "float32"],
     "slant_range_time": [["slant_range_time"], "float64"]
   },
   "quality/noise_azimuth": {
     "azimuth_time": [["azimuth_time"], "datetime64[ns]"],
-    "first_azimuth_line": [["polarization", "swath"], "int64"],
-    "first_range_sample": [["polarization", "swath"], "int64"],
-    "last_azimuth_line": [["polarization", "swath"], "int64"],
-    "last_range_sample": [["polarization", "swath"], "int64"],
-    "line": [["azimuth_time"], "int64"],
+    "first_azimuth_line": [["polarization", "swath"], "int32"],
+    "first_range_sample": [["polarization", "swath"], "int32"],
+    "last_azimuth_line": [["polarization", "swath"], "int32"],
+    "last_range_sample": [["polarization", "swath"], "int32"],
+    "line": [["azimuth_time"], "int32"],
     "noise_azimuth_lut": [["polarization", "azimuth_time", "swath"], "float32"],
     "polarization": [["polarization"], "<U2"],
     "swath": [["swath"], "<U3"]
   },
   "quality/noise_range": {
     "azimuth_time": [["azimuth_time"], "datetime64[ns]"],
-    "line": [["azimuth_time"], "int64"],
+    "line": [["azimuth_time"], "int32"],
     "noise_range_lut": [["polarization", "azimuth_time", "slant_range_time"], "float32"],
-    "pixel": [["slant_range_time"], "int64"],
+    "pixel": [["slant_range_time"], "int32"],
     "polarization": [["polarization"], "<U2"],
     "slant_range_time": [["slant_range_time"], "float64"]
   }

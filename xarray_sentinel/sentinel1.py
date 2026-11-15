@@ -92,7 +92,7 @@ def open_calibration_dataset(
     for vector in calibration_vectors:
         azimuth_time_list.append(vector["azimuthTime"])
         line_list.append(vector["line"])
-        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=np.int32, sep=" ")
         pixel_list.append(pixel)
         sigmaNought = np.fromstring(
             vector["sigmaNought"]["$"], dtype=np.float32, sep=" "
@@ -117,7 +117,7 @@ def open_calibration_dataset(
         "gamma": (("line", "pixel"), gamma_list),
         "dn": (("line", "pixel"), dn_list),
     }
-    coords = {"line": line_list, "pixel": pixel_list[0]}
+    coords = {"line": np.array(line_list, dtype=np.int32), "pixel": pixel_list[0]}
 
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
@@ -248,7 +248,7 @@ def open_noise_range_dataset(
     for vector in noise_vectors:
         azimuth_time_list.append(vector["azimuthTime"])
         line_list.append(vector["line"])
-        pixel = np.fromstring(vector["pixel"]["$"], dtype=int, sep=" ")
+        pixel = np.fromstring(vector["pixel"]["$"], dtype=np.int32, sep=" ")
         pixel_list.append(pixel)
         noiseRangeLut = np.fromstring(
             vector["noiseRangeLut"]["$"], dtype=np.float32, sep=" "
@@ -264,7 +264,7 @@ def open_noise_range_dataset(
         "azimuth_time": ("line", [np.datetime64(dt, "ns") for dt in azimuth_time_list]),
         "noiseRangeLut": (("line", "pixel"), noiseRangeLut_list),
     }
-    coords = {"line": line_list, "pixel": pixel_list[0]}
+    coords = {"line": np.array(line_list, dtype=np.int32), "pixel": pixel_list[0]}
 
     return xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
@@ -278,16 +278,16 @@ def open_noise_azimuth_dataset(
 
     vector_datasets = []
     for vector in noise_vectors:
-        line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")
+        line = np.fromstring(vector["line"]["$"], dtype=np.int32, sep=" ")
         noise_azimuth_lut = np.fromstring(
             vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" "
         )
         data_vars = {
             "noiseAzimuthLut": ("line", noise_azimuth_lut),
-            "firstAzimuthLine": vector["firstAzimuthLine"],
-            "lastAzimuthLine": vector["lastAzimuthLine"],
-            "firstRangeSample": vector["firstRangeSample"],
-            "lastRangeSample": vector["lastRangeSample"],
+            "firstAzimuthLine": np.int32(vector["firstAzimuthLine"]),
+            "lastAzimuthLine": np.int32(vector["lastAzimuthLine"]),
+            "firstRangeSample": np.int32(vector["firstRangeSample"]),
+            "lastRangeSample": np.int32(vector["lastRangeSample"]),
         }
         vector_ds = xr.Dataset(data_vars=data_vars, coords={"line": line})
         vector_datasets.append(vector_ds.expand_dims(swath=[vector["swath"]]))
@@ -662,8 +662,8 @@ def open_pol_dataset(
             ] = azimuth_time_burst
 
     coords = {
-        "pixel": np.arange(0, number_of_samples, dtype=int),
-        "line": np.arange(0, number_of_lines, dtype=int),
+        "pixel": np.arange(0, number_of_samples, dtype=np.int32),
+        "line": np.arange(0, number_of_lines, dtype=np.int32),
         # We don't need top set the "units" as Xarray now detects the best resolution.
         # See: https://github.com/pydata/xarray/issues/4183#issuecomment-685200043
         #   and https://github.com/pydata/xarray/pull/4684
