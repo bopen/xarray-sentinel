@@ -1,4 +1,10 @@
 [project]
+# eopf 3.1.0rc2 runs patched in .venv with the fix 06f22e26 of eopf main: in
+# eopf/common/xarray_utils.py, get_xarray_zarr_write_kwargs sets
+# used_write_kwargs["consolidated"] = zarr_format != 3
+# so xarray does not consolidate the Zarr v3 metadata after every group: the EW SLC
+# converts in ~2 minutes instead of ~1 hour. The eopf-cpm 3.1.0rc2 results are with the
+# patch, reapply it after any reinstall of eopf.
 dependencies = ["defusedxml", "eopf[parallel]==3.1.0rc2"]
 name = "eopf-benchmark"
 requires-python = ">=3.13"
