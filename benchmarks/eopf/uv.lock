@@ -797,7 +797,7 @@ wheels = [
 
 [[package]]
 name = "eopf"
-version = "3.0.0"
+version = "3.1.0rc2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiokafka" },
@@ -808,6 +808,7 @@ dependencies = [
     { name = "cloudpickle" },
     { name = "dacite" },
     { name = "deepdiff" },
+    { name = "defusedxml" },
     { name = "eccodes" },
     { name = "fastapi" },
     { name = "fsspec" },
@@ -845,9 +846,9 @@ dependencies = [
     { name = "xmlschema" },
     { name = "zarr" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/16/67/9d41683e00634dc7cf49a4667e03a464e45aee9d32c99463cab3ea97d600/eopf-3.0.0.tar.gz", hash = "sha256:8d30870c3a5c45c7896e8fc9acda822483b7068e619c5d4b46dd6b40e843b7c1", size = 1555542, upload-time = "2026-08-09T20:09:21.161Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/06/92/c98ce18352a79cd0ddad287c78ad15d47d7c4de3d3523696ab05cbc5170b/eopf-3.1.0rc2.tar.gz", hash = "sha256:97e6997526b9e00edc49d5b56e318fe50fa116f5281dd0f188acfa370e68a9fe", size = 1561927, upload-time = "2026-10-30T15:54:25.876Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/08/c6/f2f25a2486e52e1452c1a4146e01b34a671176b1a32920472edbe40178e4/eopf-3.0.0-py3-none-any.whl", hash = "sha256:6b750f53c14338f1c346f9ebdba6494d0f44b480732a31250c370dbe9ba7e46c", size = 1948425, upload-time = "2026-08-09T20:09:19.064Z" },
+    { url = "https://files.pythonhosted.org/packages/86/52/2b4cb09cbead771be40225759315a2d72fe59f7620555dba754eb9523c91/eopf-3.1.0rc2-py3-none-any.whl", hash = "sha256:421a959637ef57a26c8f5e637e2e07b03a84995bef2ae4cb6207e9567c12d07d", size = 1959881, upload-time = "2026-10-30T15:54:23.672Z" },
 ]
 
 [package.optional-dependencies]
@@ -868,7 +869,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "defusedxml" },
-    { name = "eopf", extras = ["parallel"], specifier = "==3.0.0" },
+    { name = "eopf", extras = ["parallel"], specifier = "==3.1.0rc2" },
 ]
 
 [[package]]
