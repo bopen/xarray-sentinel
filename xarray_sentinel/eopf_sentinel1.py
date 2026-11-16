@@ -60,7 +60,7 @@ def open_antenna_pattern(annotation: dict[str, Any]) -> xr.Dataset:
             "roll": pattern["roll"],
             "terrain_height": pattern["terrainHeight"],
         }
-        coords = {"count": np.arange(slant_range_time.size)}
+        coords = {"count": np.arange(slant_range_time.size, dtype=np.int32)}
         pattern_dataset = xr.Dataset(data_vars=data_vars, coords=coords)
         azimuth_time = [np.datetime64(pattern["azimuthTime"], "ns")]
         pattern_datasets.append(pattern_dataset.expand_dims(azimuth_time=azimuth_time))
@@ -132,7 +132,7 @@ def open_doppler_centroid(annotation: dict[str, Any]) -> xr.Dataset:
     coords = {
         "azimuth_time": [np.datetime64(e["azimuthTime"], "ns") for e in estimates],
         # the polynomial powers, not reversed as in EOPF, see quirk 2 in docs/DATATREE.md
-        "degree": np.arange(data_dc_polynomial[0].size),
+        "degree": np.arange(data_dc_polynomial[0].size, dtype=np.int32),
     }
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
@@ -155,8 +155,8 @@ def open_gcp(annotation: dict[str, Any]) -> xr.Dataset:
         # the annotated times of the first column, see quirk 1 in docs/DATATREE.md
         "azimuth_time": grids["azimuth_time_gcp"][:, 0],
         range_name: range_values,
-        "line": ("azimuth_time", lines),
-        "pixel": (range_name, pixels),
+        "line": ("azimuth_time", np.array(lines, dtype=np.int32)),
+        "pixel": (range_name, np.array(pixels, dtype=np.int32)),
     }
     dims = ("azimuth_time", range_name)
     data_vars = {name: (dims, grid) for name, grid in grids.items()}
@@ -190,7 +190,7 @@ def open_coordinate_conversion(annotation: dict[str, Any]) -> xr.Dataset | None:
     }
     coords = {
         "azimuth_time": [np.datetime64(c["azimuthTime"], "ns") for c in conversions],
-        "degree": np.arange(srgr_coefficients[0].size),
+        "degree": np.arange(srgr_coefficients[0].size, dtype=np.int32),
     }
     return xr.Dataset(data_vars=data_vars, coords=coords)
 
@@ -235,7 +235,7 @@ def open_range_vectors(
     The GRD vectors change their pixels at the sub-swath boundaries, which move in
     azimuth, so the shorter vectors are padded with NaN and pixel -1.
     """
-    pixels = [np.fromstring(v["pixel"]["$"], dtype=int, sep=" ") for v in vectors]
+    pixels = [np.fromstring(v["pixel"]["$"], dtype=np.int32, sep=" ") for v in vectors]
     pixel = stack_vectors(pixels, -1)
     range_name, range_values = range_coordinate(pixel[0], annotation)
     dims = ("azimuth_time", range_name)
@@ -249,7 +249,10 @@ def open_range_vectors(
             raise ValueError("Unable to organise vectors in a regular line-pixel grid")
         coords[range_name] = range_values
         pixel_coordinate = (range_name, pixel[0])
-    coords["line"] = ("azimuth_time", [v["line"] for v in vectors])
+    coords["line"] = (
+        "azimuth_time",
+        np.array([v["line"] for v in vectors], dtype=np.int32),
+    )
     coords["pixel"] = pixel_coordinate
     data_vars: dict[str, Any] = {}
     for name, tag in variables.items():
@@ -302,16 +305,16 @@ def open_noise_azimuth(
     vectors = vector_list["noiseAzimuthVector"]
     vector_datasets = []
     for vector in vectors:
-        line = np.fromstring(vector["line"]["$"], dtype=int, sep=" ")
+        line = np.fromstring(vector["line"]["$"], dtype=np.int32, sep=" ")
         noise_azimuth_lut = np.fromstring(
             vector["noiseAzimuthLut"]["$"], dtype=np.float32, sep=" "
         )
         data_vars = {
             "noise_azimuth_lut": ("line", noise_azimuth_lut),
-            "first_azimuth_line": vector["firstAzimuthLine"],
-            "last_azimuth_line": vector["lastAzimuthLine"],
-            "first_range_sample": vector["firstRangeSample"],
-            "last_range_sample": vector["lastRangeSample"],
+            "first_azimuth_line": np.int32(vector["firstAzimuthLine"]),
+            "last_azimuth_line": np.int32(vector["lastAzimuthLine"]),
+            "first_range_sample": np.int32(vector["firstRangeSample"]),
+            "last_range_sample": np.int32(vector["lastRangeSample"]),
         }
         vector_dataset = xr.Dataset(data_vars=data_vars, coords={"line": line})
         vector_datasets.append(vector_dataset.expand_dims(swath=[vector["swath"]]))

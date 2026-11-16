@@ -1,13 +1,9 @@
 import pathlib
-import sys
 
 import numpy as np
-import pytest
 import xarray as xr
 
 from xarray_sentinel import eopf_sentinel1, esa_safe
-
-IS_32_BIT = sys.maxsize == 0x7FFFFFFF
 
 DATA_FOLDER = pathlib.Path(__file__).parent / "data"
 
@@ -100,12 +96,11 @@ def test_open_doppler_centroid() -> None:
     assert res.data_dc_rms_error_above_threshold.dtype == bool
 
 
-@pytest.mark.xfail(IS_32_BIT, reason="int32 instead of int64 on 32bit architectures.")
 def test_open_coordinate_conversion() -> None:
     # dims and dtypes from the CPM 3.0 S01SIWGRD mapping
     expected = {
         "azimuth_time": [["azimuth_time"], "datetime64[ns]"],
-        "degree": [["degree"], "int64"],
+        "degree": [["degree"], "int32"],
         "gr0": [["azimuth_time"], "float64"],
         "grsr_coefficients": [["azimuth_time", "degree"], "float64"],
         "slant_range_time": [["azimuth_time"], "float64"],
