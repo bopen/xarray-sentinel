@@ -51,7 +51,8 @@ OPERATIONS = {
 def tool_command(tool: str, *args: str, profile: Path | None = None) -> list[str]:
     uv_run = ["uv", "run", "--frozen"]
     if tool == "xarray-sentinel":
-        uv_run += ["--extra", "lab", "--project", str(BENCHMARKS.parent)]
+        uv_run += ["--extra", "s3", "--extra", "zarr"]
+        uv_run += ["--project", str(BENCHMARKS.parent)]
     else:
         uv_run += ["--project", str(BENCHMARKS / "eopf")]
     executable = [tool]
