@@ -287,7 +287,7 @@ done at any time.
    code.
 1. Done: noise_azimuth, `eopf_sentinel1.open_noise_azimuth` with quirk 6, `line` as
    additional coordinate, the LUT as float32 and the first and last lines and samples as
-   int64. `eopf_sentinel1.azimuth_time_coordinate` gives the azimuth time of any line,
+   int32. `eopf_sentinel1.azimuth_time_coordinate` gives the azimuth time of any line,
    identical to the measurement grid. EOPF only like calibration, as it needs the
    annotation.
 1. Done: antenna_pattern, and GRD coordinate_conversion. `eopf_product.ANNOTATION_GROUPS`
@@ -358,6 +358,17 @@ done at any time.
      nodes and groups and the same `slc` data, no `quality/noise_azimuth` as the StripMap
      GRD. The shared variables are equal or within float32 rounding except quirks 1, 2, 3
      and 11, with the same additions and dtypes as GRD.
+   - Done again with `eopf` 3.1.0rc2 for the products of `benchmarks/config.toml`: the EW
+     GRDM and SLC above, the IW
+     `S1C_IW_GRDH_1SDV_20261029T051057_20261029T051122_010095_014269_71D7` and
+     `S1C_IW_SLC__1SDV_20261029T051055_20261029T051123_010095_014269_D7D7`, and the
+     StripMap `S1C_S4_GRDH_1SDV_20261026T014619_20261026T014639_010049_0140EB_A1E0` and
+     `S1C_S4_SLC__1SDV_20261026T014619_20261026T014639_010049_0140EB_A046`. Same nodes,
+     groups and measurement data, the same quirks, none fixed: quirk 11 is still there in
+     all the VV and VH products. The StripMap S4 has no `quality/noise_azimuth`, as the
+     S3. The noise azimuth lines and samples, the antenna pattern `count` and the Doppler
+     `degree` are int32, where EOPF has float64 and int64. The COG products convert to
+     the same values, CPM 3.1.0rc2 still fails on their names.
 1. Parse once: decode each XML once and pass the result down.
    - Manifest: `build_stac_discovery` and `build_processing_history` take the parsed
      `ElementTree` root instead of the path, now `build_stac_discovery` parses the
